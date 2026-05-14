@@ -116,4 +116,7 @@ if [ "$FAILED" -eq 1 ]; then
   exit 1
 fi
 
+# ── Added to Run additional code checks per standard set in previous repository ─────────────────────────────────────────────────────
+sh .husky/pre-commit-code-checks.sh
+
 exit 0
