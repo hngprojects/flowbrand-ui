@@ -1,4 +1,4 @@
-import { Email } from "@/icons/icons";
+import { EmailIcon } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,7 +40,7 @@ const ContactUs = () => {
       <div className="px-10 md:px-25 mt-10 mb-30 space-y-10 md:space-y-18">
         <div className="flex items-center gap-5">
           <div className="bg-accent rounded-full p-1.5">
-            <Email className="text-white" />
+            <EmailIcon className="text-white" />
           </div>
 
           <div>
@@ -59,7 +59,8 @@ const ContactUs = () => {
               Send us a message
             </h2>
             <p className="text-black-300 text-[14px] md:text-[16px]">
-              Fill this in and we&apos;ll get back to you within one business day
+              Fill this in and we&apos;ll get back to you within one business
+              day
             </p>
           </div>
 
