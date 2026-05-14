@@ -26,7 +26,7 @@ export default function Footer() {
               <FullLightLogo />
             </div>
 
-            <p className="text-sm leading-6 text-gray-500">
+            <p className="text-sm leading-6 text-gray-600">
               Build smarter marketing strategy without the guesswork and helping
               small and growing businesses turn attention into real customers.
             </p>
@@ -45,7 +45,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-500 transition-colors hover:text-primary-foreground"
+                      className="text-sm text-gray-600 transition-colors hover:text-primary-foreground"
                     >
                       {link.label}
                     </Link>
@@ -65,7 +65,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-500 transition-colors hover:text-primary-foreground"
+                      className="text-sm text-gray-600 transition-colors hover:text-primary-foreground"
                     >
                       {link.label}
                     </Link>
