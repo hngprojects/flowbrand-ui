@@ -1,5 +1,4 @@
 import { FullLightLogo, FullTranparentLogo } from "@/components/icons";
-import Image from "next/image";
 import Link from "next/link";
 
 const productLinks = [

@@ -51,6 +51,7 @@ export const FullLightLogo = (props: React.SVGProps<SVGSVGElement>) => (
     viewBox="0 0 66 55"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    {...props}
   >
     <g clip-path="url(#clip0_8930_48281)">
       <path
@@ -93,6 +94,7 @@ export const FullTranparentLogo = (props: React.SVGProps<SVGSVGElement>) => (
     viewBox="0 0 348 290"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    {...props}
   >
     <g clip-path="url(#clip0_8930_48293)">
       <path
