@@ -41,7 +41,9 @@ jobs:
         run: pnpm approve-builds --all
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --config.ignore-scripts=false
+        run: pnpm install --frozen-lockfile --no-optional
+        env:
+          PNPM_IGNORE_SCRIPTS_PROMPT: "true"
 
       - name: Run ESLint
         run: pnpm lint
