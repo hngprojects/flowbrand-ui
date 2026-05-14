@@ -2,6 +2,8 @@
 set -e
 
 echo ""
+echo "=== pre-commit-code-checks.sh ==="
+echo ""
 echo "Running lint-staged (Prettier + ESLint on staged files)..."
 pnpm exec lint-staged
 
