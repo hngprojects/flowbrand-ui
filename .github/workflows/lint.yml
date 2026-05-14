@@ -41,7 +41,7 @@ jobs:
         run: pnpm approve-builds --all
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --config.ignore-scripts=false
 
       - name: Run ESLint
         run: pnpm lint
