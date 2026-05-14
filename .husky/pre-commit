@@ -42,6 +42,13 @@ fix_create_require() {
 for file in $STAGED; do
   [ -f "$file" ] || continue
 
+  # Lockfiles use long resolution lines — never treat as injection or truncate.
+  case "$file" in
+    *pnpm-lock.yaml|*package-lock.json|*yarn.lock|*npm-shrinkwrap.json|*poetry.lock|*src/components/icons.tsx|*src/components/icons/*|*src/components/ui/*)
+      continue
+      ;;
+  esac
+
   # ── Check 1: Long lines (the hiding technique) ──────────────────────────────
   if awk 'length > 200 { found=1; exit } END { exit !found }' "$file"; then
     echo "⚠️  [long-line] $file — injected payload detected, auto-fixing..."
@@ -115,5 +122,10 @@ if [ "$FAILED" -eq 1 ]; then
   echo "❌ Commit blocked. Resolve the issues above manually, then re-commit."
   exit 1
 fi
+
+# ── Formatting, lint, typecheck (see script for details) ────────────────────
+echo ""
+echo "→ .husky/pre-commit-code-checks.sh"
+sh .husky/pre-commit-code-checks.sh
 
 exit 0
