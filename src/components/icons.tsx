@@ -10,7 +10,7 @@ export const ChatIcon = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path
-      d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"
+      d="M12 22.81C11.31 22.81 10.66 22.46 10.2 21.85L8.7 19.85C8.67 19.81 8.55 19.76 8.5 19.75H8C3.83 19.75 1.25 18.62 1.25 13V8C1.25 3.58 3.58 1.25 8 1.25H16C20.42 1.25 22.75 3.58 22.75 8V13C22.75 1"
       fill="currentColor"
     />
     <path
@@ -30,14 +30,17 @@ export const ChatIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const ChevronRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
+    width="9"
+    height="18"
+    viewBox="0 0 9 18"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <path d="M8 6 16 12 8 18 Z" fill="currentColor" />
+    <path
+      d="M0.7475 17.3375C0.5575 17.3375 0.3675 17.2675 0.2175 17.1175C-0.0725 16.8275 -0.0725 16.3475 0.2175 16.0575L6.7375 9.5375C7.2175 9.0575 7.2175 8.2775 6.7375 7.7975L0.2175 1.2775C-0.0725 0.987"
+      fill="currentColor"
+    />
   </svg>
 );
 
