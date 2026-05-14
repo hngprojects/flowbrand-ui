@@ -83,7 +83,7 @@ const ContactUs = () => {
             <Label>How did you week go?</Label>
             <Textarea
               placeholder="Tell us how your week went"
-              className="min-h-[100px]"
+              className="min-h-[120px]"
             />
           </div>
 
