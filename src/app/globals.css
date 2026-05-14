@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@tailwind components;
 
 @custom-variant dark (&:is(.dark *));
 
@@ -126,5 +127,15 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  /**
+   * Landing page layout shell: max width, centering, horizontal + vertical padding.
+   * Use on the inner wrapper inside a full-bleed <section>.
+   */
+  .section-class {
+    @apply mx-auto w-full max-w-[1440px] px-4 py-10 lg:py-20;
   }
 }
