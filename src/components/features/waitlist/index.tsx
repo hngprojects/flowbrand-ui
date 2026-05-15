@@ -8,6 +8,7 @@ import { useState } from "react";
 import { joinWaitlist } from "@/services/waitlist.service";
 import { waitlistSchema } from "@/schema/waitlist.schema";
 import { WaitingUsers } from "@/components/icons/waiting-users";
+import lapttopScreenPop from "@public/images/laptop-screen.png";
 
 export default function WaitlistBody() {
   const [email, setEmail] = useState("");
@@ -107,9 +108,7 @@ export default function WaitlistBody() {
 
         <div className="w-full lg:w-auto flex justify-center">
           <Image
-            src="/images/laptop-screen.png"
-            width={700}
-            height={700}
+            src={lapttopScreenPop}
             alt="laptop screen"
             className="max-w-auto min-h-auto"
             loading="eager"
