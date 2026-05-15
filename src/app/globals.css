@@ -292,3 +292,21 @@
     @apply mx-auto w-full max-w-[1440px] px-4 py-10 lg:py-20;
   }
 }
+
+/* Correction débordement horizontal */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Pour les conteneurs flex qui pourraient déborder */
+.flex, .grid {
+  overflow-x: hidden;
+}
