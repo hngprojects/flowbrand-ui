@@ -1,12 +1,16 @@
 import Image from "next/image";
-import { SectionLabelPill } from "../ui/section-label-pill";
 
 const Features = () => {
   return (
     <section className="mx-auto w-full max-w-[1440px] px-6 py-4 md:px-12 lg:px-20">
       {/* Header */}
       <div className="mb-12 text-center">
-        <SectionLabelPill>Features</SectionLabelPill>
+        <div className="mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-amber-600 text-sm font-medium">
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            Features
+          </span>
+        </div>
         <h2 className="mb-4 text-4xl font-bold text-gray-900 md:text-5xl">
           Everything you need to grow
         </h2>
@@ -61,63 +65,67 @@ const Features = () => {
         </div>
 
         {/* Card 3: Smarter Conversions */}
-        <div className="relative flex h-full min-h-80 flex-col justify-between rounded-3xl bg-[#769BE0] p-3 text-white">
-          {/* From Tag */}
-          <div className="rounded-xl bg-[#A1BAEA] p-3">
-            <div>
-              <div className="mb-4">
-                <span className="text-xs font-semibold text-blue-100 opacity-75">
-                  From
-                </span>
-                <p className="text-lg font-bold">Business Idea</p>
-              </div>
+        <div className="bg-[#7ba4ed] rounded-[2rem] p-6 flex flex-col min-h-80 relative overflow-hidden shadow-sm">
+          {/* Top Section with Vector Graphic */}
+          <div className="flex-1 relative w-full pt-4 px-0 bg-white/25 rounded-[1.5rem]">
+            {/* "From Business Idea" text */}
+            <div className="absolute top-5 left-5">
+              <p className="text-white/90 text-sm font-medium leading-tight">
+                From
+                <br />
+                Business Idea
+              </p>
+            </div>
 
-              {/* Dashed Arrow with Curve and Ball */}
+            {/* Vector Arrow Graphic */}
+            <div className="absolute top-16 left-10 w-[90px] h-[50px]">
               <svg
-                style={{
-                  position: "absolute",
-                  width: "119.26608269285097px",
-                  height: "24.986453995172663px",
-                  top: "85px",
-                  left: "31px",
-                  transform: "rotate(-28.06deg)",
-                  opacity: 1,
-                }}
-                viewBox="0 0 119.27 34.99"
+                width="100%"
+                height="100%"
+                viewBox="0 0 90 50"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                className="overflow-visible"
               >
-                {/* Ball at tail end (inverted position) */}
-                <circle cx="113.27" cy="22.49" r="6" fill="white" />
-
-                {/* Curved dashed line that bends opposite direction */}
+                {/* Starting Dot */}
+                <circle cx="5" cy="5" r="4" fill="white" />
+                {/* Curved Dashed Path */}
                 <path
-                  d="M 107.27 22.49 Q 59.27 -5 10 14.99"
+                  d="M5 10 C 5 40, 20 45, 85 45"
                   stroke="white"
-                  strokeWidth="3"
-                  strokeDasharray="6, 6"
-                  strokeLinecap="round"
+                  strokeWidth="2"
+                  strokeDasharray="4 4"
                   fill="none"
                 />
-
-                {/* Arrowhead pointing diagonally downward */}
-                <polygon points="10,14.99 17,5 12,11 22,20" fill="white" />
+                {/* Arrow Head */}
+                <path
+                  d="M75 37 L87 45 L75 53"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
-            {/* Real Marketing Strategies Box - Right Side */}
-            <div className="absolute right-4 bottom-55 max-w-[150px]">
-              <h3 className="text-sm leading-tight font-bold text-white">
+
+            {/* "Real Marketing Strategies" text */}
+            <div className="absolute top-[5rem] left-[8rem] w-full">
+              <p className="text-white text-[1rem] font-semibold leading-snug">
                 Real Marketing
                 <br />
                 Strategies
-              </h3>
+              </p>
             </div>
           </div>
-          {/* Content - Bottom */}
-          <div className="mt-auto p-6">
-            <h4 className="mb-2 text-[24px] font-bold">Smarter Conversions</h4>
-            <p className="text-[16px] leading-relaxed text-blue-50">
+
+          <div className="mt-20 px-2">
+            <h3 className="text-white text-xl font-semibold mb-3">
+              Smarter Conversions
+            </h3>
+            <p className="text-white/85 text-sm leading-relaxed">
               Convert leads into real customers with better inquiry and booking
-              flows
+              flows.
             </p>
           </div>
         </div>
