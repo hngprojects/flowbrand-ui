@@ -1,5 +1,4 @@
 import WaitlistBody from "@/components/features/waitlist";
-import {} from "@/components/icons";
 import { PatternWaitlist } from "@/components/icons/pattern-svg";
 import {
   WaitlistBottom,
