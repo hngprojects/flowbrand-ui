@@ -80,7 +80,7 @@ const ContactUs = () => {
           </div>
 
           <div className="space-y-2 w-full">
-            <Label>How did you week go?</Label>
+            <Label htmlFor="message">How did your week go?</Label>
             <Textarea
               placeholder="Tell us how your week went"
               className="min-h-[120px]"
