@@ -1,4 +1,5 @@
-import { FullLightLogo, FullTranparentLogo } from "@/components/icons";
+import { FullLightLogo } from "@/components/icons/full-light-logo";
+import { FullTranparentLogo } from "@/components/icons/full-transparent-logo";
 import Link from "next/link";
 
 const productLinks = [

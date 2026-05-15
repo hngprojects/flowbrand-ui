@@ -52,6 +52,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* Primary Scale */
+  --color-primary-50: var(--primary-50);
   --color-primary-100: var(--primary-100);
   --color-primary-200: var(--primary-200);
   --color-primary-300: var(--primary-300);
@@ -63,6 +64,7 @@
   --color-primary-900: var(--primary-900);
 
   /* Accent Scale */
+  --color-accent-50: var(--accent-50);
   --color-accent-100: var(--accent-100);
   --color-accent-200: var(--accent-200);
   --color-accent-300: var(--accent-300);
@@ -74,6 +76,7 @@
   --color-accent-900: var(--accent-900);
 
   /* Red Scale */
+  --color-red-50: var(--red-50);
   --color-red-100: var(--red-100);
   --color-red-200: var(--red-200);
   --color-red-300: var(--red-300);
@@ -85,6 +88,7 @@
   --color-red-900: var(--red-900);
 
   /* Green Scale */
+  --color-green-50: var(--green-50);
   --color-green-100: var(--green-100);
   --color-green-200: var(--green-200);
   --color-green-300: var(--green-300);
@@ -96,6 +100,7 @@
   --color-green-900: var(--green-900);
 
   /* Yellow Scale */
+  --color-yellow-50: var(--yellow-50);
   --color-yellow-100: var(--yellow-100);
   --color-yellow-200: var(--yellow-200);
   --color-yellow-300: var(--yellow-300);
@@ -107,6 +112,7 @@
   --color-yellow-900: var(--yellow-900);
 
   /* Gray Scale */
+  --color-gray-50: var(--gray-50);
   --color-gray-100: var(--gray-100);
   --color-gray-200: var(--gray-200);
   --color-gray-300: var(--gray-300);
@@ -118,6 +124,7 @@
   --color-gray-900: var(--gray-900);
 
   /* Black Scale */
+  --color-black-50: var(--black-50);
   --color-black-100: var(--black-100);
   --color-black-200: var(--black-200);
   --color-black-300: var(--black-300);
@@ -144,6 +151,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: #326ad1;
+  --primary-50: #ebf0fa;
   --primary-100: #bfd1f1;
   --primary-200: #a1baea;
   --primary-300: #769be0;
@@ -156,6 +164,7 @@
   --primary-foreground: oklch(0.985 0 0);
   --secondary: #d13232;
   --secondary-foreground: oklch(0.205 0 0);
+  --red-50: #faebeb;
   --red-100: #f1bfbf;
   --red-200: #eaa1a1;
   --red-300: #e07676;
@@ -168,6 +177,7 @@
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: #e58f17;
+  --accent-50: #fcf4e8;
   --accent-100: #f7dcb7;
   --accent-200: #f3cb94;
   --accent-300: #eeb464;
@@ -178,6 +188,7 @@
   --accent-800: #7e4f0d;
   --accent-900: #603c0a;
   --accent-foreground: oklch(0.205 0 0);
+  --green-50: #eefaeb;
   --green-100: #cbf1bf;
   --green-200: #b2eaa1;
   --green-300: #8ee076;
@@ -187,6 +198,7 @@
   --green-700: #3e9424;
   --green-800: #30731c;
   --green-900: #255815;
+  --yellow-50: #faf9eb;
   --yellow-100: #f1ebbf;
   --yellow-200: #eae1a1;
   --yellow-300: #e0d376;
@@ -196,6 +208,7 @@
   --yellow-700: #948724;
   --yellow-800: #73691c;
   --yellow-900: #585015;
+  --gray-50: #fcfcfc;
   --gray-100: #f7f7f7;
   --gray-200: #f3f3f3;
   --gray-300: #ededed;
@@ -205,6 +218,7 @@
   --gray-700: #b6b6b6;
   --gray-800: #7d7d7d;
   --gray-900: #606060;
+  --black-50: #e6e7e9;
   --black-100: #b1b4ba;
   --black-200: #8b9098;
   --black-300: #565d69;
@@ -218,8 +232,8 @@
   --progress: var(--green-500);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --label: #e4e4e4;
+  --input: #cfcfcf;
+  --label: #030d1f;
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -289,6 +303,10 @@
    * Use on the inner wrapper inside a full-bleed <section>.
    */
   .section-class {
-    @apply mx-auto w-full max-w-[1440px] px-4 py-10 lg:py-20;
+    @apply mx-auto w-full max-w-[1440px]  py-10 lg:py-20 px-4 sm:px-6 lg:px-18;
+  }
+
+  .layout-components-class {
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-18;
   }
 }
