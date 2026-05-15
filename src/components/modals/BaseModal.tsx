@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface BaseModalProps {
@@ -27,16 +22,15 @@ const BaseModal = ({
   title,
   subtitle,
   icon,
-  confirmText,
-  cancelText,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
   onConfirm,
   onCancel,
   children,
 }: BaseModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogOverlay className="bg-black-500/60" />
-      <DialogContent className="w-[85%] rounded-[32px] border-[0.5px] bg-[linear-gradient(116.82deg,#F4F8FF_0%,#E5EEFF_50%,#DFEAFF_100%)] p-10 md:w-[483px]">
+      <DialogContent className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]">
         <VisuallyHidden>
           <DialogTitle>{title ?? "Modal"}</DialogTitle>
         </VisuallyHidden>
@@ -72,7 +66,7 @@ const BaseModal = ({
             )}
 
             <div className="flex w-full flex-col gap-3">
-              {onConfirm && confirmText && (
+              {onConfirm && (
                 <button
                   type="button"
                   onClick={onConfirm}
@@ -81,7 +75,7 @@ const BaseModal = ({
                   {confirmText}
                 </button>
               )}
-              {onCancel && cancelText && (
+              {onCancel && (
                 <button
                   type="button"
                   onClick={onCancel}
