@@ -31,7 +31,7 @@ export default function FaqPage() {
     <>
       <main className="overflow-hidden">
         <section className="bg-primary/10 w-full h-[304px] flex items-center">
-          <div className=" layout-components-class">
+          <div className="section-class">
             <div className="flex  flex-col items-center gap-6 py-12 lg:flex-row lg:items-center lg:justify-between lg:py-16">
               <div className="flex  items-center gap-3">
                 <div
@@ -69,7 +69,7 @@ export default function FaqPage() {
         </section>
 
         <section className="w-full py-12 md:py-16">
-          <div className=" layout-components-class">
+          <div className="section-class">
             {filteredFaqs.length === 0 ? (
               <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 py-20 text-center">
                 <p

@@ -7,7 +7,7 @@ const productLinks = [
   { label: "How it works", href: "/how-it-works" },
   { label: "About Us", href: "/about-us" },
   { label: "Contact Us", href: "/contact-us" },
-  { label: "FAQ", href: "/faq" },
+  { label: "FAQ", href: "/faqs" },
 ];
 
 const legalLinks = [
