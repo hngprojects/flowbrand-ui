@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const Hero = () => {
   return (
     <section
@@ -6,7 +8,13 @@ const Hero = () => {
     >
       {/* Background Clouds */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <img src="/images/cloud.png" alt="" className="w-full h-full" />
+        <Image
+          src="/images/cloud.png"
+          fill
+          alt="Clouds"
+          className="object-cover"
+          preload={true}
+        />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 text-center flex flex-col items-center">
@@ -41,10 +49,13 @@ const Hero = () => {
 
         {/* Desktop Image */}
         <div className="w-full max-w-5xl mx-auto relative mt-4 md:mt-8">
-          <img
+          <Image
             src="/images/desktop.png"
+            width={1200}
+            height={800}
             alt="Seil App Interface on Desktop"
             className="w-full h-auto drop-shadow-2xl rounded-t-xl"
+            preload={true}
           />
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 const Welcome = () => {
   return (
@@ -30,8 +31,10 @@ const Welcome = () => {
 
       {/* Image Section */}
       <div className="w-full rounded-[1rem] overflow-hidden">
-        <img
+        <Image
           src="/images/dark-skin-girl-1.jpg"
+          width={1200}
+          height={600}
           alt="Business owner working on a laptop"
           className="w-full h-auto object-cover object-center"
         />
