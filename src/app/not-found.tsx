@@ -6,17 +6,25 @@ export default function NotFound() {
   return (
     <main
       className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4"
-      style={{ backgroundColor: "#EEF2FB" }}
+      style={{ backgroundColor: "#EBF0FA" }}
     >
-      <div className="absolute inset-0 -z-10">
+      <div className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2">
         <Image
-          src="/images/cloud-bg.svg"
+          src="/images/cloud1.svg"
           alt=""
-          aria-hidden
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
+          width={600}
+          height={500}
+          className="opacity-90"
+        />
+      </div>
+
+      <div className="pointer-events-none absolute right-0 bottom-1/4 translate-y-1/2">
+        <Image
+          src="/images/cloud2.svg"
+          alt=""
+          width={400}
+          height={350}
+          className="opacity-90"
         />
       </div>
 
