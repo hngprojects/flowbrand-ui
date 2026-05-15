@@ -108,21 +108,22 @@ export default function PricingPage() {
     <main className="min-h-screen bg-white dark:bg-black">
       {/* HERO */}
       <section className="relative overflow-hidden bg-sky-100/40 px-4 pb-20 pt-16 sm:pt-20 dark:bg-slate-900/20">
-        {/* Cloud images from Figma — place files at: public/images/pricing/cloud-left.png and public/images/pricing/cloud-right.png */}
+        {/* Cloud images from Figma — */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <Image
             src="/images/cloud1.png"
             alt=""
             width={340}
-            height={260}
-            className="absolute -left-10 top-0 opacity-60"
+            height={100}
+            className="absolute -left-15 top-12 opacity-60"
           />
           <Image
             src="/images/cloud2.png"
             alt=""
             width={340}
-            height={260}
-            className="absolute -right-10 bottom-0 opacity-60"
+            height={200}
+            className="absolute 
+             -right-30 bottom-10 opacity-60"
           />
           {/* fallback blobs in case images are not yet added */}
           <div className="absolute -top-10 -left-16 h-72 w-72 rounded-full bg-white/60 blur-2xl" />
@@ -136,7 +137,10 @@ export default function PricingPage() {
             Affordable Pricing for your{" "}
             <span className="text-orange-500">Business</span>
           </h1>
-          <p className="mb-8 text-gray-600 dark:text-gray-400">
+          <p
+            className="mb-8 text-gray-900
+           dark:text-gray-900 "
+          >
             Whether you&apos;re just figuring things out or ready to scale,
             FlowBrand gives you exactly what you need at every stage.
           </p>
@@ -147,8 +151,8 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("monthly")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-orange-500 text-white shadow"
-                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                  ? "bg-blue-500 text-white shadow"
+                  : "text-gray-900 hover:text-gray-800 dark:text-gray-400"
               }`}
             >
               Monthly Pricing
@@ -158,7 +162,7 @@ export default function PricingPage() {
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "annual"
                   ? "bg-orange-500 text-white shadow"
-                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                  : "text-gray-800 hover:text-gray-900 dark:text-gray-400"
               }`}
             >
               Annual Pricing
@@ -179,10 +183,10 @@ export default function PricingPage() {
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     Free Plan
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-gray-800 dark:text-gray-400">
                     Perfect for one-person shops or small businesses
                   </p>
-                  <p className="mt-4 text-base font-semibold text-orange-500">
+                  <p className="mt-4 text-base font-semibold text-blue-500">
                     Free
                   </p>
                   {/* BadgeCheck bullet — black color as requested */}
@@ -190,7 +194,7 @@ export default function PricingPage() {
                     {freeFeatures.map((item) => (
                       <div key={item} className="flex items-center gap-3">
                         <BadgeCheck className="h-4 w-4 shrink-0 text-gray-900 dark:text-white" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-gray-900 dark:text-gray-300">
                           {item}
                         </span>
                       </div>
@@ -198,7 +202,7 @@ export default function PricingPage() {
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Pro card button */}
-                <Button className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700">
+                <Button className="mt-4 rounded-md w-full bg-blue-600 text-white hover:bg-blue-700">
                   Start For Free
                 </Button>
               </div>
@@ -214,12 +218,12 @@ export default function PricingPage() {
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     Pro Plan
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-gray-800 dark:text-gray-400">
                     For businesses ready to grow further and faster.
                   </p>
-                  <p className="mt-4 text-2xl font-bold text-orange-500">
+                  <p className="mt-4 text-2xl font-bold text-orange-700">
                     ₦10,000
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-orange-600">
                       {" "}
                       /monthly
                     </span>
@@ -229,7 +233,7 @@ export default function PricingPage() {
                     {proFeatures.map((item) => (
                       <div key={item} className="flex items-center gap-3">
                         <BadgeCheck className="h-4 w-4 shrink-0 text-gray-900 dark:text-white" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-gray-900 dark:text-gray-300">
                           {item}
                         </span>
                       </div>
@@ -237,7 +241,7 @@ export default function PricingPage() {
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Free card button */}
-                <Button className="mt-4 w-full border-2 border-orange-500 bg-transparent text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950">
+                <Button className="mt-4 rounded-md w-full border-2 border-orange-500 bg-transparent text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950">
                   Get Full Access
                 </Button>
               </div>
@@ -252,22 +256,22 @@ export default function PricingPage() {
           <h2 className="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white">
             Compare Plans
           </h2>
-          <p className="mb-10 text-center text-gray-600 dark:text-gray-400">
+          <p className="mb-10 text-center text-gray-800 dark:text-gray-400">
             Find the right plan for where your business is now—and where
             you&apos;re going.
           </p>
 
-          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-900">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">
                     Feature
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-300">
                     Free
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-300">
                     Pro
                   </th>
                 </tr>
@@ -276,13 +280,15 @@ export default function PricingPage() {
                 {features.map((feature, index) => (
                   <tr
                     key={index}
-                    className="border-b border-gray-100 dark:border-gray-800"
+                    className="border-b text-black border-gray-100 dark:border-gray-900"
                   >
-                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-300">
                       {feature.name}
                     </td>
-                    <FeatureCell value={feature.free} />
-                    <FeatureCell value={feature.pro} />
+                    <div className="text-black">
+                      <FeatureCell value={feature.free} />
+                      <FeatureCell value={feature.pro} />
+                    </div>
                   </tr>
                 ))}
               </tbody>
