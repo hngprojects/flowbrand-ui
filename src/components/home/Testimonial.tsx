@@ -16,35 +16,35 @@ const testimonials1: Testimonial[] = [
     name: "Sarah Ntiaji",
     quote:
       "I used to just post on Instagram and hope for the best. Not actually tells me what I plan on doing on Monday morning. It gave our team of 3 a real system.",
-    image: "/images/red-girl.jpg",
+    image: "/images/redgirl.jpg",
   },
   {
     id: 2,
     name: "David Brown",
     quote:
       "Before using this, I was just posting daily. Now I actually have a clear system and I'm getting consistent customer inquiries every week.",
-    image: "/images/black-guy.jpg",
+    image: "/images/blackguy.jpg",
   },
   {
     id: 3,
     name: "Bright Dawkm",
     quote:
       "I didn't realize how much I was doing until I started. The step-by-step makes everything so easy to follow. I can't wait to attract the right customers.",
-    image: "/images/suit-guy.jpg",
+    image: "/images/suitguy.jpg",
   },
   {
     id: 4,
     name: "Glory Nkeme",
     quote:
       "I used to overthink my marketing at. Now I just follow the steps, and everything feels more organized and effective.",
-    image: "/images/red-girl.jpg",
+    image: "/images/redgirl.jpg",
   },
   {
     id: 5,
     name: "Ameerah Raji",
     quote:
       "This helped stop wasting time on things that weren't working. Now I focus on what actually brings in customers.",
-    image: "/images/glory.jpg",
+    image: "/images/whitegirl.png",
   },
 ];
 
@@ -54,28 +54,28 @@ const testimonials2: Testimonial[] = [
     name: "Darwin Muri",
     quote:
       "This gave me structure. I no longer guess what to do next in my marketing, and i’ve already started seeing better engagement and more serious leads.",
-    image: "/images/red-girl.jpg",
+    image: "/images/redgirl.jpg",
   },
   {
     id: 7,
     name: "Emma Wilson",
     quote:
       "I used to struggle with turning interest into actual paying customers. Now i have a proper flow that helps me follow up and close more deals.",
-    image: "/images/white-man.jpg",
+    image: "/images/whiteman.jpg",
   },
   {
     id: 8,
     name: "Marcus Thompson",
     quote:
       "Game changer for our small business. We've tripled our customer inquiries.",
-    image: "/images/suit-guy.jpg",
+    image: "/images/suitguy.jpg",
   },
   {
     id: 9,
     name: "Lisa Chen",
     quote:
       "I didn’t expect results this quickly. Within a short time, I started getting more serious inquiries from ready to buy customers.",
-    image: "/images/black-guy.jpg",
+    image: "/images/blackguy.jpg",
   },
   {
     id: 10,

@@ -3,7 +3,7 @@ import Image from "next/image";
 const Features = () => {
   return (
     <section
-      className="w-full py-16 px-4 md:px-8 lg:px-16"
+      className="w-full py-16 px-4 md:px-8 lg:px-20"
       style={{ fontFamily: '"Inter", sans-serif' }}
     >
       <div className="max-w-7xl mx-auto flex flex-col items-center">
@@ -26,7 +26,7 @@ const Features = () => {
           <div className="bg-black rounded-[2rem] p-8 flex flex-col h-[405px] shadow-sm">
             <div className="flex-1 flex justify-start items-start">
               <Image
-                src="/images/feature-1.png"
+                src="/images/feature.png"
                 alt="Guided Setup"
                 width={80}
                 height={80}
@@ -47,7 +47,7 @@ const Features = () => {
           {/* Card 2: Progress Tracking */}
           <div className="relative rounded-[2rem] overflow-hidden flex flex-col h-[405px] group shadow-sm">
             <Image
-              src="/images/dark-skin-girl-2.jpg"
+              src="/images/dark-girl-2.jpg"
               alt="Progress Tracking"
               width={405}
               height={456}

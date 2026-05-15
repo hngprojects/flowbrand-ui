@@ -1,10 +1,9 @@
-import React from "react";
 import Image from "next/image";
 
 const Welcome = () => {
   return (
     <section
-      className="w-full py-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto"
+      className="w-full py-16 px-4 md:px-10 lg:px-20 max-w-8xl mx-auto"
       style={{ fontFamily: '"Inter", sans-serif' }}
     >
       <div className="flex flex-col lg:flex-row justify-between items-start mb-10 gap-8 lg:gap-16">
@@ -32,7 +31,7 @@ const Welcome = () => {
       {/* Image Section */}
       <div className="w-full rounded-[1rem] overflow-hidden">
         <Image
-          src="/images/dark-skin-girl-1.jpg"
+          src="/images/dark-girl-1.jpg"
           width={1200}
           height={600}
           alt="Business owner working on a laptop"

@@ -9,7 +9,7 @@ const Hero = () => {
       {/* Background Clouds */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         <Image
-          src="/images/cloud.png"
+          src="/images/clouds.png"
           fill
           alt="Clouds"
           className="object-cover"
@@ -50,7 +50,7 @@ const Hero = () => {
         {/* Desktop Image */}
         <div className="w-full max-w-5xl mx-auto relative mt-4 md:mt-8">
           <Image
-            src="/images/desktop.png"
+            src="/images/desktops.png"
             width={1200}
             height={800}
             alt="Seil App Interface on Desktop"
