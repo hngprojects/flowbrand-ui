@@ -1,7 +1,7 @@
 "use client";
 
-import Navbar from "@/navigation/navbar/index";
-
+import Navbar from "@/components/navigation/navbar/index";
+import Footer from "@/components/navigation/footer";
 export default function LandingLayout({
   children,
 }: Readonly<{
@@ -11,6 +11,7 @@ export default function LandingLayout({
     <div className="flex min-h-screen w-full flex-col justify-between">
       <Navbar />
       <div className="flex-1">{children}</div>
+      <Footer />
     </div>
   );
 }

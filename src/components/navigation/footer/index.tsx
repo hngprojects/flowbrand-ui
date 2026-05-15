@@ -18,7 +18,7 @@ const legalLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-primary-900 text-primary-foreground">
+    <footer className=" bg-primary-900 text-primary-foreground">
       <div className="section-class">
         <div className="flex flex-col gap-[var(--spacing-small)] lg:flex-row lg:justify-between">
           {/* LEFT */}
