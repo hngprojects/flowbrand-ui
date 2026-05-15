@@ -303,6 +303,10 @@
    * Use on the inner wrapper inside a full-bleed <section>.
    */
   .section-class {
-    @apply mx-auto w-full max-w-[1440px] px-4 py-10 lg:py-20;
+    @apply mx-auto w-full max-w-[1440px]  py-10 lg:py-20 px-4 sm:px-6 lg:px-18;
+  }
+
+  .layout-components-class {
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-18;
   }
 }
