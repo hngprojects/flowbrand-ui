@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { faq_items } from "@/constants/home/faq/landing-faq";
 import Link from "next/link";
 import MobileLogo from "@/components/icons/navbar/mobile-logo";
-import Navbar from "@/navigation/navbar/index";
 
 export default function FaqPage() {
   const [search, setSearch] = useState("");
@@ -30,7 +29,6 @@ export default function FaqPage() {
 
   return (
     <>
-      <Navbar />
       <main className="overflow-hidden">
         <section className="bg-primary/10 w-full h-[304px] flex items-center">
           <div className="mx-auto  w-full max-w-[1440px] px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
