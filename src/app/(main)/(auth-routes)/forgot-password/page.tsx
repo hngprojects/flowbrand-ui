@@ -5,10 +5,10 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F5] md:grid md:grid-cols-2">
       
-      {/* Sidebar marketing (gauche) */}
+      {/* Sidebar marketing (left) */}
       <div className="hidden md:flex bg-[#E7EBF4] p-16 flex-col justify-center">
         <div className="max-w-md">
-          {/* Logo (optionnel) */}
+          {/* Logo */}
           <div className="mb-8">
             <Image
               src="/logo.png"
@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
 
-      {/* Forgot Password Form (droite) */}
+      {/* Forgot Password Form (right) */}
       <div className="flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">
           <h1 className="text-4xl font-semibold text-[#1E3A70] leading-tight mb-2">

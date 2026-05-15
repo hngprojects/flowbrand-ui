@@ -31,15 +31,11 @@ export function ForgotPasswordForm() {
     setSuccess(false);
 
     try {
-      // Simuler un appel API (à remplacer par vrai backend)
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (data.email.includes('@') && data.email.includes('.')) {
-        setSuccess(true);
-        } else {
-        setError('Enter a valid email address');
-        }
-
+      // Accept any valid email (for demo)
+      setSuccess(true);
     } catch (err) {
       setError('Something went wrong. Please try again.');
     } finally {

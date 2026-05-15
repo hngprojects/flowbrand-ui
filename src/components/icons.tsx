@@ -43,16 +43,3 @@ export const ChevronRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
-
-// ---------Example usage:---------
-// import { ChatIcon, ChevronRightIcon } from "@/components/icons";
-
-// export default function MyComponent() {
-//   return (
-//     <div className="flex items-center gap-2 text-primary">
-//        <ChatIcon className="w-6 h-6" />
-//        <span>Messages</span>
-//        <ChevronRightIcon className="w-4 h-4 ml-auto" />
-//     </div>
-//   );
-// }

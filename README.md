@@ -1,50 +1,52 @@
 # FlowBrand UI – Login Flow
 
-Application d’authentification complète (login, inscription, mot de passe oublié, reset password, dashboard, pages légales) développée avec Next.js, TypeScript, Tailwind CSS, Zod, React Hook Form et Zustand.
+Complete authentication application (login, registration, forgot password, reset password, dashboard, legal pages) built with Next.js, TypeScript, Tailwind CSS, Zod, React Hook Form, and Zustand.
 
-## Démo en ligne
+## Live Demo
 
-[https://flowbrand-ui.vercel.app](https://flowbrand-ui.vercel.app) 
+[https://flowbrand-ui.vercel.app](https://flowbrand-ui.vercel.app)
+
+---
 
 ## Installation
 
 ```bash
-# Cloner le dépôt
+# Clone the repository
 git clone https://github.com/ton-compte/flowbrand-ui
 cd flowbrand-ui
 
-# Installer les dépendances
+# Install dependencies
 npm install
 
-# Lancer le serveur de développement
+# Start development server
 npm run dev
-Ouvrir http://localhost:3000
+Open http://localhost:3000
 
 ---
 
-## Pages disponibles
+## Available Pages
 Page	URL	Description
-Login	/login	Connexion utilisateur (email + mot de passe)
-Register	/register	Création de compte avec validation
-Forgot Password	/forgot-password	Demande de réinitialisation du mot de passe
-Dashboard	/dashboard	Page protégée après connexion
-Terms & Conditions	/terms	Conditions générales d’utilisation
+Login	/login	User login (email + password)
+Register	/register	Account creation with validation
+Forgot Password	/forgot-password	Password reset request
+Dashboard	/dashboard	Protected page after login
+Terms & Conditions	/terms	Terms of use
 
 ---
 
-## Stack technique
-Technologie	Rôle
-Next.js 16 (App Router)	Framework React
-TypeScript	Typage statique
-Tailwind CSS	Styles et responsive
-Zod	Validation des formulaires
-React Hook Form	Gestion des formulaires
-Zustand	État global (authentification)
-Lucide Icons	Icônes (optionnel)
+## Tech Stack
+Technology	Role
+Next.js 16 (App Router)	React Framework
+TypeScript	Static typing
+Tailwind CSS	Styling & responsive
+Zod	Form validation
+React Hook Form	Form management
+Zustand	Global state (authentication)
+Lucide Icons	Icons (optional)
 
 ---
 
-## Structure du projet
+##  Project Structure
 
 src/
 ├── app/
@@ -70,59 +72,58 @@ src/
 
 ---
 
-##  Fonctionnalités
-✅ Validation des formulaires (Zod + React Hook Form)
+##  Features
+✅ Form validation (Zod + React Hook Form)
 
-✅ Affichage/masquage du mot de passe (toggle œil)
+✅ Password visibility toggle (eye icon)
 
-✅ Simulation d’authentification (mode développement)
+✅ Authentication simulation (development mode)
 
-✅ Redirections entre pages (login → dashboard, etc.)
+✅ Page redirects (login → dashboard, etc.)
 
-✅ Sidebar marketing responsive (cachée sur mobile)
+✅ Responsive marketing sidebar (hidden on mobile)
 
-✅ Dashboard protégé + déconnexion
+✅ Protected dashboard + logout
 
-✅ Page Terms & Conditions avec table des matières sticky
-
-
----
-
-## Simulation d’authentification
-En développement, le service d’authentification accepte n’importe quel email et mot de passe. Pour passer en production, remplace authService.ts par un vrai appel API.
+✅ Terms & Conditions page with sticky sidebar
 
 ---
 
-## Responsive
-Desktop (> 768px) : deux colonnes (sidebar + formulaire)
-Mobile (< 768px) : une seule colonne, sidebar masquée
+## Authentication Simulation
+In development mode, the authentication service accepts any email and password. For production, replace authService.ts with a real API call.
 
 ---
 
-##  Tests
+## Responsive Design
+Desktop (> 768px): Two columns (sidebar + form)
+Mobile (< 768px): Single column, sidebar hidden
+
+---
+
+## Testing
 
 npm run dev
-# Puis visite :
+# Then visit:
 # - http://localhost:3000/login
 # - http://localhost:3000/register
 # - http://localhost:3000/forgot-password
 # - http://localhost:3000/terms
-# - http://localhost:3000/dashboard (après connexion)
+# - http://localhost:3000/dashboard (after login)
 
 ---
 
-## Améliorations possibles
-Intégration d’un vrai backend (API REST)
+## Possible Improvements
 
-Gestion des erreurs plus fine
-
-Tests unitaires avec Jest / Testing Library
-
-Internationalisation (i18n)
+Integrate a real backend (REST API)
+More detailed error handling
+Unit tests with Jest / Testing Library
+Internationalization (i18n)
 
 ---
 
-##  Auteur
+##  Author
 ALAYDE Malomon Araffath – HNG Internship 2026
 
-GitHub : m-tech-cod
+GitHub: m-tech-cod
+
+
