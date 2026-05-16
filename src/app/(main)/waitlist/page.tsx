@@ -1,6 +1,6 @@
 "use client";
 
-import WaitlistView from "@/views/WaitlistView";
+import WaitlistView from "@/components/waitlist/page";
 
 export default function Waitlist() {
   return (
