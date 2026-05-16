@@ -3,8 +3,8 @@
 import * as z from "zod";
 import { cookies } from "next/headers";
 import { envConfig } from "~/config/env.config";
-import { LoginSchema } from "~/schemas";
-import type { AuthResponse, ErrorResponse, User } from "~/types";
+import { LoginSchema } from "@/schema/auth.schema";
+import type { AuthResponse, ErrorResponse, User } from "@/types/auth";
 import { HttpError, createFetchUtil } from "./fetchutil";
 
 export interface LoginResponse {

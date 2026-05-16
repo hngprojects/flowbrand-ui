@@ -3,9 +3,9 @@ import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { nextLogin, googleAuth } from "~/actions/nextauth";
-import { inDevEnvironment } from "~/utils";
-import { LoginSchema } from "~/schemas";
-import { CustomJWT } from "~/types";
+import { inDevEnvironment } from "@/lib/utils";
+import { LoginSchema } from "@/schema/auth.schema";
+import { CustomJWT } from "@/types/auth";
 
 const INVALID_CREDENTIAL_STATUSES = new Set([400, 401, 403, 422]);
 const AUTH_SECRET_FALLBACK =

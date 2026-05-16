@@ -15,7 +15,7 @@ import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import * as z from "zod";
 import { LoginSchema } from "@/schema/auth.schema";
 import { DEFAULT_LOGIN_REDIRECT } from "~/routes";
-import { cn } from "~/utils";
+import { cn } from "@/lib/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";

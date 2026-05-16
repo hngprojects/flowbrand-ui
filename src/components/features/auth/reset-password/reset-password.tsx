@@ -25,7 +25,7 @@ import {
   PASSWORD_RULE_ROWS,
   ResetPasswordSchema,
 } from "@/schema/auth.schema";
-import { cn } from "~/utils";
+import { cn } from "@/lib/utils";
 
 const inputClassWithError = (hasError: boolean) => {
   return cn(

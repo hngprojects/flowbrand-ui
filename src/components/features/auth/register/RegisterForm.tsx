@@ -30,7 +30,7 @@ import {
 } from "@/schema/auth.schema";
 import { COUNTRY_OPTIONS } from "~/lib/countries";
 import { REGISTER_VERIFY_EMAIL_STORAGE_KEY } from "~/lib/register-verify-storage";
-import { cn } from "~/utils";
+import { cn } from "@/lib/utils";
 
 const inputClassWithError = (hasError: boolean) => {
   return cn(

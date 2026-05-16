@@ -11,8 +11,8 @@ import type {
   VerifyOtpResult,
   VerifyOtpSuccess,
 } from "~/lib/auth-action-results";
-import { LoginSchema, RegisterSchema } from "~/schemas";
-import { AuthResponse, ErrorResponse } from "~/types";
+import { LoginSchema, RegisterSchema } from "@/schema/auth.schema";
+import { AuthResponse, ErrorResponse } from "@/types/auth";
 
 /** Safe string from API error payloads; avoids showing objects in the UI. */
 function messageFromAxiosData(data: unknown, fallback: string): string {
