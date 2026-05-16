@@ -7,7 +7,7 @@ export const DocsImg = (props: React.SVGProps<SVGSVGElement>) => (
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <g clip-path="url(#clip0_6478_27333)">
+    <g clipPath="url(`#clip0_6478_27333`)">
       <path
         d="M10.1553 0.5H21.3926L30.6992 9.80664V27.834C30.6992 29.8301 28.9622 31.5 26.752 31.5H10.0557C7.83629 31.4999 6.09961 29.8294 6.09961 27.834V4.16602C6.09957 2.18421 7.92092 0.500015 10.1553 0.5Z"
         fill="white"
