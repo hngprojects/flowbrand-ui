@@ -12,6 +12,8 @@ export const {
 
 declare module "next-auth" {
   interface Session {
+    /** Set when the JWT lacks a backend user id — treat as signed out. */
+    invalid?: boolean;
     user: {
       id: User["id"];
       first_name: User["first_name"];

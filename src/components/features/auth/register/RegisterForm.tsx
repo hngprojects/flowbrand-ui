@@ -42,7 +42,11 @@ const inputClassWithError = (hasError: boolean) => {
 
 const RegistrationForm = () => {
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
+  const isAuthenticated =
+    status === "authenticated" &&
+    session?.invalid !== true &&
+    !!session?.user?.id;
   const [showPasswordPlain, setShowPasswordPlain] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
@@ -61,10 +65,10 @@ const RegistrationForm = () => {
   const { isSubmitting } = form.formState;
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       router.push("/dashboard");
     }
-  }, [status, router]);
+  }, [isAuthenticated, router]);
 
   const onSubmit = async (values: z.infer<typeof RegistrationFormSchema>) => {
     try {
@@ -330,7 +334,7 @@ const RegistrationForm = () => {
       <Button
         type="button"
         variant="outline"
-        disabled={isSubmitting || status === "authenticated"}
+        disabled={isSubmitting || isAuthenticated}
         onClick={() => signIn("google", { redirectTo: "/dashboard" })}
         className="h-auto w-full gap-2 rounded-lg py-2.5 text-sm font-semibold sm:py-3"
       >

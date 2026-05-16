@@ -120,7 +120,11 @@ function AuthField({
 
 export function LoginForm() {
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
+  const isAuthenticated =
+    status === "authenticated" &&
+    session?.invalid !== true &&
+    !!session?.user?.id;
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -134,8 +138,7 @@ export function LoginForm() {
     mode: "onSubmit",
   });
 
-  const isBusy =
-    isPending || form.formState.isSubmitting || status === "authenticated";
+  const isBusy = isPending || form.formState.isSubmitting || isAuthenticated;
   const rememberMe =
     useWatch({
       control: form.control,
@@ -143,10 +146,10 @@ export function LoginForm() {
     }) ?? false;
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       router.push(DEFAULT_LOGIN_REDIRECT);
     }
-  }, [router, status]);
+  }, [router, isAuthenticated]);
 
   const onSubmit = async (values: LoginValues) => {
     form.clearErrors("password");

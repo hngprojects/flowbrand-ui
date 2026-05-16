@@ -22,7 +22,11 @@ export default function DashboardPage() {
     );
   }
 
-  if (status !== "authenticated" || !session?.user) {
+  if (
+    status !== "authenticated" ||
+    !session?.user ||
+    session.invalid === true
+  ) {
     return null;
   }
 

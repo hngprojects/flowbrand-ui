@@ -70,16 +70,20 @@ const authConfig: NextAuthConfig = {
     },
     async jwt({ token, user, account }) {
       if (account?.provider === "google") {
-        if (!account?.id_token) {
-          return token;
+        if (!account.id_token) {
+          throw new Error("Google sign-in failed: missing ID token");
         }
-        const response = await googleAuth(account?.id_token);
-        if (!response || !("data" in response)) {
-          return token;
+
+        const response = await googleAuth(account.id_token);
+        if (!response?.data) {
+          throw new Error("Google sign-in failed: invalid backend response");
         }
-        token = response.data as CustomJWT;
-        token.access_token = response.access_token;
-        return token;
+
+        return {
+          ...token,
+          ...(response.data as CustomJWT),
+          access_token: response.access_token,
+        } as CustomJWT;
       }
 
       return {
@@ -89,21 +93,15 @@ const authConfig: NextAuthConfig = {
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       const customToken = token as CustomJWT;
-      if (!customToken || !customToken.id) {
+      if (!customToken?.id) {
+        console.warn("[auth] Rejecting session: JWT missing backend user id", {
+          sub: customToken?.sub,
+          email: customToken?.email,
+        });
         return {
-          ...session,
-          user: {
-            id: "",
-            first_name: "",
-            last_name: "",
-            email: "",
-            image: "",
-          },
-          access_token: undefined,
-          userOrg: undefined,
-          currentOrgId: undefined,
           expires: new Date(0).toISOString(),
-        };
+          invalid: true,
+        } as Session;
       }
 
       session.user = {

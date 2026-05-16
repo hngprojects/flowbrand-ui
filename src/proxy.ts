@@ -11,7 +11,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 
 export const proxy = auth((request) => {
   const { nextUrl } = request;
-  const isLoggedIn = !!request.auth?.user?.id;
+  const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
   const pathname = nextUrl.pathname;
 
   const isAuthRoute = authRoutes.some(
