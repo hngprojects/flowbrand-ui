@@ -28,7 +28,7 @@ export default function OnboardingPage() {
 
   const handleCreateStrategy = async () => {
     if (isLoading) return;
-    
+
     setErrorText(null);
 
     const payload = {
@@ -128,13 +128,25 @@ export default function OnboardingPage() {
           {store.step === 2 && (
             <StepTwo
               theyAre={store.theyAre}
-              toggleTheyAre={(val) => { setErrorText(null); store.toggleTheyAre(val); }}
+              toggleTheyAre={(val) => {
+                setErrorText(null);
+                store.toggleTheyAre(val);
+              }}
               whoWantTo={store.whoWantTo}
-              toggleWhoWantTo={(val) => { setErrorText(null); store.toggleWhoWantTo(val); }}
+              toggleWhoWantTo={(val) => {
+                setErrorText(null);
+                store.toggleWhoWantTo(val);
+              }}
               locatedIn={store.locatedIn}
-              toggleLocatedIn={(val) => { setErrorText(null); store.toggleLocatedIn(val); }}
+              toggleLocatedIn={(val) => {
+                setErrorText(null);
+                store.toggleLocatedIn(val);
+              }}
               customInput={store.customCustomerInput}
-              setCustomInput={(val) => { setErrorText(null); store.setCustomCustomerInput(val); }}
+              setCustomInput={(val) => {
+                setErrorText(null);
+                store.setCustomCustomerInput(val);
+              }}
               onNext={() => {
                 setErrorText(null);
                 store.nextStep();
@@ -145,8 +157,8 @@ export default function OnboardingPage() {
           {store.step === 3 && (
             <StepThree
               selected={store.trafficChannel}
-              onSelect={(val) => { 
-                setErrorText(null); 
+              onSelect={(val) => {
+                setErrorText(null);
                 if (store.trafficChannel === val) {
                   store.setTrafficChannel("");
                 } else {
@@ -158,10 +170,9 @@ export default function OnboardingPage() {
             />
           )}
 
-
           {errorText && (
-            <div 
-              role="alert" 
+            <div
+              role="alert"
               className="text-2sm font-medium text-destructive bg-destructive/10 p-small rounded-sm transition-all"
             >
               {errorText}
