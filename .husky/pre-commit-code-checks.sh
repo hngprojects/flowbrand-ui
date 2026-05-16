@@ -26,7 +26,17 @@ if ! pnpm check-format; then
   fi
 fi
 
+# ── ESLint ────────────────────────────────────────────────
+echo ""
+echo "🔎 👀 Checking for lint errors... 🧹 🪣"
+echo ""
 
+if ! pnpm lint; then
+  echo ""
+  echo "💀 ☠️  Bro what is this code — Fix your lint errors!! 💀 ☠️"
+  echo ""
+  exit 1
+fi
 
 # ── TypeScript ────────────────────────────────────────────
 echo ""

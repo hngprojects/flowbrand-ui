@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { QuoteUpSvg } from "@/components/icons/quote-up-svg";
+import { QuoteDownSvg } from "@/components/icons/quote-down-svg";
 
 const WhySection = () => {
   return (
@@ -52,14 +54,7 @@ const WhySection = () => {
         <h2 className="text-[0.65rem] md:text-[2rem] font-[500] leading-[120%] text-center ">
           Seil started as a simple idea
         </h2>
-        <Image
-          src="/quote-up.svg"
-          alt="qoute-up"
-          width={14.6}
-          height={14.6}
-          className="e md:h-[2.8rem] md:w-[2.8rem] "
-        />
-
+        <QuoteUpSvg className="absolute right-0 bottom-[-0.44rem] md:bottom-[-2.2rem]  md:h-[2.8rem] md:w-[2.8rem] " />
         <div className="border-[0.04rem] border-[#CFCFCF] rounded w-[90%] md:w-[88.7%]  m-auto ">
           <p className="text-[0.41rem] md:text-[1.25rem] text-[var(--black-400)] leading-[130%] text-center p-[0.49rem] ">
             what if we could ask someone few questions about their business, and
@@ -67,13 +62,7 @@ const WhySection = () => {
             plain English, one step at a time?
           </p>
         </div>
-        <Image
-          src="/quote-down.svg"
-          alt="qoute-down"
-          width={14.6}
-          height={14.6}
-          className="right-0 bottom-[-0.44rem] md:bottom-[-2.2rem]  absolute md:h-[2.8rem] md:w-[2.8rem] "
-        />
+        <QuoteDownSvg className="absolute right-0 bottom-[-0.44rem] md:bottom-[-2.2rem]  md:h-[2.8rem] md:w-[2.8rem] " />
       </div>
     </section>
   );

@@ -1,3 +1,43 @@
+import Image from "next/image";
+
+const LOGOS = [
+  {
+    src: "/repair-service.svg",
+    alt: "repair service",
+    width: 228,
+    height: 67,
+    className: "w-[80px] h-[40px] md:w-[228px] md:h-[67px]",
+  },
+  {
+    src: "/beauty-salon.svg",
+    alt: "beauty salon",
+    width: 239,
+    height: 67,
+    className: "w-[80px] h-[40px] md:w-[239px] md:h-[67px]",
+  },
+  {
+    src: "/bakery.svg",
+    alt: "bakery",
+    width: 118,
+    height: 67,
+    className: "w-[80px] h-[40px] md:w-[118px] md:h-[67px]",
+  },
+  {
+    src: "/small-retail.svg",
+    alt: "small retail",
+    width: 172,
+    height: 67,
+    className: "w-[80px] h-[40px] md:w-[172px] md:h-[67px]",
+  },
+  {
+    src: "/agency.svg",
+    alt: "agency",
+    width: 139,
+    height: 67,
+    className: "w-[80px] h-[40px] md:w-[139px] md:h-[67px]",
+  },
+] as const;
+
 const SocialProof = () => {
   return (
     <section className="w-full mb-[84px]">
@@ -7,35 +47,17 @@ const SocialProof = () => {
         </h2>
 
         <div className="w-full flex justify-between align-center gap-[7px]  overflow-hidden ">
-          <img
-            src="/repair-service.svg"
-            alt="repair service"
-            className="w-[80px] h-[40px] md:w-[228px] md:h-[67px]"
-          />
-
-          <img
-            src="/beauty-salon.svg"
-            alt="beauty salon"
-            className="w-[80px] h-[40px] md:w-[239px] md:h-[67px]"
-          />
-
-          <img
-            src="/bakery.svg"
-            alt="bakery"
-            className="w-[80px] h-[40px] md:w-[118px] md:h-[67px]"
-          />
-
-          <img
-            src="/small-retail.svg"
-            alt="small retail"
-            className="w-[80px] h-[40px] md:w-[172px] md:h-[67px]"
-          />
-
-          <img
-            src="/agency.svg"
-            alt="agency"
-            className="w-[80px] h-[40px] md:w-[139px] md:h-[67px]"
-          />
+          {LOGOS.map((logo) => (
+            <Image
+              key={logo.src}
+              src={logo.src}
+              alt={logo.alt}
+              width={logo.width}
+              height={logo.height}
+              unoptimized
+              className={logo.className}
+            />
+          ))}
         </div>
       </div>
     </section>

@@ -14,7 +14,7 @@ const HeroesAbout = () => {
       <div className="  relative mx-auto mt-[4.4rem] md:mt-[11.2rem] w-[92%] px-2 md:w-[65%] ">
         <h1 className="font-[500] text-[2rem] md:text-[3.8rem] leading-[110%] md:leading-[100%] text-center ">
           We built <span className="text-[var(--accent)]">Seil</span> because
-          great marketing shouldn't require a marketing degree.
+          great marketing shouldn&apos;t require a marketing degree.
         </h1>
       </div>
 
