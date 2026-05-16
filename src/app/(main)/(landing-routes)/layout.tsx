@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/navigation/navbar/index";
 import Footer from "@/components/navigation/footer";
+
 export default function LandingLayout({
   children,
 }: Readonly<{

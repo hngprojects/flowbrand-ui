@@ -310,3 +310,29 @@
     @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-18;
   }
 }
+/* Fix overflow issues - scoped instead of global */
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Only apply max-width to media elements, not all elements */
+img,
+video,
+svg,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Utility class for overflow control */
+.overflow-x-guard {
+  overflow-x: hidden;
+}
