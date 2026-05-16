@@ -88,7 +88,20 @@ const SideBar = ({
             <div className="space-y-[12px]">
               <h2 className="text-[16px] text-black-300">Your Strategy</h2>
               <div className="border border-gray-500 p-[20px] space-y-[20px] rounded-[20px]">
-                {strategy.map((strategy) => (
+                {strategy.map((item) => (
+                   <div
+                    key={item.title}
+                     className="flex items-start justify-between border-b pb-4 border-gray-500 last:border-none"
+                   >
+                     <div className="flex items-start gap-default">
+                       <StrategyIcon />
+                       <div className="flex flex-col">
+                         <h3 className="text-[16px] text-foreground">
+                          {item.title}
+                         </h3>
+                         <p className="text-[14px] text-black-300">
+                          {item.tasks}
+                         </p>
                   <div
                     key={strategy.title}
                     className="flex items-start justify-between border-b pb-4 border-gray-500 last:border-none"
