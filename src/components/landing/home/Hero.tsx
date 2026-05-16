@@ -50,7 +50,7 @@ const Hero = () => {
         {/* Desktop Image */}
         <div className="w-full max-w-5xl mx-auto relative mt-4 md:mt-8">
           <Image
-            src="/images/desktops.png"
+            src="/images/desktops.jpg"
             width={1200}
             height={800}
             alt="Seil App Interface on Desktop"

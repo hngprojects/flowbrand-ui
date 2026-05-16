@@ -7,7 +7,7 @@ const productLinks = [
   { label: "How it works", href: "/how-it-works" },
   { label: "About Us", href: "/about-us" },
   { label: "Contact Us", href: "/contact-us" },
-  { label: "FAQ", href: "/faq" },
+  { label: "FAQ", href: "/faqs" },
 ];
 
 const legalLinks = [
@@ -18,7 +18,7 @@ const legalLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-primary-900 text-primary-foreground">
+    <footer className=" bg-primary-900 text-primary-foreground">
       <div className="section-class">
         <div className="flex flex-col gap-[var(--spacing-small)] lg:flex-row lg:justify-between">
           {/* LEFT */}
