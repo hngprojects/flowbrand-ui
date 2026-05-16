@@ -36,6 +36,9 @@ export default function StepThree({
       <div className="space-y-small">
         {CHANNELS.map((channel) => {
           const active = selected === channel;
+          // CodeRabbit Fix: Convert spaces to lowercase tokens to make IDs valid HTML specification strings
+          const sanitizedId = channel.toLowerCase().replace(/\s+/g, "-");
+
           return (
             <div
               key={channel}
@@ -47,7 +50,7 @@ export default function StepThree({
               }`}
             >
               <Checkbox
-                id={channel}
+                id={sanitizedId}
                 checked={active}
                 onCheckedChange={() => onSelect(channel)}
                 className={`h-4 w-4 rounded transition ${
@@ -57,7 +60,7 @@ export default function StepThree({
                 }`}
               />
               <label
-                htmlFor={channel}
+                htmlFor={sanitizedId}
                 className="text-sm font-medium text-label cursor-pointer select-none"
               >
                 {channel}

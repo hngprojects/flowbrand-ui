@@ -74,16 +74,20 @@ export default function StepTwo(props: StepTwoProps) {
             They are:
           </span>
           <div className="flex flex-wrap gap-2">
-            {SECTIONS.theyAre.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => props.toggleTheyAre(opt)}
-                className={pillClass(isSelected(props.theyAre, opt))}
-              >
-                {opt}
-              </button>
-            ))}
+            {SECTIONS.theyAre.map((opt) => {
+              const active = isSelected(props.theyAre, opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  aria-pressed={active} // CodeRabbit Accessibility Fix
+                  onClick={() => props.toggleTheyAre(opt)}
+                  className={pillClass(active)}
+                >
+                  {opt}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -92,16 +96,20 @@ export default function StepTwo(props: StepTwoProps) {
             Who want to:
           </span>
           <div className="flex flex-wrap gap-2">
-            {SECTIONS.whoWantTo.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => props.toggleWhoWantTo(opt)}
-                className={pillClass(isSelected(props.whoWantTo, opt))}
-              >
-                {opt}
-              </button>
-            ))}
+            {SECTIONS.whoWantTo.map((opt) => {
+              const active = isSelected(props.whoWantTo, opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  aria-pressed={active} // CodeRabbit Accessibility Fix
+                  onClick={() => props.toggleWhoWantTo(opt)}
+                  className={pillClass(active)}
+                >
+                  {opt}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -110,16 +118,20 @@ export default function StepTwo(props: StepTwoProps) {
             Located In:
           </span>
           <div className="flex flex-wrap gap-2">
-            {SECTIONS.locatedIn.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => props.toggleLocatedIn(opt)}
-                className={pillClass(isSelected(props.locatedIn, opt))}
-              >
-                {opt}
-              </button>
-            ))}
+            {SECTIONS.locatedIn.map((opt) => {
+              const active = isSelected(props.locatedIn, opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  aria-pressed={active} // CodeRabbit Accessibility Fix
+                  onClick={() => props.toggleLocatedIn(opt)}
+                  className={pillClass(active)}
+                >
+                  {opt}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -130,10 +142,8 @@ export default function StepTwo(props: StepTwoProps) {
           <Textarea
             placeholder="e.g Young women in Lagos who want affordable stylish clothing"
             value={props.customInput}
-            onChange={(e) =>
-              props.customInput.length < 500 &&
-              props.setCustomInput(e.target.value)
-            }
+            // CodeRabbit Fix: Safe slice constraint prevents block lockups on backspaces
+            onChange={(e) => props.setCustomInput(e.target.value.slice(0, 500))}
             className="min-h-[70px] resize-none bg-card border border-gray-700 text-label placeholder:text-gray-700 rounded-lg text-sm"
           />
         </div>

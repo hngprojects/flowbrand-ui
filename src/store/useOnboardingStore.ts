@@ -27,7 +27,8 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
   locatedIn: [],
   customCustomerInput: "",
   trafficChannel: "",
-  setStep: (step) => set({ step }),
+  // Safely clamp direct manual updates
+  setStep: (step) => set({ step: Math.max(1, Math.min(step, 3)) }),
   nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 3) })),
   prevStep: () => set((state) => ({ step: Math.max(state.step - 1, 1) })),
   setBusinessDescription: (val) => set({ businessDescription: val }),

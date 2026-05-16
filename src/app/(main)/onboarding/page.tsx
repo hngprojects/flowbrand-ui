@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
@@ -9,15 +10,16 @@ import ProgressBar from "@/components/onboarding/ProgressBar";
 import StepOne from "@/components/onboarding/StepOne";
 import StepTwo from "@/components/onboarding/StepTwo";
 import StepThree from "@/components/onboarding/StepThree";
-import { useState } from "react";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const store = useOnboardingStore();
-
   const [isLoading, setIsLoading] = useState(false);
 
+  const [errorText, setErrorText] = useState<string | null>(null);
+
   const handleBackClick = () => {
+    setErrorText(null);
     if (store.step === 1) {
       router.push("/auth-routes");
     } else {
@@ -26,6 +28,8 @@ export default function OnboardingPage() {
   };
 
   const handleCreateStrategy = async () => {
+    setErrorText(null);
+
     const payload = {
       businessDescription: store.businessDescription,
       idealCustomer: {
@@ -41,7 +45,7 @@ export default function OnboardingPage() {
     if (!validation.success) {
       const firstErrorMessage =
         validation.error.issues?.[0]?.message || "Validation Error";
-      alert(firstErrorMessage);
+      setErrorText(firstErrorMessage);
       return;
     }
 
@@ -54,14 +58,19 @@ export default function OnboardingPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Submission pipeline failure.");
+        let errorBodyMessage = "Submission pipeline failure.";
+        try {
+          const apiErrorData = await response.json();
+          if (apiErrorData?.message) errorBodyMessage = apiErrorData.message;
+        } catch {}
+        throw new Error(errorBodyMessage);
       }
 
       router.push("/dashboard");
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Something went wrong.";
-      alert(errorMessage);
+      setErrorText(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +92,7 @@ export default function OnboardingPage() {
               stroke="currentColor"
               strokeWidth="1.35"
               className="h-4 w-7 text-label"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -94,39 +104,74 @@ export default function OnboardingPage() {
           </Button>
         </div>
 
-        {/* Content Card Wrapper */}
-        <div className="bg-card p-section rounded-2xl border border-border shadow-sm">
+        {/* Content Card Wrapper  */}
+        <div className="bg-card p-section rounded-2xl border border-border shadow-sm space-y-default">
           <ProgressBar currentStep={store.step} />
 
           {store.step === 1 && (
             <StepOne
               value={store.businessDescription}
-              onChange={store.setBusinessDescription}
-              onNext={store.nextStep}
+              onChange={(val) => {
+                setErrorText(null);
+                store.setBusinessDescription(val);
+              }}
+              onNext={() => {
+                setErrorText(null);
+                store.nextStep();
+              }}
             />
           )}
 
           {store.step === 2 && (
             <StepTwo
               theyAre={store.theyAre}
-              toggleTheyAre={store.toggleTheyAre}
+              toggleTheyAre={(val) => {
+                setErrorText(null);
+                store.toggleTheyAre(val);
+              }}
               whoWantTo={store.whoWantTo}
-              toggleWhoWantTo={store.toggleWhoWantTo}
+              toggleWhoWantTo={(val) => {
+                setErrorText(null);
+                store.toggleWhoWantTo(val);
+              }}
               locatedIn={store.locatedIn}
-              toggleLocatedIn={store.toggleLocatedIn}
+              toggleLocatedIn={(val) => {
+                setErrorText(null);
+                store.toggleLocatedIn(val);
+              }}
               customInput={store.customCustomerInput}
-              setCustomInput={store.setCustomCustomerInput}
-              onNext={store.nextStep}
+              setCustomInput={(val) => {
+                setErrorText(null);
+                store.setCustomCustomerInput(val);
+              }}
+              onNext={() => {
+                setErrorText(null);
+                store.nextStep();
+              }}
             />
           )}
 
           {store.step === 3 && (
             <StepThree
               selected={store.trafficChannel}
-              onSelect={store.setTrafficChannel}
+              onSelect={(val) => {
+                setErrorText(null);
+                store.trafficChannel === val
+                  ? store.setTrafficChannel("")
+                  : store.setTrafficChannel(val);
+              }}
               onSubmit={handleCreateStrategy}
               isLoading={isLoading}
             />
+          )}
+
+          {errorText && (
+            <div
+              role="alert"
+              className="text-2sm font-medium text-destructive bg-destructive/10 p-small rounded-sm transition-all"
+            >
+              {errorText}
+            </div>
           )}
         </div>
       </div>
