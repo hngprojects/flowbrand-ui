@@ -251,7 +251,7 @@ export default function OnboardingPage() {
           </div>
           <div className="flex-1 text-left">
             <p className="text-[15px] font-semibold text-gray-800 dark:text-gray-100">
-              Don't have a document to upload? Create your strategy another way.
+              {"Don't have a document to upload? Create your strategy another way."}
             </p>
             <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-500">
               Create your marketing strategy without the need to upload a document.
