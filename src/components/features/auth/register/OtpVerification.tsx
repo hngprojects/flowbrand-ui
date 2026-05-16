@@ -17,7 +17,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { REGISTER_VERIFY_EMAIL_STORAGE_KEY } from "~/lib/register-verify-storage";
+import { clearRegisterVerifyEmail } from "~/lib/register-verify-storage";
 import { OtpFormSchema } from "@/schema/auth.schema";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +33,7 @@ const OTPVerification = ({ email }: { email: string }) => {
   const router = useRouter();
   const [secondsLeft, setSecondsLeft] = useState(30);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const form = useForm<z.infer<typeof OtpFormSchema>>({
@@ -74,7 +75,7 @@ const OTPVerification = ({ email }: { email: string }) => {
           return;
         }
         if (result.status >= 200 && result.status < 300) {
-          sessionStorage.removeItem(REGISTER_VERIFY_EMAIL_STORAGE_KEY);
+          clearRegisterVerifyEmail();
           toast.success("Verification complete", {
             description: result.message,
           });
@@ -91,12 +92,14 @@ const OTPVerification = ({ email }: { email: string }) => {
   };
 
   const handleResend = async () => {
+    if (isResending) return;
     if (!email) {
       toast.error("Missing email", {
         description: "Go back to registration and try again.",
       });
       return;
     }
+    setIsResending(true);
     try {
       const result = await resendOtp(email);
       if (
@@ -119,6 +122,8 @@ const OTPVerification = ({ email }: { email: string }) => {
       toast.error("Could not resend", {
         description: "Network error. Please try again later.",
       });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -207,7 +212,7 @@ const OTPVerification = ({ email }: { email: string }) => {
           <Button
             type="button"
             variant="link"
-            disabled={secondsLeft > 0 || isVerifying}
+            disabled={secondsLeft > 0 || isVerifying || isResending}
             onClick={handleResend}
             className="text-primary hover:text-primary/90 h-auto p-0 font-bold disabled:opacity-40"
           >

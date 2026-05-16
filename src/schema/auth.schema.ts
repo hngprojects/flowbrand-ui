@@ -2,7 +2,7 @@ import * as z from "zod";
 
 export const LoginSchema = z.object({
   password: z.string().min(8, {
-    message: "Password is required",
+    message: "Password must be at least 8 characters",
   }),
   email: z
     .string()
@@ -116,6 +116,13 @@ export const OtpFormSchema = z.object({
   d4: z.string().length(1).regex(/^\d$/),
   d5: z.string().length(1).regex(/^\d$/),
 });
+
+/** Six-digit OTP string sent to the verify endpoint (joined from OtpFormSchema). */
+export const VerifyOtpCodeSchema = z
+  .string()
+  .trim()
+  .min(1, { message: "Verification code is required." })
+  .regex(/^\d{6}$/, { message: "Verification code must be 6 digits." });
 
 export const ResetPasswordSchema = z
   .object({

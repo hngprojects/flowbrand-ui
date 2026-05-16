@@ -11,7 +11,11 @@ import type {
   VerifyOtpResult,
   VerifyOtpSuccess,
 } from "~/lib/auth-action-results";
-import { LoginSchema, RegisterSchema } from "@/schema/auth.schema";
+import {
+  LoginSchema,
+  RegisterSchema,
+  VerifyOtpCodeSchema,
+} from "@/schema/auth.schema";
 import { AuthResponse, ErrorResponse } from "@/types/auth";
 
 /** Safe string from API error payloads; avoids showing objects in the UI. */
@@ -28,6 +32,30 @@ function messageFromAxiosData(data: unknown, fallback: string): string {
     }
   }
   return fallback;
+}
+
+function validateAuthEmail(
+  email: string,
+): { email: string } | { error: string } {
+  const trimmed = email.trim();
+  if (!trimmed) {
+    return { error: "Email is required." };
+  }
+  if (!z.string().email().safeParse(trimmed).success) {
+    return { error: "Enter a valid email address." };
+  }
+  return { email: trimmed };
+}
+
+function validateOtpCode(code: string): { code: string } | { error: string } {
+  const result = VerifyOtpCodeSchema.safeParse(code);
+  if (!result.success) {
+    return {
+      error:
+        result.error.issues[0]?.message ?? "Verification code is required.",
+    };
+  }
+  return { code: result.data };
 }
 
 const credentialsAuth = async (
@@ -107,10 +135,15 @@ const registerUser = async (
 };
 
 const resendOtp = async (email: string): Promise<ResendOtpResult> => {
+  const validated = validateAuthEmail(email);
+  if ("error" in validated) {
+    return { error: validated.error };
+  }
+
   const baseURL = envConfig.BASEURL;
   try {
     const response = await axios.post(`${baseURL}/auth/request/token`, {
-      email,
+      email: validated.email,
     });
 
     const success: ResendOtpSuccess = {
@@ -137,11 +170,27 @@ const verifyOtp = async (
   email: string,
   code: string,
 ): Promise<VerifyOtpResult> => {
+  const trimmedEmail = email.trim();
+  const trimmedCode = code.trim();
+  if (!trimmedEmail && !trimmedCode) {
+    return { error: "Email and verification code are required." };
+  }
+
+  const validatedEmail = validateAuthEmail(email);
+  if ("error" in validatedEmail) {
+    return { error: validatedEmail.error };
+  }
+
+  const validatedCode = validateOtpCode(code);
+  if ("error" in validatedCode) {
+    return { error: validatedCode.error };
+  }
+
   const baseURL = envConfig.BASEURL;
   try {
     const response = await axios.post(`${baseURL}/auth/verify/otp`, {
-      email,
-      code,
+      email: validatedEmail.email,
+      code: validatedCode.code,
     });
     const success: VerifyOtpSuccess = {
       status: response.status,
@@ -166,9 +215,9 @@ const verifyOtp = async (
 const requestPasswordReset = async (
   email: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> => {
-  const trimmed = email.trim();
-  if (!trimmed) {
-    return { ok: false, error: "Email is required." };
+  const validated = validateAuthEmail(email);
+  if ("error" in validated) {
+    return { ok: false, error: validated.error };
   }
 
   const baseURL = envConfig.BASEURL;
@@ -180,7 +229,9 @@ const requestPasswordReset = async (
   }
 
   try {
-    await axios.post(`${baseURL}/auth/password/forgot`, { email: trimmed });
+    await axios.post(`${baseURL}/auth/password/forgot`, {
+      email: validated.email,
+    });
     return { ok: true };
   } catch (error) {
     return axios.isAxiosError(error) && error.response

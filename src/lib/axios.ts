@@ -1,4 +1,10 @@
 import axios from "axios";
+import { authRoutes } from "@/routes";
+
+const isAuthPath = (pathname: string) =>
+  authRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
 
 export const publicApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -33,7 +39,11 @@ privateApi.interceptors.request.use(
 privateApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (typeof window !== "undefined" && error.response?.status === 401) {
+    if (
+      typeof window !== "undefined" &&
+      error.response?.status === 401 &&
+      !isAuthPath(window.location.pathname)
+    ) {
       localStorage.removeItem("access_token");
       window.location.href = "/login";
     }

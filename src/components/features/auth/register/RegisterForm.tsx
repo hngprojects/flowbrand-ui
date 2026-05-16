@@ -29,7 +29,7 @@ import {
   splitFullNameForRegister,
 } from "@/schema/auth.schema";
 import { COUNTRY_OPTIONS } from "~/lib/countries";
-import { REGISTER_VERIFY_EMAIL_STORAGE_KEY } from "~/lib/register-verify-storage";
+import { setRegisterVerifyEmail } from "~/lib/register-verify-storage";
 import { cn } from "@/lib/utils";
 
 const inputClassWithError = (hasError: boolean) => {
@@ -95,7 +95,7 @@ const RegistrationForm = () => {
       );
 
       if (isSuccess) {
-        sessionStorage.setItem(REGISTER_VERIFY_EMAIL_STORAGE_KEY, values.email);
+        setRegisterVerifyEmail(values.email);
         router.push("/register/verify");
       }
     } catch {

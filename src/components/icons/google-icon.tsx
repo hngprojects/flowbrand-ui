@@ -1,4 +1,6 @@
-export const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+import type { SVGProps } from "react";
+
+export const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     width="15"
     height="15"

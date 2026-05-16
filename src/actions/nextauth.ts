@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { envConfig } from "~/config/env.config";
 import { LoginSchema } from "@/schema/auth.schema";
 import type { AuthResponse, ErrorResponse, User } from "@/types/auth";
-import { HttpError, createFetchUtil } from "./fetchutil";
+import { FetchTimeoutError, HttpError, createFetchUtil } from "./fetchutil";
 
 export interface LoginResponse {
   user: User;
@@ -91,6 +91,14 @@ export const nextLogin = async (
       message: "login success",
     };
   } catch (error) {
+    if (error instanceof FetchTimeoutError) {
+      return {
+        success: false,
+        message: GENERIC_LOGIN_ERROR_MESSAGE,
+        status_code: 504,
+      };
+    }
+
     if (error instanceof HttpError) {
       return {
         success: false,
@@ -112,14 +120,33 @@ export const nextLogin = async (
   }
 };
 
+const GOOGLE_AUTH_TIMEOUT_MS = 30_000;
+
 export const googleAuth = async (idToken: string) => {
-  const res = await fetch(`${envConfig.APP_URL}/api/social/google`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id_token: idToken }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    GOOGLE_AUTH_TIMEOUT_MS,
+  );
+
+  let res: Response;
+  try {
+    res = await fetch(`${envConfig.APP_URL}/api/social/google`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id_token: idToken }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error("Google authentication timed out");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!res.ok) {
     throw new Error(`Error: ${res.status}`);
@@ -141,10 +168,15 @@ export const googleAuth = async (idToken: string) => {
 export const setBackend = async (backend?: string) => {
   const cookieStore = await cookies();
   if (backend) {
-    cookieStore.set("backend", backend);
+    cookieStore.set("backend", backend, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
   }
 
   return {
-    sucess: true,
+    success: true,
   };
 };

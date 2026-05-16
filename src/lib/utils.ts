@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const inDevEnvironment =
-  !!process && process.env.NODE_ENV === "development";
+  typeof process !== "undefined" && process.env.NODE_ENV === "development";
 
 export const ROOT_DOMAIN = "abincii.online";
 

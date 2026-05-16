@@ -23,11 +23,13 @@ export const proxy = auth((request) => {
   if (isProtectedRoute && !isLoggedIn) {
     const loginUrl = new URL("/login", nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return Response.redirect(loginUrl);
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthRoute && isLoggedIn) {
-    return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin));
+    return NextResponse.redirect(
+      new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin),
+    );
   }
 
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();

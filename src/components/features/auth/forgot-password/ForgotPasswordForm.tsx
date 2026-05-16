@@ -28,11 +28,7 @@ export function ForgotPasswordForm() {
 
   const onSubmit = async (values: ForgotPasswordValues) => {
     try {
-      const result = await requestPasswordReset(values.email);
-      if (!result.ok) {
-        toast.error("Could not send reset link", { description: result.error });
-        return;
-      }
+      await requestPasswordReset(values.email);
       setSubmittedEmail(values.email);
       setSubmitted(true);
     } catch {
