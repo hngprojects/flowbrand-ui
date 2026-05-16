@@ -1,6 +1,6 @@
 "use client";
 import SideBar from "@/components/SideBar";
-import Navbar from "@/navigation/navbar";
+import Navbar from "@/components/navigation/navbar";
 import { LoadingIcon } from "@/components/icons/loading-icon";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";

@@ -36,7 +36,7 @@ const HowItWorks = () => {
 
         {/* ----CLOUD IMAGES---- */}
         <Image
-          src="/assets/big-cloud.png"
+          src="/images/big-cloud.png"
           aria-hidden
           alt="Cloud"
           width={445}
@@ -44,7 +44,7 @@ const HowItWorks = () => {
           className="absolute -left-20 md:left-0 top-10 md:top-30 w-[200px] md:w-[445px] opacity-50 md:opacity-100"
         />
         <Image
-          src="/assets/small-cloud.png"
+          src="/images/small-cloud.png"
           aria-hidden
           alt="Cloud"
           width={286}

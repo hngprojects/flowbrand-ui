@@ -21,7 +21,7 @@ const ContactUs = () => {
 
         {/* ----CLOUD IMAGES---- */}
         <Image
-          src="/assets/big-cloud.png"
+          src="/images/big-cloud.png"
           aria-hidden
           alt="Cloud"
           width={445}
@@ -29,7 +29,7 @@ const ContactUs = () => {
           className="absolute left-0 top-0"
         />
         <Image
-          src="/assets/small-cloud.png"
+          src="/images/small-cloud.png"
           aria-hidden
           alt="Cloud"
           width={286}
