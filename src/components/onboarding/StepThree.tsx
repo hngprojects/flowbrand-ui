@@ -36,7 +36,6 @@ export default function StepThree({
       <div className="space-y-small">
         {CHANNELS.map((channel) => {
           const active = selected === channel;
-          // CodeRabbit Fix: Convert spaces to lowercase tokens to make IDs valid HTML specification strings
           const sanitizedId = channel.toLowerCase().replace(/\s+/g, "-");
 
           return (

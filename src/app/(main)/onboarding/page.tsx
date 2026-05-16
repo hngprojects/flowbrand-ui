@@ -15,7 +15,6 @@ export default function OnboardingPage() {
   const router = useRouter();
   const store = useOnboardingStore();
   const [isLoading, setIsLoading] = useState(false);
-
   const [errorText, setErrorText] = useState<string | null>(null);
 
   const handleBackClick = () => {
@@ -28,6 +27,8 @@ export default function OnboardingPage() {
   };
 
   const handleCreateStrategy = async () => {
+    if (isLoading) return;
+    
     setErrorText(null);
 
     const payload = {
@@ -62,7 +63,9 @@ export default function OnboardingPage() {
         try {
           const apiErrorData = await response.json();
           if (apiErrorData?.message) errorBodyMessage = apiErrorData.message;
-        } catch {}
+        } catch {
+          // Fallback if parsing fails
+        }
         throw new Error(errorBodyMessage);
       }
 
@@ -104,7 +107,7 @@ export default function OnboardingPage() {
           </Button>
         </div>
 
-        {/* Content Card Wrapper  */}
+        {/* Content Card Wrapper */}
         <div className="bg-card p-section rounded-2xl border border-border shadow-sm space-y-default">
           <ProgressBar currentStep={store.step} />
 
@@ -125,25 +128,13 @@ export default function OnboardingPage() {
           {store.step === 2 && (
             <StepTwo
               theyAre={store.theyAre}
-              toggleTheyAre={(val) => {
-                setErrorText(null);
-                store.toggleTheyAre(val);
-              }}
+              toggleTheyAre={(val) => { setErrorText(null); store.toggleTheyAre(val); }}
               whoWantTo={store.whoWantTo}
-              toggleWhoWantTo={(val) => {
-                setErrorText(null);
-                store.toggleWhoWantTo(val);
-              }}
+              toggleWhoWantTo={(val) => { setErrorText(null); store.toggleWhoWantTo(val); }}
               locatedIn={store.locatedIn}
-              toggleLocatedIn={(val) => {
-                setErrorText(null);
-                store.toggleLocatedIn(val);
-              }}
+              toggleLocatedIn={(val) => { setErrorText(null); store.toggleLocatedIn(val); }}
               customInput={store.customCustomerInput}
-              setCustomInput={(val) => {
-                setErrorText(null);
-                store.setCustomCustomerInput(val);
-              }}
+              setCustomInput={(val) => { setErrorText(null); store.setCustomCustomerInput(val); }}
               onNext={() => {
                 setErrorText(null);
                 store.nextStep();
@@ -154,20 +145,23 @@ export default function OnboardingPage() {
           {store.step === 3 && (
             <StepThree
               selected={store.trafficChannel}
-              onSelect={(val) => {
-                setErrorText(null);
-                store.trafficChannel === val
-                  ? store.setTrafficChannel("")
-                  : store.setTrafficChannel(val);
+              onSelect={(val) => { 
+                setErrorText(null); 
+                if (store.trafficChannel === val) {
+                  store.setTrafficChannel("");
+                } else {
+                  store.setTrafficChannel(val);
+                }
               }}
               onSubmit={handleCreateStrategy}
               isLoading={isLoading}
             />
           )}
 
+
           {errorText && (
-            <div
-              role="alert"
+            <div 
+              role="alert" 
               className="text-2sm font-medium text-destructive bg-destructive/10 p-small rounded-sm transition-all"
             >
               {errorText}

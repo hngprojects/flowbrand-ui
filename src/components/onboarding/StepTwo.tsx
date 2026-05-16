@@ -80,7 +80,7 @@ export default function StepTwo(props: StepTwoProps) {
                 <button
                   key={opt}
                   type="button"
-                  aria-pressed={active} // CodeRabbit Accessibility Fix
+                  aria-pressed={active}
                   onClick={() => props.toggleTheyAre(opt)}
                   className={pillClass(active)}
                 >
@@ -102,7 +102,7 @@ export default function StepTwo(props: StepTwoProps) {
                 <button
                   key={opt}
                   type="button"
-                  aria-pressed={active} // CodeRabbit Accessibility Fix
+                  aria-pressed={active}
                   onClick={() => props.toggleWhoWantTo(opt)}
                   className={pillClass(active)}
                 >
@@ -124,7 +124,7 @@ export default function StepTwo(props: StepTwoProps) {
                 <button
                   key={opt}
                   type="button"
-                  aria-pressed={active} // CodeRabbit Accessibility Fix
+                  aria-pressed={active} // t Accessibility Fix
                   onClick={() => props.toggleLocatedIn(opt)}
                   className={pillClass(active)}
                 >
@@ -142,7 +142,6 @@ export default function StepTwo(props: StepTwoProps) {
           <Textarea
             placeholder="e.g Young women in Lagos who want affordable stylish clothing"
             value={props.customInput}
-            // CodeRabbit Fix: Safe slice constraint prevents block lockups on backspaces
             onChange={(e) => props.setCustomInput(e.target.value.slice(0, 500))}
             className="min-h-[70px] resize-none bg-card border border-gray-700 text-label placeholder:text-gray-700 rounded-lg text-sm"
           />
