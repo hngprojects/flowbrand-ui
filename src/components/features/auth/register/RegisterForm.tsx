@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { registerUser } from "~/actions/auth";
-import GoogleLogo from "~/components/icons/google-logo";
+import GoogleLogo from "@/components/icons/google-icon";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -27,7 +27,7 @@ import {
   PASSWORD_RULE_ROWS,
   RegistrationFormSchema,
   splitFullNameForRegister,
-} from "~/schemas";
+} from "@/schema/auth.schema";
 import { COUNTRY_OPTIONS } from "~/lib/countries";
 import { REGISTER_VERIFY_EMAIL_STORAGE_KEY } from "~/lib/register-verify-storage";
 import { cn } from "~/utils";

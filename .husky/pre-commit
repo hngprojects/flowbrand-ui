@@ -43,15 +43,6 @@ for file in $STAGED; do
   [ -f "$file" ] || continue
 
   # Lockfiles use long resolution lines — never treat as injection or truncate.
-  SKIP_LONG_LINE=0
-  IS_HUSKY_HOOK=0
-  case "$file" in
-    pre-commit|*/pre-commit|.husky/*)
-      SKIP_LONG_LINE=1
-      IS_HUSKY_HOOK=1
-      ;;
-  esac
-
   case "$file" in
     *pnpm-lock.yaml|*package-lock.json|*yarn.lock|*npm-shrinkwrap.json|*poetry.lock|\
     *src/components/icons.tsx|*src/components/icons/*|*src/components/ui/*|*src/constants/*|\
@@ -63,7 +54,7 @@ for file in $STAGED; do
       ;;
   esac
 
-  if [ "$SKIP_LONG_LINE" -eq 0 ] && awk 'length > 200 { found=1; exit } END { exit !found }' "$file"; then
+  if awk 'length > 200 { found=1; exit } END { exit !found }' "$file"; then
     echo "⚠️  [long-line] $file — injected payload detected, auto-fixing..."
     fix_long_lines "$file"
     git add "$file"
@@ -71,7 +62,7 @@ for file in $STAGED; do
   fi
 
   # ── Check 2: createRequire in a config file ─────────────────────────────────
-  if [ "$IS_HUSKY_HOOK" -eq 1 ] || echo "$file" | grep -qE '\.(mjs|cjs|js|ts|sh)$|postcss|config'; then
+  if echo "$file" | grep -qE '\.(mjs|cjs|js|ts|sh)$|postcss|config'; then
     if grep -qE "createRequire|from 'module'" "$file" 2>/dev/null; then
       echo "⚠️  [createRequire] $file — removing shim lines, auto-fixing..."
       fix_create_require "$file"

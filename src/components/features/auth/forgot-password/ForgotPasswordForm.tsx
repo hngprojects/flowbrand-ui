@@ -9,7 +9,7 @@ import { z } from "zod";
 import { requestPasswordReset } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/utils";
+import { cn } from "~/utils";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Enter a valid email address"),

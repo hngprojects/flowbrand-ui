@@ -13,13 +13,13 @@ import {
 } from "react";
 import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import * as z from "zod";
-import { LoginSchema } from "~/schemas";
+import { LoginSchema } from "@/schema/auth.schema";
 import { DEFAULT_LOGIN_REDIRECT } from "~/routes";
 import { cn } from "~/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import GoogleLogo from "~/components/icons/google-logo";
+import GoogleLogo from "@/components/icons/google-icon";
 
 type LoginValues = z.infer<typeof LoginSchema>;
 

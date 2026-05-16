@@ -18,7 +18,7 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { REGISTER_VERIFY_EMAIL_STORAGE_KEY } from "~/lib/register-verify-storage";
-import { OtpFormSchema } from "~/schemas";
+import { OtpFormSchema } from "@/schema/auth.schema";
 import { cn } from "~/utils";
 
 const OTP_FIELDS = ["d0", "d1", "d2", "d3", "d4", "d5"] as const;

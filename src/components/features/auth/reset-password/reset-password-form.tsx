@@ -23,7 +23,7 @@ import {
   getPasswordChecks,
   PASSWORD_RULE_ROWS,
   ResetPasswordSchema,
-} from "~/schemas";
+} from "@/schema/auth.schema";
 import { cn } from "~/utils";
 
 const inputClassWithError = (hasError: boolean) =>
