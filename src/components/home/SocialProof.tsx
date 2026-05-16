@@ -8,7 +8,7 @@ import {
   Instrument_Serif,
 } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const fontHomemadeApple = Homemade_Apple({ weight: "400", subsets: ["latin"] });
 const fontInspiration = Inspiration({ weight: "400", subsets: ["latin"] });
