@@ -42,15 +42,23 @@ const OnboardingNavbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="border-gray-500 flex h-11 w-11 items-center justify-center rounded-[41px] border-[0.5px] p-[10px]">
+            <button
+              type="button"
+              aria-label="Notifications"
+              className="border-gray-500 flex h-11 w-11 items-center justify-center rounded-[41px] border-[0.5px] p-[10px]"
+            >
               <BellIcon />
-            </div>
-            <div className="border-gray-500 flex h-11 items-center gap-[10px] rounded-[41px] border-[0.5px] px-3 py-[10px] lg:w-[103px]">
+            </button>
+            <Link
+              href="/profile"
+              aria-label="Profile"
+              className="border-gray-500 flex h-11 items-center gap-[10px] rounded-[41px] border-[0.5px] px-3 py-[10px] lg:w-[103px]"
+            >
               <ProfileIcon />
               <span className="text-foreground hidden text-sm font-medium lg:block">
                 Profile
               </span>
-            </div>
+            </Link>
           </div>
         </div>
 
