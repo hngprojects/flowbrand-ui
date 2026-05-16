@@ -19,7 +19,8 @@ import { cn } from "@/lib/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import GoogleLogo from "@/components/icons/google-icon";
+import { getGoogleOAuthUrl } from "~/actions/auth";
+import GoogleLogo from "@/components/icons/googleIcon";
 
 type LoginValues = z.infer<typeof LoginSchema>;
 
@@ -300,7 +301,8 @@ export function LoginForm() {
             return;
           }
 
-          await signIn("google", { redirectTo: DEFAULT_LOGIN_REDIRECT });
+          const url = await getGoogleOAuthUrl();
+          window.location.href = url;
         }}
         className="h-auto w-full gap-2 rounded-lg py-2.5 text-sm font-semibold sm:py-3"
       >

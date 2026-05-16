@@ -2,15 +2,15 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Eye, EyeOff } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { registerUser } from "~/actions/auth";
-import GoogleLogo from "@/components/icons/google-icon";
+import { getGoogleOAuthUrl, registerUser } from "~/actions/auth";
+import GoogleLogo from "@/components/icons/googleIcon";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -26,7 +26,6 @@ import {
   getPasswordChecks,
   PASSWORD_RULE_ROWS,
   RegistrationFormSchema,
-  splitFullNameForRegister,
 } from "@/schema/auth.schema";
 import { COUNTRY_OPTIONS } from "~/lib/countries";
 import { setRegisterVerifyEmail } from "~/lib/register-verify-storage";
@@ -72,15 +71,12 @@ const RegistrationForm = () => {
 
   const onSubmit = async (values: z.infer<typeof RegistrationFormSchema>) => {
     try {
-      const { first_name, last_name } = splitFullNameForRegister(
-        values.full_name,
-      );
       const data = await registerUser({
-        first_name,
-        last_name,
         email: values.email,
+        full_name: values.full_name,
         country: values.country,
         password: values.password,
+        terms_accepted: true,
       });
       const isSuccess = data.ok && data.status === 201;
       const errorDescription = !data.ok
@@ -335,7 +331,10 @@ const RegistrationForm = () => {
         type="button"
         variant="outline"
         disabled={isSubmitting || isAuthenticated}
-        onClick={() => signIn("google", { redirectTo: "/dashboard" })}
+        onClick={async () => {
+          const url = await getGoogleOAuthUrl();
+          window.location.href = url;
+        }}
         className="h-auto w-full gap-2 rounded-lg py-2.5 text-sm font-semibold sm:py-3"
       >
         <GoogleLogo className="size-4" />

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Figtree } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { AppProviders } from "@/components/providers/app-providers";
+import { AppProviders } from "@/components/providers/appProviders";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 

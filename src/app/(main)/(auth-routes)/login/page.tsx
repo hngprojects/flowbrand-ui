@@ -1,5 +1,5 @@
 import { LoginForm } from "@/components/features/auth/login/LoginForm";
-import AuthSplitLayout from "@/components/features/auth/auth-split-layout";
+import AuthSplitLayout from "@/components/features/auth/authSplitLayout";
 
 export default function LoginPage() {
   return (

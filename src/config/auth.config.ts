@@ -1,8 +1,7 @@
 import { NextAuthConfig, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google";
-import { nextLogin, googleAuth } from "~/actions/nextauth";
+import { nextLogin } from "~/actions/nextauth";
 import { inDevEnvironment } from "@/lib/utils";
 import { LoginSchema } from "@/schema/auth.schema";
 import { CustomJWT } from "@/types/auth";
@@ -13,20 +12,8 @@ const AUTH_SECRET_FALLBACK =
   process.env.NEXTAUTH_SECRET ??
   (process.env.NODE_ENV !== "production" ? "flowbrand-dev-secret" : undefined);
 
-const googleConfigured =
-  Boolean(process.env.AUTH_GOOGLE_ID) &&
-  Boolean(process.env.AUTH_GOOGLE_SECRET);
-
 const authConfig: NextAuthConfig = {
   providers: [
-    ...(googleConfigured
-      ? [
-          Google({
-            clientId: process.env.AUTH_GOOGLE_ID!,
-            clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-          }),
-        ]
-      : []),
     Credentials({
       async authorize(credentials) {
         const validatedFields = LoginSchema.safeParse(credentials);
@@ -62,30 +49,7 @@ const authConfig: NextAuthConfig = {
   },
   debug: inDevEnvironment,
   callbacks: {
-    async signIn({ account, profile, user }) {
-      if (account?.provider === "google" && profile?.email) {
-        return true;
-      }
-      return !!user;
-    },
-    async jwt({ token, user, account }) {
-      if (account?.provider === "google") {
-        if (!account.id_token) {
-          throw new Error("Google sign-in failed: missing ID token");
-        }
-
-        const response = await googleAuth(account.id_token);
-        if (!response?.data) {
-          throw new Error("Google sign-in failed: invalid backend response");
-        }
-
-        return {
-          ...token,
-          ...(response.data as CustomJWT),
-          access_token: response.access_token,
-        } as CustomJWT;
-      }
-
+    async jwt({ token, user }) {
       return {
         ...token,
         ...user,
@@ -106,8 +70,8 @@ const authConfig: NextAuthConfig = {
 
       session.user = {
         id: customToken.id as string,
-        first_name: customToken.first_name,
-        last_name: customToken.last_name,
+        first_name: customToken.first_name ?? "",
+        last_name: customToken.last_name ?? "",
         image: customToken.avatar_url || "",
         email: customToken.email as string,
       };

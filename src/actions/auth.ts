@@ -12,27 +12,16 @@ import type {
   VerifyOtpSuccess,
 } from "~/lib/auth-action-results";
 import {
+  authApiUrl,
+  messageFromApiBody,
+  parseLoginEnvelope,
+} from "~/lib/auth-api";
+import {
   LoginSchema,
-  RegisterSchema,
+  registrationPasswordField,
   VerifyOtpCodeSchema,
 } from "@/schema/auth.schema";
 import { AuthResponse, ErrorResponse } from "@/types/auth";
-
-/** Safe string from API error payloads; avoids showing objects in the UI. */
-function messageFromAxiosData(data: unknown, fallback: string): string {
-  if (
-    data &&
-    typeof data === "object" &&
-    "message" in data &&
-    typeof (data as { message: unknown }).message === "string"
-  ) {
-    const text = (data as { message: string }).message.trim();
-    if (text.length > 0) {
-      return text;
-    }
-  }
-  return fallback;
-}
 
 function validateAuthEmail(
   email: string,
@@ -58,6 +47,10 @@ function validateOtpCode(code: string): { code: string } | { error: string } {
   return { code: result.data };
 }
 
+export async function getGoogleOAuthUrl(): Promise<string> {
+  return authApiUrl(envConfig.BASEURL, "/google");
+}
+
 const credentialsAuth = async (
   values: z.infer<typeof LoginSchema>,
 ): Promise<AuthResponse | ErrorResponse> => {
@@ -71,21 +64,32 @@ const credentialsAuth = async (
     };
   }
   const { email, password } = validatedFields.data;
-  const payload = { email, password };
   try {
-    const response = await axios.post(`${baseURL}/auth/login`, payload);
+    const response = await axios.post(
+      authApiUrl(baseURL, "/login"),
+      { email, password },
+      { withCredentials: true },
+    );
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed) {
+      return {
+        success: false,
+        message: "Something went wrong",
+        status_code: response.status,
+      };
+    }
     return {
-      data: response.data.user,
-      access_token: response.data.access_token,
+      data: parsed.user,
+      access_token: parsed.access_token,
       success: true,
-      message: "login success",
+      message: messageFromApiBody(response.data, "Login successful"),
     };
   } catch (error) {
     return {
       success: false,
       message:
         axios.isAxiosError(error) && error.response
-          ? messageFromAxiosData(error.response.data, "Something went wrong")
+          ? messageFromApiBody(error.response.data, "Something went wrong")
           : "Something went wrong",
       status_code:
         axios.isAxiosError(error) && error.response
@@ -95,21 +99,49 @@ const credentialsAuth = async (
   }
 };
 
+export type RegisterUserInput = {
+  email: string;
+  full_name: string;
+  country: string;
+  password: string;
+  terms_accepted?: boolean;
+};
+
 const registerUser = async (
-  values: z.infer<typeof RegisterSchema>,
+  values: RegisterUserInput,
 ): Promise<RegisterUserResult> => {
-  const validatedFields = RegisterSchema.safeParse(values);
   const baseURL = envConfig.BASEURL;
-  if (!validatedFields.success) {
+  const payload = {
+    email: values.email.trim(),
+    full_name: values.full_name.trim(),
+    country: values.country.trim(),
+    password: values.password,
+    terms_accepted: values.terms_accepted ?? true,
+  };
+
+  const registrationBodySchema = z.object({
+    email: z.string().email(),
+    full_name: z.string().trim().min(1, { message: "Full name is required." }),
+    country: z.string().trim().min(1, { message: "Country is required." }),
+    password: registrationPasswordField,
+    terms_accepted: z.literal(true),
+  });
+
+  const validated = registrationBodySchema.safeParse(payload);
+  if (!validated.success) {
     return {
       ok: false,
-      error: "registration  Failed. Please check your inputs.",
+      error:
+        validated.error.issues[0]?.message ??
+        "Registration failed. Please check your inputs.",
     };
   }
+
   try {
     const response = await axios.post(
-      `${baseURL}/auth/register`,
-      validatedFields.data,
+      authApiUrl(baseURL, "/register"),
+      validated.data,
+      { withCredentials: true },
     );
 
     return {
@@ -121,7 +153,7 @@ const registerUser = async (
     return axios.isAxiosError(error) && error.response
       ? {
           ok: false,
-          error: messageFromAxiosData(
+          error: messageFromApiBody(
             error.response.data,
             "Registration failed.",
           ),
@@ -142,22 +174,21 @@ const resendOtp = async (email: string): Promise<ResendOtpResult> => {
 
   const baseURL = envConfig.BASEURL;
   try {
-    const response = await axios.post(`${baseURL}/auth/request/token`, {
-      email: validated.email,
-    });
+    const response = await axios.post(
+      authApiUrl(baseURL, "/resend-otp"),
+      { email: validated.email },
+      { withCredentials: true },
+    );
 
     const success: ResendOtpSuccess = {
       status: response.status,
-      message: response.data?.message,
+      message: messageFromApiBody(response.data, "OTP sent successfully"),
     };
     return success;
   } catch (error) {
     return axios.isAxiosError(error) && error.response
       ? {
-          error: messageFromAxiosData(
-            error.response.data,
-            "Resend OTP failed.",
-          ),
+          error: messageFromApiBody(error.response.data, "Resend OTP failed."),
           status: error.response.status,
         }
       : {
@@ -188,19 +219,20 @@ const verifyOtp = async (
 
   const baseURL = envConfig.BASEURL;
   try {
-    const response = await axios.post(`${baseURL}/auth/verify/otp`, {
-      email: validatedEmail.email,
-      code: validatedCode.code,
-    });
+    const response = await axios.post(
+      authApiUrl(baseURL, "/verify-otp"),
+      { email: validatedEmail.email, otp: validatedCode.code },
+      { withCredentials: true },
+    );
     const success: VerifyOtpSuccess = {
       status: response.status,
-      message: response.data?.message,
+      message: messageFromApiBody(response.data, "Email verified successfully"),
     };
     return success;
   } catch (error) {
     return axios.isAxiosError(error) && error.response
       ? {
-          error: messageFromAxiosData(
+          error: messageFromApiBody(
             error.response.data,
             "Invalid or expired verification code.",
           ),
@@ -221,23 +253,18 @@ const requestPasswordReset = async (
   }
 
   const baseURL = envConfig.BASEURL;
-  if (!baseURL) {
-    return {
-      ok: false,
-      error: "Password reset is unavailable until the API is configured.",
-    };
-  }
-
   try {
-    await axios.post(`${baseURL}/auth/password/forgot`, {
-      email: validated.email,
-    });
+    await axios.post(
+      authApiUrl(baseURL, "/password/forgot"),
+      { email: validated.email },
+      { withCredentials: true },
+    );
     return { ok: true };
   } catch (error) {
     return axios.isAxiosError(error) && error.response
       ? {
           ok: false,
-          error: messageFromAxiosData(
+          error: messageFromApiBody(
             error.response.data,
             "Could not send reset link.",
           ),
@@ -265,12 +292,12 @@ const resetPasswordWithToken = async (input: {
   const baseURL = envConfig.BASEURL;
   try {
     await axios.post(
-      `${baseURL}/auth/password/reset`,
+      authApiUrl(baseURL, "/password/reset"),
       {
         token: trimmed,
         password: input.password,
       },
-      { timeout: 30_000 },
+      { withCredentials: true, timeout: 30_000 },
     );
     return { ok: true };
   } catch (error) {
@@ -284,7 +311,7 @@ const resetPasswordWithToken = async (input: {
     return axios.isAxiosError(error) && error.response
       ? {
           ok: false,
-          error: messageFromAxiosData(
+          error: messageFromApiBody(
             error.response.data,
             "Could not reset password. Please try again.",
           ),

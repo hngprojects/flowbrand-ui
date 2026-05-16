@@ -3,7 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import OtpVerification from "@/components/features/auth/register/OtpVerification";
-import AuthSplitLayout from "@/components/features/auth/auth-split-layout";
+import AuthSplitLayout from "@/components/features/auth/authSplitLayout";
 import {
   getRegisterVerifyEmail,
   subscribeToRegisterVerifyEmail,

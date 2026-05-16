@@ -1,5 +1,5 @@
-import CreateNewPassword from "@/components/features/auth/reset-password/reset-password-form";
-import AuthSplitLayout from "@/components/features/auth/auth-split-layout";
+import CreateNewPassword from "@/components/features/auth/resetPassword/resetPasswordForm";
+import AuthSplitLayout from "@/components/features/auth/authSplitLayout";
 
 export default function ResetPasswordPage() {
   return (
