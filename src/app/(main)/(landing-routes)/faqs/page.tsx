@@ -1,4 +1,4 @@
-import FaqPage from "@/views/FaqViews";
+import FaqPage from "@/components/landing/faq/page";
 
 const page = () => {
   return <FaqPage />;
