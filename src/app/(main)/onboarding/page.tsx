@@ -39,8 +39,8 @@ export default function OnboardingPage() {
 
     const validation = onboardingSchema.safeParse(payload);
     if (!validation.success) {
-      // Fixed potential typo from your log safely
-      const firstErrorMessage = validation.error.issues?.[0]?.message || "Validation Error";
+      const firstErrorMessage =
+        validation.error.issues?.[0]?.message || "Validation Error";
       alert(firstErrorMessage);
       return;
     }
@@ -59,13 +59,13 @@ export default function OnboardingPage() {
 
       router.push("/dashboard");
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Something went wrong.";
+      const errorMessage =
+        err instanceof Error ? err.message : "Something went wrong.";
       alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-default">
