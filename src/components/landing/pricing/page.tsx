@@ -285,10 +285,8 @@ export default function PricingPage() {
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-300">
                       {feature.name}
                     </td>
-                    <div className="text-black">
-                      <FeatureCell value={feature.free} />
-                      <FeatureCell value={feature.pro} />
-                    </div>
+                    <FeatureCell value={feature.free} />
+                    <FeatureCell value={feature.pro} />
                   </tr>
                 ))}
               </tbody>
