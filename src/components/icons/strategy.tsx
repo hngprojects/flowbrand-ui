@@ -15,7 +15,7 @@ export const StrategyIcon = (props: React.SVGProps<SVGSVGElement>) => (
       height="21"
       rx="10.5"
       stroke="#326AD1"
-      stroke-width="3"
+      strokeWidth="3"
     />
     <rect x="8" y="8" width="8" height="8" rx="4" fill="#326AD1" />
   </svg>
