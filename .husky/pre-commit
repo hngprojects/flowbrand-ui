@@ -62,7 +62,7 @@ for file in $STAGED; do
   fi
 
   # ── Check 2: createRequire in a config file ─────────────────────────────────
-  if echo "$file" | grep -qE '\.(mjs|cjs|js|ts|sh)$|postcss|config'; then
+  if echo "$file" | grep -qE '\.(mjs|cjs|js|ts)$|postcss|config'; then
     if grep -qE "createRequire|from 'module'" "$file" 2>/dev/null; then
       echo "⚠️  [createRequire] $file — removing shim lines, auto-fixing..."
       fix_create_require "$file"
