@@ -7,7 +7,7 @@ export const PdfImg = (props: React.SVGProps<SVGSVGElement>) => (
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <g clip-path="url(#clip0_6461_25117)">
+    <g clipPath="url(`#clip0_6461_25117`)">
       <path
         d="M12.6943 0.5H26.793L38.5 12.207V34.793C38.4998 37.3646 36.2642 39.4999 33.4404 39.5H12.5703C9.73516 39.5 7.50023 37.364 7.5 34.793V5.20703C7.50013 2.64972 9.84436 0.500142 12.6943 0.5Z"
         fill="white"
