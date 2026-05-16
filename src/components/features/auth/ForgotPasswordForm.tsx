@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,6 +16,7 @@ type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 export function ForgotPasswordForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -34,9 +36,10 @@ export function ForgotPasswordForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Accept any valid email (for demo)
+      // Store submitted email for success message
+      setSubmittedEmail(data.email);
       setSuccess(true);
-    } catch (err) {
+    } catch (err: unknown) {
       setError('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
@@ -53,11 +56,11 @@ export function ForgotPasswordForm() {
         </div>
         <h3 className="text-xl font-semibold text-[#1E3A70]">Check your email</h3>
         <p className="text-[#7B7B7B]">
-          We sent a password reset link to <strong>{success === true ? 'your email' : ''}</strong>
+          We sent a password reset link to <strong>{submittedEmail}</strong>
         </p>
-        <a href="/login" className="inline-block text-sm text-[#3B6DE0] hover:underline mt-4">
+        <Link href="/login" className="inline-block text-sm text-[#3B6DE0] hover:underline mt-4">
           Back to Log In
-        </a>
+        </Link>
       </div>
     );
   }
@@ -91,12 +94,12 @@ export function ForgotPasswordForm() {
       </Button>
 
       <div className="text-center mt-6">
-        <a href="/login" className="text-sm text-[#5A5A5A] hover:text-[#1E3A70] transition flex items-center justify-center gap-1">
+        <Link href="/login" className="text-sm text-[#5A5A5A] hover:text-[#1E3A70] transition flex items-center justify-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Log In
-        </a>
+        </Link>
       </div>
     </form>
   );

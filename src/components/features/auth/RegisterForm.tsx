@@ -2,32 +2,34 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 
-// Schéma de validation avec confirmation du mot de passe
+// Validation schema with password confirmation
 const registerSchema = z.object({
-  fullName: z.string().min(2, 'Nom complet requis'),
-  email: z.string().email('Email invalide'),
-  country: z.string().min(1, 'Pays requis'),
-  password: z.string().min(6, '6 caractères minimum'),
-  confirmPassword: z.string().min(6, 'Confirmation requise'),
+  fullName: z.string().min(2, 'Full name is required'),
+  email: z.string().email('Invalid email address'),
+  country: z.string().min(1, 'Country is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Please confirm your password'),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: 'Les mots de passe ne correspondent pas',
+  message: 'Passwords do not match',
   path: ['confirmPassword'],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
-    const router = useRouter();
-    const [error, setError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const { isLoading } = useAuthStore();
+  const router = useRouter();
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { isLoading } = useAuthStore();
 
   const {
     register,
@@ -39,14 +41,17 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setError('');
+    setIsSubmitting(true);
     try {
-      // Simuler une inscription (remplacer par appel API plus tard)
+      // Simulate registration (replace with real API later)
       await new Promise(resolve => setTimeout(resolve, 800));
-      console.log('Inscription réussie', data);
-      // Rediriger vers login après inscription
+      // Redirect to login page after successful registration
       router.push('/login');
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'inscription');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -60,7 +65,7 @@ export function RegisterForm() {
         <input
           type="text"
           {...register('fullName')}
-          className="w-full h-12 px-4 rounded-md border border-[#2E4D7B] bg-transparent text-white text-sm placeholder:text-[#7E8CA0] focus:outline-none focus:ring-2 focus:ring-[#2F6BFF] focus:border-transparent"
+          className="w-full h-12 px-4 rounded-md border border-[#2E4D7B] bg-transparent text-white text-sm placeholder:text-[#7E8CA0] focus:outline-none focus:ring-2 focus:ring-[#2F6BFF] focus:border-
           placeholder="John Doe"
         />
         {errors.fullName && (
@@ -76,7 +81,7 @@ export function RegisterForm() {
         <input
           type="email"
           {...register('email')}
-          className="w-full h-12 px-4 rounded-md border border-[#2E4D7B] bg-transparent text-white text-sm placeholder:text-[#7E8CA0] focus:outline-none focus:ring-2 focus:ring-[#2F6BFF] focus:border-transparent"
+          className="w-full h-12 px-4 rounded-md border border-[#2E4D7B] bg-transparent text-white text-sm placeholder:text-[#7E8CA0] focus:outline-none focus:ring-2 focus:ring-[#2F6BFF] focus:border-
           placeholder="you@example.com"
         />
         {errors.email && (
@@ -104,7 +109,7 @@ export function RegisterForm() {
         )}
       </div>
 
-      {/* Password avec œil */}
+      {/* Password with eye toggle */}
       <div>
         <label className="block text-sm font-medium text-[#B8C1D1] mb-1">
           Password
@@ -119,16 +124,18 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-pressed={showPassword}
             className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#7E8CA0] hover:text-white"
           >
             {showPassword ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.5
               </svg>
             ) : (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.24
               </svg>
             )}
           </button>
@@ -138,7 +145,7 @@ export function RegisterForm() {
         )}
       </div>
 
-      {/* Confirm Password avec œil */}
+      {/* Confirm Password with eye toggle */}
       <div>
         <label className="block text-sm font-medium text-[#B8C1D1] mb-1">
           Confirm password
@@ -153,16 +160,18 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+            aria-pressed={showConfirmPassword}
             className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#7E8CA0] hover:text-white"
           >
             {showConfirmPassword ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.5
               </svg>
             ) : (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.24
               </svg>
             )}
           </button>
@@ -172,12 +181,12 @@ export function RegisterForm() {
         )}
       </div>
 
-      {/* Terms text */}
+      {/* Terms and conditions link */}
       <p className="text-sm text-[#7E8CA0]">
         By signing up you agree to our{' '}
-        <a href="/terms" className="text-[#3B82F6] hover:underline">
+        <Link href="/terms" className="text-[#3B82F6] hover:underline">
           Terms & Privacy
-        </a>
+        </Link>
       </p>
 
       {error && <p className="text-red-400 text-sm text-center">{error}</p>}
@@ -185,21 +194,21 @@ export function RegisterForm() {
       {/* Register button */}
       <Button
         type="submit"
-        disabled={isLoading}
+        disabled={isLoading || isSubmitting}
         className="w-full bg-[#2F6BFF] hover:bg-[#2459D6] text-white py-3 rounded-md font-semibold transition mt-2"
       >
-        {isLoading ? 'Création...' : 'Create account'}
+        {isLoading || isSubmitting ? 'Creating...' : 'Create account'}
       </Button>
 
-      {/* Link to login */}
+      {/* Link to login page */}
       <p className="text-center text-sm text-[#7E8CA0] mt-6">
         Already have an account?{' '}
-        <a href="/login" className="text-[#3B82F6] font-medium hover:underline">
+        <Link href="/login" className="text-[#3B82F6] font-medium hover:underline">
           Log in
-        </a>
+        </Link>
       </p>
 
-      {/* Google button */}
+      {/* Google sign-in button */}
       <button
         type="button"
         className="w-full border border-[#2E4D7B] bg-transparent text-white py-2.5 rounded-md font-medium flex items-center justify-center gap-2 hover:bg-white/5 transition"

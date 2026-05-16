@@ -1,129 +1,102 @@
-# FlowBrand UI – Login Flow
+# Next.js Starter
 
-Complete authentication application (login, registration, forgot password, reset password, dashboard, legal pages) built with Next.js, TypeScript, Tailwind CSS, Zod, React Hook Form, and Zustand.
+Next.js 16 + React 19 + Tailwind v4 + shadcn (radix-maia). Validated env, typed proxy, and the standard set of route conventions wired up.
 
-## Live Demo
+## Stack
 
-[https://flowbrand-ui.vercel.app](https://flowbrand-ui.vercel.app)
+- **Next.js 16** App Router (`proxy.ts`, `forbidden.tsx`, `unauthorized.tsx`)
+- **React 19**, **TypeScript** (strict)
+- **Tailwind v4** with shadcn `radix-maia` style
+- **`@t3-oss/env-nextjs`** + **Zod 4** for build-time env validation
 
----
-
-## Installation
+## Getting started
 
 ```bash
-# Clone the repository
-git clone https://github.com/ton-compte/flowbrand-ui
-cd flowbrand-ui
+pnpm install
+cp .env.example .env.local   # fill in values
+pnpm dev
+```
 
-# Install dependencies
-npm install
+Open <http://localhost:3000>.
 
-# Start development server
-npm run dev
-Open http://localhost:3000
+## Scripts
 
----
+| Command          | What it does                     |
+| ---------------- | -------------------------------- |
+| `pnpm dev`       | Dev server                       |
+| `pnpm build`     | Production build (validates env) |
+| `pnpm start`     | Run the production build         |
+| `pnpm lint`      | ESLint                           |
+| `pnpm typecheck` | `tsc --noEmit`                   |
 
-## Available Pages
-Page	URL	Description
-Login	/login	User login (email + password)
-Register	/register	Account creation with validation
-Forgot Password	/forgot-password	Password reset request
-Dashboard	/dashboard	Protected page after login
-Terms & Conditions	/terms	Terms of use
+## Environment variables
 
----
+Schemas live in [`src/env/`](./src/env), split by side:
 
-## Tech Stack
-Technology	Role
-Next.js 16 (App Router)	React Framework
-TypeScript	Static typing
-Tailwind CSS	Styling & responsive
-Zod	Form validation
-React Hook Form	Form management
-Zustand	Global state (authentication)
-Lucide Icons	Icons (optional)
+- [`src/env/server.ts`](./src/env/server.ts) — server-only vars. t3-env throws at runtime if a client component reads it.
+- [`src/env/client.ts`](./src/env/client.ts) — `NEXT_PUBLIC_*` vars, safe everywhere.
 
----
+Both are imported in [`next.config.ts`](./next.config.ts) so the build fails on any malformed value. Set `SKIP_ENV_VALIDATION=1` to bypass (Docker, lint-only CI).
 
-##  Project Structure
+| Var                    | Side   | Required | Notes                                 |
+| ---------------------- | ------ | -------- | ------------------------------------- |
+| `NODE_ENV`             | server | auto     | `development` / `test` / `production` |
+| `API_BASE_URL`         | server | optional | Upstream API for server-side `fetch`  |
+| `API_SECRET`           | server | optional | Bearer token forwarded server-side    |
+| `NEXT_PUBLIC_APP_URL`  | client | optional | Defaults to `http://localhost:3000`   |
+| `NEXT_PUBLIC_APP_NAME` | client | optional | Defaults to `Next Starter`            |
 
+Use it like:
+
+```ts
+// Server code (route handlers, Server Components, Server Actions)
+import { env } from "@/env/server";
+
+await fetch(`${env.API_BASE_URL}/users`, {
+  headers: { Authorization: `Bearer ${env.API_SECRET}` },
+});
+
+// Client code or shared metadata
+import { env } from "@/env/client";
+
+console.log(env.NEXT_PUBLIC_APP_URL);
+```
+
+## Proxy (`src/proxy.ts`)
+
+Replaces the legacy `middleware.ts` (Next.js 16 renamed it). It runs before the cache and:
+
+- Generates an `x-request-id` and forwards it to the request headers + response
+- Sets baseline security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`)
+- Skips static assets via the matcher
+
+Add auth gating, rewrites, or redirects there as needed. Note: `runtime` config is **not** allowed in `proxy.ts` — it always runs on Node.js.
+
+## Route conventions wired up
+
+| File                          | Purpose                                  |
+| ----------------------------- | ---------------------------------------- |
+| `src/app/loading.tsx`         | Root suspense fallback                   |
+| `src/app/error.tsx`           | Client error boundary (`unstable_retry`) |
+| `src/app/not-found.tsx`       | 404 page                                 |
+| `src/app/forbidden.tsx`       | 403 page (calls `forbidden()`)           |
+| `src/app/unauthorized.tsx`    | 401 page (calls `unauthorized()`)        |
+| `src/app/robots.ts`           | `/robots.txt`                            |
+| `src/app/sitemap.ts`          | `/sitemap.xml`                           |
+| `src/app/api/health/route.ts` | Liveness probe at `GET /api/health`      |
+
+`forbidden.tsx` and `unauthorized.tsx` require `experimental.authInterrupts: true`, already enabled in [`next.config.ts`](./next.config.ts).
+
+## Project layout
+
+```
 src/
-├── app/
-│   ├── (main)/(auth-routes)/
-│   │   ├── login/page.tsx
-│   │   ├── register/page.tsx
-│   │   ├── forgot-password/page.tsx
-│   │   └── terms/page.tsx
-│   └── dashboard/page.tsx
-├── components/features/auth/
-│   ├── LoginForm.tsx
-│   ├── RegisterForm.tsx
-│   ├── ForgotPasswordForm.tsx
-│   └── ResetPasswordForm.tsx
-├── store/
-│   └── authStore.ts
-├── services/
-│   └── authService.ts
-├── schema/
-│   └── authSchema.ts
-└── types/
-    └── auth.ts
-
----
-
-##  Features
-✅ Form validation (Zod + React Hook Form)
-
-✅ Password visibility toggle (eye icon)
-
-✅ Authentication simulation (development mode)
-
-✅ Page redirects (login → dashboard, etc.)
-
-✅ Responsive marketing sidebar (hidden on mobile)
-
-✅ Protected dashboard + logout
-
-✅ Terms & Conditions page with sticky sidebar
-
----
-
-## Authentication Simulation
-In development mode, the authentication service accepts any email and password. For production, replace authService.ts with a real API call.
-
----
-
-## Responsive Design
-Desktop (> 768px): Two columns (sidebar + form)
-Mobile (< 768px): Single column, sidebar hidden
-
----
-
-## Testing
-
-npm run dev
-# Then visit:
-# - http://localhost:3000/login
-# - http://localhost:3000/register
-# - http://localhost:3000/forgot-password
-# - http://localhost:3000/terms
-# - http://localhost:3000/dashboard (after login)
-
----
-
-## Possible Improvements
-
-Integrate a real backend (REST API)
-More detailed error handling
-Unit tests with Jest / Testing Library
-Internationalization (i18n)
-
----
-
-##  Author
-ALAYDE Malomon Araffath – HNG Internship 2026
-
-GitHub: m-tech-cod
-
-
+├── app/                # App Router routes & file conventions
+│   └── api/health/     # Liveness probe
+├── components/ui/      # shadcn components (added via `pnpm dlx shadcn@latest add ...`)
+├── lib/utils.ts        # cn() helper
+├── env/
+│   ├── server.ts       # Server-only env schema
+│   └── client.ts       # NEXT_PUBLIC_* env schema
+└── proxy.ts            # Next.js 16 proxy (formerly middleware)
+```

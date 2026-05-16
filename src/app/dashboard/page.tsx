@@ -1,26 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, token, logout } = useAuthStore();
-  const [isClient, setIsClient] = useState(false);
 
-  // Vérifier l’authentification côté client
+  // Check authentication and redirect if not logged in
   useEffect(() => {
-    setIsClient(true);
-    if (!token && typeof window !== 'undefined') {
+    if (!token) {
       router.push('/login');
     }
   }, [token, router]);
 
-  if (!isClient || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">Chargement...</div>
+        <div className="text-center">Loading...</div>
       </div>
     );
   }
@@ -40,7 +38,7 @@ export default function DashboardPage() {
             onClick={handleLogout}
             className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
           >
-            Se déconnecter
+            Logout
           </button>
         </div>
       </header>
@@ -49,17 +47,17 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Bienvenue, {user.name || user.email} 👋
+            Welcome, {user.name || user.email} 👋
           </h2>
           <p className="text-gray-600">
-            Vous êtes connecté avec succès. Cette page est protégée et accessible uniquement aux utilisateurs authentifiés.
+            You are successfully logged in. This page is protected and only accessible to authenticated users.
           </p>
           <div className="mt-4 p-4 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-500">
-              <strong>Email :</strong> {user.email}
+              <strong>Email:</strong> {user.email}
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              <strong>ID utilisateur :</strong> {user.id}
+              <strong>User ID:</strong> {user.id}
             </p>
           </div>
         </div>

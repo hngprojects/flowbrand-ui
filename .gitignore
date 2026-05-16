@@ -40,4 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vscode
-package-lock.json
+# package-lock.json is ignored (pnpm is used instead)
+# package-lock.json

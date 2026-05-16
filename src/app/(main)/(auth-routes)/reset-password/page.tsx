@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
@@ -10,6 +10,16 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Clean redirect timer on unmount
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +38,6 @@ export default function ResetPasswordPage() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setSuccess(true);
-    setTimeout(() => router.push('/login'), 2000);
   };
 
   if (success) {
