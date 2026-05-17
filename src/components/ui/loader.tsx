@@ -1,5 +1,5 @@
 import React from "react";
-import MobileLogoIcon from "@/components/icons/navbar/mobile-logo";
+import MobileLogoIcon from "@/components/icons/navbar/mobileLogo";
 import LoaderSpinner from "@/components/icons/loader/spinner";
 import { cn } from "@/lib/utils";
 
