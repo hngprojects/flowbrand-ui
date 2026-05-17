@@ -1,7 +1,5 @@
-import PrivacyPolicyView from "@/views/privacy-policy";
+import PrivacyPolicyView from "@/components/landing/privacyPolicy/page";
 
-const PrivacyPolicy = () => {
+export default function PrivacyPolicyPage() {
   return <PrivacyPolicyView />;
-};
-
-export default PrivacyPolicy;
+}

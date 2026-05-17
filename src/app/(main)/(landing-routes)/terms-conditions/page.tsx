@@ -1,7 +1,5 @@
-import TermsConditionsView from "@/views/terms-conditions";
+import TermsConditionsView from "@/components/landing/terms/page";
 
-const TermsConditions = () => {
+export default function TermsConditionsPage() {
   return <TermsConditionsView />;
-};
-
-export default TermsConditions;
+}
