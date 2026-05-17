@@ -1,4 +1,3 @@
-"use client";
 import Hero from "@/components/landing/about-us/hero";
 import WhyWeStarted from "@/components/landing/about-us/WhyWeStarted";
 import MissionSection from "@/components/landing/about-us/mission";
