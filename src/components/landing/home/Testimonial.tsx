@@ -2,186 +2,153 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { Card } from "@/components/ui/card";
+import { SectionLabelPill } from "@/components/ui/section-label-pill";
+import { testimonialCardClassName } from "@/components/icons/testimonials";
 
-interface Testimonial {
-  id: number;
-  name: string;
+type Testimonial = {
   quote: string;
+  name: string;
   image: string;
-}
+  alt: string;
+};
 
-const testimonials1: Testimonial[] = [
+const row1: Testimonial[] = [
   {
-    id: 1,
-    name: "Sarah Ntiaji",
     quote:
-      "I used to just post on Instagram and hope for the best. Not actually tells me what I plan on doing on Monday morning. It gave our team of 3 a real system.",
-    image: "/images/redgirl.jpg",
+      "I used to just post on Instagram and hope for the best. FlowBrand actually tells me what to do on Monday morning. It gave our team of 3 a real system.",
+    name: "Sarah Nnaji",
+    image: "/images/chef.png",
+    alt: "Sarah Nnaji testimonial",
   },
   {
-    id: 2,
+    quote:
+      "Before using this, I was just posting and hoping for results. Now I actually have a clear system and I am getting consistent customer inquiries every week.",
     name: "David Brown",
-    quote:
-      "Before using this, I was just posting daily. Now I actually have a clear system and I'm getting consistent customer inquiries every week.",
-    image: "/images/blackguy.jpg",
+    image: "/images/david.png",
+    alt: "David Brown testimonial",
   },
   {
-    id: 3,
-    name: "Bright Dawkm",
     quote:
-      "I didn't realize how much I was doing until I started. The step-by-step makes everything so easy to follow. I can't wait to attract the right customers.",
-    image: "/images/suitguy.jpg",
+      "I did not realize how much I was doing wrong until I started. The step-by-step guidance made everything so easy to follow, and I finally understand how to attract the right customers.",
+    name: "Bright Dawin",
+    image: "/images/bright.png",
+    alt: "Bright Dawin testimonial",
   },
   {
-    id: 4,
-    name: "Glory Nkeme",
-    quote:
-      "I used to overthink my marketing at. Now I just follow the steps, and everything feels more organized and effective.",
-    image: "/images/redgirl.jpg",
-  },
-  {
-    id: 5,
-    name: "Ameerah Raji",
-    quote:
-      "This helped stop wasting time on things that weren't working. Now I focus on what actually brings in customers.",
-    image: "/images/whitegirl.png",
-  },
-];
-
-const testimonials2: Testimonial[] = [
-  {
-    id: 6,
-    name: "Darwin Muri",
     quote:
       "This gave me structure. I no longer guess what to do next in my marketing, and i’ve already started seeing better engagement and more serious leads.",
-    image: "/images/redgirl.jpg",
+    name: "Golda Falcon",
+    image: "/images/david.png",
+    alt: "Golda Falcon testimonial",
   },
   {
-    id: 7,
-    name: "Emma Wilson",
     quote:
-      "I used to struggle with turning interest into actual paying customers. Now i have a proper flow that helps me follow up and close more deals.",
-    image: "/images/whiteman.jpg",
-  },
-  {
-    id: 8,
-    name: "Marcus Thompson",
-    quote:
-      "Game changer for our small business. We've tripled our customer inquiries.",
-    image: "/images/suitguy.jpg",
-  },
-  {
-    id: 9,
-    name: "Lisa Chen",
-    quote:
-      "I didn’t expect results this quickly. Within a short time, I started getting more serious inquiries from ready to buy customers.",
-    image: "/images/blackguy.jpg",
-  },
-  {
-    id: 10,
-    name: "James Roberts",
-    quote:
-      "I have tried different strategies before, but this is the first time something actually feels simple and actionable.",
-    image: "/images/glory.jpg",
+      "I used to struggle with turning interest into actual paying customers. Now i have a proper flow that helps me follow up and close more deals”.",
+    name: "Rita Johnson",
+    image: "/images/bright.png",
+    alt: "Rita Johnson testimonial",
   },
 ];
 
-const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => (
-  <div className=" shrink-0 w-100 px-4">
-    <div className="bg-card rounded-2xl p-6 h-full border border-border shadow-sm hover:shadow-md transition-shadow">
-      {/* Quote */}
-      <p className="text-foreground text-sm font-medium leading-relaxed mb-6 min-h-24">
-        {testimonial.quote}
-      </p>
+const row2: Testimonial[] = [
+  {
+    quote:
+      "I used to overthink my marketing a lot. Now I just follow the steps, and everything feels more organized and effective.",
+    name: "Glory Nkene",
+    image: "/images/ellipse-1.png",
+    alt: "Glory Nkene testimonial",
+  },
+  {
+    quote:
+      "This helped me stop wasting time on things that were not working. Now I focus on what actually brings in customers.",
+    name: "Ameerah Raji",
+    image: "/images/ellipse-2.png",
+    alt: "Ameerah Raji testimonial",
+  },
+  {
+    quote:
+      "I finally understand my customer journey, from attracting them to getting them to buy. It all makes sense now.",
+    name: "Darwin Muri",
+    image: "/images/ellipse-3.png",
+    alt: "Darwin Muri testimonial",
+  },
+  {
+    quote:
+      "I have tried different strategies before, but this is the first time something actually feels simple and actionable.",
+    name: "Jordan Coal",
+    image: "/images/ellipse-1.png",
+    alt: "Jordan Coal testimonial",
+  },
+  {
+    quote:
+      "My biggest win is consistency. I now show up with a plan, not just vibes and it’s paying off.",
+    name: "Ray Sybil",
+    image: "/images/ellipse-2.png",
+    alt: "Ray Sybil testimonial",
+  },
+];
 
-      {/* Divider */}
-      <div className="mt-6">
-        {/* Profile Section - Centered */}
-        <div className="flex items-center justify-center gap-2">
-          {/* Profile Image */}
-          <div>
-            <Image
-              src={testimonial.image}
-              alt={testimonial.name}
-              className="w-6 h-6 rounded-full object-cover"
-              width={24}
-              height={24}
-            />
-          </div>
-
-          {/* Name */}
-          <h4 className="text-gray-900 font-semibold text-sm text-center">
-            {testimonial.name}
-          </h4>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const TestimonialRow = ({
-  testimonials,
-  direction,
+function TestimonialRow({
+  items,
+  direction = "left",
 }: {
-  testimonials: Testimonial[];
-  direction: "left" | "right";
-}) => {
-  const duplicatedTestimonials = [...testimonials, ...testimonials];
+  items: Testimonial[];
+  direction?: "left" | "right";
+}) {
+  // Duplicate items for seamless loop
+  const duplicatedItems = [...items, ...items];
 
   return (
-    <div className="overflow-hidden">
+    <div className="w-full overflow-hidden py-2 sm:py-4">
       <motion.div
-        className="flex w-max"
+        className="flex min-w-max gap-3 px-1 sm:gap-4 md:gap-6 md:px-2"
         animate={{
-          x: direction === "left" ? ["0%", "-50%"] : ["-50%", "0%"],
+          x: direction === "left" ? [0, "-50%"] : ["-50%", 0],
         }}
         transition={{
-          duration: direction === "left" ? 40 : 45,
+          duration: 40,
           repeat: Infinity,
-          repeatType: "loop",
           ease: "linear",
         }}
       >
-        {duplicatedTestimonials.map((testimonial, index) => (
-          <TestimonialCard
-            key={`${testimonial.id}-${index}`}
-            testimonial={testimonial}
-          />
+        {duplicatedItems.map((t, index) => (
+          <Card key={`${t.name}-${index}`} className={testimonialCardClassName}>
+            <p className="w-full text-sm leading-snug text-black-500 sm:text-base sm:leading-[130%] md:text-lg lg:text-[20px]">
+              “{t.quote}”
+            </p>
+            <div className="flex w-full items-center justify-center gap-2 sm:gap-2.5">
+              <Image
+                src={t.image}
+                alt={t.alt}
+                width={40}
+                height={40}
+                className="size-8 shrink-0 rounded-full sm:size-10"
+              />
+              <span className="text-sm font-medium text-black-500 sm:text-base">
+                {t.name}
+              </span>
+            </div>
+          </Card>
         ))}
       </motion.div>
     </div>
   );
-};
+}
 
-const Testimonial = () => {
+export default function Testimonials() {
   return (
-    <div
-      className="w-full py-16 px-4 md:px-8 lg:px-16"
-      style={{ fontFamily: '"Inter", sans-serif' }}
-    >
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div className="flex justify-center mb-4">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-amber-600 text-sm font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            Testimonials
-          </span>
-        </div>
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
+    <section className="w-full">
+      <div className="flex flex-col items-center justify-center text-center">
+        <SectionLabelPill>Testimonials</SectionLabelPill>
+        <h2 className="mb-6 px-4 text-2xl font-medium tracking-tight text-black-500 sm:mb-8 sm:text-4xl md:text-5xl">
           Trusted by growing businesses
         </h2>
+        <div className="w-full space-y-4 sm:space-y-6 md:space-y-8">
+          <TestimonialRow items={row1} direction="left" />
+          <TestimonialRow items={row2} direction="right" />
+        </div>
       </div>
-
-      {/* Testimonials Container */}
-      <div className="space-y-8">
-        {/* Row 1 - Moving Right to Left */}
-        <TestimonialRow testimonials={testimonials1} direction="left" />
-
-        {/* Row 2 - Moving Left to Right */}
-        <TestimonialRow testimonials={testimonials2} direction="right" />
-      </div>
-    </div>
+    </section>
   );
-};
-
-export default Testimonial;
+}
