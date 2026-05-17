@@ -4,10 +4,10 @@ const CookiesPolicyView = () => {
       <div className="flex h-[114px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:h-[272px] md:pt-[0px]">
         <h1 className="text-[20px] md:text-[40px]">Cookies Policy</h1>
         <p className="text-[14px] text-[#565D69] md:text-[20px]">
-          Effective date : 10-Apr -2026
+          Effective date : 10-Apr-2026
         </p>
         <p className="text-[14px] text-[#565D69] md:text-[20px]">
-          Last updated : 10-Apr -2026
+          Last updated : 10-Apr-2026
         </p>
       </div>
 
@@ -17,7 +17,7 @@ const CookiesPolicyView = () => {
             How do we use Cookies
           </h2>
           <p className="text-[14px] md:text-[16px]">
-            This Cookie Policy explains how FlowBrand uses cookies and similar
+            This Cookie Policy explains how Seil uses cookies and similar
             technologies to recognize you when you visit our website. It
             explains what these technologies are and why we use them.
           </p>
@@ -34,7 +34,7 @@ const CookiesPolicyView = () => {
           </p>
         </div>
         <div>
-          <h2 className="font-[500 ] mb-[12px] text-[16px] md:text-[24px]">
+          <h2 className="font-[500] mb-[12px] text-[16px] md:text-[24px]">
             What are cookies
           </h2>
           <h4 className="text-[14px] md:text-[16px]">We use cookies to:</h4>
@@ -74,7 +74,7 @@ const CookiesPolicyView = () => {
               improve functionality and user experience.
             </p>
             <h3 className="mt-[14px] mb-[12px] text-[14px] font-[500] md:mt-[25px] md:text-[20px]">
-              Fuctional Cookies
+              Functional Cookies
             </h3>
             <p className="text-[14px] md:text-[16px]">
               These remember your preferences, such as saved settings, to
@@ -109,7 +109,7 @@ const CookiesPolicyView = () => {
           </h2>
           <p className="text-[14px] md:text-[16px]">
             If you have any questions about our use of cookies, please contact
-            us at: flowband@gmail.com
+            us at: seil@gmail.com
           </p>
         </div>
       </div>

@@ -4,7 +4,7 @@ const TermsConditionsView = () => {
       <div className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]">
         <h1 className="text-[20px] md:text-[40px]">Terms and Conditions</h1>
         <p className="text-[14px] md:text-[20px] text-[#565D69]">
-          Last updated : 10-Apr -2026
+          Last updated : 10-Apr-2026
         </p>
       </div>
 

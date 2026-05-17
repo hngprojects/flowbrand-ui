@@ -77,7 +77,7 @@ export function getSubdomain(hostname: string, rootDomain: string): string {
   if (hostname === rootDomain) {
     return "";
   }
-  if (hostname.includes("localhost")) {
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
     const parts = hostname.split(".");
     if (parts.length > 1) {
       return parts[0];

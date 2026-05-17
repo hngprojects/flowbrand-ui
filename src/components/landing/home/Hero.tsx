@@ -10,17 +10,17 @@ const Hero = () => {
         <Image
           src="/images/smallCloud.png"
           alt="Clouds"
-          width={100}
-          height={100}
-          className="o w-[702px] h-[622px] absolute top-0 left-50 -translate-y-20"
+          width={702}
+          height={622}
+          className="absolute top-0 left-50 -translate-y-20"
           preload={true}
         />
         <Image
           src="/images/bigCloud.png"
           alt="Clouds"
-          width={100}
-          height={100}
-          className="o w-[286px] h-[264px] absolute top-30 right-60"
+          width={286}
+          height={264}
+          className=" absolute top-30 right-60"
           preload={true}
         />
       </div>

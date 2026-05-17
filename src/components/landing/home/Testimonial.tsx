@@ -44,7 +44,7 @@ const row1: Testimonial[] = [
   },
   {
     quote:
-      "“I used to struggle with turning interest into actual paying customers. Now i have a proper flow that helps me follow up and close more deals”.",
+      "I used to struggle with turning interest into actual paying customers. Now i have a proper flow that helps me follow up and close more deals”.",
     name: "Rita Johnson",
     image: "/images/bright.png",
     alt: "Rita Johnson testimonial",
@@ -113,7 +113,7 @@ function TestimonialRow({
         }}
       >
         {duplicatedItems.map((t, index) => (
-          <Card key={index} className={testimonialCardClassName}>
+          <Card key={`${t.name}-${index}`} className={testimonialCardClassName}>
             <p className="w-full text-sm leading-snug text-black-500 sm:text-base sm:leading-[130%] md:text-lg lg:text-[20px]">
               “{t.quote}”
             </p>
@@ -140,10 +140,7 @@ export default function Testimonials() {
   return (
     <section className="w-full">
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="bg-badge-bg mb-2 flex items-center gap-2 rounded-xl px-4 py-2">
-          <div className="bg-badge-fg h-4 w-4 rounded-full"></div>
-          <SectionLabelPill>Testimonials</SectionLabelPill>
-        </div>
+        <SectionLabelPill>Testimonials</SectionLabelPill>
         <h2 className="mb-6 px-4 text-2xl font-medium tracking-tight text-black-500 sm:mb-8 sm:text-4xl md:text-5xl">
           Trusted by growing businesses
         </h2>

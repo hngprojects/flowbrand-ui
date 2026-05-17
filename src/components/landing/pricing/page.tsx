@@ -115,14 +115,14 @@ export default function PricingPage() {
             alt=""
             width={602}
             height={522}
-            className="absolute -top-20 left-20 opacity-60"
+            className="absolute -top-20 left-20 w-[602px] h-[522px] opacity-60"
           />
           <Image
             src="/images/smallCloud.png"
             alt=""
             width={286}
             height={264}
-            className="absolute right-50 bottom-10 opacity-60"
+            className="absolute right-50 bottom-10 w-[286px] h-[264px] opacity-60"
           />
         </div>
 

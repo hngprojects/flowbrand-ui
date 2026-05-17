@@ -4,7 +4,7 @@ const PrivacyPolicyView = () => {
       <div className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]">
         <h1 className="text-[20px] md:text-[40px]">Privacy Policy</h1>
         <p className="text-[14px] md:text-[20px] text-[#565D69]">
-          Last updated : 10-Apr -2026
+          Last updated : 10-Apr-2026
         </p>
       </div>
 
@@ -14,38 +14,24 @@ const PrivacyPolicyView = () => {
             Your privacy matters to us
           </h2>
           <p className="text-[14px] md:text-[16px]">
-            This Privacy Policy explains how FlowBrand collects, uses, and
-            protects the information you share when using the platform. It is
-            written in plain language so you can clearly understand how your
-            data is handled.
+            This Privacy Policy explains how Seil collects, uses, and protects
+            the information you share when using the platform. It is written in
+            plain language so you can clearly understand how your data is
+            handled.
             <span className="block mt-[8px] md:mt-[16px]">
-              By using FlowBrand, you agree to the practices described in this
+              By using Seil, you agree to the practices described in this
               policy.
             </span>
           </p>
         </div>
         <div>
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
-            Information we collect
-          </h2>
-          <p className="text-[14px] md:text-[16px]">
-            Your information is used to generate tailored marketing
-            recommendations, maintain your account, and improve the overall
-            FlowBrand experience.
-            <span className="block mt-[8px] md:mt-[16px]">
-              We may also use aggregated, non-identifiable data to analyze
-              trends and refine the quality of our suggestions.
-            </span>
-          </p>
-        </div>
-        <div>
-          <h2 className="font-[500 ] text-[16px] md:text-[24px] mb-[12px]">
+          <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
             How we use your information
           </h2>
           <p className="text-[14px] md:text-[16px]">
             Your information is used to generate tailored marketing
-            recommendations, maintain your account, and improve the overall
-            FlowBrand experience.
+            recommendations, maintain your account, and improve the overall Seil
+            experience.
             <span className="block mt-[8px] md:mt-[16px]">
               We may also use aggregated, non-identifiable data to analyze
               trends and refine the quality of our suggestions.
@@ -62,7 +48,7 @@ const PrivacyPolicyView = () => {
             only to the extent necessary to deliver our services.
             <span className="block mt-[8px] md:mt-[16px]">
               We may disclose information when required by law or to protect the
-              rights, safety, and integrity of FlowBrand and its users.
+              rights, safety, and integrity of Seil and its users.
             </span>
           </p>
         </div>
