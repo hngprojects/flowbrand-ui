@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { faq_items } from "@/constants/home/faq/landing-faq";
 import Link from "next/link";
-import MobileLogo from "@/components/icons/navbar/mobile-logo";
+import MobileLogo from "@/components/icons/navbar/mobileLogo";
 
 export default function FaqPage() {
   const [search, setSearch] = useState("");
