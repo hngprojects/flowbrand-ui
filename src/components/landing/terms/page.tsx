@@ -38,7 +38,7 @@ const TermsConditionsView = () => {
         </div>
 
         <div>
-          <h2 className="font-[500 ] text-[16px] md:text-[24px] mb-[12px]">
+          <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
             User Responsibilities
           </h2>
           <p className="text-[14px] md:text-[16px]">
