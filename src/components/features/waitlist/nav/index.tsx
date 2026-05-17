@@ -1,4 +1,4 @@
-import { BlueBlackLogo } from "@/components/icons/blueblack-logo";
+import { BlueBlackLogo } from "@/components/icons/blueblackLogo";
 import Link from "next/link";
 
 export default function WaitlistHeader() {
