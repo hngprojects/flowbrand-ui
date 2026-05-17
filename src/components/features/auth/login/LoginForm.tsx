@@ -165,17 +165,31 @@ export function LoginForm() {
       });
 
       if (!response?.ok) {
+        const apiMessage =
+          typeof response?.error === "string" &&
+          response.error !== "CredentialsSignin"
+            ? response.error
+            : undefined;
+
         if (!isCredentialsSigninError(response)) {
           form.setError("root", {
             type: "server",
-            message: LOGIN_ERROR_MESSAGE,
+            message: apiMessage ?? LOGIN_ERROR_MESSAGE,
           });
           return;
         }
 
         form.setError("password", {
           type: "server",
-          message: PASSWORD_ERROR_MESSAGE,
+          message:
+            apiMessage && apiMessage !== "CredentialsSignin"
+              ? apiMessage
+              : PASSWORD_ERROR_MESSAGE,
+        });
+        form.setError("root", {
+          type: "server",
+          message:
+            "If you just registered, verify your email with the OTP before logging in.",
         });
         return;
       }

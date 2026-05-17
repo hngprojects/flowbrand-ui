@@ -72,10 +72,14 @@ const credentialsAuth = async (
     );
     const parsed = parseLoginEnvelope(response.data);
     if (!parsed) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[auth] Unrecognized login response shape", response.data);
+      }
       return {
         success: false,
-        message: "Something went wrong",
-        status_code: response.status,
+        message:
+          "Login succeeded but the server response was invalid. Contact support.",
+        status_code: 502,
       };
     }
     return {

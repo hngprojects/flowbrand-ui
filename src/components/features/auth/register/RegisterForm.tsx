@@ -47,6 +47,8 @@ const RegistrationForm = () => {
     session?.invalid !== true &&
     !!session?.user?.id;
   const [showPasswordPlain, setShowPasswordPlain] = useState(false);
+  const [showConfirmPasswordPlain, setShowConfirmPasswordPlain] =
+    useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   const form = useForm<z.infer<typeof RegistrationFormSchema>>({
@@ -58,6 +60,7 @@ const RegistrationForm = () => {
       email: "",
       country: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -308,6 +311,54 @@ const RegistrationForm = () => {
                 </FormItem>
               );
             }}
+          />
+
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground/80 text-xs font-semibold sm:text-sm">
+                  Confirm password
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPasswordPlain ? "text" : "password"}
+                      placeholder="Confirm your password"
+                      disabled={isSubmitting}
+                      autoComplete="new-password"
+                      {...field}
+                      className={cn(
+                        inputClassWithError(
+                          !!form.formState.errors.confirmPassword,
+                        ),
+                        "pr-10",
+                      )}
+                    />
+                    <button
+                      type="button"
+                      aria-label={
+                        showConfirmPasswordPlain
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                      disabled={isSubmitting}
+                      className="text-foreground/45 hover:text-foreground/70 absolute inset-y-0 right-0 flex items-center pr-2.5 disabled:opacity-50 sm:pr-3"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => setShowConfirmPasswordPlain((v) => !v)}
+                    >
+                      {showConfirmPasswordPlain ? (
+                        <EyeOff className="size-5" aria-hidden />
+                      ) : (
+                        <Eye className="size-5" aria-hidden />
+                      )}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <Button

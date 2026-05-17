@@ -58,13 +58,46 @@ export function parseLoginEnvelope(
       ? (record.data as Record<string, unknown>)
       : record;
 
-  const user = data.user as ApiAuthUser | undefined;
-  const access_token =
-    typeof data.access_token === "string" ? data.access_token : undefined;
-
-  if (!user?.id || !access_token) {
+  const rawUser = data.user;
+  if (!rawUser || typeof rawUser !== "object") {
     return null;
   }
 
-  return { user: mapApiUser(user), access_token };
+  const userRecord = rawUser as Record<string, unknown>;
+  const id =
+    userRecord.id != null && String(userRecord.id).length > 0
+      ? String(userRecord.id)
+      : undefined;
+  const email =
+    typeof userRecord.email === "string" ? userRecord.email : undefined;
+  const full_name =
+    typeof userRecord.full_name === "string"
+      ? userRecord.full_name
+      : typeof userRecord.fullname === "string"
+        ? userRecord.fullname
+        : "";
+
+  const access_token =
+    typeof data.access_token === "string"
+      ? data.access_token
+      : typeof data.accessToken === "string"
+        ? data.accessToken
+        : undefined;
+
+  if (!id || !access_token || !email) {
+    return null;
+  }
+
+  return {
+    user: mapApiUser({
+      id,
+      email,
+      full_name,
+      avatar_url:
+        typeof userRecord.avatar_url === "string"
+          ? userRecord.avatar_url
+          : null,
+    }),
+    access_token,
+  };
 }

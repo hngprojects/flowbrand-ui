@@ -94,6 +94,9 @@ export const RegistrationFormSchema = z
       .email({ message: "Enter a valid email address" }),
     country: z.string().trim().min(1, { message: "Please select a country" }),
     password: registrationPasswordField,
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Please confirm your password" }),
   })
   .superRefine((data, ctx) => {
     const names = splitFullNameForRegister(data.full_name);
@@ -106,6 +109,10 @@ export const RegistrationFormSchema = z
         });
       }
     }
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
 
 export const OtpFormSchema = z.object({
