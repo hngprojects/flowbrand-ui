@@ -100,3 +100,5 @@ src/
 │   └── client.ts       # NEXT_PUBLIC_* env schema
 └── proxy.ts            # Next.js 16 proxy (formerly middleware)
 ```
+
+Testing CI/CD
