@@ -2,8 +2,8 @@ import Link from "next/link";
 
 const CtaSection = () => {
   return (
-    <section className="mb-[5.7rem] h-auto">
-      <div className="w-[90%] flex flex-col justify-center align-center md:gap-[1rem] md:w-[50%] mx-auto ">
+    <section className="w-full">
+      <div className="section-class max-w-5xl flex flex-col justify-center align-center md:gap-[1rem] md:w-[50%] mx-auto ">
         <h1 className="text-[2rem] md:text-[3rem] font-[500] leading-[110%] text-center ">
           Get a step-by-step marketing strategy in minutes
         </h1>
