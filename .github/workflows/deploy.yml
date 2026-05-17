@@ -24,21 +24,21 @@ jobs:
             if [ "${{ github.ref_name }}" = "staging" ]; then
               cd /home/okezie/staging/flowbrand-ui
               git pull origin staging
-              pnpm install
+              pnpm install --force --config.confirmModulesPurge=false
               pnpm build
               pm2 restart flowbrand-ui-staging
 
             elif [ "${{ github.ref_name }}" = "main" ]; then
               cd /home/okezie/projects/flowbrand-ui
               git pull origin main
-              pnpm install
+              pnpm install --force --config.confirmModulesPurge=false
               pnpm build
               pm2 restart flowbrand-ui
 
             else
               cd /home/okezie/projects/flowbrand-ui
               git pull origin dev
-              pnpm install
+              pnpm install --force --config.confirmModulesPurge=false
               pnpm build
               pm2 restart flowbrand-ui
             fi
