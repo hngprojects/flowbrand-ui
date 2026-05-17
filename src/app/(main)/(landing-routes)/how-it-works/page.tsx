@@ -7,21 +7,21 @@ const HowItWorks = () => {
     {
       title: "Tell us about your business.",
       desc: "Upload your business documents or answer 3 plain questions to get started— no marketing knowledge needed.",
-      image: "/step1.png",
+      image: "/images/snippet.svg",
     },
     {
       title: "We build your marketing strategy",
       desc: "Seil matches your answers to the right strategy plan type and personalizes every stage for your business. Done in under 3 seconds.",
-      image: "/step2.png",
+      image: "/images/snippet-1.svg",
     },
     {
       title: "Take it one step at a time.",
       desc: "Each week, you get one clear action to complete. Tick it off. Move to the next stage. No overwhelm, no skipped steps.",
-      image: "/step3.png",
+      image: "/images/snippet-2.svg",
     },
   ];
   return (
-    <main className="space-y-[84px] bg-white">
+    <main className="w-full bg-primary-50">
       <div className="bg-primary-50 h-[300px] md:h-[400px] w-full relative flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="max-w-[721px] space-y-6 text-center z-10">
           <h1 className="text-[28px] md:text-[40px] text-black-500 font-medium leading-tight">
@@ -36,29 +36,29 @@ const HowItWorks = () => {
 
         {/* ----CLOUD IMAGES---- */}
         <Image
-          src="/assets/big-cloud.png"
+          src="/images/bigCloud.png"
           aria-hidden
           alt="Cloud"
           width={445}
           height={447}
-          className="absolute -left-20 md:left-0 top-10 md:top-30 w-[200px] md:w-[445px] opacity-50 md:opacity-100"
+          className="absolute -left-20 md:left-0 top-10 md:top-10 w-[200px] md:w-[445px] opacity-50 md:opacity-100"
         />
         <Image
-          src="/assets/small-cloud.png"
+          src="/images/smallCloud.png"
           aria-hidden
           alt="Cloud"
           width={286}
           height={264}
-          className="absolute -right-10 md:right-0 top-40 md:top-60 w-[150px] md:w-[286px] opacity-50 md:opacity-100"
+          className="absolute -right-10 md:right-0 top-40 md:top-40 w-[150px] md:w-[286px] opacity-50 md:opacity-100"
         />
       </div>
 
-      <div className="space-y-12 md:space-y-20 mx-auto">
+      <div className="w-full bg-white">
         {steps.map((step, index) => (
           <div
             key={index}
             className={cn(
-              "flex flex-col md:flex-row justify-between items-center gap-10 bg-[#FBFCFF] py-12 md:py-20 px-6 md:px-20",
+              "flex flex-col md:flex-row justify-between items-center gap-10 section-class",
               index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse",
             )}
           >
@@ -86,7 +86,7 @@ const HowItWorks = () => {
                 </p>
               </div>
             </div>
-            <div className="w-full md:w-1/2 flex justify-center">
+            <div className="w-full md:w-1/2 flex justify-center bg-accent p-10 rounded-xl">
               <Image
                 src={step.image}
                 alt={step.title}
@@ -99,7 +99,7 @@ const HowItWorks = () => {
         ))}
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-8 px-6 py-12 md:py-20 text-center">
+      <div className="flex flex-col items-center justify-center gap-8 text-center section-class">
         <div className="space-y-4 max-w-[800px]">
           <h2 className="text-[28px] md:text-[48px] text-foreground font-medium leading-tight">
             Get a step-by-step marketing strategy in minutes

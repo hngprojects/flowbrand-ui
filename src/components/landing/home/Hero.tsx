@@ -3,16 +3,24 @@ import Image from "next/image";
 const Hero = () => {
   return (
     <section
-      className="relative w-full pt-20 overflow-hidden bg-gradient-to-b from-[#f4f7fb] to-white"
+      className="relative w-full pt-20 overflow-hidden bg-primary-50 to-white"
       style={{ fontFamily: '"Inter", sans-serif' }}
     >
-      {/* Background Clouds */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+      <div className="absolute w-full h-full z-0 pointer-events-none">
         <Image
-          src="/images/clouds.png"
-          fill
+          src="/images/smallCloud.png"
           alt="Clouds"
-          className="object-cover"
+          width={100}
+          height={100}
+          className="o w-[702px] h-[622px] absolute top-0 left-50 -translate-y-20"
+          preload={true}
+        />
+        <Image
+          src="/images/bigCloud.png"
+          alt="Clouds"
+          width={100}
+          height={100}
+          className="o w-[286px] h-[264px] absolute top-30 right-60"
           preload={true}
         />
       </div>
@@ -50,7 +58,7 @@ const Hero = () => {
         {/* Desktop Image */}
         <div className="w-full max-w-5xl mx-auto relative mt-4 md:mt-8">
           <Image
-            src="/images/desktops.jpg"
+            src="/images/hero.svg"
             width={1200}
             height={800}
             alt="Seil App Interface on Desktop"

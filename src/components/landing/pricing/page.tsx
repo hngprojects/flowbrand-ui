@@ -107,32 +107,26 @@ export default function PricingPage() {
   return (
     <main className="min-h-screen bg-white dark:bg-black">
       {/* HERO */}
-      <section className="relative overflow-hidden bg-sky-100/40 px-4 pb-20 pt-16 sm:pt-20 dark:bg-slate-900/20">
+      <section className="relative overflow-hidden bg-px-4 pb-20 pt-16 sm:pt-20 w-full bg-primary-50">
         {/* Cloud images from Figma — */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <Image
-            src="/images/cloud1.png"
+            src="/images/bigCloud.png"
             alt=""
-            width={340}
-            height={100}
-            className="absolute -left-15 top-12 opacity-60"
+            width={602}
+            height={522}
+            className="absolute -top-20 left-20 opacity-60"
           />
           <Image
-            src="/images/cloud2.png"
+            src="/images/smallCloud.png"
             alt=""
-            width={340}
-            height={200}
-            className="absolute 
-             -right-30 bottom-10 opacity-60"
+            width={286}
+            height={264}
+            className="absolute right-50 bottom-10 opacity-60"
           />
-          {/* fallback blobs in case images are not yet added */}
-          <div className="absolute -top-10 -left-16 h-72 w-72 rounded-full bg-white/60 blur-2xl" />
-          <div className="absolute -right-16 -bottom-10 h-80 w-80 rounded-full bg-white/60 blur-2xl" />
-          <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-sky-200/20 blur-3xl" />
-          <div className="absolute -right-32 -bottom-20 h-96 w-96 rounded-full bg-sky-200/20 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto max-w-4xl text-center">
+        <div className="relative section-class text-center">
           <h1 className="mb-2 text-4xl font-bold sm:text-5xl">
             Affordable Pricing for your{" "}
             <span className="text-orange-500">Business</span>
