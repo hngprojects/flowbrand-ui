@@ -11,7 +11,7 @@ const CookiesPolicyView = () => {
         </p>
       </div>
 
-      <div className="flex flex-col gap-[36px] px-[16px] pt-[24px] pb-[84px] md:px-[100px] md:pt-[53px]">
+      <div className="flex flex-col section-class space-y-5">
         <div>
           <h2 className="mb-[12px] text-[16px] font-[500] md:text-[24px]">
             How do we use Cookies

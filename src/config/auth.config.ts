@@ -19,7 +19,7 @@ function readAuthSecret(): string | undefined {
 
 const AUTH_SECRET_FALLBACK =
   readAuthSecret() ??
-  (process.env.NODE_ENV !== "production" ? "flowbrand-dev-secret" : undefined);
+  (process.env.NODE_ENV !== "production" ? "seil-dev-secret" : undefined);
 
 const authConfig: NextAuthConfig = {
   providers: [
