@@ -2,22 +2,26 @@
   "name": "nextjs-starter",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "check-format": "prettier --check .",
+    "lint-staged": "lint-staged",
     "prepare": "husky"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.100.10",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.16.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
-    "motion": "^12.38.0",
     "next": "16.2.6",
     "radix-ui": "^1.4.3",
     "react": "19.2.6",
@@ -29,14 +33,27 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "19.8.1",
+    "@commitlint/config-conventional": "19.8.1",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^25.7.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^10.3.0",
+    "eslint": "^9.39.4",
     "eslint-config-next": "16.2.6",
     "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
+    "prettier": "^3.8.3",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,mjs,cjs,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,css,md,mdx,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
