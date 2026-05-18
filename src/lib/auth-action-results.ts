@@ -14,9 +14,18 @@ export type RegisterUserResult = RegisterUserSuccess | RegisterUserFailure;
 
 export type ResetPasswordResult = { ok: true } | { ok: false; error: string };
 
-export type ResendOtpSuccess = { status: number; message?: string };
+export type ResendOtpSuccess = {
+  status: number;
+  message?: string;
+  /** Seconds until resend is allowed (from API body when provided). */
+  cooldownSeconds?: number;
+};
 
-export type ResendOtpFailure = { error: string; status?: number };
+export type ResendOtpFailure = {
+  error: string;
+  status?: number;
+  cooldownSeconds?: number;
+};
 
 export type ResendOtpResult = ResendOtpSuccess | ResendOtpFailure;
 
@@ -26,7 +35,11 @@ export function isResendOtpSuccess(
   return !("error" in result);
 }
 
-export type VerifyOtpSuccess = { status: number; message?: string };
+export type VerifyOtpSuccess = {
+  status: number;
+  message?: string;
+  accessToken: string;
+};
 
 export type VerifyOtpFailure = { error: string; status?: number };
 

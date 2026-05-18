@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { authRoutes, DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { authRoutes, DEFAULT_LOGIN_REDIRECT, protectedRoutes } from "@/routes";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -8,6 +8,12 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
+
+function isProtectedPath(pathname: string): boolean {
+  return protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+}
 
 export const proxy = auth((request) => {
   const { nextUrl } = request;
@@ -17,10 +23,8 @@ export const proxy = auth((request) => {
   const isAuthRoute = authRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
-  const isProtectedRoute =
-    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 
-  if (isProtectedRoute && !isLoggedIn) {
+  if (isProtectedPath(pathname) && !isLoggedIn) {
     const loginUrl = new URL("/login", nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);

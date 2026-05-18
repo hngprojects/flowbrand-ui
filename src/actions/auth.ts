@@ -2,26 +2,29 @@
 
 import axios from "axios";
 import * as z from "zod";
+import { auth } from "@/auth";
 import { envConfig } from "~/config/env.config";
+import { fetchAuthMe } from "@/lib/auth-api";
+import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import type {
   RegisterUserResult,
   ResendOtpResult,
-  ResendOtpSuccess,
   ResetPasswordResult,
   VerifyOtpResult,
   VerifyOtpSuccess,
 } from "~/lib/auth-action-results";
 import {
   authApiUrl,
+  formatAuthApiError,
   messageFromApiBody,
   parseLoginEnvelope,
+  readOtpCooldownSeconds,
 } from "~/lib/auth-api";
+import { credentialsAuth } from "@/lib/credentials-auth";
 import {
-  LoginSchema,
   registrationPasswordField,
   VerifyOtpCodeSchema,
 } from "@/schema/auth.schema";
-import { AuthResponse, ErrorResponse } from "@/types/auth";
 
 function validateAuthEmail(
   email: string,
@@ -51,57 +54,22 @@ export async function getGoogleOAuthUrl(): Promise<string> {
   return authApiUrl(envConfig.BASEURL, "/google");
 }
 
-const credentialsAuth = async (
-  values: z.infer<typeof LoginSchema>,
-): Promise<AuthResponse | ErrorResponse> => {
-  const baseURL = envConfig.BASEURL;
-  const validatedFields = LoginSchema.safeParse(values);
-  if (!validatedFields.success) {
-    return {
-      message: "Something went wrong",
-      status_code: 401,
-      success: false,
-    };
+/** Where to send the user after login/register (uses GET /api/auth/me when possible). */
+export async function getPostAuthRedirect(): Promise<string> {
+  const session = await auth();
+  const accessToken = session?.access_token;
+  const isValid =
+    !!session?.user?.id &&
+    session.invalid !== true &&
+    typeof accessToken === "string";
+
+  if (!isValid) {
+    return "/login";
   }
-  const { email, password } = validatedFields.data;
-  try {
-    const response = await axios.post(
-      authApiUrl(baseURL, "/login"),
-      { email, password },
-      { withCredentials: true },
-    );
-    const parsed = parseLoginEnvelope(response.data);
-    if (!parsed) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[auth] Unrecognized login response shape", response.data);
-      }
-      return {
-        success: false,
-        message:
-          "Login succeeded but the server response was invalid. Contact support.",
-        status_code: 502,
-      };
-    }
-    return {
-      data: parsed.user,
-      access_token: parsed.access_token,
-      success: true,
-      message: messageFromApiBody(response.data, "Login successful"),
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        axios.isAxiosError(error) && error.response
-          ? messageFromApiBody(error.response.data, "Something went wrong")
-          : "Something went wrong",
-      status_code:
-        axios.isAxiosError(error) && error.response
-          ? error.response.status
-          : undefined,
-    };
-  }
-};
+
+  const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+  return resolvePostAuthPath(me);
+}
 
 export type RegisterUserInput = {
   email: string;
@@ -115,23 +83,21 @@ const registerUser = async (
   values: RegisterUserInput,
 ): Promise<RegisterUserResult> => {
   const baseURL = envConfig.BASEURL;
-  const payload = {
-    email: values.email.trim(),
-    full_name: values.full_name.trim(),
-    country: values.country.trim(),
-    password: values.password,
-    terms_accepted: values.terms_accepted ?? true,
-  };
 
   const registrationBodySchema = z.object({
     email: z.string().email(),
-    full_name: z.string().trim().min(1, { message: "Full name is required." }),
-    country: z.string().trim().min(1, { message: "Country is required." }),
+    fullName: z.string().trim().min(1, { message: "Full name is required." }),
     password: registrationPasswordField,
-    terms_accepted: z.literal(true),
+    termsAccepted: z.literal(true),
   });
 
-  const validated = registrationBodySchema.safeParse(payload);
+  const validated = registrationBodySchema.safeParse({
+    email: values.email.trim(),
+    fullName: values.full_name.trim(),
+    password: values.password,
+    termsAccepted: values.terms_accepted ?? true,
+  });
+
   if (!validated.success) {
     return {
       ok: false,
@@ -141,12 +107,14 @@ const registerUser = async (
     };
   }
 
+  const registerUrl = authApiUrl(baseURL, "/register");
+
   try {
-    const response = await axios.post(
-      authApiUrl(baseURL, "/register"),
-      validated.data,
-      { withCredentials: true },
-    );
+    const response = await axios.post(registerUrl, validated.data, {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+      timeout: 30_000,
+    });
 
     return {
       ok: true,
@@ -154,19 +122,67 @@ const registerUser = async (
       data: response.data,
     };
   } catch (error) {
-    return axios.isAxiosError(error) && error.response
-      ? {
-          ok: false,
-          error: messageFromApiBody(
-            error.response.data,
-            "Registration failed.",
-          ),
-          status: error.response.status,
-        }
-      : {
-          ok: false,
-          error: "An unexpected error occurred.",
-        };
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+
+      if (process.env.NODE_ENV === "development") {
+        console.error("[auth] register failed", {
+          url: registerUrl,
+          status,
+          body: data,
+          sent: validated.data,
+        });
+      }
+
+      return {
+        ok: false,
+        error: formatAuthApiError(status, data, "Registration failed."),
+        status,
+      };
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("[auth] register network error", {
+        url: registerUrl,
+        error,
+      });
+    }
+
+    return {
+      ok: false,
+      error: "Could not reach the server. Check your connection and BASE_URL.",
+    };
+  }
+};
+
+const sendOtp = async (email: string): Promise<ResendOtpResult> => {
+  const validated = validateAuthEmail(email);
+  if ("error" in validated) {
+    return { error: validated.error };
+  }
+
+  const baseURL = envConfig.BASEURL;
+  try {
+    const response = await axios.post(
+      authApiUrl(baseURL, "/send-otp"),
+      { email: validated.email },
+      { withCredentials: true },
+    );
+
+    return {
+      status: response.status,
+      message: messageFromApiBody(response.data, "OTP sent successfully"),
+      cooldownSeconds: readOtpCooldownSeconds(response.data),
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        error: messageFromApiBody(error.response.data, "Could not send OTP."),
+        status: error.response.status,
+        cooldownSeconds: readOtpCooldownSeconds(error.response.data),
+      };
+    }
+    return { error: "An unexpected error occurred." };
   }
 };
 
@@ -184,20 +200,20 @@ const resendOtp = async (email: string): Promise<ResendOtpResult> => {
       { withCredentials: true },
     );
 
-    const success: ResendOtpSuccess = {
+    return {
       status: response.status,
       message: messageFromApiBody(response.data, "OTP sent successfully"),
+      cooldownSeconds: readOtpCooldownSeconds(response.data),
     };
-    return success;
   } catch (error) {
-    return axios.isAxiosError(error) && error.response
-      ? {
-          error: messageFromApiBody(error.response.data, "Resend OTP failed."),
-          status: error.response.status,
-        }
-      : {
-          error: "An unexpected error occurred.",
-        };
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        error: messageFromApiBody(error.response.data, "Resend OTP failed."),
+        status: error.response.status,
+        cooldownSeconds: readOtpCooldownSeconds(error.response.data),
+      };
+    }
+    return { error: "An unexpected error occurred." };
   }
 };
 
@@ -225,12 +241,22 @@ const verifyOtp = async (
   try {
     const response = await axios.post(
       authApiUrl(baseURL, "/verify-otp"),
-      { email: validatedEmail.email, otp: validatedCode.code },
+      { email: validatedEmail.email, otp_code: validatedCode.code },
       { withCredentials: true },
     );
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed?.access_token) {
+      return {
+        error:
+          "Verification succeeded but the server response was invalid. Please try signing in.",
+        status: 502,
+      };
+    }
+
     const success: VerifyOtpSuccess = {
       status: response.status,
       message: messageFromApiBody(response.data, "Email verified successfully"),
+      accessToken: parsed.access_token,
     };
     return success;
   } catch (error) {
@@ -330,5 +356,6 @@ export {
   requestPasswordReset,
   resendOtp,
   resetPasswordWithToken,
+  sendOtp,
   verifyOtp,
 };
