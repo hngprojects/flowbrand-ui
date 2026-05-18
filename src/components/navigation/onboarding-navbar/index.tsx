@@ -21,7 +21,7 @@ const OnboardingNavbar = () => {
 
   return (
     <>
-      <nav className="bg-background border-border sticky top-0 z-50 border-b">
+      <nav className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
         <div className="layout-components-class flex h-[83px] items-center justify-between">
           <div className="flex items-center gap-3">
             <button
