@@ -3,6 +3,8 @@ import { CredentialsSignin } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { credentialsAuth } from "~/actions/auth";
+import { envConfig } from "@/config/env.config";
+import { fetchAuthMe } from "@/lib/auth-api";
 import { inDevEnvironment } from "@/lib/utils";
 import { LoginCredentialsSchema } from "@/schema/auth.schema";
 import { CustomJWT } from "@/types/auth";
@@ -68,6 +70,39 @@ const authConfig: NextAuthConfig = {
 
         const user = response.data as CustomJWT;
         user.access_token = response.access_token;
+        return user;
+      },
+    }),
+    Credentials({
+      id: "access-token",
+      credentials: {
+        accessToken: { label: "Access Token", type: "password" },
+      },
+      async authorize(credentials) {
+        const accessToken =
+          typeof credentials?.accessToken === "string"
+            ? credentials.accessToken.trim()
+            : "";
+        if (!accessToken) {
+          return null;
+        }
+
+        const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+        if (!me) {
+          return null;
+        }
+
+        const fullName = me.full_name?.trim() ?? "";
+        const spaceIndex = fullName.indexOf(" ");
+        const user: CustomJWT = {
+          id: me.id,
+          email: me.email,
+          first_name:
+            spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex),
+          last_name:
+            spaceIndex === -1 ? "" : fullName.slice(spaceIndex + 1).trim(),
+          access_token: accessToken,
+        };
         return user;
       },
     }),

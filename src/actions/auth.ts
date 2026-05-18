@@ -9,7 +9,6 @@ import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import type {
   RegisterUserResult,
   ResendOtpResult,
-  ResendOtpSuccess,
   ResetPasswordResult,
   VerifyOtpResult,
   VerifyOtpSuccess,
@@ -19,6 +18,7 @@ import {
   formatAuthApiError,
   messageFromApiBody,
   parseLoginEnvelope,
+  readOtpCooldownSeconds,
 } from "~/lib/auth-api";
 import {
   LoginSchema,
@@ -208,6 +208,37 @@ const registerUser = async (
   }
 };
 
+const sendOtp = async (email: string): Promise<ResendOtpResult> => {
+  const validated = validateAuthEmail(email);
+  if ("error" in validated) {
+    return { error: validated.error };
+  }
+
+  const baseURL = envConfig.BASEURL;
+  try {
+    const response = await axios.post(
+      authApiUrl(baseURL, "/send-otp"),
+      { email: validated.email },
+      { withCredentials: true },
+    );
+
+    return {
+      status: response.status,
+      message: messageFromApiBody(response.data, "OTP sent successfully"),
+      cooldownSeconds: readOtpCooldownSeconds(response.data),
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        error: messageFromApiBody(error.response.data, "Could not send OTP."),
+        status: error.response.status,
+        cooldownSeconds: readOtpCooldownSeconds(error.response.data),
+      };
+    }
+    return { error: "An unexpected error occurred." };
+  }
+};
+
 const resendOtp = async (email: string): Promise<ResendOtpResult> => {
   const validated = validateAuthEmail(email);
   if ("error" in validated) {
@@ -222,20 +253,20 @@ const resendOtp = async (email: string): Promise<ResendOtpResult> => {
       { withCredentials: true },
     );
 
-    const success: ResendOtpSuccess = {
+    return {
       status: response.status,
       message: messageFromApiBody(response.data, "OTP sent successfully"),
+      cooldownSeconds: readOtpCooldownSeconds(response.data),
     };
-    return success;
   } catch (error) {
-    return axios.isAxiosError(error) && error.response
-      ? {
-          error: messageFromApiBody(error.response.data, "Resend OTP failed."),
-          status: error.response.status,
-        }
-      : {
-          error: "An unexpected error occurred.",
-        };
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        error: messageFromApiBody(error.response.data, "Resend OTP failed."),
+        status: error.response.status,
+        cooldownSeconds: readOtpCooldownSeconds(error.response.data),
+      };
+    }
+    return { error: "An unexpected error occurred." };
   }
 };
 
@@ -263,12 +294,22 @@ const verifyOtp = async (
   try {
     const response = await axios.post(
       authApiUrl(baseURL, "/verify-otp"),
-      { email: validatedEmail.email, otp: validatedCode.code },
+      { email: validatedEmail.email, otp_code: validatedCode.code },
       { withCredentials: true },
     );
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed?.access_token) {
+      return {
+        error:
+          "Verification succeeded but the server response was invalid. Please try signing in.",
+        status: 502,
+      };
+    }
+
     const success: VerifyOtpSuccess = {
       status: response.status,
       message: messageFromApiBody(response.data, "Email verified successfully"),
+      accessToken: parsed.access_token,
     };
     return success;
   } catch (error) {
@@ -368,5 +409,6 @@ export {
   requestPasswordReset,
   resendOtp,
   resetPasswordWithToken,
+  sendOtp,
   verifyOtp,
 };
