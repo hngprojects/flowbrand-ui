@@ -1,18 +1,20 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/auth/logout-button";
+import { cn } from "@/lib/utils";
+
+const dashboardLogoutClass = cn(
+  "flex h-11 items-center justify-center",
+  "rounded-[41px] border border-gray-500 px-4",
+  "text-sm font-medium text-foreground",
+  "hover:border-[#D13232] hover:text-[#D13232]",
+  "disabled:opacity-50",
+);
 
 export default function DashboardPage() {
-  const router = useRouter();
   const { data: session, status } = useSession();
-
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push("/login");
-  };
 
   if (status === "loading") {
     return (
@@ -40,14 +42,7 @@ export default function DashboardPage() {
       <header className="border-b bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <h1 className="text-2xl font-bold text-[#326AD1]">Dashboard</h1>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleLogout}
-            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-          >
-            Log out
-          </Button>
+          <LogoutButton className={dashboardLogoutClass} />
         </div>
       </header>
 
@@ -56,11 +51,11 @@ export default function DashboardPage() {
           <h2 className="mb-2 text-xl font-semibold text-gray-800">
             Welcome, {displayName}
           </h2>
-          <p className="text-gray-600">
+          <p className="text-black-300">
             You are signed in. This page is only available to authenticated
             users.
           </p>
-          <div className="mt-4 rounded-md bg-gray-50 p-4 text-sm text-gray-500">
+          <div className="mt-4 rounded-md bg-gray-50 p-4 text-sm text-black-300">
             <p>
               <strong>Email:</strong> {session.user.email}
             </p>
