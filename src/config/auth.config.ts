@@ -4,10 +4,15 @@ import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { credentialsAuth } from "~/actions/auth";
 import { inDevEnvironment } from "@/lib/utils";
-import { LoginSchema } from "@/schema/auth.schema";
+import { LoginCredentialsSchema } from "@/schema/auth.schema";
 import { CustomJWT } from "@/types/auth";
 
 const INVALID_CREDENTIAL_STATUSES = new Set([400, 401, 403, 422, 502]);
+
+/** Surfaces API copy in the Auth.js `code` query param for client signIn(redirect: false). */
+class InvalidLoginCredentials extends CredentialsSignin {
+  code = "invalid_email_or_password";
+}
 
 function readAuthSecret(): string | undefined {
   const value =
@@ -25,12 +30,12 @@ const authConfig: NextAuthConfig = {
   providers: [
     Credentials({
       async authorize(credentials) {
-        const validatedFields = LoginSchema.safeParse(credentials);
+        const validatedFields = LoginCredentialsSchema.safeParse(credentials);
         if (!validatedFields.success) {
           if (inDevEnvironment) {
             console.warn(
               "[auth] Login validation failed",
-              validatedFields.error,
+              validatedFields.error.flatten(),
             );
           }
           return null;
@@ -51,7 +56,7 @@ const authConfig: NextAuthConfig = {
           }
 
           if (INVALID_CREDENTIAL_STATUSES.has(statusCode)) {
-            throw new CredentialsSignin(response.message);
+            throw new InvalidLoginCredentials();
           }
 
           throw new Error(response.message);

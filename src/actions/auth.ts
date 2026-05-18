@@ -2,7 +2,10 @@
 
 import axios from "axios";
 import * as z from "zod";
+import { auth } from "@/auth";
 import { envConfig } from "~/config/env.config";
+import { fetchAuthMe } from "@/lib/auth-api";
+import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import type {
   RegisterUserResult,
   ResendOtpResult,
@@ -13,6 +16,7 @@ import type {
 } from "~/lib/auth-action-results";
 import {
   authApiUrl,
+  formatAuthApiError,
   messageFromApiBody,
   parseLoginEnvelope,
 } from "~/lib/auth-api";
@@ -49,6 +53,23 @@ function validateOtpCode(code: string): { code: string } | { error: string } {
 
 export async function getGoogleOAuthUrl(): Promise<string> {
   return authApiUrl(envConfig.BASEURL, "/google");
+}
+
+/** Where to send the user after login/register (uses GET /api/auth/me when possible). */
+export async function getPostAuthRedirect(): Promise<string> {
+  const session = await auth();
+  const accessToken = session?.access_token;
+  const isValid =
+    !!session?.user?.id &&
+    session.invalid !== true &&
+    typeof accessToken === "string";
+
+  if (!isValid) {
+    return "/login";
+  }
+
+  const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+  return resolvePostAuthPath(me);
 }
 
 const credentialsAuth = async (
@@ -115,23 +136,21 @@ const registerUser = async (
   values: RegisterUserInput,
 ): Promise<RegisterUserResult> => {
   const baseURL = envConfig.BASEURL;
-  const payload = {
-    email: values.email.trim(),
-    full_name: values.full_name.trim(),
-    country: values.country.trim(),
-    password: values.password,
-    terms_accepted: values.terms_accepted ?? true,
-  };
 
   const registrationBodySchema = z.object({
     email: z.string().email(),
-    full_name: z.string().trim().min(1, { message: "Full name is required." }),
-    country: z.string().trim().min(1, { message: "Country is required." }),
+    fullName: z.string().trim().min(1, { message: "Full name is required." }),
     password: registrationPasswordField,
-    terms_accepted: z.literal(true),
+    termsAccepted: z.literal(true),
   });
 
-  const validated = registrationBodySchema.safeParse(payload);
+  const validated = registrationBodySchema.safeParse({
+    email: values.email.trim(),
+    fullName: values.full_name.trim(),
+    password: values.password,
+    termsAccepted: values.terms_accepted ?? true,
+  });
+
   if (!validated.success) {
     return {
       ok: false,
@@ -141,12 +160,14 @@ const registerUser = async (
     };
   }
 
+  const registerUrl = authApiUrl(baseURL, "/register");
+
   try {
-    const response = await axios.post(
-      authApiUrl(baseURL, "/register"),
-      validated.data,
-      { withCredentials: true },
-    );
+    const response = await axios.post(registerUrl, validated.data, {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+      timeout: 30_000,
+    });
 
     return {
       ok: true,
@@ -154,19 +175,36 @@ const registerUser = async (
       data: response.data,
     };
   } catch (error) {
-    return axios.isAxiosError(error) && error.response
-      ? {
-          ok: false,
-          error: messageFromApiBody(
-            error.response.data,
-            "Registration failed.",
-          ),
-          status: error.response.status,
-        }
-      : {
-          ok: false,
-          error: "An unexpected error occurred.",
-        };
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+
+      if (process.env.NODE_ENV === "development") {
+        console.error("[auth] register failed", {
+          url: registerUrl,
+          status,
+          body: data,
+          sent: validated.data,
+        });
+      }
+
+      return {
+        ok: false,
+        error: formatAuthApiError(status, data, "Registration failed."),
+        status,
+      };
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("[auth] register network error", {
+        url: registerUrl,
+        error,
+      });
+    }
+
+    return {
+      ok: false,
+      error: "Could not reach the server. Check your connection and BASE_URL.",
+    };
   }
 };
 

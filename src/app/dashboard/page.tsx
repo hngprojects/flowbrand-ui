@@ -2,16 +2,14 @@
 
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
-  const router = useRouter();
   const { data: session, status } = useSession();
 
   const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push("/login");
+    sessionStorage.removeItem("flowbrand-funnel-preview-toast");
+    await signOut({ callbackUrl: "/login", redirect: true });
   };
 
   if (status === "loading") {
@@ -68,11 +66,17 @@ export default function DashboardPage() {
               <strong>User ID:</strong> {session.user.id}
             </p>
           </div>
-          <p className="mt-6">
+          <div className="mt-6 flex flex-wrap gap-4 text-sm">
+            <Link href="/onboarding" className="text-[#326AD1] hover:underline">
+              Onboarding
+            </Link>
+            <Link href="/funnel" className="text-[#326AD1] hover:underline">
+              Funnel
+            </Link>
             <Link href="/" className="text-[#326AD1] hover:underline">
               Back to home
             </Link>
-          </p>
+          </div>
         </div>
       </main>
     </div>
