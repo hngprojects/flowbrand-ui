@@ -21,35 +21,35 @@ const fontInstrumentSerif = Instrument_Serif({
 const logos = [
   {
     label: "Repair Service",
-    icon: "/images/repair.png",
+    icon: "/images/repair.svg",
     width: 67,
     height: 41,
     fontClass: fontInstrumentSerif.className,
   },
   {
     label: "Beauty Salon",
-    icon: "/images/beauty.png",
+    icon: "/images/salon.svg",
     width: 39,
     height: 57,
     fontClass: fontHomemadeApple.className,
   },
   {
     label: "Bakery",
-    icon: "/images/bakery.png",
+    icon: "/images/bakery.svg",
     width: 48,
     height: 40,
     fontClass: fontInspiration.className,
   },
   {
     label: "Small Retail",
-    icon: "/images/small.png",
+    icon: "/images/shop.svg",
     width: 43,
     height: 36,
     fontClass: fontInknutAntiqua.className,
   },
   {
     label: "Agency",
-    icon: "/images/layer1.png",
+    icon: "/images/agency.svg",
     width: 39,
     height: 57,
     fontClass: fontHomemadeApple.className,
@@ -97,7 +97,7 @@ export default function SocialProof() {
   return (
     <section className="w-full bg-[#FCFDFF] py-8 md:py-12 overflow-hidden">
       <div className="mx-auto flex flex-col items-center gap-10">
-        <p className="text-center text-[14px] text-gray-800 md:text-[16px] px-6">
+        <p className="text-center text-[14px] text-gray-800 md:text-[16px] px-6 font-semibold">
           Used by small businesses like yours to build and grow with confidence
         </p>
 

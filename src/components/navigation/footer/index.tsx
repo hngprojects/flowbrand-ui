@@ -1,5 +1,5 @@
-import { FullLightLogo } from "@/components/icons/full-light-logo";
-import { FullTranparentLogo } from "@/components/icons/full-transparent-logo";
+import { FullLightLogo } from "@/components/icons/fullLightLogo";
+import { FullTranparentLogo } from "@/components/icons/fullTransparentLogo";
 import Link from "next/link";
 
 const productLinks = [
@@ -11,7 +11,7 @@ const productLinks = [
 ];
 
 const legalLinks = [
-  { label: "Terms of use", href: "/terms" },
+  { label: "Terms of use", href: "/terms&conditions" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Cookie Policy", href: "/cookie-policy" },
 ];

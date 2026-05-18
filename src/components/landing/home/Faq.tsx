@@ -9,17 +9,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { faq_items } from "@/constants/home/faq/landing-faq";
+import { SectionLabelPill } from "@/components/ui/section-label-pill";
 
 export default function FaqSection() {
   return (
-    <section className="w-full py-12 md:py-16">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-4 sm:px-6 md:px-10 lg:px-16 xl:px-20">
+    <section className="w-full">
+      <div className="flex flex-col items-center section-class">
         <div className="flex w-full flex-col items-center gap-6">
           <div className="mb-4">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-amber-600 text-sm font-medium">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-              FAQs
-            </span>
+            <SectionLabelPill>FAQs</SectionLabelPill>
           </div>
 
           <h2 className="text-foreground text-center text-3xl font-semibold md:text-4xl">
