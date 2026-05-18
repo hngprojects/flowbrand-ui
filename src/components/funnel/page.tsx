@@ -6,11 +6,17 @@ import { Button } from "@/components/ui/button";
 import { StrategyIcon } from "@/components/icons/strategy";
 import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "../navigation/onboarding-navbar";
+import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
+
 const Funnel = () => {
   const [loading, setLoading] = useState(true);
   const [steps, setSteps] = useState<React.ReactNode>(
     "We are building your marketing strategy...",
   );
+  useEffect(() => {
+    showFunnelPreviewToast();
+  }, []);
+
   useEffect(() => {
     const loadingSteps = [
       <div key={"step-1"} className="flex flex-col gap-4">

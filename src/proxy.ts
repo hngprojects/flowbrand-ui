@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { authRoutes, DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { fetchAuthMe } from "@/lib/auth-api";
+import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
+import { envConfig } from "@/config/env.config";
+import { authRoutes, protectedRoutes } from "@/routes";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -9,7 +12,13 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
 
-export const proxy = auth((request) => {
+function isProtectedPath(pathname: string): boolean {
+  return protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+}
+
+export const proxy = auth(async (request) => {
   const { nextUrl } = request;
   const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
   const pathname = nextUrl.pathname;
@@ -17,19 +26,23 @@ export const proxy = auth((request) => {
   const isAuthRoute = authRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
-  const isProtectedRoute =
-    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 
-  if (isProtectedRoute && !isLoggedIn) {
+  if (isProtectedPath(pathname) && !isLoggedIn) {
     const loginUrl = new URL("/login", nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthRoute && isLoggedIn) {
-    return NextResponse.redirect(
-      new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin),
-    );
+    const accessToken = request.auth?.access_token;
+    let redirectPath = "/onboarding";
+
+    if (typeof accessToken === "string") {
+      const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+      redirectPath = resolvePostAuthPath(me);
+    }
+
+    return NextResponse.redirect(new URL(redirectPath, nextUrl.origin));
   }
 
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();

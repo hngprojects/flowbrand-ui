@@ -2,14 +2,15 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Eye, EyeOff } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { getGoogleOAuthUrl, registerUser } from "~/actions/auth";
+import { usePostAuthRedirect } from "@/hooks/use-post-auth-redirect";
 import GoogleLogo from "@/components/icons/googleIcon";
 import { Button } from "~/components/ui/button";
 import {
@@ -28,7 +29,6 @@ import {
   RegistrationFormSchema,
 } from "@/schema/auth.schema";
 import { COUNTRY_OPTIONS } from "~/lib/countries";
-import { setRegisterVerifyEmail } from "~/lib/register-verify-storage";
 import { cn } from "@/lib/utils";
 
 const inputClassWithError = (hasError: boolean) => {
@@ -66,13 +66,13 @@ const RegistrationForm = () => {
 
   const { isSubmitting } = form.formState;
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, router]);
+  usePostAuthRedirect();
 
   const onSubmit = async (values: z.infer<typeof RegistrationFormSchema>) => {
+    if (isSubmitting) {
+      return;
+    }
+
     try {
       const data = await registerUser({
         email: values.email,
@@ -81,26 +81,38 @@ const RegistrationForm = () => {
         password: values.password,
         terms_accepted: true,
       });
-      const isSuccess = data.ok && data.status === 201;
+      const isSuccess = data.ok && data.status >= 200 && data.status < 300;
       const errorDescription = !data.ok
         ? data.error
         : !isSuccess
           ? "Registration could not be completed."
           : undefined;
 
-      toast[isSuccess ? "success" : "error"](
-        isSuccess ? "Account created successfully" : "An error occurred",
-        {
-          description: isSuccess
-            ? "Verify your email with the code we sent"
-            : errorDescription,
-        },
-      );
-
-      if (isSuccess) {
-        setRegisterVerifyEmail(values.email);
-        router.push("/register/verify");
+      if (!isSuccess) {
+        toast.error("An error occurred", { description: errorDescription });
+        return;
       }
+
+      toast.success("Account created successfully", {
+        description: "Signing you in…",
+      });
+
+      const signInResult = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        rememberMe: false,
+        redirect: false,
+      });
+
+      if (!signInResult?.ok) {
+        toast.error("Account created", {
+          description: "Please log in with your new password.",
+        });
+        router.push("/login");
+        return;
+      }
+
+      // Session updates after signIn; usePostAuthRedirect handles navigation.
     } catch {
       toast.error("An error occurred", {
         description: "Please try again.",

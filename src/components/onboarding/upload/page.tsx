@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileUp, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
 
 type UploadPageProps = {
   onSwitchToQuestions?: () => void;
@@ -107,8 +108,9 @@ export default function UploadPage({ onSwitchToQuestions }: UploadPageProps) {
     router.push("/onboarding");
   }, [onSwitchToQuestions, router]);
 
-  const goToDashboard = useCallback(() => {
-    router.push("/dashboard");
+  const goToFunnel = useCallback(() => {
+    showFunnelPreviewToast();
+    router.push("/funnel");
   }, [router]);
 
   const simulateUpload = useCallback((id: string) => {
@@ -162,8 +164,9 @@ export default function UploadPage({ onSwitchToQuestions }: UploadPageProps) {
 
   // Clear all intervals on unmount
   useEffect(() => {
+    const intervals = uploadIntervals.current;
     return () => {
-      Object.values(uploadIntervals.current).forEach(clearInterval);
+      Object.values(intervals).forEach(clearInterval);
     };
   }, []);
 
@@ -236,7 +239,7 @@ export default function UploadPage({ onSwitchToQuestions }: UploadPageProps) {
           )}
 
           <Button
-            onClick={goToDashboard}
+            onClick={goToFunnel}
             disabled={!allDone}
             className="mt-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A]
              disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800/90"

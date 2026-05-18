@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
+import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
 
 import ProgressBar from "./ProgressBar";
 import StepOne from "./StepOne";
@@ -68,8 +69,15 @@ export default function OnboardingQuestions({
         body: JSON.stringify(payload),
       });
 
+      if (response.status === 501) {
+        // Backend onboarding route not wired yet — same as upload path (go to funnel).
+        showFunnelPreviewToast();
+        router.push("/funnel");
+        return;
+      }
+
       if (!response.ok) {
-        let errorBodyMessage = "Submission pipeline failure.";
+        let errorBodyMessage = "Could not save your answers. Please try again.";
         try {
           const apiErrorData = await response.json();
           if (apiErrorData?.message) errorBodyMessage = apiErrorData.message;
@@ -79,7 +87,8 @@ export default function OnboardingQuestions({
         throw new Error(errorBodyMessage);
       }
 
-      router.push("/dashboard");
+      showFunnelPreviewToast();
+      router.push("/funnel");
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Something went wrong.";
