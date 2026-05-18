@@ -2,15 +2,19 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Eye, EyeOff } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { getGoogleOAuthUrl, registerUser } from "~/actions/auth";
-import { usePostAuthRedirect } from "@/hooks/use-post-auth-redirect";
+import { getGoogleOAuthUrl, registerUser, sendOtp } from "~/actions/auth";
+import { isResendOtpSuccess } from "~/lib/auth-action-results";
+import {
+  setRegisterVerifyCooldown,
+  setRegisterVerifyEmail,
+} from "~/lib/register-verify-storage";
 import GoogleLogo from "@/components/icons/googleIcon";
 import { Button } from "~/components/ui/button";
 import {
@@ -66,8 +70,6 @@ const RegistrationForm = () => {
 
   const { isSubmitting } = form.formState;
 
-  usePostAuthRedirect();
-
   const onSubmit = async (values: z.infer<typeof RegistrationFormSchema>) => {
     if (isSubmitting) {
       return;
@@ -93,26 +95,27 @@ const RegistrationForm = () => {
         return;
       }
 
-      toast.success("Account created successfully", {
-        description: "Signing you in…",
-      });
+      const otpResult = await sendOtp(values.email);
+      setRegisterVerifyEmail(values.email);
+      if (otpResult.cooldownSeconds) {
+        setRegisterVerifyCooldown(otpResult.cooldownSeconds);
+      }
 
-      const signInResult = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        rememberMe: false,
-        redirect: false,
-      });
-
-      if (!signInResult?.ok) {
+      if (!isResendOtpSuccess(otpResult)) {
         toast.error("Account created", {
-          description: "Please log in with your new password.",
+          description:
+            otpResult.error ??
+            "We could not send a verification code. Try signing in to resend.",
         });
-        router.push("/login");
+        router.push("/register/verify");
         return;
       }
 
-      // Session updates after signIn; usePostAuthRedirect handles navigation.
+      toast.success("Account created", {
+        description:
+          otpResult.message ?? "Check your email for a 6-digit code.",
+      });
+      router.push("/register/verify");
     } catch {
       toast.error("An error occurred", {
         description: "Please try again.",

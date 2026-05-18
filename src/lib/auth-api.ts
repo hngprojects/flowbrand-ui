@@ -35,6 +35,41 @@ export function mapApiUser(user: ApiAuthUser): User {
   };
 }
 
+/** OTP resend/send cooldown from API (`retryAfter`, `cooldown`, etc.). */
+export function readOtpCooldownSeconds(data: unknown): number | undefined {
+  if (!data || typeof data !== "object") {
+    return undefined;
+  }
+
+  const record = data as Record<string, unknown>;
+  const nested =
+    record.data && typeof record.data === "object"
+      ? (record.data as Record<string, unknown>)
+      : null;
+
+  const candidates = [record, nested].filter(Boolean) as Record<
+    string,
+    unknown
+  >[];
+
+  for (const source of candidates) {
+    for (const key of [
+      "retryAfter",
+      "retry_after",
+      "cooldown",
+      "cooldownSeconds",
+      "cooldown_seconds",
+    ]) {
+      const value = source[key];
+      if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+        return Math.ceil(value);
+      }
+    }
+  }
+
+  return undefined;
+}
+
 export function messageFromApiBody(data: unknown, fallback: string): string {
   if (!data || typeof data !== "object") {
     return fallback;
