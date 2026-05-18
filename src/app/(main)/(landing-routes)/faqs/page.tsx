@@ -1,7 +1,5 @@
 import FaqPage from "@/components/landing/faq/page";
 
-const page = () => {
+export default function FaqsPage() {
   return <FaqPage />;
-};
-
-export default page;
+}

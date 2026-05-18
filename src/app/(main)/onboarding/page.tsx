@@ -57,7 +57,9 @@ function FileRow({
             {item.file.name}
           </p>
           <span className="shrink-0 text-sm text-gray-500 dark:text-gray-400">
-            {item.done ? formatMB(item.file.size) : `${item.progress}% Uploading`}
+            {item.done
+              ? formatMB(item.file.size)
+              : `${item.progress}% Uploading`}
           </span>
         </div>
 
@@ -107,16 +109,14 @@ export default function OnboardingPage() {
 
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === id
-            ? { ...f, progress: Math.min(progress, 100) }
-            : f
-        )
+          f.id === id ? { ...f, progress: Math.min(progress, 100) } : f,
+        ),
       );
 
       if (progress >= 100) {
         clearInterval(interval);
         setFiles((prev) =>
-          prev.map((f) => (f.id === id ? { ...f, done: true } : f))
+          prev.map((f) => (f.id === id ? { ...f, done: true } : f)),
         );
         delete uploadIntervals.current[id];
       }
@@ -139,7 +139,7 @@ export default function OnboardingPage() {
         simulateUpload(id);
       });
     },
-    [simulateUpload]
+    [simulateUpload],
   );
 
   const removeFile = (id: string) => {
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
   return (
     <main className="min-h-screen bg-[#F7F8FA] dark:bg-gray-950">
       <div className="mx-auto flex w-full max-w-[620px] flex-col items-center px-4 py-14 md:py-20">
-        <h1 className="mb-2 text-center text-3xl font-semibold text-gray-900 dark:text-gray-100 md:text-4xl">
+        <h1 className="mb-2 text-center text-3xl font-semibold text-black-900 dark:text-gray-100 md:text-4xl">
           Start creating your marketing strategy
         </h1>
         <p className="mb-10 text-center text-sm text-gray-600 dark:text-gray-400">
@@ -228,14 +228,15 @@ export default function OnboardingPage() {
           <Button
             onClick={goToWizard}
             disabled={!allDone}
-            className="mt-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800/90"
+            className="mt-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 mb-5 dark:hover:bg-blue-800/90"
           >
             Create my strategy
           </Button>
+          <div className="border-t-2  "></div>
 
           <button
             onClick={goToWizard}
-            className="mt-5 flex w-full items-center justify-center gap-1 text-sm text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            className="mt-5 flex w-full items-center justify-center gap-1 text-sm text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-400dark:hover:text-gray-200"
           >
             {"Don't know what to do? Click here"}
             <ChevronRight size={15} />
@@ -247,17 +248,24 @@ export default function OnboardingPage() {
           className="mt-6 flex w-full items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700">
-            <FileUp size={20} className="text-gray-500 dark:text-gray-400" strokeWidth={1.8} />
+            <FileUp
+              size={20}
+              className="text-gray-500 dark:text-gray-400"
+              strokeWidth={1.8}
+            />
           </div>
-          <div className="flex-1 text-left">
+          <div className="flex-1  text-left">
             <p className="text-[15px] font-semibold text-gray-800 dark:text-gray-100">
-              {"Don't have a document to upload? Create your strategy another way."}
+              {
+                "Don't have a document to upload? Create your funnel another way."
+              }
             </p>
             <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-500">
-              Create your marketing strategy without the need to upload a document.
+              Create your marketing strategy without the need to upload a
+              document.
             </p>
           </div>
-          <ChevronRight size={18} className="shrink-0 text-gray-400" />
+          <ChevronRight size={18} className="shrink-0 text-gray-900" />
         </button>
       </div>
     </main>

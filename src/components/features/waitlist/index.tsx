@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { joinWaitlist } from "@/services/waitlist.service";
 import { waitlistSchema } from "@/schema/waitlist.schema";
-import { WaitingUsers } from "@/components/icons/waiting-users";
+import { WaitingUsers } from "@/components/icons/waitingUsers";
 
 export default function WaitlistBody() {
   const [email, setEmail] = useState("");
