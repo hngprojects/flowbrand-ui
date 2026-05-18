@@ -1,0 +1,30 @@
+import NextAuth, { type DefaultSession } from "next-auth";
+import authConfig from "@/config/auth.config";
+import type { Organisation, User } from "@/types/auth";
+
+export const {
+  handlers: { GET, POST },
+  auth,
+  unstable_update,
+} = NextAuth({
+  ...authConfig,
+});
+
+declare module "next-auth" {
+  interface Session {
+    /** Set when the JWT lacks a backend user id — treat as signed out. */
+    invalid?: boolean;
+    user: {
+      id: User["id"];
+      first_name: User["first_name"];
+      last_name: User["last_name"];
+      email: User["email"];
+      image: User["avatar_url"];
+      bio?: string;
+      username?: string;
+      is_superadmin?: boolean;
+    } & DefaultSession["user"];
+    access_token?: string;
+    userOrg?: Organisation[];
+  }
+}

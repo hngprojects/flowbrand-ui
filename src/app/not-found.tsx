@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import NotFoundIcon from "@/components/icons/not-found/not-found";
+import NotFoundIcon from "@/components/icons/notFound/notFound";
 
 export default function NotFound() {
   return (
