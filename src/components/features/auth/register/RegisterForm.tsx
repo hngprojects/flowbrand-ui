@@ -119,8 +119,8 @@ const RegistrationForm = () => {
           Start building your first marketing strategy
         </h2>
         <p className="text-foreground/70 text-sm sm:text-[24px]">
-          Create your free FlowBrand account and launch your first campaign in
-          under 10 minutes.
+          Create your free Seil account and launch your first campaign in under
+          10 minutes.
         </p>
       </div>
 
@@ -405,7 +405,7 @@ const RegistrationForm = () => {
       <p className="text-foreground/50 px-4 pb-4 text-center text-[10px]">
         By signing up you agree to our{" "}
         <Link
-          href="/terms-and-conditions"
+          href="/terms&conditions"
           className="text-primary hover:text-accent underline"
         >
           Terms of Service

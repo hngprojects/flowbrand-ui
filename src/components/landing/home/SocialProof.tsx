@@ -97,7 +97,7 @@ export default function SocialProof() {
   return (
     <section className="w-full bg-[#FCFDFF] py-8 md:py-12 overflow-hidden">
       <div className="mx-auto flex flex-col items-center gap-10">
-        <p className="text-center text-[14px] text-gray-800 md:text-[16px] px-6">
+        <p className="text-center text-[14px] text-gray-800 md:text-[16px] px-6 font-semibold">
           Used by small businesses like yours to build and grow with confidence
         </p>
 

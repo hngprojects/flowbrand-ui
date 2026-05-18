@@ -336,7 +336,7 @@ export function LoginForm() {
 
       <p className="text-foreground/50 px-4 text-center text-[10px]">
         By logging in, you agree to our{" "}
-        <Link href="/terms-and-conditions" className="text-primary underline">
+        <Link href="/terms&conditions" className="text-primary underline">
           Terms of Service
         </Link>{" "}
         and{" "}

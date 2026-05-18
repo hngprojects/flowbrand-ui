@@ -17,14 +17,14 @@ const steps: Step[] = [
     number: 1,
     title: "Tell us about your business.",
     description:
-      "Upload your business documents or answer 3 plain questions to get started—no marketing knowledge needed.",
+      "Upload your business documents or answer 3 plain questions to get started, no marketing knowledge needed.",
     image: "/images/snippet.svg",
   },
   {
     number: 2,
     title: "We build your marketing strategy.",
     description:
-      "FlowBrand matches your answers to the right strategy plan type and personalizes every stage for your business. Done in under 3 seconds.",
+      "Seil matches your answers to the right strategy plan type and personalizes every stage for your business. Done in under 3 seconds.",
     image: "/images/snippet-1.svg",
   },
   {
@@ -82,7 +82,7 @@ const Solution = () => {
           <h2 className="mb-4 text-4xl font-medium tracking-tight text-[#0F172A] md:text-5xl">
             How it works
           </h2>
-          <p className="text-base font-medium text-gray-600 md:text-lg">
+          <p className="text-base text-black-300 md:text-lg">
             We get you up and running in just 3 steps
           </p>
         </div>
@@ -128,7 +128,7 @@ const Solution = () => {
                   <h3 className="mb-4 text-2xl font-bold text-[#0F172A] md:text-3xl">
                     {currentStep.title}
                   </h3>
-                  <p className="max-w-md text-lg leading-relaxed text-foreground/80">
+                  <p className="max-w-md text-lg leading-relaxed text-black-300">
                     {currentStep.description}
                   </p>
                 </motion.div>
