@@ -107,32 +107,26 @@ export default function PricingPage() {
   return (
     <main className="min-h-screen bg-white dark:bg-black">
       {/* HERO */}
-      <section className="relative overflow-hidden bg-sky-100/40 px-4 pb-20 pt-16 sm:pt-20 dark:bg-slate-900/20">
+      <section className="relative overflow-hidden bg-px-4 pb-20 pt-16 sm:pt-20 w-full bg-primary-50">
         {/* Cloud images from Figma — */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <Image
-            src="/images/cloud1.png"
+            src="/images/bigCloud.png"
             alt=""
-            width={340}
-            height={100}
-            className="absolute -left-15 top-12 opacity-60"
+            width={602}
+            height={522}
+            className="absolute -top-20 left-20 w-[602px] h-[522px] opacity-60"
           />
           <Image
-            src="/images/cloud2.png"
+            src="/images/smallCloud.png"
             alt=""
-            width={340}
-            height={200}
-            className="absolute 
-             -right-30 bottom-10 opacity-60"
+            width={286}
+            height={264}
+            className="absolute right-50 bottom-10 w-[286px] h-[264px] opacity-60"
           />
-          {/* fallback blobs in case images are not yet added */}
-          <div className="absolute -top-10 -left-16 h-72 w-72 rounded-full bg-white/60 blur-2xl" />
-          <div className="absolute -right-16 -bottom-10 h-80 w-80 rounded-full bg-white/60 blur-2xl" />
-          <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-sky-200/20 blur-3xl" />
-          <div className="absolute -right-32 -bottom-20 h-96 w-96 rounded-full bg-sky-200/20 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto max-w-4xl text-center">
+        <div className="relative section-class text-center">
           <h1 className="mb-2 text-4xl font-bold sm:text-5xl">
             Affordable Pricing for your{" "}
             <span className="text-orange-500">Business</span>
@@ -141,8 +135,8 @@ export default function PricingPage() {
             className="mb-8 text-gray-900
            dark:text-gray-900 "
           >
-            Whether you&apos;re just figuring things out or ready to scale,
-            FlowBrand gives you exactly what you need at every stage.
+            Whether you&apos;re just figuring things out or ready to scale, Seil
+            gives you exactly what you need at every stage.
           </p>
 
           {/* Toggle — slightly rounded rectangle, not full pill */}
@@ -252,12 +246,12 @@ export default function PricingPage() {
 
       {/* COMPARE TABLE */}
       <section className="w-full py-16">
-        <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
-          <h2 className="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="mx-auto w-full max-w-5xl px-6 md:px-12 lg:px-20">
+          <h2 className="mb-3 text-center text-3xl font-bold text-black dark:text-white">
             Compare Plans
           </h2>
           <p className="mb-10 text-center text-gray-800 dark:text-gray-400">
-            Find the right plan for where your business is now—and where
+            Find the right plan for where your business is now and where
             you&apos;re going.
           </p>
 
@@ -310,12 +304,9 @@ export default function PricingPage() {
                 FAQs
               </span>
             </div>
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+            <h2 className="mb-4 text-3xl font-bold text-black dark:text-white">
               Still wondering? We thought you might be .
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Get answers to common questions about our plans and features.
-            </p>
           </div>
 
           <Accordion
