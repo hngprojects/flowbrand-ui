@@ -3,7 +3,7 @@ import Link from "next/link";
 const CtaSection = () => {
   return (
     <section className="w-full">
-      <div className="section-class max-w-5xl flex flex-col justify-center align-center md:gap-[1rem] md:w-[50%] mx-auto ">
+      <div className="section-class max-w-5xl flex flex-col justify-center align-center md:gap-[1rem] mx-auto ">
         <h1 className="text-[2rem] md:text-[3rem] font-[500] leading-[110%] text-center ">
           Get a step-by-step marketing strategy in minutes
         </h1>

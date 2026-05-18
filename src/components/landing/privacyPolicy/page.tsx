@@ -8,7 +8,7 @@ const PrivacyPolicyView = () => {
         </p>
       </div>
 
-      <div className="flex flex-col gap-[36px] px-[16px] md:px-[100px] pt-[24px] md:pt-[53px] pb-[84px]">
+      <div className="flex flex-col section-class space-y-5">
         <div>
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Your privacy matters to us
@@ -24,6 +24,7 @@ const PrivacyPolicyView = () => {
             </span>
           </p>
         </div>
+
         <div>
           <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
             How we use your information
@@ -38,6 +39,7 @@ const PrivacyPolicyView = () => {
             </span>
           </p>
         </div>
+
         <div>
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Data sharing
@@ -52,6 +54,7 @@ const PrivacyPolicyView = () => {
             </span>
           </p>
         </div>
+
         <div>
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Data security
@@ -66,6 +69,7 @@ const PrivacyPolicyView = () => {
             </span>
           </p>
         </div>
+
         <div>
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Your rights
@@ -80,6 +84,7 @@ const PrivacyPolicyView = () => {
             </span>
           </p>
         </div>
+
         <div>
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Changes to the policy

@@ -16,7 +16,7 @@ type Testimonial = {
 const row1: Testimonial[] = [
   {
     quote:
-      "I used to just post on Instagram and hope for the best. FlowBrand actually tells me what to do on Monday morning. It gave our team of 3 a real system.",
+      "I used to just post on Instagram and hope for the best. Seil actually tells me what to do on Monday morning. It gave our team of 3 a real system.",
     name: "Sarah Nnaji",
     image: "/images/chef.png",
     alt: "Sarah Nnaji testimonial",
