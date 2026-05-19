@@ -124,7 +124,7 @@ export default function StepTwo(props: StepTwoProps) {
                 <button
                   key={opt}
                   type="button"
-                  aria-pressed={active} // t Accessibility Fix
+                  aria-pressed={active}
                   onClick={() => props.toggleLocatedIn(opt)}
                   className={pillClass(active)}
                 >

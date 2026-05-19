@@ -51,6 +51,7 @@ export default function StepThree({
               <Checkbox
                 id={sanitizedId}
                 checked={active}
+                onClick={(e) => e.stopPropagation()}
                 onCheckedChange={() => onSelect(channel)}
                 className={`h-4 w-4 rounded transition ${
                   active
