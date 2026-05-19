@@ -2,12 +2,19 @@ import { NextAuthConfig, Session } from "next-auth";
 import { CredentialsSignin } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import { credentialsAuth } from "~/actions/auth";
+import { credentialsAuth } from "@/lib/credentials-auth";
+import { envConfig } from "@/config/env.config";
+import { fetchAuthMe } from "@/lib/auth-api";
 import { inDevEnvironment } from "@/lib/utils";
-import { LoginSchema } from "@/schema/auth.schema";
+import { LoginCredentialsSchema } from "@/schema/auth.schema";
 import { CustomJWT } from "@/types/auth";
 
 const INVALID_CREDENTIAL_STATUSES = new Set([400, 401, 403, 422, 502]);
+
+/** Surfaces API copy in the Auth.js `code` query param for client signIn(redirect: false). */
+class InvalidLoginCredentials extends CredentialsSignin {
+  code = "invalid_email_or_password";
+}
 
 function readAuthSecret(): string | undefined {
   const value =
@@ -25,12 +32,12 @@ const authConfig: NextAuthConfig = {
   providers: [
     Credentials({
       async authorize(credentials) {
-        const validatedFields = LoginSchema.safeParse(credentials);
+        const validatedFields = LoginCredentialsSchema.safeParse(credentials);
         if (!validatedFields.success) {
           if (inDevEnvironment) {
             console.warn(
               "[auth] Login validation failed",
-              validatedFields.error,
+              validatedFields.error.flatten(),
             );
           }
           return null;
@@ -51,7 +58,7 @@ const authConfig: NextAuthConfig = {
           }
 
           if (INVALID_CREDENTIAL_STATUSES.has(statusCode)) {
-            throw new CredentialsSignin(response.message);
+            throw new InvalidLoginCredentials();
           }
 
           throw new Error(response.message);
@@ -66,11 +73,44 @@ const authConfig: NextAuthConfig = {
         return user;
       },
     }),
+    Credentials({
+      id: "access-token",
+      credentials: {
+        accessToken: { label: "Access Token", type: "password" },
+      },
+      async authorize(credentials) {
+        const accessToken =
+          typeof credentials?.accessToken === "string"
+            ? credentials.accessToken.trim()
+            : "";
+        if (!accessToken) {
+          return null;
+        }
+
+        const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+        if (!me) {
+          return null;
+        }
+
+        const fullName = me.full_name?.trim() ?? "";
+        const spaceIndex = fullName.indexOf(" ");
+        const user: CustomJWT = {
+          id: me.id,
+          email: me.email,
+          first_name:
+            spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex),
+          last_name:
+            spaceIndex === -1 ? "" : fullName.slice(spaceIndex + 1).trim(),
+          access_token: accessToken,
+        };
+        return user;
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
   },
-  debug: inDevEnvironment,
+  debug: process.env.AUTH_DEBUG === "true",
   callbacks: {
     async jwt({ token, user }) {
       return {

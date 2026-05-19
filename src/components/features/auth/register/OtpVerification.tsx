@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -14,10 +14,11 @@ import {
   isResendOtpSuccess,
   isVerifyOtpSuccess,
 } from "~/lib/auth-action-results";
+import { isSignInFailure, getLoginErrorMessage } from "@/lib/login-errors";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { clearRegisterVerifyEmail } from "~/lib/register-verify-storage";
+import { consumeRegisterVerifyCooldown } from "~/lib/register-verify-storage";
 import { OtpFormSchema } from "@/schema/auth.schema";
 import { cn } from "@/lib/utils";
 
@@ -30,8 +31,9 @@ const formatTimer = (seconds: number) => {
 };
 
 const OTPVerification = ({ email }: { email: string }) => {
-  const router = useRouter();
-  const [secondsLeft, setSecondsLeft] = useState(30);
+  const [secondsLeft, setSecondsLeft] = useState(() =>
+    consumeRegisterVerifyCooldown(),
+  );
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -55,6 +57,14 @@ const OTPVerification = ({ email }: { email: string }) => {
     return () => clearInterval(id);
   }, [secondsLeft]);
 
+  const applyCooldown = useCallback((seconds: number | undefined) => {
+    if (seconds != null && seconds > 0) {
+      setSecondsLeft(Math.ceil(seconds));
+    } else {
+      setSecondsLeft(0);
+    }
+  }, []);
+
   const otpValues = useWatch({ control: form.control });
   const isOtpComplete = OtpFormSchema.safeParse(otpValues).success;
 
@@ -74,13 +84,22 @@ const OTPVerification = ({ email }: { email: string }) => {
           });
           return;
         }
-        if (result.status >= 200 && result.status < 300) {
-          clearRegisterVerifyEmail();
-          toast.success("Verification complete", {
-            description: result.message,
+
+        const signInResult = await signIn("access-token", {
+          accessToken: result.accessToken,
+          redirect: false,
+        });
+
+        if (isSignInFailure(signInResult)) {
+          toast.error("Verification complete", {
+            description: `${getLoginErrorMessage(signInResult)} Try signing in with your password.`,
           });
-          router.push("/login");
+          return;
         }
+
+        toast.success("Email verified", {
+          description: result.message ?? "Welcome to Seil.",
+        });
       } catch {
         toast.error("Verification failed", {
           description: "Network error. Please try again.",
@@ -110,8 +129,11 @@ const OTPVerification = ({ email }: { email: string }) => {
         toast.success("Code sent", {
           description: result.message,
         });
-        setSecondsLeft(30);
+        applyCooldown(result.cooldownSeconds);
       } else {
+        applyCooldown(
+          !isResendOtpSuccess(result) ? result.cooldownSeconds : undefined,
+        );
         toast.error("Could not resend", {
           description: isResendOtpSuccess(result)
             ? "Please try again later."
@@ -202,9 +224,11 @@ const OTPVerification = ({ email }: { email: string }) => {
         </div>
       </Form>
 
-      <div className="text-foreground/60 text-right font-mono text-xs">
-        {formatTimer(Math.max(0, secondsLeft))}
-      </div>
+      {secondsLeft > 0 ? (
+        <div className="text-foreground/60 text-right font-mono text-xs">
+          {formatTimer(secondsLeft)}
+        </div>
+      ) : null}
 
       <div className="space-y-3 sm:space-y-4">
         <p className="text-foreground/70 text-center text-xs sm:text-sm">
