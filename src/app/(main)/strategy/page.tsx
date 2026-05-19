@@ -1,7 +1,9 @@
 "use client";
 
+
 import { useMemo, useState } from "react";
 import { Check, ChevronRight, Plus, CircleHelp, FileText } from "lucide-react";
+import StrategySidebar from "@/components/strategy-layout/strategy-sidebar";
 
 type ResourceLink = {
   label: string;
@@ -287,7 +289,15 @@ export default function StrategyPage() {
   return (
     <main className="min-h-screen bg-[#FAFAFA]">
       <div className="flex">
-        {/* SIDEBAR */}
+        {/* SIDEBAR COMPONENT */}
+
+        <StrategySidebar
+          strategies={STRATEGIES}
+          activeStrategy={activeStrategy}
+          setActiveStrategy={setActiveStrategy}
+        />
+
+        {/* SIDEBAR
         <aside className="hidden w-[320px] shrink-0 border-r border-[#EAECF0] bg-[#FAFAFA] px-8 py-8 lg:block">
           <div>
             <p className="mb-5 text-[15px] font-medium text-[#344054]">
@@ -387,7 +397,7 @@ export default function StrategyPage() {
               />
             </button>
           </div>
-        </aside>
+        </aside> */}
 
         {/* CONTENT */}
         <section className="flex-1 px-4 py-6 lg:px-8 lg:py-8">
