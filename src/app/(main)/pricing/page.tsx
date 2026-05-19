@@ -79,14 +79,14 @@ function FeatureCell({ value }: { value: FeatureValue }) {
   if (value === true) {
     return (
       <td className="px-6 py-4 text-center">
-        <Check className="mx-auto h-5 w-5 text-orange-500" />
+        <Check className="mx-auto h-5 w-5 text-[#E58F17]" />
       </td>
     );
   }
   if (value === false) {
     return (
       <td className="px-6 py-4 text-center">
-        <span className="mx-auto block text-center text-base font-medium text-orange-400">
+        <span className="mx-auto block text-center text-base font-medium text-[#E58F17]">
           —
         </span>
       </td>
@@ -94,7 +94,7 @@ function FeatureCell({ value }: { value: FeatureValue }) {
   }
   return (
     <td className="px-6 py-4 text-center">
-      <span className="text-sm text-gray-700 dark:text-gray-300">{value}</span>
+      <span className="text-sm text-[#030D1F] dark:text-gray-300">{value}</span>
     </td>
   );
 }
@@ -135,14 +135,14 @@ export default function PricingPage() {
         <div className="relative mx-auto max-w-4xl text-center">
           <h1 className="mb-2 text-4xl font-bold sm:text-5xl">
             Affordable Pricing for your{" "}
-            <span className="text-orange-500">Business</span>
+            <div className="text-[#E58F17]">Business</div>
           </h1>
           <p
-            className="mb-8 text-gray-900
-           dark:text-gray-900 "
+            className="mb-8 text-[#030D1F]
+           dark:text-[#030D1F]  "
           >
             Whether you&apos;re just figuring things out or ready to scale,
-            FlowBrand gives you exactly what you need at every stage.
+            FlowBrand gives you <br /> exactly what you need at every stage.
           </p>
 
           {/* Toggle — slightly rounded rectangle, not full pill */}
@@ -151,8 +151,8 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("monthly")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-blue-500 text-white shadow"
-                  : "text-gray-900 hover:text-gray-800 dark:text-gray-400"
+                  ? "bg-[#326AD1] text-white shadow"
+                  : "text-[#030D1F] hover:text-[#565D69] dark:text-gray-400"
               }`}
             >
               Monthly Pricing
@@ -161,8 +161,8 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("annual")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "annual"
-                  ? "bg-orange-500 text-white shadow"
-                  : "text-gray-800 hover:text-gray-900 dark:text-gray-400"
+                  ? "bg-[#E58F17] text-white shadow"
+                  : "text-[#565D69] hover:text-[#030D1F] dark:text-gray-400"
               }`}
             >
               Annual Pricing
@@ -175,26 +175,26 @@ export default function PricingPage() {
       <section className="relative z-10 w-full">
         <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
           {/* Outer wrapper with background — matches Figma card container */}
-          <div className="-mt-10 rounded-2xl bg-gray-50 p-6 shadow-sm dark:bg-gray-900/50">
+          <div className="-mt-10 rounded-2xl bg-[#FFFFFF] p-6   border-white dark:bg-gray-900/50">
             <div className="grid gap-6 md:grid-cols-2">
               {/* Free Plan — uses flex-col so button stays at bottom */}
               <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950">
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h3 className="text-xl font-bold text-[#030D1F] dark:text-white">
                     Free Plan
                   </h3>
-                  <p className="mt-1 text-sm text-gray-800 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-[#565D69] dark:text-gray-400">
                     Perfect for one-person shops or small businesses
                   </p>
-                  <p className="mt-4 text-base font-semibold text-blue-500">
+                  <p className="mt-4 text-base font-semibold text-[#326AD1]">
                     Free
                   </p>
                   {/* BadgeCheck bullet — black color as requested */}
                   <div className="my-6 space-y-3">
                     {freeFeatures.map((item) => (
                       <div key={item} className="flex items-center gap-3">
-                        <BadgeCheck className="h-4 w-4 shrink-0 text-gray-900 dark:text-white" />
-                        <span className="text-sm text-gray-900 dark:text-gray-300">
+                        <BadgeCheck className="h-4 w-4 shrink-0 text-[#030D1F] dark:text-white" />
+                        <span className="text-sm text-[#030D1F] dark:text-gray-300">
                           {item}
                         </span>
                       </div>
@@ -202,28 +202,28 @@ export default function PricingPage() {
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Pro card button */}
-                <Button className="mt-4 rounded-md w-full bg-blue-600 text-white hover:bg-blue-700">
+                <Button className="mt-4 rounded-md w-full bg-[#326AD1] text-white hover:bg-blue-700">
                   Start For Free
                 </Button>
               </div>
 
               {/* Pro Plan — uses flex-col so button stays at bottom */}
-              <div className="relative flex flex-col rounded-2xl border-2 border-orange-500 bg-white p-8 shadow-sm dark:bg-gray-950">
+              <div className="relative flex flex-col rounded-2xl border-2 border-[#F3F3F3] bg-white p-8 shadow-sm dark:bg-gray-950">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="whitespace-nowrap rounded-full bg-orange-500 px-4 py-1 text-xs font-semibold text-white shadow">
+                  <span className="whitespace-nowrap rounded-full bg-[#E58F17] px-4 py-1 text-sm font-semibold text-white shadow">
                     Recommended
                   </span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h3 className="text-xl font-bold text-[#030D1F] dark:text-white">
                     Pro Plan
                   </h3>
-                  <p className="mt-1 text-sm text-gray-800 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-[#565D69] dark:text-gray-400">
                     For businesses ready to grow further and faster.
                   </p>
-                  <p className="mt-4 text-2xl font-bold text-orange-700">
+                  <p className="mt-4 text-[24px] font-bold text-[#A36610]">
                     ₦10,000
-                    <span className="text-sm font-normal text-orange-600">
+                    <span className="text-[24px] font-normal text-[#A36610]">
                       {" "}
                       /monthly
                     </span>
@@ -232,8 +232,8 @@ export default function PricingPage() {
                   <div className="my-6 space-y-3">
                     {proFeatures.map((item) => (
                       <div key={item} className="flex items-center gap-3">
-                        <BadgeCheck className="h-4 w-4 shrink-0 text-gray-900 dark:text-white" />
-                        <span className="text-sm text-gray-900 dark:text-gray-300">
+                        <BadgeCheck className="h-4 w-4 shrink-0 text-[#030D1F] dark:text-white" />
+                        <span className="text-sm text-[#030D1F] dark:text-gray-300">
                           {item}
                         </span>
                       </div>
@@ -241,7 +241,7 @@ export default function PricingPage() {
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Free card button */}
-                <Button className="mt-4 rounded-md w-full border-2 border-orange-500 bg-transparent text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950">
+                <Button className="mt-4 rounded-md w-full border-2 border-[#E58F17] bg-transparent text-[#E58F17] hover:bg-orange-50 dark:hover:bg-orange-950">
                   Get Full Access
                 </Button>
               </div>
@@ -253,11 +253,11 @@ export default function PricingPage() {
       {/* COMPARE TABLE */}
       <section className="w-full py-16">
         <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
-          <h2 className="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mb-3 text-center text-3xl font-bold text-[#030D1F] dark:text-white">
             Compare Plans
           </h2>
-          <p className="mb-10 text-center text-gray-800 dark:text-gray-400">
-            Find the right plan for where your business is now—and where
+          <p className="mb-10 text-center text-[#565D69] dark:text-gray-400">
+            Find the right plan for where your business is now and where
             you&apos;re going.
           </p>
 
@@ -265,13 +265,13 @@ export default function PricingPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#030D1F] dark:text-gray-300">
                     Feature
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-[#030D1F] dark:text-gray-300">
                     Free
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-[#030D1F] dark:text-gray-300">
                     Pro
                   </th>
                 </tr>
@@ -282,13 +282,11 @@ export default function PricingPage() {
                     key={index}
                     className="border-b text-black border-gray-100 dark:border-gray-900"
                   >
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-300">
+                    <td className="px-6 py-4 text-sm text-[#030D1F] dark:text-gray-300">
                       {feature.name}
                     </td>
-                    <div className="text-black">
-                      <FeatureCell value={feature.free} />
-                      <FeatureCell value={feature.pro} />
-                    </div>
+                    <FeatureCell value={feature.free} />
+                    <FeatureCell value={feature.pro} />
                   </tr>
                 ))}
               </tbody>
@@ -298,10 +296,10 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="relative overflow-hidden bg-slate-50/60 px-4 py-16 dark:bg-amber-900/10">
+      <section className="relative overflow-hidden bg-[#FBFCFF] px-4 py-16 dark:bg-amber-900/10">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-1/2 -left-32 h-80 w-80 rounded-full bg-yellow-200/20 blur-3xl" />
-          <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-yellow-200/15 blur-3xl" />
+          <div className="absolute top-1/2 -left-32 h-80 w-80 rounded-full  blur-3xl" />
+          <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-[#FBFCFF] blur-3xl" />
         </div>
 
         <div className="relative mx-auto max-w-4xl">
@@ -312,12 +310,12 @@ export default function PricingPage() {
                 FAQs
               </span>
             </div>
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+            <h2 className="mb-4 text-3xl font-bold text-[#030D1F] dark:text-white">
               Still wondering? We thought you might be .
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            {/* <p className="text-gray-600 dark:text-gray-400">
               Get answers to common questions about our plans and features.
-            </p>
+            </p> */}
           </div>
 
           <Accordion
@@ -329,12 +327,12 @@ export default function PricingPage() {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="group rounded-xl border border-gray-200 bg-white px-5 py-1 dark:border-gray-700 dark:bg-gray-900"
+                className="group rounded-xl border border-gray-200 bg-white px-2 py-1 dark:border-gray-700 dark:bg-gray-900"
               >
-                <AccordionTrigger className="flex w-full items-center justify-between gap-3 text-left text-sm font-medium hover:no-underline hover:text-orange-500 [&>svg]:hidden">
+                <AccordionTrigger className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:no-underline hover:text-[#E58F17] [&>svg]:hidden">
                   <span>{faq.question}</span>
                   {/* + rotates 45deg to become × when open */}
-                  <span className="shrink-0 text-xl font-light text-orange-500 transition-transform duration-200 group-has-[[data-state=open]]:rotate-45">
+                  <span className="shrink-0 text-xl font-light text-[#E58F17] transition-transform duration-200 group-has-[[data-state=open]]:rotate-45">
                     +
                   </span>
                 </AccordionTrigger>
