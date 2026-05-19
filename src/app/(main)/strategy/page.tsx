@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, CircleHelp, FileText } from "lucide-react";
+import { Check, ChevronRight, Plus, CircleHelp, FileText } from "lucide-react";
 
 type ResourceLink = {
   label: string;
@@ -364,10 +364,29 @@ export default function StrategyPage() {
             </div>
           </div>
 
-          <p className="mt-10 text-[15px] leading-7 text-[#667085]">
-            If you need to create more funnels for specific use cases, click on
-            the button below.
-          </p>
+          <div className="mt-10">
+            <p className="mb-5 text-[15px] leading-7 text-[#667085]">
+              If you need to create more funnels for specific use cases, click
+              on the button below.
+            </p>
+
+            <button className="flex w-full items-center justify-between rounded-[24px] bg-[#D9DEE8] px-5 py-5 transition-all duration-200 hover:bg-[#CED5E2]">
+              <div className="flex items-center gap-4">
+                <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[16px] bg-[#2F6FED] shadow-sm">
+                  <Plus className="h-7 w-7 text-white" strokeWidth={2.2} />
+                </div>
+
+                <p className="text-[18px] font-medium text-[#101828]">
+                  Create New Strategy
+                </p>
+              </div>
+
+              <ChevronRight
+                className="h-7 w-7 text-[#101828]"
+                strokeWidth={2}
+              />
+            </button>
+          </div>
         </aside>
 
         {/* CONTENT */}

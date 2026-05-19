@@ -8,39 +8,52 @@ import { useState } from "react";
 import { joinWaitlist } from "@/services/waitlist.service";
 import { waitlistSchema } from "@/schema/waitlist.schema";
 import { WaitingUsers } from "@/components/icons/waitingUsers";
-import { WaitlistBottom } from "@/components/icons/waitlistBottom";
+import {
+  WaitlistBottom,
+  WaitlistBottomSmall,
+} from "@/components/icons/waitlistBottom";
+import { toast } from "sonner";
+import WaitlistModal from "@/components/modals/waitlist";
 
 export default function WaitlistBody() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setError("");
-    setSuccess(false);
     setLoading(true);
 
-    const result = waitlistSchema.safeParse({ email });
+    const validationResult = waitlistSchema.safeParse({ email });
 
-    if (!result.success) {
+    if (!validationResult.success) {
       setError("Enter a valid email");
       setLoading(false);
       return;
     }
 
     try {
-      await joinWaitlist(email);
+      const result = await joinWaitlist(email.trim());
 
-      setSuccess(true);
-      setEmail("");
+      setLoading(false);
+
+      if (result.success) {
+        if (result.isNew) {
+          setIsModalOpen(true);
+        } else {
+          toast.info(result.message); // "You are already on the waitlist"
+        }
+        setEmail("");
+      } else {
+        toast.error(result.message);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to join waitlist";
       setError(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
@@ -89,11 +102,6 @@ export default function WaitlistBody() {
                   {error && (
                     <p className="text-red-500 text-sm mt-2">{error}</p>
                   )}
-                  {success && (
-                    <p className="text-green-600 text-sm mt-2">
-                      Congratulations! You are added to our waitlist
-                    </p>
-                  )}
                 </div>
 
                 <Button type="submit" disabled={loading} className="h-12">
@@ -122,7 +130,12 @@ export default function WaitlistBody() {
           </div>
         </div>
       </div>
-      <WaitlistBottom className=" w-full mt-auto " />
+      <WaitlistBottom className="w-full mt-auto hidden lg:block" />
+      <WaitlistBottomSmall className="w-full mt-auto block lg:hidden" />
+      <WaitlistModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

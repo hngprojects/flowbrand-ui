@@ -4,17 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import {
-  type ChangeEventHandler,
-  useEffect,
-  useState,
-  useTransition,
-} from "react";
+import { type ChangeEventHandler, useState } from "react";
+import { toast } from "sonner";
 import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import * as z from "zod";
 import { LoginSchema } from "@/schema/auth.schema";
-import { DEFAULT_LOGIN_REDIRECT } from "~/routes";
+import { usePostAuthRedirect } from "@/hooks/use-post-auth-redirect";
+import { getLoginErrorMessage, isSignInFailure } from "@/lib/login-errors";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
@@ -24,16 +20,7 @@ import GoogleLogo from "@/components/icons/googleIcon";
 
 type LoginValues = z.infer<typeof LoginSchema>;
 
-const PASSWORD_ERROR_MESSAGE = "The password you've entered is incorrect";
 const LOGIN_ERROR_MESSAGE = "Unable to sign in. Please try again.";
-
-function isCredentialsSigninError(
-  response: { error?: string; code?: string } | undefined,
-) {
-  return (
-    response?.error === "CredentialsSignin" || response?.code === "credentials"
-  );
-}
 
 function AuthField({
   id,
@@ -120,14 +107,12 @@ function AuthField({
 }
 
 export function LoginForm() {
-  const router = useRouter();
   const { data: session, status } = useSession();
   const isAuthenticated =
     status === "authenticated" &&
     session?.invalid !== true &&
     !!session?.user?.id;
   const [showPassword, setShowPassword] = useState(false);
-  const [isPending, startTransition] = useTransition();
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
@@ -139,18 +124,14 @@ export function LoginForm() {
     mode: "onSubmit",
   });
 
-  const isBusy = isPending || form.formState.isSubmitting || isAuthenticated;
+  usePostAuthRedirect();
+
+  const isBusy = form.formState.isSubmitting || isAuthenticated;
   const rememberMe =
     useWatch({
       control: form.control,
       name: "rememberMe",
     }) ?? false;
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push(DEFAULT_LOGIN_REDIRECT);
-    }
-  }, [router, isAuthenticated]);
 
   const onSubmit = async (values: LoginValues) => {
     form.clearErrors("password");
@@ -164,41 +145,26 @@ export function LoginForm() {
         redirect: false,
       });
 
-      if (!response?.ok) {
-        const apiMessage =
-          typeof response?.error === "string" &&
-          response.error !== "CredentialsSignin"
-            ? response.error
-            : undefined;
-
-        if (!isCredentialsSigninError(response)) {
-          form.setError("root", {
-            type: "server",
-            message: apiMessage ?? LOGIN_ERROR_MESSAGE,
-          });
-          return;
-        }
-
+      if (isSignInFailure(response)) {
+        const message = getLoginErrorMessage(response);
+        toast.error("Could not sign in", { description: message });
         form.setError("password", {
           type: "server",
-          message:
-            apiMessage && apiMessage !== "CredentialsSignin"
-              ? apiMessage
-              : PASSWORD_ERROR_MESSAGE,
-        });
-        form.setError("root", {
-          type: "server",
-          message:
-            "If you just registered, verify your email with the OTP before logging in.",
+          message,
         });
         return;
       }
 
-      startTransition(() => {
-        router.push(DEFAULT_LOGIN_REDIRECT);
-      });
+      toast.success("Signed in successfully");
+
+      // Session updates after signIn; usePostAuthRedirect handles navigation.
     } catch (error) {
-      console.error("Login failed", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Login failed", error);
+      }
+      toast.error("Could not sign in", {
+        description: LOGIN_ERROR_MESSAGE,
+      });
       form.setError("root", {
         type: "server",
         message: LOGIN_ERROR_MESSAGE,

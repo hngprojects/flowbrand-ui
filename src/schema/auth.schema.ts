@@ -1,5 +1,13 @@
 import * as z from "zod";
 
+/** NextAuth passes every credential field as a string — never use z.boolean() raw here. */
+function parseRememberMe(value: unknown): boolean {
+  if (value === true || value === "true" || value === "on" || value === "1") {
+    return true;
+  }
+  return false;
+}
+
 export const LoginSchema = z.object({
   password: z.string().min(8, {
     message: "Password must be at least 8 characters",
@@ -13,6 +21,26 @@ export const LoginSchema = z.object({
       message: "Enter a valid email address",
     }),
   rememberMe: z.boolean().default(false).optional(),
+});
+
+/** Used in NextAuth `authorize()` where email/password/rememberMe are all strings. */
+export const LoginCredentialsSchema = z.object({
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters",
+  }),
+  email: z
+    .string()
+    .trim()
+    .min(1, {
+      message: "Email is required",
+    })
+    .email({
+      message: "Enter a valid email address",
+    }),
+  rememberMe: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform(parseRememberMe),
 });
 
 export const registrationPasswordField = z

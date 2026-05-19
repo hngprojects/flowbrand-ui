@@ -5,21 +5,57 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { email } = body;
 
-    if (!email) {
+    if (!email || typeof email !== "string") {
       return NextResponse.json(
-        { message: "Email is required" },
+        { success: false, message: "Email is required" },
         { status: 400 },
       );
     }
 
-    // simulate sending to backend or email service
-    console.log("Waitlist email received:", email);
+    const apiUrl = process.env.BASE_URL;
+    if (!apiUrl) {
+      return NextResponse.json(
+        { success: false, message: "API URL not configured" },
+        { status: 500 },
+      );
+    }
+
+    const backendRes = await fetch(`${apiUrl}/api/waitlist/join`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ email: email.trim() }),
+    });
+
+    const data = await backendRes.json().catch(() => null);
+
+    if (!backendRes.ok) {
+      const message =
+        (Array.isArray(data?.details) && data.details[0]) ||
+        data?.message ||
+        "Failed to join waitlist";
+      return NextResponse.json(
+        { success: false, message },
+        { status: backendRes.status },
+      );
+    }
 
     return NextResponse.json(
-      { message: "Successfully joined waitlist" },
-      { status: 200 },
+      {
+        success: true,
+        isNew: backendRes.status === 201,
+        message: data?.message ?? "You are on the waitlist",
+        data: data?.data,
+      },
+      { status: backendRes.status },
     );
-  } catch {
-    return NextResponse.json({ message: "Failed" }, { status: 500 });
+  } catch (error) {
+    console.error("Waitlist proxy error:", error);
+    return NextResponse.json(
+      { success: false, message: "Network or server error" },
+      { status: 500 },
+    );
   }
 }
