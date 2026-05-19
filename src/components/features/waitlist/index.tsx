@@ -8,7 +8,10 @@ import { useState } from "react";
 import { joinWaitlist } from "@/services/waitlist.service";
 import { waitlistSchema } from "@/schema/waitlist.schema";
 import { WaitingUsers } from "@/components/icons/waitingUsers";
-import { WaitlistBottom } from "@/components/icons/waitlistBottom";
+import {
+  WaitlistBottom,
+  WaitlistBottomSmall,
+} from "@/components/icons/waitlistBottom";
 import { toast } from "sonner";
 import WaitlistModal from "@/components/modals/waitlist";
 
@@ -127,7 +130,8 @@ export default function WaitlistBody() {
           </div>
         </div>
       </div>
-      <WaitlistBottom className=" w-full mt-auto " />
+      <WaitlistBottom className="w-full mt-auto hidden lg:block" />
+      <WaitlistBottomSmall className="w-full mt-auto block lg:hidden" />
       <WaitlistModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

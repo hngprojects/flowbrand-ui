@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const apiUrl = process.env.API_URL;
+    const apiUrl = process.env.BASE_URL;
     if (!apiUrl) {
       return NextResponse.json(
         { success: false, message: "API URL not configured" },
