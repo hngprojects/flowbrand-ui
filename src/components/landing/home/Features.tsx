@@ -1,19 +1,12 @@
 import Image from "next/image";
+import { SectionLabelPill } from "@/components/ui/section-label-pill";
 
 const Features = () => {
   return (
-    <section
-      className="w-full py-16 px-4 md:px-8 lg:px-20"
-      style={{ fontFamily: '"Inter", sans-serif' }}
-    >
-      <div className="max-w-7xl mx-auto flex flex-col items-center">
+    <section className="w-full" style={{ fontFamily: '"Inter", sans-serif' }}>
+      <div className="flex flex-col items-center section-class">
         {/* Badge */}
-        <div className="flex justify-center mb-4">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-amber-600 text-sm font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            Features
-          </span>
-        </div>
+        <SectionLabelPill>Features</SectionLabelPill>
 
         {/* Heading */}
         <h2 className="text-3xl md:text-4xl font-semibold mb-12 text-foreground text-center tracking-tight">
@@ -26,7 +19,7 @@ const Features = () => {
           <div className="bg-black rounded-[2rem] p-8 flex flex-col h-[405px] shadow-sm">
             <div className="flex-1 flex justify-start items-start">
               <Image
-                src="/images/feature.png"
+                src="/images/feature-1.png"
                 alt="Guided Setup"
                 width={80}
                 height={80}
@@ -47,7 +40,7 @@ const Features = () => {
           {/* Card 2: Progress Tracking */}
           <div className="relative rounded-[2rem] overflow-hidden flex flex-col h-[405px] group shadow-sm">
             <Image
-              src="/images/dark-girl-2.jpg"
+              src="/images/dark-skin-girl-2.jpg"
               alt="Progress Tracking"
               width={405}
               height={456}

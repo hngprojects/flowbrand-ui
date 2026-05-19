@@ -1,60 +1,62 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import { SectionLabelPill } from "@/components/ui/section-label-pill";
 
 interface Step {
-  id: number;
+  number: number;
   title: string;
   description: string;
   image: string;
-  align?: "center" | "bottom";
 }
 
 const steps: Step[] = [
   {
-    id: 1,
+    number: 1,
     title: "Tell us about your business.",
     description:
-      "Upload your business documents or answer 3 plain questions to get started— no marketing knowledge needed!",
-    image: "/images/snippet.png",
-    align: "center",
+      "Upload your business documents or answer 3 plain questions to get started, no marketing knowledge needed.",
+    image: "/images/snippet.svg",
   },
   {
-    id: 2,
-    title: "We build your marketing strategy",
+    number: 2,
+    title: "We build your marketing strategy.",
     description:
       "Seil matches your answers to the right strategy plan type and personalizes every stage for your business. Done in under 3 seconds.",
-    image: "/images/snippet-1.png",
-    align: "bottom",
+    image: "/images/snippet-1.svg",
   },
   {
-    id: 3,
+    number: 3,
     title: "Take it one step at a time.",
     description:
       "Each week, you get one clear action to complete. Tick it off. Move to the next stage. No overwhelm, no skipped steps.",
-    image: "/images/snippet-2.png",
-    align: "bottom",
+    image: "/images/snippet-2.svg",
   },
 ];
 
 const Solution = () => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   const [direction, setDirection] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setDirection(1);
-      setCurrentStep((prev) => (prev + 1) % steps.length);
-    }, 5000);
+      setActiveStep((prev) => (prev + 1) % steps.length);
+    }, 8000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const slideVariants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 50 : -50,
+  const goToStep = (index: number) => {
+    setDirection(index > activeStep ? 1 : -1);
+    setActiveStep(index);
+  };
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 100 : -100,
       opacity: 0,
     }),
     center: {
@@ -62,135 +64,119 @@ const Solution = () => {
       x: 0,
       opacity: 1,
     },
-    exit: (dir: number) => ({
+    exit: (direction: number) => ({
       zIndex: 0,
-      x: dir > 0 ? -50 : 50,
+      x: direction < 0 ? 100 : -100,
       opacity: 0,
     }),
   };
 
+  const currentStep = steps[activeStep];
+
   return (
-    <div
-      className="w-full py-16 px-4 md:px-8 lg:px-16 overflow-hidden"
-      style={{ fontFamily: '"Inter", sans-serif' }}
-    >
-      {/* Header */}
-      <div className="text-center mb-16">
-        <div className="flex justify-center mb-4">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-amber-600 text-sm font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            Our Solution
-          </span>
-        </div>
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-foreground">
-          How it works
-        </h2>
-        <p className="text-foreground/80 text-lg">
-          We get you up and running in just 3 steps
-        </p>
-      </div>
-
-      {/* Main Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-7xl mx-auto">
-        {/* Left Content */}
-        <div className="flex flex-col justify-center">
-          <AnimatePresence initial={false} custom={direction} mode="wait">
-            <motion.div
-              key={currentStep}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.3 },
-              }}
-              className="flex flex-col justify-center"
-            >
-              {/* Navigation Dots */}
-              <div className="flex gap-2 mb-10">
-                {steps.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setDirection(index > currentStep ? 1 : -1);
-                      setCurrentStep(index);
-                    }}
-                    className={`transition-all duration-300 rounded-full ${
-                      index === currentStep
-                        ? "w-8 h-2.5 bg-amber-500"
-                        : "w-2.5 h-2.5 bg-amber-100 hover:bg-amber-200"
-                    }`}
-                    aria-label={`Go to step ${index + 1}`}
-                  />
-                ))}
-              </div>
-
-              {/* Step Number */}
-              <div className="mb-4">
-                <span className="text-foreground/80 text-sm font-semibold tracking-wider uppercase">
-                  STEP {currentStep + 1}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground mb-4 leading-tight">
-                {steps[currentStep].title}
-              </h3>
-
-              {/* Description */}
-              <p className="text-foreground/80 leading-relaxed text-lg max-w-lg">
-                {steps[currentStep].description}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+    <section className="w-full">
+      <div className="section-class">
+        {/* Header Content */}
+        <div className="mb-16 text-center md:mb-20">
+          <SectionLabelPill>Our Solution</SectionLabelPill>
+          <h2 className="mb-4 text-4xl font-medium tracking-tight text-[#0F172A] md:text-5xl">
+            How it works
+          </h2>
+          <p className="text-base text-black-300 md:text-lg">
+            We get you up and running in just 3 steps
+          </p>
         </div>
 
-        {/* Right Image Container */}
-        <div className="flex justify-center w-full">
-          <AnimatePresence initial={false} custom={direction} mode="wait">
-            <motion.div
-              key={currentStep}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.3 },
-              }}
-              className="w-full max-w-md mx-auto"
-            >
-              {/* Orange Background Container */}
-              <div
-                className={`relative w-full aspect-[4/3] rounded-[2rem] bg-amber-500 flex justify-center overflow-hidden ${
-                  steps[currentStep].align === "bottom"
-                    ? "items-end pt-6 px-2 md:pt-10 md:px-4"
-                    : "items-center py-4 px-2 md:py-6 md:px-4"
-                }`}
-              >
+        {/* Interactive Content */}
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+          {/* Left Column: Text Content */}
+          <div className="flex flex-col items-start">
+            {/* Dots Pagination */}
+            <div className="mb-10 flex gap-3">
+              {steps.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => goToStep(idx)}
+                  className={`h-3 rounded-full transition-all duration-300 ${
+                    idx === activeStep
+                      ? "w-8 bg-orange-400"
+                      : "w-3 bg-orange-100"
+                  }`}
+                  aria-label={`Go to step ${idx + 1}`}
+                />
+              ))}
+            </div>
+
+            <div className="relative min-h-[200px] w-full overflow-hidden">
+              <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.15, duration: 0.4 }}
-                  className="w-full h-full flex justify-center"
+                  key={activeStep}
+                  custom={direction}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 },
+                  }}
+                  className="w-full"
                 >
-                  <Image
-                    src={steps[currentStep].image}
-                    alt={`Step ${currentStep + 1}: ${steps[currentStep].title}`}
-                    className="max-w-full max-h-full object-contain object-bottom rounded-xl"
-                    width={600}
-                    height={400}
-                  />
+                  <span className="mb-4 block text-sm font-semibold tracking-wider text-gray-700 uppercase">
+                    STEP {currentStep.number}
+                  </span>
+                  <h3 className="mb-4 text-2xl font-bold text-[#0F172A] md:text-3xl">
+                    {currentStep.title}
+                  </h3>
+                  <p className="max-w-md text-lg leading-relaxed text-black-300">
+                    {currentStep.description}
+                  </p>
                 </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Right Column: Image Mockup */}
+          <div className="flex justify-center lg:justify-end">
+            <div
+              className={`relative aspect-[606/468] w-full max-w-[606px] overflow-hidden rounded-[32px] bg-accent transition-all duration-500 ${
+                activeStep === 0
+                  ? "p-6 sm:p-8 lg:p-10"
+                  : "px-6 pt-6 pb-0 sm:px-8 sm:pt-8 lg:px-10 lg:pt-10"
+              }`}
+            >
+              <div className="relative h-full w-full">
+                <AnimatePresence initial={false} custom={direction} mode="wait">
+                  <motion.div
+                    key={activeStep}
+                    custom={direction}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 },
+                    }}
+                    className="relative h-full w-full"
+                  >
+                    <Image
+                      src={currentStep.image}
+                      alt={currentStep.title}
+                      fill
+                      className={`object-contain transition-all duration-500 ${
+                        activeStep === 0 ? "object-center" : "object-bottom"
+                      }`}
+                      priority
+                    />
+                  </motion.div>
+                </AnimatePresence>
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

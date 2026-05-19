@@ -1,7 +1,7 @@
 import { PptImg } from "./icons/ppt-img";
 import { PdfImg } from "./icons/pdf-img";
 import { DocsImg } from "./icons/docs-img";
-import { BlueBlackLogo } from "./icons/blueblack-logo";
+import { BlueBlackLogo } from "./icons/blueblackLogo";
 import { StrategyIcon } from "./icons/strategy";
 
 const SideBar = ({
@@ -75,7 +75,7 @@ const SideBar = ({
         ))}
       </div>
 
-      <p className="text-[16px] text-foreground flex items-center gap-default">
+      <div className="text-[16px] text-foreground flex items-center gap-default">
         {loading && <BlueBlackLogo className="w-[25px]" />}
         {loading ? (
           steps
@@ -89,31 +89,18 @@ const SideBar = ({
               <h2 className="text-[16px] text-black-300">Your Strategy</h2>
               <div className="border border-gray-500 p-[20px] space-y-[20px] rounded-[20px]">
                 {strategy.map((item) => (
-                   <div
-                    key={item.title}
-                     className="flex items-start justify-between border-b pb-4 border-gray-500 last:border-none"
-                   >
-                     <div className="flex items-start gap-default">
-                       <StrategyIcon />
-                       <div className="flex flex-col">
-                         <h3 className="text-[16px] text-foreground">
-                          {item.title}
-                         </h3>
-                         <p className="text-[14px] text-black-300">
-                          {item.tasks}
-                         </p>
                   <div
-                    key={strategy.title}
+                    key={item.title}
                     className="flex items-start justify-between border-b pb-4 border-gray-500 last:border-none"
                   >
                     <div className="flex items-start gap-default">
                       <StrategyIcon />
                       <div className="flex flex-col">
                         <h3 className="text-[16px] text-foreground">
-                          {strategy.title}
+                          {item.title}
                         </h3>
                         <p className="text-[14px] text-black-300">
-                          {strategy.tasks}
+                          {item.tasks}
                         </p>
                       </div>
                     </div>
@@ -124,7 +111,7 @@ const SideBar = ({
             </div>
           </div>
         )}
-      </p>
+      </div>
 
       <p className="text-[16px] text-black-300">
         If you need to create more funnels for specific use cases, click on the
