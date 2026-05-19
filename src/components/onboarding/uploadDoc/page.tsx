@@ -152,8 +152,9 @@ export default function OnboardingPage() {
 
   // Clear all intervals on unmount
   useEffect(() => {
+    const intervals = uploadIntervals.current;
     return () => {
-      Object.values(uploadIntervals.current).forEach(clearInterval);
+      Object.values(intervals).forEach(clearInterval);
     };
   }, []);
 
@@ -206,7 +207,10 @@ export default function OnboardingPage() {
                 e.target.value = ""; // reset to allow same file selection
               }}
             />
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-md">
+            <div
+              className="mb-4 flex h-14 w-14 items-center justify-center 
+            rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-md"
+            >
               <FileUp className="h-7 w-7 text-white" strokeWidth={1.8} />
             </div>
             <p className="text-base font-semibold text-gray-800 dark:text-gray-100">
@@ -228,7 +232,10 @@ export default function OnboardingPage() {
           <Button
             onClick={goToWizard}
             disabled={!allDone}
-            className="mt-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 mb-5 dark:hover:bg-blue-800/90"
+            className="mt-5 w-full rounded-md bg-[#2D4EAB] py-6
+             text-base font-semibold text-white hover:bg-[#1E3A8A] 
+            disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700
+             mb-5 dark:hover:bg-blue-800/90"
           >
             Create my strategy
           </Button>
@@ -236,7 +243,9 @@ export default function OnboardingPage() {
 
           <button
             onClick={goToWizard}
-            className="mt-5 flex w-full items-center justify-center gap-1 text-sm text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-400dark:hover:text-gray-200"
+            className="mt-5 flex w-full items-center justify-center gap-1 
+            text-sm text-gray-700 transition-colors 
+            hover:text-gray-900 dark:text-gray-400dark:hover:text-gray-200"
           >
             {"Don't know what to do? Click here"}
             <ChevronRight size={15} />
@@ -245,9 +254,14 @@ export default function OnboardingPage() {
 
         <button
           onClick={goToWizard}
-          className="mt-6 flex w-full items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50"
+          className="mt-6 flex w-full items-center gap-4 rounded-2xl border 
+          border-gray-100 bg-white px-6 py-5 shadow-sm transition-colors hover:bg-gray-50 
+          dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50"
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700">
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center 
+          rounded-xl border border-gray-200 dark:border-gray-700"
+          >
             <FileUp
               size={20}
               className="text-gray-500 dark:text-gray-400"
