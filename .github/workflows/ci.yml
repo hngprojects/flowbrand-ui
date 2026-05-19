@@ -3,12 +3,12 @@ name: CI
 on:
   push:
     branches:
-      - main
-      - develop
+      - dev
+      - staging
   pull_request:
     branches:
-      - main
-      - develop
+      - dev
+      - staging
 
 jobs:
   lint-and-test:
