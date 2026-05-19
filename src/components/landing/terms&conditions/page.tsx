@@ -1,16 +1,44 @@
+"use client";
+
+import { motion } from "framer-motion";
+
+const fadeUp = {
+  initial: { opacity: 0, y: 32 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+};
+
 const TermsConditionsView = () => {
   return (
     <>
-      <div className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]">
-        <h1 className="text-[20px] md:text-[40px]">Terms and Conditions</h1>
-        <p className="text-[14px] md:text-[20px] text-[#565D69]">
+      <motion.div
+        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <motion.h1
+          className="text-[20px] md:text-[40px]"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          Terms and Conditions
+        </motion.h1>
+        <motion.p
+          className="text-[14px] md:text-[20px] text-[#565D69]"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+        >
           Last updated : 10-Apr-2026
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
       <div className="flex flex-col section-class space-y-5">
-        <div>
-          <h2 className="text-[16px]  font-[500] mb-[12px]">
+        <motion.div {...fadeUp}>
+          <h2 className="text-[16px] font-[500] mb-[12px]">
             These Terms & Conditions explain how Seil works and what you can
             expect when using the platform. They are written in simple language
             to help you clearly understand your responsibilities and our role.
@@ -18,10 +46,18 @@ const TermsConditionsView = () => {
               By using Seil, you agree to these terms.
             </span>
           </h2>
-        </div>
+        </motion.div>
 
         <div className="space-y-10">
-          <div className="mb-10 border-t-3 border-gray-300 pt-10">
+          <motion.div
+            className="mb-10 border-t-3 border-gray-300 pt-10"
+            {...fadeUp}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.05,
+            }}
+          >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               1. Use of the Platform
             </h2>
@@ -37,9 +73,12 @@ const TermsConditionsView = () => {
                 provided.
               </span>
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            {...fadeUp}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          >
             <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
               2. User Responsibilities
             </h2>
@@ -55,9 +94,16 @@ const TermsConditionsView = () => {
                 out.
               </span>
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            {...fadeUp}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.15,
+            }}
+          >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               3. Generated Content
             </h2>
@@ -71,9 +117,12 @@ const TermsConditionsView = () => {
                 strategies are implemented and other external factors.
               </span>
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            {...fadeUp}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+          >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               4. Account & Access
             </h2>
@@ -87,9 +136,16 @@ const TermsConditionsView = () => {
                 terms.
               </span>
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            {...fadeUp}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1],
+              delay: 0.25,
+            }}
+          >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               5. Limitation of Liability
             </h2>
@@ -103,9 +159,12 @@ const TermsConditionsView = () => {
                 its recommendations.
               </span>
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            {...fadeUp}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+          >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               6. Changes to the Terms
             </h2>
@@ -117,7 +176,7 @@ const TermsConditionsView = () => {
                 efforts to inform users so they are aware of the changes.
               </span>
             </p>
-          </div>
+          </motion.div>
         </div>
       </div>
     </>

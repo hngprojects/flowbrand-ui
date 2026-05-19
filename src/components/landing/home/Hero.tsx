@@ -7,8 +7,8 @@ const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.25,
-      delayChildren: 0.2,
+      staggerChildren: 0.2,
+      delayChildren: 0.1,
     },
   },
 };
@@ -18,21 +18,26 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
+
+const itemVariantsDown = {
+  hidden: { opacity: 0, y: -32 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
 const imageVariants = {
-  hidden: { opacity: 0, y: 60, scale: 0.98 },
+  hidden: { opacity: 0, x: 80, scale: 0.98 },
   visible: {
     opacity: 1,
-    y: 0,
+    x: 0,
     scale: 1,
-    transition: {
-      duration: 0.9,
-      ease: [0.22, 1, 0.36, 1] as const,
-      delay: 0.1,
-    },
+    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
@@ -66,7 +71,7 @@ const Hero = () => {
         animate="visible"
       >
         <motion.div
-          variants={itemVariants}
+          variants={itemVariantsDown}
           className="inline-flex items-center rounded-lg border border-amber-300 bg-white p-2 pr-5 mb-8 shadow-sm"
         >
           <span className="bg-amber-500 text-white text-xs md:text-sm font-semibold px-4 py-1.5 rounded-lg mr-3">
@@ -78,7 +83,7 @@ const Hero = () => {
         </motion.div>
 
         <motion.h1
-          variants={itemVariants}
+          variants={itemVariantsDown}
           className="text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6 max-w-4xl tracking-tight"
         >
           Grow your business with a smarter{" "}
@@ -116,6 +121,9 @@ const Hero = () => {
         </motion.div>
 
         <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
           variants={imageVariants}
           className="w-full max-w-5xl mx-auto relative mt-4 md:mt-8"
         >

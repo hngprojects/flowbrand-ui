@@ -76,15 +76,43 @@ const Solution = () => {
   return (
     <section className="w-full">
       <div className="section-class">
-        {/* Header Content */}
         <div className="mb-16 text-center md:mb-20">
-          <SectionLabelPill>Our Solution</SectionLabelPill>
-          <h2 className="mb-4 text-4xl font-medium tracking-tight text-[#0F172A] md:text-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <SectionLabelPill>Our Solution</SectionLabelPill>
+          </motion.div>
+
+          <motion.h2
+            className="mb-4 text-4xl font-medium tracking-tight text-[#0F172A] md:text-5xl"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.1,
+            }}
+          >
             How it works
-          </h2>
-          <p className="text-base text-black-300 md:text-lg">
+          </motion.h2>
+
+          <motion.p
+            className="text-base text-black-300 md:text-lg"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.2,
+            }}
+          >
             We get you up and running in just 3 steps
-          </p>
+          </motion.p>
         </div>
 
         {/* Interactive Content */}
