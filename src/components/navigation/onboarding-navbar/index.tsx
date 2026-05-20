@@ -7,24 +7,37 @@ import LogoIcon from "@/components/icons/navbar/logo";
 import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import FunnelSidebar from "@/components/dashboard/funnel/funnel-sidebar";
+import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
+import {
+  DUMMY_STRATEGY_PHASES,
+  DEFAULT_UPLOADED_DOCS,
+} from "@/lib/dashboard-mock-data";
+import { FUNNEL_ROUTE } from "@/routes";
 
-const navLinks = [
-  { label: "Home", path: "/" },
-  { label: "How it works", path: "/how-it-works" },
-  { label: "About Us", path: "/about-us" },
-  { label: "Pricing", path: "/pricing" },
-];
+interface OnboardingNavbarProps {
+  steps?: ReactNode;
+  loading?: boolean;
+  documents?: MockUploadedDoc[];
+  strategyPhases?: readonly { title: string; tasks: string }[];
+}
 
-const OnboardingNavbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const OnboardingNavbar = ({
+  steps = null,
+  loading = false,
+  documents = DEFAULT_UPLOADED_DOCS,
+  strategyPhases = DUMMY_STRATEGY_PHASES,
+}: OnboardingNavbarProps) => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
+  const isFunnelRoute = pathname === FUNNEL_ROUTE;
+
   useEffect(() => {
     if (!profileOpen) return;
-
     const onPointerDown = (event: MouseEvent) => {
       if (
         profileRef.current &&
@@ -33,27 +46,35 @@ const OnboardingNavbar = () => {
         setProfileOpen(false);
       }
     };
-
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [profileOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen, pathname]);
 
   return (
     <>
       <nav className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
         <div className="layout-components-class flex h-[83px] items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
-              className="z-50 flex h-11 w-11 items-center justify-center rounded-[41px] border-[0.5px] border-gray-500 p-[10px] lg:hidden"
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label={isOpen ? "Close menu" : "Open menu"}
-            >
-              {isOpen ? (
-                <X size={24} className="text-foreground" />
-              ) : (
-                <Menu size={24} className="text-foreground" />
-              )}
-            </button>
+            {isFunnelRoute && (
+              <button
+                className="z-50 flex h-11 w-11 items-center justify-center rounded-[41px] border-[0.5px] border-gray-500 p-[10px] lg:hidden"
+                onClick={() => setDrawerOpen(!drawerOpen)}
+                aria-label={drawerOpen ? "Close menu" : "Open menu"}
+              >
+                {drawerOpen ? (
+                  <X size={24} className="text-foreground" />
+                ) : (
+                  <Menu size={24} className="text-foreground" />
+                )}
+              </button>
+            )}
 
             <Link href="/" className="cursor-pointer">
               <LogoIcon />
@@ -81,49 +102,48 @@ const OnboardingNavbar = () => {
                   Profile
                 </span>
               </button>
-              {profileOpen ? (
+              {profileOpen && (
                 <div className="border-border absolute top-[calc(100%+8px)] right-0 z-50 min-w-[160px] overflow-hidden rounded-xl border bg-white py-1 shadow-lg">
                   <LogoutButton variant="menu" className="flex" />
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
         </div>
-
-        <div
-          className={`bg-background absolute top-full left-0 flex w-full flex-col gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
-            isOpen
-              ? "max-h-96 py-6 opacity-100"
-              : "pointer-events-none max-h-0 opacity-0"
-          }`}
-          inert={!isOpen ? true : undefined}
-        >
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.path}
-              className={`hover:text-primary px-4 py-2 text-black-300 ${
-                link.path === "/"
-                  ? pathname === "/"
-                    ? "text-primary"
-                    : ""
-                  : pathname.startsWith(link.path)
-                    ? "text-primary"
-                    : ""
-              }`}
-              onClick={() => setIsOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
       </nav>
 
-      {isOpen && (
-        <div
-          onClick={() => setIsOpen(false)}
-          className="fixed top-0 right-0 left-0 z-40 h-screen w-screen bg-black/50 lg:hidden"
-        />
+      {isFunnelRoute && (
+        <>
+          <div
+            onClick={() => setDrawerOpen(false)}
+            className={`fixed inset-0 z-40 transition-opacity duration-300 lg:hidden ${
+              drawerOpen ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
+            style={{ backgroundColor: "rgba(3, 13, 31, 0.8)" }}
+          />
+
+          <div
+            className={`fixed top-0 left-0 z-50 h-full w-[90vw] transform overflow-auto bg-white transition-transform duration-300 ease-in-out lg:hidden ${
+              drawerOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <button
+              className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200"
+              onClick={() => setDrawerOpen(false)}
+              aria-label="Close sidebar"
+            >
+              <X size={18} className="text-foreground" />
+            </button>
+
+            <FunnelSidebar
+              steps={steps}
+              loading={loading}
+              documents={documents}
+              strategyPhases={strategyPhases}
+              className="block! h-full! w-full! border-none"
+            />
+          </div>
+        </>
       )}
     </>
   );
