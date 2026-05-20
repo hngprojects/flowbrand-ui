@@ -50,7 +50,7 @@ export default function Hero() {
       </div>
 
       {/* ── Image + overlay ── */}
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full mt-12 md:mt-0 md:-mb-14">
         {/* Desktop */}
         <div className="relative mx-auto hidden w-full lg:block w-full ">
           <Image
@@ -63,13 +63,13 @@ export default function Hero() {
           />
 
           {/* Overlay: absolute, pinned to bottom, covers ~40% of image height */}
-          <div className="pointer-events-none absolute bottom-0 left-0 w-full select-none h-[25%]">
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0  select-none flex justify-center translate-y-1/4">
             <Image
-              src="/images/white.png"
+              src="/images/white2.png"
               alt=""
               width={1450}
               height={778}
-              className=" h-full w-full object-cover object-top mt-9 lg:mt-0 "
+              className="w-[calc(100svw+300px)] max-w-[calc(100svw+300px)]  -mx-35"
               aria-hidden
             />
           </div>
