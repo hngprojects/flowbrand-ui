@@ -1,4 +1,4 @@
-import OnboardingUpload from "@/components/onboarding/onboarding-upload";
+import OnboardingUpload from "@/components/Onboardin/onboarding-upload";
 
 export default function Page() {
   return <OnboardingUpload />;
