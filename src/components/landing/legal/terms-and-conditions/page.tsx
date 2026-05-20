@@ -1,4 +1,4 @@
-const TermsConditionsView = () => {
+const TermsAndConditionsView = () => {
   return (
     <>
       <div className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]">
@@ -124,4 +124,4 @@ const TermsConditionsView = () => {
   );
 };
 
-export default TermsConditionsView;
+export default TermsAndConditionsView;
