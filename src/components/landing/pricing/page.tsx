@@ -155,7 +155,7 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("monthly")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-blue-600 text-white shadow"
+                  ? "bg-[#326AD1] text-white shadow"
                   : "text-[#030D1F] hover:text-[#565D69] dark:text-gray-400"
               }`}
             >
@@ -214,7 +214,7 @@ export default function PricingPage() {
                     ))}
                   </div>
                 </motion.div>
-                <Button className="mt-4 rounded-md w-full bg-blue-600 text-white hover:bg-blue-700">
+                <Button className="mt-4 rounded-md w-full bg-[#326AD1] text-white hover:bg-[#2A56B0]">
                   Start For Free
                 </Button>
               </motion.div>
