@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
-import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -15,70 +14,18 @@ import StepThree from "@/components/onboarding/StepThree";
 export default function OnboardingPage() {
   const router = useRouter();
   const store = useOnboardingStore();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const handleBackClick = () => {
     if (store.step === 1) {
-      router.push("/auth-routes");
+      router.push("/login");
     } else {
       store.prevStep();
     }
   };
 
-  const handleCreateStrategy = async () => {
-    if (isLoading) return;
-
-    const payload = {
-      businessDescription: store.businessDescription,
-      idealCustomer: {
-        theyAre: store.theyAre,
-        whoWantTo: store.whoWantTo,
-        locatedIn: store.locatedIn,
-        customInput: store.customCustomerInput,
-      },
-      trafficChannel: store.trafficChannel,
-    };
-
-    const validation = onboardingSchema.safeParse(payload);
-    if (!validation.success) {
-      toast.error(validation.error.issues?.[0]?.message || "Invalid input");
-      return;
-    }
-
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      toast.error("Session expired. Please sign in again.");
-      router.push("/auth-routes");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "";
-
-      const response = await fetch(`${baseUrl}/api/onboarding/complete`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        // 3. Use validation.data (schema-normalized)
-        body: JSON.stringify(validation.data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to complete onboarding");
-      }
-
-      toast.success("Strategy created successfully!");
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleCreateStrategy = () => {
+    toast.info("Strategy submission coming soon.");
   };
 
   return (
