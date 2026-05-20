@@ -52,7 +52,7 @@ const Navbar = () => {
             >
               <Link
                 href="/login"
-                className="text-foreground hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-
+                className="text-foreground hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:ring-offset-2"
               >
                 Log In
               </Link>
@@ -74,7 +74,7 @@ const Navbar = () => {
             >
               <Link
                 href="/register"
-                className="bg-primary text-primary-foreground relative inline-flex h-[51px] items-center justify-center rounded-[10px] px-6 py-3 font-semibold focus-visible:ring-2 focus-visible:ring-a
+                className="bg-primary text-primary-foreground relative inline-flex h-[51px] items-center justify-center rounded-[10px] px-6 py-3 font-semibold focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:ring-offset-2 transition-colors"
               >
                 <motion.span
                   className="absolute inset-0 bg-amber-500 z-0"

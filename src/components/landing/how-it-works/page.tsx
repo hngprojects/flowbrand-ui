@@ -176,7 +176,7 @@ const HowItWorks = () => {
           >
             <Link
               href="/register"
-              className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset fo
+              className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:ring-offset-2 transition-colors"
             >
               <motion.span
                 className="absolute inset-0 bg-amber-500 z-0"
