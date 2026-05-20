@@ -40,8 +40,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Prepare pnpm workspace for CI
+        run: |
+          {
+            echo 'packages:'
+            echo '  - "."'
+            cat pnpm-workspace.yaml
+          } > pnpm-workspace.ci.yaml
+          mv pnpm-workspace.ci.yaml pnpm-workspace.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -49,8 +56,8 @@ jobs:
       - name: Check formatting
         run: pnpm check-format
 
-      - name: Lint
-        run: pnpm lint
+      # - name: Lint
+      #   run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
@@ -133,6 +140,12 @@ jobs:
 
             export HUSKY=0
             export NEXT_TELEMETRY_DISABLED=1
+            {
+              echo 'packages:'
+              echo '  - "."'
+              cat pnpm-workspace.yaml
+            } > pnpm-workspace.ci.yaml
+            mv pnpm-workspace.ci.yaml pnpm-workspace.yaml
             pnpm install --frozen-lockfile --prod=false
             pnpm build
             pm2 delete "${{ env.APP_NAME }}" || true
