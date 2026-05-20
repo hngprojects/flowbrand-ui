@@ -37,14 +37,14 @@ const row1: Testimonial[] = [
   },
   {
     quote:
-      "This gave me structure. I no longer guess what to do next in my marketing, and i’ve already started seeing better engagement and more serious leads.",
+      "This gave me structure. I no longer guess what to do next in my marketing, and i've already started seeing better engagement and more serious leads.",
     name: "Golda Falcon",
     image: "/images/david.png",
     alt: "Golda Falcon testimonial",
   },
   {
     quote:
-      "I used to struggle with turning interest into actual paying customers. Now i have a proper flow that helps me follow up and close more deals”.",
+      "I used to struggle with turning interest into actual paying customers. Now i have a proper flow that helps me follow up and close more deals.",
     name: "Rita Johnson",
     image: "/images/bright.png",
     alt: "Rita Johnson testimonial",
@@ -82,12 +82,14 @@ const row2: Testimonial[] = [
   },
   {
     quote:
-      "My biggest win is consistency. I now show up with a plan, not just vibes and it’s paying off.",
+      "My biggest win is consistency. I now show up with a plan, not just vibes and it's paying off.",
     name: "Ray Sybil",
     image: "/images/ellipse-2.png",
     alt: "Ray Sybil testimonial",
   },
 ];
+
+const easeOut = [0.22, 1, 0.36, 1] as const;
 
 function TestimonialRow({
   items,
@@ -113,7 +115,7 @@ function TestimonialRow({
       >
         {duplicatedItems.map((t, index) => (
           <Card key={`${t.name}-${index}`} className={testimonialCardClassName}>
-            <p className="w-full text-sm leading-snug text-black-500 sm:text-base sm:leading-[130%] md:text-lg lg:text-[20px]">
+            <p className="w-full leading-snug text-black-500 text-[13px] md:text-[20px]">
               “{t.quote}”
             </p>
             <div className="flex w-full items-center justify-center gap-2 sm:gap-2.5">
@@ -124,7 +126,7 @@ function TestimonialRow({
                 height={40}
                 className="size-8 shrink-0 rounded-full sm:size-10"
               />
-              <span className="text-sm font-medium text-black-500 sm:text-base">
+              <span className="text-[13px] md:text-[20px] font-[500] text-black-500">
                 {t.name}
               </span>
             </div>
@@ -138,7 +140,7 @@ function TestimonialRow({
 export default function Testimonials() {
   return (
     <section className="w-full">
-      <div className="flex flex-col items-center justify-center text-center">
+      <div className="flex flex-col items-center justify-center text-center py-10">
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -149,15 +151,11 @@ export default function Testimonials() {
         </motion.div>
 
         <motion.h2
-          className="mb-6 px-4 text-2xl font-medium tracking-tight text-black-500 sm:mb-8 sm:text-4xl md:text-5xl"
+          className="mb-2 px-4 text-[24px] md:text-[32px] font-[500] max-w-xs md:max-w-none tracking-tight text-black-500"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{
-            duration: 0.7,
-            ease: [0.22, 1, 0.36, 1] as const,
-            delay: 0.15,
-          }}
+          transition={{ duration: 0.7, ease: easeOut, delay: 0.15 }}
         >
           Trusted by growing businesses
         </motion.h2>

@@ -1,7 +1,6 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -14,9 +13,9 @@ import { SectionLabelPill } from "@/components/ui/section-label-pill";
 
 export default function FaqSection() {
   return (
-    <section className="w-full">
+    <section className="w-full pt-15 bg-primary-60">
       <div className="flex flex-col items-center section-class">
-        <div className="flex w-full flex-col items-center gap-6">
+        <div className="flex w-full flex-col items-center">
           <motion.div
             className="mb-4"
             initial={{ opacity: 0, y: -16 }}
@@ -28,7 +27,7 @@ export default function FaqSection() {
           </motion.div>
 
           <motion.h2
-            className="text-foreground text-center text-3xl font-semibold md:text-4xl"
+            className="text-foreground text-center text-[24px] md:text-[32px] font-[500] mb-8"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -83,63 +82,6 @@ export default function FaqSection() {
               </motion.div>
             ))}
           </Accordion>
-
-          <div className="mt-20 flex flex-col items-center gap-6 pb-12 text-center md:pb-20">
-            <motion.h2
-              className="text-black-500 max-w-4xl text-3xl font-semibold tracking-tight md:text-4xl lg:text-5xl"
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
-            >
-              Get a step-by-step marketing strategy in minutes
-            </motion.h2>
-
-            <motion.p
-              className="text-black-400 max-w-md text-sm leading-relaxed md:text-base"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{
-                duration: 0.7,
-                ease: [0.22, 1, 0.36, 1] as const,
-                delay: 0.15,
-              }}
-            >
-              A simple marketing plan that attracts, nurtures, and converts
-              customers without stress
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1] as const,
-                delay: 0.25,
-              }}
-            >
-              <motion.div
-                className="mt-4 inline-block rounded-lg overflow-hidden"
-                whileHover="hover"
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
-                <Link
-                  href="/register"
-                  className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
-                >
-                  <motion.span
-                    className="absolute inset-0 bg-amber-500 z-0"
-                    variants={{ hover: { x: 0 } }}
-                    initial={{ x: "-100%" }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  />
-                  <span className="relative z-10">Create a free account</span>
-                </Link>
-              </motion.div>
-            </motion.div>
-          </div>
         </div>
       </div>
     </section>
