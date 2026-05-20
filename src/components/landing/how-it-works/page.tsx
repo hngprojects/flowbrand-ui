@@ -6,7 +6,7 @@ const HowItWorks = () => {
   const steps = [
     {
       title: "Tell us about your business.",
-      desc: "Upload your business documents or answer 3 plain questions to get started— no marketing knowledge needed.",
+      desc: "Upload your business documents or answer 3 plain questions to get started, no marketing knowledge needed.",
       image: "/images/snippet.svg",
     },
     {
@@ -24,13 +24,13 @@ const HowItWorks = () => {
     <main className="w-full bg-primary-50">
       <div className="bg-primary-50 h-[300px] md:h-[400px] w-full relative flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="max-w-[721px] space-y-6 text-center z-10">
-          <h1 className="text-[28px] md:text-[40px] text-black-500 font-medium leading-tight">
+          <h1 className="text-[28px] md:text-[40px] text-black-500 font-bold leading-tight">
             From setup to growth in three steps
           </h1>
 
           <p className="text-[16px] md:text-[18px] text-black-300 max-w-[600px] mx-auto">
             Seil takes you from understanding your business to running a fully
-            structured marketing Strategy—step by step.
+            structured marketing Strategy, step by step.
           </p>
         </div>
 

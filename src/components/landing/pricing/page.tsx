@@ -135,8 +135,8 @@ export default function PricingPage() {
             className="mb-8 text-gray-900
            dark:text-gray-900 "
           >
-            Whether you&apos;re just figuring things out or ready to scale,
-            FlowBrand gives you exactly what you need at every stage.
+            Whether you&apos;re just figuring things out or ready to scale, Seil
+            gives you exactly what you need at every stage.
           </p>
 
           {/* Toggle — slightly rounded rectangle, not full pill */}
@@ -246,12 +246,12 @@ export default function PricingPage() {
 
       {/* COMPARE TABLE */}
       <section className="w-full py-16">
-        <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
-          <h2 className="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="mx-auto w-full max-w-5xl px-6 md:px-12 lg:px-20">
+          <h2 className="mb-3 text-center text-3xl font-bold text-black dark:text-white">
             Compare Plans
           </h2>
           <p className="mb-10 text-center text-gray-800 dark:text-gray-400">
-            Find the right plan for where your business is now—and where
+            Find the right plan for where your business is now and where
             you&apos;re going.
           </p>
 
@@ -304,12 +304,9 @@ export default function PricingPage() {
                 FAQs
               </span>
             </div>
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+            <h2 className="mb-4 text-3xl font-bold text-black dark:text-white">
               Still wondering? We thought you might be .
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Get answers to common questions about our plans and features.
-            </p>
           </div>
 
           <Accordion

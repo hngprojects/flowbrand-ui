@@ -5,11 +5,16 @@ import { Check, Eye, EyeOff } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { getGoogleOAuthUrl, registerUser } from "~/actions/auth";
+import { getGoogleOAuthUrl, registerUser, sendOtp } from "~/actions/auth";
+import { isResendOtpSuccess } from "~/lib/auth-action-results";
+import {
+  setRegisterVerifyCooldown,
+  setRegisterVerifyEmail,
+} from "~/lib/register-verify-storage";
 import GoogleLogo from "@/components/icons/googleIcon";
 import { Button } from "~/components/ui/button";
 import {
@@ -28,7 +33,6 @@ import {
   RegistrationFormSchema,
 } from "@/schema/auth.schema";
 import { COUNTRY_OPTIONS } from "~/lib/countries";
-import { setRegisterVerifyEmail } from "~/lib/register-verify-storage";
 import { cn } from "@/lib/utils";
 
 const inputClassWithError = (hasError: boolean) => {
@@ -66,13 +70,11 @@ const RegistrationForm = () => {
 
   const { isSubmitting } = form.formState;
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, router]);
-
   const onSubmit = async (values: z.infer<typeof RegistrationFormSchema>) => {
+    if (isSubmitting) {
+      return;
+    }
+
     try {
       const data = await registerUser({
         email: values.email,
@@ -81,26 +83,39 @@ const RegistrationForm = () => {
         password: values.password,
         terms_accepted: true,
       });
-      const isSuccess = data.ok && data.status === 201;
+      const isSuccess = data.ok && data.status >= 200 && data.status < 300;
       const errorDescription = !data.ok
         ? data.error
         : !isSuccess
           ? "Registration could not be completed."
           : undefined;
 
-      toast[isSuccess ? "success" : "error"](
-        isSuccess ? "Account created successfully" : "An error occurred",
-        {
-          description: isSuccess
-            ? "Verify your email with the code we sent"
-            : errorDescription,
-        },
-      );
-
-      if (isSuccess) {
-        setRegisterVerifyEmail(values.email);
-        router.push("/register/verify");
+      if (!isSuccess) {
+        toast.error("An error occurred", { description: errorDescription });
+        return;
       }
+
+      const otpResult = await sendOtp(values.email);
+      setRegisterVerifyEmail(values.email);
+      if (otpResult.cooldownSeconds) {
+        setRegisterVerifyCooldown(otpResult.cooldownSeconds);
+      }
+
+      if (!isResendOtpSuccess(otpResult)) {
+        toast.error("Account created", {
+          description:
+            otpResult.error ??
+            "We could not send a verification code. Try signing in to resend.",
+        });
+        router.push("/register/verify");
+        return;
+      }
+
+      toast.success("Account created", {
+        description:
+          otpResult.message ?? "Check your email for a 6-digit code.",
+      });
+      router.push("/register/verify");
     } catch {
       toast.error("An error occurred", {
         description: "Please try again.",
@@ -119,8 +134,8 @@ const RegistrationForm = () => {
           Start building your first marketing strategy
         </h2>
         <p className="text-foreground/70 text-sm sm:text-[24px]">
-          Create your free FlowBrand account and launch your first campaign in
-          under 10 minutes.
+          Create your free Seil account and launch your first campaign in under
+          10 minutes.
         </p>
       </div>
 
@@ -405,7 +420,7 @@ const RegistrationForm = () => {
       <p className="text-foreground/50 px-4 pb-4 text-center text-[10px]">
         By signing up you agree to our{" "}
         <Link
-          href="/terms-and-conditions"
+          href="/terms&conditions"
           className="text-primary hover:text-accent underline"
         >
           Terms of Service
