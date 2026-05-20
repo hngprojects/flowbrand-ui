@@ -1,5 +1,4 @@
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
-import { OnboardingStepNav } from "@/components/dashboard/onboarding/onboarding-step-nav";
 import { PatternMesh } from "@/components/icons/patternSvg";
 
 export function DashboardOnboardingLayout({
@@ -19,7 +18,6 @@ export function DashboardOnboardingLayout({
       />
       <div className="relative z-10 flex min-h-screen flex-col">
         <OnboardingNavbar />
-        <OnboardingStepNav />
         <div className="flex flex-1 flex-col">{children}</div>
       </div>
     </div>

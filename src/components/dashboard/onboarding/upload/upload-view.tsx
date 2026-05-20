@@ -4,6 +4,9 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileUp, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DocsImg } from "@/components/icons/docs-img";
+import { PptImg } from "@/components/icons/ppt-img";
+import { PdfImg } from "@/components/icons/pdf-img";
 import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
 import { fileNameToDocType, formatFileSize } from "@/lib/dashboard-mock-data";
 import {
@@ -12,6 +15,7 @@ import {
 } from "@/lib/dashboard-mock-session";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { FUNNEL_ROUTE, ONBOARDING_QUESTIONS_ROUTE } from "@/routes";
+import { cn } from "@/lib/utils";
 
 interface UploadedFile {
   id: string;
@@ -32,10 +36,11 @@ function fileExt(name: string) {
   return name.split(".").pop()?.toUpperCase() ?? "FILE";
 }
 
-function extColor(ext: string) {
-  if (ext === "PDF") return "bg-red-500";
-  if (ext === "PPT" || ext === "PPTX") return "bg-orange-500";
-  return "bg-blue-500";
+function FileTypeIcon({ ext }: { ext: string }) {
+  if (ext === "PDF") return <PdfImg className="h-8 w-8 shrink-0" />;
+  if (ext === "PPT" || ext === "PPTX")
+    return <PptImg className="h-8 w-8 shrink-0" />;
+  return <DocsImg className="h-8 w-8 shrink-0" />;
 }
 
 function FileRow({
@@ -48,47 +53,42 @@ function FileRow({
   const ext = fileExt(item.file.name);
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
-      <div className="relative mt-0.5 flex h-10 w-8 shrink-0 flex-col items-center justify-end rounded border border-gray-200 bg-gray-50 pb-1 dark:border-gray-700 dark:bg-gray-800">
-        <span
-          className={`rounded px-1 py-0.5 text-[9px] font-bold text-white ${extColor(ext)}`}
-        >
-          {ext}
-        </span>
-      </div>
+    <div className="flex items-start gap-3 py-1">
+      <FileTypeIcon ext={ext} />
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm font-medium text-gray-800 dark:text-gray-100">
+        <div className="flex items-center justify-between gap-3">
+          <p className="truncate text-sm font-medium text-[#1F2937]">
             {item.file.name}
           </p>
-          <span className="shrink-0 text-sm text-gray-500 dark:text-gray-400">
+          <span className="shrink-0 text-sm text-[#6B7280]">
             {item.done
               ? formatMB(item.file.size)
               : `${item.progress}% Uploading`}
           </span>
         </div>
 
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+        <div className="mt-2 h-[6px] w-full overflow-hidden rounded-full bg-[#F3F4F6]">
           <div
-            className="h-full rounded-full bg-amber-400 transition-all duration-300"
-            style={{ width: `${item.progress}%` }}
+            className="h-full rounded-full bg-[#F59E0B] transition-all duration-300"
+            style={{ width: `${item.done ? 100 : item.progress}%` }}
           />
         </div>
 
         {!item.done && (
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-600">
+          <p className="mt-1 text-xs text-[#9CA3AF]">
             {formatMB(item.file.size)}
           </p>
         )}
       </div>
 
       <button
+        type="button"
         onClick={() => onRemove(item.id)}
-        className="mt-1 shrink-0 text-gray-300 transition-colors hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+        className="mt-0.5 shrink-0 text-[#D1D5DB] transition-colors hover:text-[#6B7280]"
         aria-label="Remove file"
       >
-        <X size={15} />
+        <X size={16} />
       </button>
     </div>
   );
@@ -104,7 +104,6 @@ export function UploadView() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
 
-  // Store intervals to clear on remove/unmount
   const uploadIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const goToQuestions = useCallback(() => {
@@ -173,8 +172,8 @@ export function UploadView() {
 
       Array.from(incoming).forEach((file) => {
         const ext = fileExt(file.name);
-        if (!ALLOWED_EXTENSIONS.includes(ext)) return; // enforce type
-        if (file.size > MAX_MB * 1024 * 1024) return; // enforce size
+        if (!ALLOWED_EXTENSIONS.includes(ext)) return;
+        if (file.size > MAX_MB * 1024 * 1024) return;
 
         const id = `${file.name}-${Date.now()}-${Math.random()}`;
         setFiles((prev) => [...prev, { id, file, progress: 0, done: false }]);
@@ -193,7 +192,6 @@ export function UploadView() {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  // Clear all intervals on unmount
   useEffect(() => {
     const intervals = uploadIntervals.current;
     return () => {
@@ -206,15 +204,15 @@ export function UploadView() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <div className="mx-auto flex w-full max-w-[620px] flex-col items-center px-4 py-14 md:py-20">
-        <h1 className="mb-2 text-center text-3xl font-semibold text-gray-900 dark:text-gray-100 md:text-4xl">
+      <div className="mx-auto flex w-full max-w-[640px] flex-col items-center px-4 py-12 md:py-16">
+        <h1 className="mb-2 text-center text-[28px] font-semibold leading-tight text-[#111827] md:text-[32px]">
           Start creating your marketing strategy
         </h1>
-        <p className="mb-10 text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="mb-8 max-w-md text-center text-sm text-[#6B7280] md:mb-10 md:text-base">
           Create marketing strategy tailored to your business needs.
         </p>
 
-        <div className="w-full rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="w-full rounded-2xl border border-[#F3F4F6] bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] md:p-8">
           <div
             role="button"
             tabIndex={0}
@@ -232,12 +230,12 @@ export function UploadView() {
               setDragging(false);
               addFiles(e.dataTransfer.files);
             }}
-            className={[
-              "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed py-10 transition-colors",
+            className={cn(
+              "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-10 transition-colors",
               dragging
-                ? "border-blue-400 bg-blue-50 dark:bg-blue-950/20"
-                : "border-gray-200 hover:border-blue-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/40",
-            ].join(" ")}
+                ? "border-primary bg-primary-50"
+                : "border-[#E5E7EB] bg-white hover:border-primary-300 hover:bg-[#FAFBFC]",
+            )}
           >
             <input
               ref={inputRef}
@@ -247,22 +245,22 @@ export function UploadView() {
               className="hidden"
               onChange={(e) => {
                 addFiles(e.target.files);
-                e.target.value = ""; // reset to allow same file selection
+                e.target.value = "";
               }}
             />
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-md">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary shadow-sm">
               <FileUp className="h-7 w-7 text-white" strokeWidth={1.8} />
             </div>
-            <p className="text-base font-semibold text-gray-800 dark:text-gray-100">
-              Upload your business documents
+            <p className="text-center text-base font-semibold text-[#111827]">
+              Upload your business identity documents
             </p>
-            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+            <p className="mt-1 text-center text-xs text-[#9CA3AF]">
               Supports Doc, Docx, PDF, PPT, PPTX . Max 5.0MB
             </p>
           </div>
 
           {hasFiles && (
-            <div className="mt-4 flex flex-col gap-2">
+            <div className="mt-6 flex flex-col gap-4 border-t border-[#F3F4F6] pt-6">
               {files.map((item) => (
                 <FileRow key={item.id} item={item} onRemove={removeFile} />
               ))}
@@ -270,10 +268,10 @@ export function UploadView() {
           )}
 
           <Button
+            type="button"
             onClick={goToFunnel}
             disabled={!allDone}
-            className="mt-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A]
-             disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800/90"
+            className="mt-6 h-auto w-full rounded-[10px] bg-primary py-4 text-base font-semibold text-white hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Create my strategy
           </Button>
@@ -281,38 +279,35 @@ export function UploadView() {
           <button
             type="button"
             onClick={goToQuestions}
-            className="mt-5 flex w-full items-center justify-center gap-1 text-sm text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-0.5 text-sm text-[#6B7280] transition-colors hover:text-[#374151]"
           >
-            {"Don't know what to do? Click here"}
-            <ChevronRight size={15} />
+            Don&apos;t know what to do? Click here
+            <ChevronRight size={16} className="text-[#9CA3AF]" />
           </button>
         </div>
 
         <button
           type="button"
           onClick={goToQuestions}
-          className="mt-6 flex w-full items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 
-          shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50"
+          className={cn(
+            "mt-6 flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-[#F3F4F6] bg-white px-5 py-5",
+            "shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-colors hover:bg-[#FAFBFC] hover:cursor-pointer",
+          )}
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700">
-            <FileUp
-              size={20}
-              className="text-gray-500 dark:text-gray-400"
-              strokeWidth={1.8}
-            />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] bg-white">
+            <FileUp size={20} className="text-[#9CA3AF]" strokeWidth={1.8} />
           </div>
-          <div className="flex-1 text-left">
-            <p className="text-[15px] font-semibold text-gray-800 dark:text-gray-100">
-              {
-                "Don't have a document to upload? Create your strategy another way."
-              }
+          <div className="min-w-0 flex-1 text-left">
+            <p className="text-[15px] font-semibold leading-snug text-[#111827]">
+              Don&apos;t have a document to upload? Create your funnel another
+              way.
             </p>
-            <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-500">
+            <p className="mt-1 text-sm text-[#6B7280]">
               Create your marketing strategy without the need to upload a
               document.
             </p>
           </div>
-          <ChevronRight size={18} className="shrink-0 text-gray-400" />
+          <ChevronRight size={20} className="shrink-0 text-[#9CA3AF]" />
         </button>
       </div>
     </main>

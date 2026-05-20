@@ -4,9 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import LogoIcon from "@/components/icons/navbar/logo";
-import { motion } from "framer-motion";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -21,8 +19,8 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-background border-border font-inter sticky top-0 z-50 border-b">
-        <div className=" layout-components-class flex h-[83px]  items-center justify-between ">
+      <nav className="bg-background border-border sticky top-0 z-50 border-b">
+        <div className="layout-components-class flex h-[83px] items-center justify-between">
           <Link href="/" className="cursor-pointer">
             <LogoIcon />
           </Link>
@@ -32,12 +30,13 @@ const Navbar = () => {
               <li key={link.label}>
                 <Link
                   href={link.path}
-                  className={`hover:text-primary flex h-12 items-center justify-center py-3 text-base font-medium text-black-300 transition-colors ${
-                    pathname === link.path ||
-                    (link.path !== "/" && pathname.startsWith(link.path))
-                      ? "text-primary font-semibold"
-                      : ""
-                  }`}
+                  className={`hover:text-primary flex h-12 items-center justify-center py-3 
+                    text-base font-medium text-black-300 transition-colors ${
+                      pathname === link.path ||
+                      (link.path !== "/" && pathname.startsWith(link.path))
+                        ? "text-primary font-semibold"
+                        : ""
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -46,56 +45,22 @@ const Navbar = () => {
           </ul>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <motion.div
-              className="relative"
-              whileHover="hover"
-              whileTap={{ scale: 0.97 }}
+            <Link
+              href="/login"
+              className="text-primary hover:text-primary flex h-[51px] items-center 
+              justify-center px-6 py-3 text-base font-medium transition-colors"
             >
-              <Link
-                href="/login"
-                className={cn(
-                  "text-foreground hover:text-primary flex h-[51px] items-center",
-                  "justify-center px-6 py-3 text-base font-medium transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500",
-                  "focus-visible:ring-inset focus-visible:ring-offset-2",
-                )}
-              >
-                Log In
-              </Link>
-              <motion.span
-                className="absolute bottom-2 left-6 right-6 h-[2px] bg-primary origin-left"
-                variants={{
-                  hover: { scaleX: 1 },
-                }}
-                initial={{ scaleX: 0 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-              />
-            </motion.div>
-
-            <motion.div
-              className="inline-block rounded-[10px] overflow-hidden"
-              whileHover="hover"
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              Log In
+            </Link>
+            <Link
+              href="/register"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 
+              inline-flex h-[51px] items-center justify-center 
+              rounded-[10px] px-6 py-3 font-semibold transition-colors focus-visible:ring-2 
+              focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
             >
-              <Link
-                href="/register"
-                className={cn(
-                  "bg-primary text-primary-foreground relative inline-flex h-[51px]",
-                  "items-center justify-center rounded-[10px] px-6 py-3 font-semibold",
-                  "focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset",
-                  "focus-visible:ring-offset-2 transition-colors",
-                )}
-              >
-                <motion.span
-                  className="absolute inset-0 bg-amber-500 z-0"
-                  variants={{ hover: { x: 0 } }}
-                  initial={{ x: "-100%" }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-                <span className="relative z-10">Get started</span>
-              </Link>
-            </motion.div>
+              Get started
+            </Link>
           </div>
 
           <button
@@ -112,11 +77,12 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`bg-background absolute top-full left-0 flex w-full flex-col gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
-            isOpen
-              ? "max-h-96 py-6 opacity-100"
-              : "pointer-events-none max-h-0 opacity-0"
-          }`}
+          className={`bg-background absolute top-full left-0 flex w-full flex-col 
+            gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
+              isOpen
+                ? "max-h-96 py-6 opacity-100"
+                : "pointer-events-none max-h-0 opacity-0"
+            }`}
           inert={!isOpen ? true : undefined}
         >
           {navLinks.map((link) => (

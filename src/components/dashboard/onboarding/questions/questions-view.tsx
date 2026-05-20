@@ -57,7 +57,6 @@ export function QuestionsView() {
     }
 
     setIsLoading(true);
-    // Local-only flow: persist answers for funnel dummy UI (no API).
     await new Promise((resolve) => setTimeout(resolve, 600));
 
     saveDashboardMockSession(

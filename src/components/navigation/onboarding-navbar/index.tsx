@@ -61,7 +61,6 @@ const OnboardingNavbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <LogoutButton className="hidden lg:flex" />
             <button
               type="button"
               aria-label="Notifications"
@@ -117,12 +116,6 @@ const OnboardingNavbar = () => {
               {link.label}
             </Link>
           ))}
-          <div className="px-4">
-            <LogoutButton
-              variant="menu"
-              className="flex w-full rounded-lg border border-border"
-            />
-          </div>
         </div>
       </nav>
 
