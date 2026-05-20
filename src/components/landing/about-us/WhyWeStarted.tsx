@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 
 export default function WhyWeStarted() {
   return (
-    <section className="w-full bg-[var(--background)]">
-      <div className="section-class flex flex-col md:flex-row md:items-center">
+    <section className="w-full">
+      <div className="section-class max-w-7xl flex flex-col lg:flex-row lg:items-center justify-between">
         <motion.div
-          className="w-full flex-shrink-0 md:mt-8 md:w-[50%] md:pr-4 mb-4 md:mb-0 "
+          className="w-full flex-shrink-0 lg:mt-8 lg:w-[42%] mb-5 lg:mb-0"
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -21,21 +21,21 @@ export default function WhyWeStarted() {
           <h2 className="mb-5 text-[22px] font-bold tracking-tight text-[#0D1117] md:text-[26px]">
             Why we started
           </h2>
-          <p className="mb-3 text-[16px] leading-relaxed text-black md:text-[18px]">
+          <p className="mb-3 text-[16px] lg:text-[20px] leading-relaxed text-black md:text-[18px]">
             We kept seeing the same story everywhere.
           </p>
-          <p className="mb-3 text-[16px] leading-relaxed text-black md:text-[18px]">
+          <p className="mb-3 text-[16px] lg:text-[20px] leading-relaxed text-black md:text-[18px]">
             A business owner doing everything, running the operation, managing
             staff, chasing payments and still finding time to post on Instagram
             hoping something would click.
           </p>
-          <p className="text-[16px] leading-relaxed text-black md:text-[18px]">
+          <p className="text-[16px] lg:text-[20px] leading-relaxed text-black md:text-[18px]">
             No strategy. No plan. Just effort and hope.
           </p>
         </motion.div>
 
         <motion.div
-          className="w-full flex-shrink-0 md:w-[50%]"
+          className="w-full flex-shrink-0 lg:w-[45%]"
           initial={{ opacity: 0, x: 50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.2 }}

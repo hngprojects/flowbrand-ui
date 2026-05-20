@@ -1,7 +1,6 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -14,9 +13,9 @@ import { SectionLabelPill } from "@/components/ui/section-label-pill";
 
 export default function FaqSection() {
   return (
-    <section className="w-full">
+    <section className="w-full pt-15 bg-primary-60">
       <div className="flex flex-col items-center section-class">
-        <div className="flex w-full flex-col items-center gap-6">
+        <div className="flex w-full flex-col items-center">
           <motion.div
             className="mb-4"
             initial={{ opacity: 0, y: -16 }}
@@ -28,7 +27,7 @@ export default function FaqSection() {
           </motion.div>
 
           <motion.h2
-            className="text-foreground text-center text-3xl font-semibold md:text-4xl"
+            className="text-foreground text-center text-[24px] md:text-[32px] font-[500] mb-8"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -83,6 +82,7 @@ export default function FaqSection() {
               </motion.div>
             ))}
           </Accordion>
+<<<<<<< HEAD
 
           <div className="mt-20 flex flex-col items-center gap-6 pb-12 text-center md:pb-20">
             <motion.h2
@@ -140,6 +140,8 @@ export default function FaqSection() {
               </motion.div>
             </motion.div>
           </div>
+=======
+>>>>>>> 2a0bd0dfa69d4ab53479f1b5dbfe7738be46daac
         </div>
       </div>
     </section>

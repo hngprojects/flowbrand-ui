@@ -20,8 +20,8 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-background border-border font-inter sticky top-0 z-50 border-b">
-        <div className=" layout-components-class flex h-[83px]  items-center justify-between ">
+      <nav className="bg-background border-border sticky top-0 z-50 border-b">
+        <div className="layout-components-class flex h-[83px] items-center justify-between">
           <Link href="/" className="cursor-pointer">
             <LogoIcon />
           </Link>
@@ -31,12 +31,13 @@ const Navbar = () => {
               <li key={link.label}>
                 <Link
                   href={link.path}
-                  className={`hover:text-primary flex h-12 items-center justify-center py-3 text-base font-medium text-black-300 transition-colors ${
-                    pathname === link.path ||
-                    (link.path !== "/" && pathname.startsWith(link.path))
-                      ? "text-primary font-semibold"
-                      : ""
-                  }`}
+                  className={`hover:text-primary flex h-12 items-center justify-center py-3 
+                    text-base font-medium text-black-300 transition-colors ${
+                      pathname === link.path ||
+                      (link.path !== "/" && pathname.startsWith(link.path))
+                        ? "text-primary font-semibold"
+                        : ""
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -45,10 +46,10 @@ const Navbar = () => {
           </ul>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <motion.div
-              className="relative"
-              whileHover="hover"
-              whileTap={{ scale: 0.97 }}
+            <Link
+              href="/login"
+              className="text-primary hover:text-primary flex h-[51px] items-center 
+              justify-center px-6 py-3 text-base font-medium transition-colors"
             >
               <Link
                 href="/login"
@@ -64,7 +65,7 @@ const Navbar = () => {
                 initial={{ scaleX: 0 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
               />
-            </motion.div>
+            </Link>
 
             <motion.div
               className="inline-block rounded-[10px] overflow-hidden"
@@ -101,11 +102,12 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`bg-background absolute top-full left-0 flex w-full flex-col gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
-            isOpen
-              ? "max-h-96 py-6 opacity-100"
-              : "pointer-events-none max-h-0 opacity-0"
-          }`}
+          className={`bg-background absolute top-full left-0 flex w-full flex-col 
+            gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
+              isOpen
+                ? "max-h-96 py-6 opacity-100"
+                : "pointer-events-none max-h-0 opacity-0"
+            }`}
           inert={!isOpen ? true : undefined}
         >
           {navLinks.map((link) => (
