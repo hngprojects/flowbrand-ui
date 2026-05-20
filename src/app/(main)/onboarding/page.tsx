@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
+import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import {
+  startOnboarding,
+  saveOnboardingStep,
+  completeOnboarding,
+} from "@/actions/onboarding";
 
 import ProgressBar from "@/components/onboarding/ProgressBar";
 import StepOne from "@/components/onboarding/StepOne";
@@ -14,7 +20,23 @@ import StepThree from "@/components/onboarding/StepThree";
 export default function OnboardingPage() {
   const router = useRouter();
   const store = useOnboardingStore();
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (store.sessionId) return;
+    (async () => {
+      const res = await startOnboarding();
+      if (res.ok) {
+        const data = res.data as { data?: { session_id?: string } };
+        const id = data?.data?.session_id;
+        if (id) store.setSessionId(id);
+      } else if (res.status === 409) {
+        router.push("/funnel");
+      } else {
+        toast.error(res.error);
+      }
+    })();
+  }, []);
 
   const handleBackClick = () => {
     if (store.step === 1) {
@@ -24,8 +46,98 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleCreateStrategy = () => {
-    toast.info("Strategy submission coming soon.");
+  const handleCreateStrategy = async () => {
+    if (isLoading) return;
+
+    const payload = {
+      businessDescription: store.businessDescription,
+      idealCustomer: {
+        theyAre: store.theyAre,
+        whoWantTo: store.whoWantTo,
+        locatedIn: store.locatedIn,
+        customInput: store.customCustomerInput,
+      },
+      trafficChannel: store.trafficChannel,
+    };
+    const validation = onboardingSchema.safeParse(payload);
+    if (!validation.success) {
+      toast.error(validation.error.issues?.[0]?.message || "Invalid input");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const start = await startOnboarding();
+      if (!start.ok) {
+        if (start.status === 409) {
+          router.push("/funnel");
+          return;
+        }
+        toast.error(start.error);
+        return;
+      }
+
+      const startData = start.data as { data?: { session_id?: string } };
+      const sessionId = startData?.data?.session_id;
+      if (!sessionId) {
+        toast.error("Session not ready. Please try again.");
+        return;
+      }
+      store.setSessionId(sessionId);
+
+      const steps = [
+        {
+          step: 1,
+          answer: { business_description: store.businessDescription },
+        },
+        {
+          step: 2,
+          answer: {
+            customer_tags: {
+              type: [
+                ...store.theyAre,
+                ...store.whoWantTo,
+                ...store.locatedIn,
+                ...(store.customCustomerInput.trim()
+                  ? [store.customCustomerInput.trim()]
+                  : []),
+              ],
+            },
+          },
+        },
+        {
+          step: 3,
+          answer: { discovery_channel: store.trafficChannel },
+        },
+      ];
+
+      for (const s of steps) {
+        const res = await saveOnboardingStep({
+          session_id: sessionId,
+          step: s.step,
+          answer: s.answer,
+        });
+        if (!res.ok) {
+          toast.error(res.error);
+          return;
+        }
+      }
+
+      const done = await completeOnboarding(sessionId);
+      if (!done.ok) {
+        toast.error(done.error);
+        return;
+      }
+
+      store.setSessionId(null);
+      toast.success("Strategy created successfully!");
+      router.push("/funnel");
+    } catch {
+      toast.error("Something went wrong.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
