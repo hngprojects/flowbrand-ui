@@ -11,23 +11,23 @@ const productLinks = [
 ];
 
 const legalLinks = [
-  { label: "Terms of use", href: "/terms&conditions" },
+  { label: "Terms of use", href: "/terms-and-conditions" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Cookie Policy", href: "/cookie-policy" },
 ];
 
 export default function Footer() {
   return (
-    <footer className=" bg-primary-900 text-primary-foreground">
+    <footer className=" bg-primary-800 text-primary-foreground">
       <div className="section-class">
         <div className="flex flex-col gap-[var(--spacing-small)] lg:flex-row lg:justify-between">
           {/* LEFT */}
-          <div className="max-w-[360px]">
+          <div className="max-w-[360px] mb-15">
             <div className="mb-[var(--spacing-small)]">
               <FullLightLogo />
             </div>
 
-            <p className="text-sm leading-6 text-gray-600">
+            <p className="text-sm leading-6 text-white">
               Build smarter marketing strategy without the guesswork and helping
               small and growing businesses turn attention into real customers.
             </p>
@@ -37,7 +37,7 @@ export default function Footer() {
           <div className="flex gap-[var(--spacing-default)] sm:gap-[64px]">
             {/* PRODUCT */}
             <div className="space-y-[var(--spacing-small)]">
-              <h3 className="text-base font-semibold text-primary-foreground">
+              <h3 className="text-[16px] lg:text-[24px] font-[600] text-gray-600">
                 Product
               </h3>
 
@@ -46,7 +46,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-600 transition-colors hover:text-primary-foreground"
+                      className="text-[16px] font-[400] text-gray-600 transition-colors hover:text-primary-foreground "
                     >
                       {link.label}
                     </Link>
@@ -57,7 +57,7 @@ export default function Footer() {
 
             {/* LEGAL */}
             <div className="space-y-[var(--spacing-small)]">
-              <h3 className="text-base font-semibold text-primary-foreground">
+              <h3 className="text-[16px] lg:text-[24px] font-[600] text-gray-600">
                 Legal
               </h3>
 
@@ -66,7 +66,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-600 transition-colors hover:text-primary-foreground"
+                      className="text-[16px] font-[400] text-gray-600 transition-colors hover:text-primary-foreground"
                     >
                       {link.label}
                     </Link>

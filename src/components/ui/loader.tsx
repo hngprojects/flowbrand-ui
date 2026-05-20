@@ -1,5 +1,4 @@
-import React from "react";
-import MobileLogoIcon from "@/components/icons/navbar/mobileLogo";
+import { BlueBlackLogo } from "@/components/icons/blueblackLogo";
 import LoaderSpinner from "@/components/icons/loader/spinner";
 import { cn } from "@/lib/utils";
 
@@ -15,12 +14,16 @@ const Loader = ({ text, className }: LoaderProps) => {
         "flex flex-col items-center justify-center gap-6",
         className,
       )}
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
     >
-      <div
-        className="relative overflow-visible"
-        style={{ width: "130px", height: "130px" }}
-      >
-        <svg viewBox="0 0 130 130" className="absolute inset-0 h-full w-full">
+      <div className="relative size-[130px] shrink-0 overflow-hidden">
+        <svg
+          viewBox="0 0 130 130"
+          className="absolute inset-0 h-full w-full"
+          aria-hidden
+        >
           <circle
             cx="65"
             cy="65"
@@ -33,16 +36,16 @@ const Loader = ({ text, className }: LoaderProps) => {
 
         <LoaderSpinner />
 
-        <div className="absolute inset-0 flex items-center justify-center">
-          <MobileLogoIcon />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <BlueBlackLogo className="h-9 w-auto" aria-hidden />
         </div>
       </div>
 
-      {text && (
-        <p className="text-black-300 text-center text-base font-normal leading-[150%] tracking-normal">
+      {text ? (
+        <p className="text-black-300 text-center text-base font-normal leading-[150%]">
           {text}
         </p>
-      )}
+      ) : null}
     </div>
   );
 };
