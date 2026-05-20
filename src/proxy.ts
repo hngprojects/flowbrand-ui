@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { authRoutes, DEFAULT_LOGIN_REDIRECT, protectedRoutes } from "@/routes";
+import { fetchAuthMe } from "@/lib/auth-api";
+import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
+import { envConfig } from "@/config/env.config";
+import { authRoutes, ONBOARDING_UPLOAD_ROUTE, protectedRoutes } from "@/routes";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -15,7 +18,7 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
-export const proxy = auth((request) => {
+export const proxy = auth(async (request) => {
   const { nextUrl } = request;
   const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
   const pathname = nextUrl.pathname;
@@ -31,9 +34,15 @@ export const proxy = auth((request) => {
   }
 
   if (isAuthRoute && isLoggedIn) {
-    return NextResponse.redirect(
-      new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin),
-    );
+    const accessToken = request.auth?.access_token;
+    let redirectPath = ONBOARDING_UPLOAD_ROUTE;
+
+    if (typeof accessToken === "string") {
+      const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+      redirectPath = resolvePostAuthPath(me);
+    }
+
+    return NextResponse.redirect(new URL(redirectPath, nextUrl.origin));
   }
 
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();

@@ -13,6 +13,7 @@ import { faq_items } from "@/constants/home/faq/landing-faq";
 import Link from "next/link";
 import MobileLogo from "@/components/icons/navbar/mobileLogo";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function FaqPage() {
   const [search, setSearch] = useState("");
@@ -216,7 +217,12 @@ export default function FaqPage() {
                     >
                       <Link
                         href="/register"
-                        className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
+                        className={cn(
+                          "bg-primary text-primary-foreground relative inline-flex rounded-lg",
+                          "px-8 py-3.5 text-md font-medium shadow-md",
+                          "focus-visible:ring-2 focus-visible:ring-amber-500",
+                          "focus-visible:ring-offset-2 transition-colors",
+                        )}
                       >
                         <motion.span
                           className="absolute inset-0 bg-amber-500 z-0"
