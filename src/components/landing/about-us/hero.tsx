@@ -29,27 +29,27 @@ export default function Hero() {
 
       {/* ── Headline ── */}
       <div className="relative z-10 mx-auto mt-8 max-w-[440px] px-5 pt-20 text-center md:max-w-[800px]">
-        <h1 className="w-full text-[32px] leading-[1.16] font-bold tracking-[-0.5px] text-black md:text-[54px] md:tracking-[-1.5px] lg:text-[52px]">
+        <h1 className="w-full text-[32px] leading-[1.16] font-bold tracking-[-0.5px] text-black md:text-[54px] md:tracking-[-1.5px] lg:text-[60px]">
           We built <span className="text-[#E58F17]">Seil </span> because great
           marketing shouldn&apos;t require a marketing degree.
         </h1>
       </div>
 
       {/* ── Image + overlay ── */}
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full mt-12 md:mt-0">
         {/* Desktop */}
-        <div className="relative mx-auto hidden w-full md:block w-full ">
+        <div className="relative mx-auto hidden w-full md:block w-full lg:max-w-[2000px] lg:mx-auto">
           <Image
             src="/images/new-hero.png"
             alt="Small business owners — Maimuna, David, Sarah and Aisha"
             width={1100}
             height={640}
             priority
-            className="w-[calc(100svw+300px)] max-w-[calc(100svw+300px)] -mx-35"
+            className=" w-[calc(100svw+300px)] max-w-[calc(100svw+300px)] -mx-35"
           />
 
           {/* Overlay: absolute, pinned to bottom, covers ~40% of image height */}
-          <div className="pointer-events-none absolute bottom-0 left-0 w-full select-none h-[25%]">
+          <div className="pointer-events-none absolute bottom-0 left-0 w-full select-none h-[25%] -mb-8">
             <Image
               src="/images/white.png"
               alt=""
@@ -72,7 +72,7 @@ export default function Hero() {
             className="w-full object-cover object-top"
           />
           {/* Overlay: pinned to bottom, covers ~38% */}
-          <div className="pointer-events-none absolute bottom-0 left-0 w-full select-none h-[28%]">
+          <div className="pointer-events-none absolute bottom-0 left-0 w-full select-none h-[28%] -mb-4">
             <Image
               src="/images/white.png"
               alt=""

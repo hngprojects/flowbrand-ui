@@ -9,7 +9,9 @@ const AboutUs = () => {
   return (
     <section className="w-full bg-[#FFFFFF]">
       <Hero />
+
       <SocialProof />
+
       <WhyWeStarted />
       <SimpleIdea />
       <MissionSection />
