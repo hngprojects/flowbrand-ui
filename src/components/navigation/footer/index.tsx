@@ -18,26 +18,26 @@ const legalLinks = [
 
 export default function Footer() {
   return (
-    <footer className=" bg-primary-900 text-primary-foreground">
+    <footer className=" bg-primary-800 text-primary-foreground ">
       <div className="section-class">
-        <div className="flex flex-col gap-[var(--spacing-small)] lg:flex-row lg:justify-between">
+        <div className=" flex  flex-col gap-[var(--spacing-small)] md:flex-row md:justify-between">
           {/* LEFT */}
-          <div className="max-w-[360px]">
+          <div className="max-w-[360px]  mb-[calc(var(--spacing-large)*2)] lg:mb-0">
             <div className="mb-[var(--spacing-small)]">
               <FullLightLogo />
             </div>
 
-            <p className="text-sm leading-6 text-gray-600">
+            <p className="text-sm md:text-base lg:text-lg leading-6 text-gray-600">
               Build smarter marketing strategy without the guesswork and helping
               small and growing businesses turn attention into real customers.
             </p>
           </div>
 
           {/* RIGHT */}
-          <div className="flex gap-[var(--spacing-default)] sm:gap-[64px]">
+          <div className="flex gap-[calc(var(--spacing-default)*4)] sm:gap-[64px] ">
             {/* PRODUCT */}
             <div className="space-y-[var(--spacing-small)]">
-              <h3 className="text-base font-semibold text-primary-foreground">
+              <h3 className="text-base md:text-lg lg:text-xl font-semibold text-primary-foreground">
                 Product
               </h3>
 
@@ -46,7 +46,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-600 transition-colors hover:text-primary-foreground"
+                      className="text-sm md:text-base lg:text-lg text-gray-600 transition-colors hover:text-primary-foreground"
                     >
                       {link.label}
                     </Link>
@@ -57,7 +57,7 @@ export default function Footer() {
 
             {/* LEGAL */}
             <div className="space-y-[var(--spacing-small)]">
-              <h3 className="text-base font-semibold text-primary-foreground">
+              <h3 className="text-base md:text-lg lg:text-xl font-semibold text-primary-foreground">
                 Legal
               </h3>
 
@@ -66,7 +66,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-600 transition-colors hover:text-primary-foreground"
+                      className="text-sm md:text-base lg:text-lg text-gray-600 transition-colors hover:text-primary-foreground"
                     >
                       {link.label}
                     </Link>
@@ -81,7 +81,7 @@ export default function Footer() {
         <div className="my-[var(--spacing-default)] h-px w-full bg-gray-500/20" />
 
         {/* WATERMARK LOGO */}
-        <div className="lg:w-full flex items-center justify-center w-[calc(var(--spacing-hero)*4)] md:w-[calc(var(--spacing-hero)*3)] h-auto mx-auto">
+        <div className="lg:w-full h-[250px] md:h-[290px] flex justify-center w-[calc(var(--spacing-hero)*2.8)] md:w-[calc(var(--spacing-hero)*3)] lg:w-[calc(var(--spacing-hero)*5)] mx-auto">
           <FullTranparentLogo />
         </div>
       </div>
