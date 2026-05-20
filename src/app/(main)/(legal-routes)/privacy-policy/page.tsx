@@ -1,4 +1,4 @@
-import PrivacyPolicyView from "@/components/landing/legal/privacy-policy/page";
+import PrivacyPolicyView from "@/components/legal/privacy-policy/page";
 
 export default function PrivacyPolicyPage() {
   return <PrivacyPolicyView />;
