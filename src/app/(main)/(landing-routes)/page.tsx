@@ -5,6 +5,7 @@ import Features from "@/components/landing/home/Features";
 import Testimonials from "@/components/landing/home/Testimonial";
 import FaqSection from "@/components/landing/home/Faq";
 import Solution from "@/components/landing/home/Solution";
+import CreateSection from "@/components/landing/home/Create";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <Solution />
       <Testimonials />
       <FaqSection />
+      <CreateSection />
     </>
   );
 }
