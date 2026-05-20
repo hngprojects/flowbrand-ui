@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DocsImg } from "@/components/icons/docs-img";
@@ -33,7 +34,10 @@ export default function FunnelSidebar({
 
   return (
     <aside
-      className={`sticky top-0 left-0 hidden h-screen overflow-auto border-r border-gray-200 bg-[#FFFFFF] px-section py-large space-y-section md:block md:w-1/3 ${className ?? ""}`}
+      className={cn(
+        "sticky top-0 left-0 hidden h-screen overflow-auto border-r border-gray-200 bg-[#FFFFFF] px-section py-large space-y-section md:block md:w-1/3",
+        className,
+      )}
     >
       <div className="space-y-3">
         <div>

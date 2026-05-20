@@ -55,7 +55,7 @@ const OnboardingNavbar = ({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [drawerOpen]);
+  }, [drawerOpen, pathname]);
 
   return (
     <>
@@ -140,7 +140,7 @@ const OnboardingNavbar = ({
               loading={loading}
               documents={documents}
               strategyPhases={strategyPhases}
-              className="!block !h-full !w-full border-none"
+              className="block! h-full! w-full! border-none"
             />
           </div>
         </>
