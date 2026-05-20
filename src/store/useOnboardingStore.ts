@@ -8,7 +8,9 @@ interface OnboardingState {
   locatedIn: string[];
   customCustomerInput: string;
   trafficChannel: string;
+  sessionId: string | null;
   setStep: (step: number) => void;
+  setSessionId: (id: string | null) => void;
   nextStep: () => void;
   prevStep: () => void;
   setBusinessDescription: (val: string) => void;
@@ -27,8 +29,10 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
   locatedIn: [],
   customCustomerInput: "",
   trafficChannel: "",
+  sessionId: null,
   // Safely clamp direct manual updates
   setStep: (step) => set({ step: Math.max(1, Math.min(step, 3)) }),
+  setSessionId: (id) => set({ sessionId: id }),
   nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 3) })),
   prevStep: () => set((state) => ({ step: Math.max(state.step - 1, 1) })),
   setBusinessDescription: (val) => set({ businessDescription: val }),
