@@ -36,26 +36,26 @@ export default function Hero() {
       </div>
 
       {/* ── Image + overlay ── */}
-      <div className="relative z-10 w-full mt-12 md:mt-0">
+      <div className="relative z-10 w-full mt-12 md:mt-0 md:-mb-14">
         {/* Desktop */}
-        <div className="relative mx-auto hidden w-full md:block w-full lg:max-w-[2000px] lg:mx-auto">
+        <div className="relative mx-auto hidden w-full md:flex lg:max-w-[1560px] lg:mx-auto">
           <Image
             src="/images/new-hero.png"
             alt="Small business owners — Maimuna, David, Sarah and Aisha"
             width={1100}
             height={640}
             priority
-            className=" w-[calc(100svw+300px)] max-w-[calc(100svw+300px)] -mx-35"
+            className="w-[calc(100svw+300px)] max-w-[calc(100svw+300px)] -mx-35"
           />
 
           {/* Overlay: absolute, pinned to bottom, covers ~40% of image height */}
-          <div className="pointer-events-none absolute bottom-0 left-0 w-full select-none h-[25%] -mb-8">
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0  select-none flex justify-center translate-y-1/4">
             <Image
-              src="/images/white.png"
+              src="/images/white2.png"
               alt=""
               width={1450}
               height={778}
-              className=" h-full w-full object-cover object-top mt-9 lg:mt-0 "
+              className="w-[calc(100svw+300px)] max-w-[calc(100svw+300px)]  -mx-35"
               aria-hidden
             />
           </div>
