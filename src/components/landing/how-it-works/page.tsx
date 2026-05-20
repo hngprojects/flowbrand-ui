@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { motion } from "framer-motion";
+
 const HowItWorks = () => {
   const steps = [
     {
@@ -20,21 +23,35 @@ const HowItWorks = () => {
       image: "/images/snippet-2.svg",
     },
   ];
+
   return (
     <main className="w-full bg-primary-50">
       <div className="bg-primary-50 h-[300px] md:h-[400px] w-full relative flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="max-w-[721px] space-y-6 text-center z-10">
-          <h1 className="text-[28px] md:text-[40px] text-black-500 font-bold leading-tight">
+          <motion.h1
+            className="text-[28px] md:text-[40px] text-black-500 font-bold leading-tight"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
+          >
             From setup to growth in three steps
-          </h1>
+          </motion.h1>
 
-          <p className="text-[16px] md:text-[18px] text-black-300 max-w-[600px] mx-auto">
+          <motion.p
+            className="text-[16px] md:text-[18px] text-black-300 max-w-[600px] mx-auto"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.15,
+            }}
+          >
             Seil takes you from understanding your business to running a fully
             structured marketing Strategy, step by step.
-          </p>
+          </motion.p>
         </div>
 
-        {/* ----CLOUD IMAGES---- */}
         <Image
           src="/images/bigCloud.png"
           aria-hidden
@@ -54,53 +71,83 @@ const HowItWorks = () => {
       </div>
 
       <div className="w-full bg-white">
-        {steps.map((step, index) => (
-          <div
-            key={index}
-            className={cn(
-              "flex flex-col md:flex-row justify-between items-center gap-10 section-class",
-              index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse",
-            )}
-          >
-            <div className="space-y-8 md:space-y-[41px] max-w-[500px] w-full">
-              <div className="flex items-center gap-2">
-                {[1, 2, 3].map((num) => (
-                  <div
-                    key={num}
-                    className={cn(
-                      "w-[15px] h-[15px] bg-accent-50 rounded-full",
-                      index + 1 === num && "bg-accent w-[41px]",
-                    )}
-                  ></div>
-                ))}
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-[14px] md:text-[18px] text-black-300 font-medium font-heading">
-                  Step {index + 1}
-                </h2>
-                <h2 className="text-[22px] md:text-[32px] text-foreground font-medium leading-tight">
-                  {step.title}
-                </h2>
-                <p className="text-[16px] md:text-[18px] text-black-300 leading-relaxed">
-                  {step.desc}
-                </p>
-              </div>
+        {steps.map((step, index) => {
+          const isEven = index % 2 === 0;
+          return (
+            <div
+              key={index}
+              className={cn(
+                "flex flex-col md:flex-row justify-between items-center gap-10 section-class",
+                isEven ? "md:flex-row" : "md:flex-row-reverse",
+              )}
+            >
+              <motion.div
+                className="space-y-8 md:space-y-[41px] max-w-[500px] w-full"
+                initial={{ opacity: 0, x: isEven ? -50 : 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.22, 1, 0.36, 1] as const,
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3].map((num) => (
+                    <div
+                      key={num}
+                      className={cn(
+                        "w-[15px] h-[15px] bg-accent-50 rounded-full",
+                        index + 1 === num && "bg-accent w-[41px]",
+                      )}
+                    />
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-[14px] md:text-[18px] text-black-300 font-medium font-heading">
+                    Step {index + 1}
+                  </h2>
+                  <h2 className="text-[22px] md:text-[32px] text-foreground font-medium leading-tight">
+                    {step.title}
+                  </h2>
+                  <p className="text-[16px] md:text-[18px] text-black-300 leading-relaxed">
+                    {step.desc}
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="w-full md:w-1/2 flex justify-center bg-accent p-10 rounded-xl"
+                initial={{ opacity: 0, x: isEven ? 50 : -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.22, 1, 0.36, 1] as const,
+                  delay: 0.15,
+                }}
+              >
+                <Image
+                  src={step.image}
+                  alt={step.title}
+                  width={606}
+                  height={468}
+                  className="w-full max-w-[500px] md:max-w-none h-auto object-contain"
+                />
+              </motion.div>
             </div>
-            <div className="w-full md:w-1/2 flex justify-center bg-accent p-10 rounded-xl">
-              <Image
-                src={step.image}
-                alt={step.title}
-                width={606}
-                height={468}
-                className="w-full max-w-[500px] md:max-w-none h-auto object-contain"
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
+      {/* Bottom CTA */}
       <div className="flex flex-col items-center justify-center gap-8 text-center section-class">
-        <div className="space-y-4 max-w-[800px]">
+        <motion.div
+          className="space-y-4 max-w-[800px]"
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
+        >
           <h2 className="text-[28px] md:text-[48px] text-foreground font-medium leading-tight">
             Get a step-by-step marketing strategy in minutes
           </h2>
@@ -108,13 +155,43 @@ const HowItWorks = () => {
             A simple marketing plan that attracts, nurtures, and converts
             customers without stress
           </p>
-        </div>
-        <Button
-          asChild
-          className="md:w-[232px] w-full h-[56px] text-lg rounded-[10px]"
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{
+            duration: 0.6,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.25,
+          }}
         >
-          <Link href="/register">Create a free account</Link>
-        </Button>
+          <motion.div
+            className="mt-4 inline-block rounded-lg overflow-hidden"
+            whileHover="hover"
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <Link
+              href="/register"
+              className={cn(
+                "bg-primary text-primary-foreground relative inline-flex px-8 py-3.5",
+                "text-md font-medium shadow-md",
+                "focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset",
+                "focus-visible:ring-offset-2 transition-colors",
+              )}
+            >
+              <motion.span
+                className="absolute inset-0 bg-amber-500 z-0"
+                variants={{ hover: { x: 0 } }}
+                initial={{ x: "-100%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
+              <span className="relative z-10">Create a free account</span>
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
     </main>
   );

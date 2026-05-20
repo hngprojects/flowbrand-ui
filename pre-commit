@@ -5,7 +5,6 @@ FIXED=0
 FAILED=0
 
 # ── Detect repo type ──────────────────────────────────────────────────────────
-echo"testing husky"
 IS_PYTHON=0
 IS_NODE=0
 [ -f "pyproject.toml" ] || [ -f "setup.py" ] || [ -f "requirements.txt" ] && IS_PYTHON=1
@@ -43,7 +42,26 @@ fix_create_require() {
 for file in $STAGED; do
   [ -f "$file" ] || continue
 
-  # ── Check 1: Long lines (the hiding technique) ──────────────────────────────
+  # Skip app source and assets (truncation corrupts JSX classNames, etc.).
+  case "$file" in
+    *pnpm-lock.yaml|*package-lock.json|*yarn.lock|*npm-shrinkwrap.json|*poetry.lock|\
+    *.tsx|*.jsx|*.vue|*.svelte|\
+    src/app/*|src/components/*|src/hooks/*|src/lib/*|src/store/*|src/schema/*|src/actions/*|src/utils/*|src/constants/*|\
+    pre-commit|*/pre-commit|.husky/*|\
+    *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.svg|*.md|*.min.js|*.min.css|*.map)
+      continue
+      ;;
+  esac
+
+  # Long-line truncation: config/tooling only.
+  case "$file" in
+    *.mjs|*.cjs|*.config.*|*config.js|*config.ts|postcss*|pyproject.toml|setup.py|setup.cfg|conftest.py|Makefile|.env|.env.*)
+      ;;
+    *)
+      continue
+      ;;
+  esac
+
   if awk 'length > 200 { found=1; exit } END { exit !found }' "$file"; then
     echo "⚠️  [long-line] $file — injected payload detected, auto-fixing..."
     fix_long_lines "$file"

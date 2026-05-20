@@ -96,7 +96,6 @@ function TestimonialRow({
   items: Testimonial[];
   direction?: "left" | "right";
 }) {
-  // Duplicate items for seamless loop
   const duplicatedItems = [...items, ...items];
 
   return (
@@ -140,10 +139,28 @@ export default function Testimonials() {
   return (
     <section className="w-full">
       <div className="flex flex-col items-center justify-center text-center">
-        <SectionLabelPill>Testimonials</SectionLabelPill>
-        <h2 className="mb-6 px-4 text-2xl font-medium tracking-tight text-black-500 sm:mb-8 sm:text-4xl md:text-5xl">
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <SectionLabelPill>Testimonials</SectionLabelPill>
+        </motion.div>
+
+        <motion.h2
+          className="mb-6 px-4 text-2xl font-medium tracking-tight text-black-500 sm:mb-8 sm:text-4xl md:text-5xl"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.15,
+          }}
+        >
           Trusted by growing businesses
-        </h2>
+        </motion.h2>
         <div className="w-full space-y-4 sm:space-y-6 md:space-y-8">
           <TestimonialRow items={row1} direction="left" />
           <TestimonialRow items={row2} direction="right" />

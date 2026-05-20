@@ -2,14 +2,14 @@ import { toast } from "sonner";
 
 const SESSION_KEY = "flowbrand-funnel-preview-toast";
 
-/** Once per browser session — funnel still uses placeholder strategy data. */
+/** Once per browser session — funnel still uses placeholder data. */
 export function showFunnelPreviewToast(): void {
   if (typeof window === "undefined") return;
   if (sessionStorage.getItem(SESSION_KEY)) return;
 
   sessionStorage.setItem(SESSION_KEY, "1");
-  toast.info("Preview with sample data", {
+  toast.info("Preview mode", {
     description:
-      "This strategy page is showing placeholder content until yours is ready.",
+      "Using sample data from your onboarding answers — no API calls in this flow.",
   });
 }

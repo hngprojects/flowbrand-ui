@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { fetchAuthMe } from "@/lib/auth-api";
 import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import { envConfig } from "@/config/env.config";
-import { authRoutes, protectedRoutes } from "@/routes";
+import { authRoutes, ONBOARDING_UPLOAD_ROUTE, protectedRoutes } from "@/routes";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -35,7 +35,7 @@ export const proxy = auth(async (request) => {
 
   if (isAuthRoute && isLoggedIn) {
     const accessToken = request.auth?.access_token;
-    let redirectPath = "/onboarding";
+    let redirectPath = ONBOARDING_UPLOAD_ROUTE;
 
     if (typeof accessToken === "string") {
       const me = await fetchAuthMe(envConfig.BASEURL, accessToken);

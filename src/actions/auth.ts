@@ -20,12 +20,11 @@ import {
   parseLoginEnvelope,
   readOtpCooldownSeconds,
 } from "~/lib/auth-api";
+import { credentialsAuth } from "@/lib/credentials-auth";
 import {
-  LoginSchema,
   registrationPasswordField,
   VerifyOtpCodeSchema,
 } from "@/schema/auth.schema";
-import { AuthResponse, ErrorResponse } from "@/types/auth";
 
 function validateAuthEmail(
   email: string,
@@ -71,58 +70,6 @@ export async function getPostAuthRedirect(): Promise<string> {
   const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
   return resolvePostAuthPath(me);
 }
-
-const credentialsAuth = async (
-  values: z.infer<typeof LoginSchema>,
-): Promise<AuthResponse | ErrorResponse> => {
-  const baseURL = envConfig.BASEURL;
-  const validatedFields = LoginSchema.safeParse(values);
-  if (!validatedFields.success) {
-    return {
-      message: "Something went wrong",
-      status_code: 401,
-      success: false,
-    };
-  }
-  const { email, password } = validatedFields.data;
-  try {
-    const response = await axios.post(
-      authApiUrl(baseURL, "/login"),
-      { email, password },
-      { withCredentials: true },
-    );
-    const parsed = parseLoginEnvelope(response.data);
-    if (!parsed) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[auth] Unrecognized login response shape", response.data);
-      }
-      return {
-        success: false,
-        message:
-          "Login succeeded but the server response was invalid. Contact support.",
-        status_code: 502,
-      };
-    }
-    return {
-      data: parsed.user,
-      access_token: parsed.access_token,
-      success: true,
-      message: messageFromApiBody(response.data, "Login successful"),
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        axios.isAxiosError(error) && error.response
-          ? messageFromApiBody(error.response.data, "Something went wrong")
-          : "Something went wrong",
-      status_code:
-        axios.isAxiosError(error) && error.response
-          ? error.response.status
-          : undefined,
-    };
-  }
-};
 
 export type RegisterUserInput = {
   email: string;

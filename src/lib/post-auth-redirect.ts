@@ -1,7 +1,7 @@
 import {
   FUNNEL_ROUTE,
   mapApiRedirectToAppPath,
-  ONBOARDING_ROUTE,
+  ONBOARDING_UPLOAD_ROUTE,
 } from "@/routes";
 import type { AuthMeProfile } from "@/lib/auth-api";
 
@@ -19,5 +19,5 @@ export function resolvePostAuthPath(
     return FUNNEL_ROUTE;
   }
 
-  return ONBOARDING_ROUTE;
+  return ONBOARDING_UPLOAD_ROUTE;
 }

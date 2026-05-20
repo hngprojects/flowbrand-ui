@@ -104,7 +104,13 @@ const OnboardingNavbar = () => {
               key={link.label}
               href={link.path}
               className={`hover:text-primary px-4 py-2 text-black-300 ${
-                pathname === link.path ? "text-primary" : ""
+                link.path === "/"
+                  ? pathname === "/"
+                    ? "text-primary"
+                    : ""
+                  : pathname.startsWith(link.path)
+                    ? "text-primary"
+                    : ""
               }`}
               onClick={() => setIsOpen(false)}
             >

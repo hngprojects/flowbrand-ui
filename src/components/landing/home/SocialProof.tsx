@@ -102,7 +102,6 @@ export default function SocialProof() {
         </p>
 
         <div className="relative w-full">
-          {/* Gradient Overlays for smooth edges */}
           <div className="absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-[#FCFDFF] to-transparent md:w-32"></div>
           <div className="absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-[#FCFDFF] to-transparent md:w-32"></div>
 

@@ -2,7 +2,7 @@ import { NextAuthConfig, Session } from "next-auth";
 import { CredentialsSignin } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
-import { credentialsAuth } from "~/actions/auth";
+import { credentialsAuth } from "@/lib/credentials-auth";
 import { envConfig } from "@/config/env.config";
 import { fetchAuthMe } from "@/lib/auth-api";
 import { inDevEnvironment } from "@/lib/utils";
@@ -110,7 +110,7 @@ const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  debug: inDevEnvironment,
+  debug: process.env.AUTH_DEBUG === "true",
   callbacks: {
     async jwt({ token, user }) {
       return {

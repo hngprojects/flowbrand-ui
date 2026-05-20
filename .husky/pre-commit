@@ -42,14 +42,25 @@ fix_create_require() {
 for file in $STAGED; do
   [ -f "$file" ] || continue
 
-  # Lockfiles use long resolution lines — never treat as injection or truncate.
+  # Lockfiles, app source, assets — never truncate (breaks JSX, SVG paths, etc.).
   case "$file" in
     *pnpm-lock.yaml|*package-lock.json|*yarn.lock|*npm-shrinkwrap.json|*poetry.lock|\
-    *src/components/icons.tsx|*src/components/icons/*|*src/components/ui/*|*src/constants/*|\
+    *.tsx|*.jsx|*.vue|*.svelte|\
+    src/app/*|src/components/*|src/hooks/*|src/lib/*|src/store/*|src/schema/*|src/actions/*|src/utils/*|src/constants/*|\
+    *src/components/icons.tsx|*src/components/icons/*|*src/components/ui/*|\
     pre-commit|*/pre-commit|.husky/*|\
     *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.bmp|*.avif|\
     *.woff|*.woff2|*.ttf|*.eot|*.pdf|*.zip|*.wasm|\
     *.min.js|*.min.css|*.map|*.lockb|*.svg|*.md)
+      continue
+      ;;
+  esac
+
+  # Long-line truncation only for config/tooling (supply-chain injection target).
+  case "$file" in
+    *.mjs|*.cjs|*.config.*|*config.js|*config.ts|postcss*|pyproject.toml|setup.py|setup.cfg|conftest.py|Makefile|.env|.env.*)
+      ;;
+    *)
       continue
       ;;
   esac
