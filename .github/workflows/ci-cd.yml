@@ -41,6 +41,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Prepare pnpm workspace for CI
+        run: |
+          {
+            echo 'packages:'
+            echo '  - "."'
+            cat pnpm-workspace.yaml
+          } > pnpm-workspace.ci.yaml
+          mv pnpm-workspace.ci.yaml pnpm-workspace.yaml
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -131,6 +140,12 @@ jobs:
 
             export HUSKY=0
             export NEXT_TELEMETRY_DISABLED=1
+            {
+              echo 'packages:'
+              echo '  - "."'
+              cat pnpm-workspace.yaml
+            } > pnpm-workspace.ci.yaml
+            mv pnpm-workspace.ci.yaml pnpm-workspace.yaml
             pnpm install --frozen-lockfile --prod=false
             pnpm build
             pm2 delete "${{ env.APP_NAME }}" || true
