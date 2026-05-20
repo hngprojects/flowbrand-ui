@@ -2,10 +2,10 @@ import Image from "next/image";
 
 export default function WhyWeStarted() {
   return (
-    <section className="w-full ">
+    <section className="w-full bg-[var(--background)]  ">
       <div className="section-class flex flex-col md:flex-row md:items-center">
         {/* Text — 45% */}
-        <div className="w-full flex-shrink-0 md:mt-8 md:w-[50%]">
+        <div className="w-full flex-shrink-0 md:mt-8 md:w-[50%] md:pr-4 mb-4 md:mb-0 ">
           <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-[#E58F172B] px-3 py-1 text-[11px] font-semibold tracking-wide text-[#E58F17] uppercase">
             <span className="inline-block h-3 w-3 rounded-full bg-[#E58F17]" />
             Our Story

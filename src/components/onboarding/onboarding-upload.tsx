@@ -235,7 +235,7 @@ export default function OnboardingUpload() {
           <Button
             onClick={navigateToWizard}
             disabled={!allUploadsCompleted}
-            className="mt-5 mb-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:b
+            className="mt-5 mb-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800/90"
           >
             Create my strategy
           </Button>
@@ -256,7 +256,7 @@ export default function OnboardingUpload() {
         <button
           type="button"
           onClick={navigateToWizard}
-          className="mt-6 flex w-full items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:h
+          className="mt-6 flex w-full items-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/50"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700">
             <FileUp
