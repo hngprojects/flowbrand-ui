@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 const containerVariants = {
@@ -102,24 +103,26 @@ const Hero = () => {
           variants={itemVariants}
           className="relative mb-16 flex flex-col items-center"
         >
-          <motion.button
-            className="relative bg-[#3b71e1] text-white font-medium py-3 px-8 rounded-lg z-10 overflow-hidden"
+          <motion.div
+            className="inline-block rounded-lg overflow-hidden"
             whileHover="hover"
             whileTap={{ scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
           >
-            <motion.span
-              className="absolute inset-0 bg-amber-500 z-0"
-              variants={{
-                hover: { x: 0 },
-              }}
-              initial={{ x: "-100%" }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            />
-            <span className="relative z-10">Create a free account</span>
-          </motion.button>
+            <Link
+              href="/register"
+              className="bg-[#3b71e1] text-white relative inline-flex px-8 py-3 font-medium focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
+            >
+              <motion.span
+                className="absolute inset-0 bg-amber-500 z-0"
+                variants={{ hover: { x: 0 } }}
+                initial={{ x: "-100%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
+              <span className="relative z-10">Create a free account</span>
+            </Link>
+          </motion.div>
         </motion.div>
-
         <motion.div
           initial="hidden"
           whileInView="visible"

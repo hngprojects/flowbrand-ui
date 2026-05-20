@@ -115,11 +115,8 @@ const Solution = () => {
           </motion.p>
         </div>
 
-        {/* Interactive Content */}
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          {/* Left Column: Text Content */}
           <div className="flex flex-col items-start">
-            {/* Dots Pagination */}
             <div className="mb-10 flex gap-3">
               {steps.map((_, idx) => (
                 <button
@@ -164,7 +161,6 @@ const Solution = () => {
             </div>
           </div>
 
-          {/* Right Column: Image Mockup */}
           <div className="flex justify-center lg:justify-end">
             <div
               className={`relative aspect-[606/468] w-full max-w-[606px] overflow-hidden rounded-[32px] bg-accent transition-all duration-500 ${

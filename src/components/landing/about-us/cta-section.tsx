@@ -50,7 +50,7 @@ const CtaSection = () => {
           >
             <Link
               href="/signup"
-              className="bg-[var(--primary)] text-white relative inline-flex px-[2rem] py-[0.69rem] text-[1rem] font-[500]"
+              className="bg-[var(--primary)] text-white relative inline-flex px-[2rem] py-[0.69rem] text-[1rem] font-medium focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
             >
               <motion.span
                 className="absolute inset-0 bg-amber-500 z-0"

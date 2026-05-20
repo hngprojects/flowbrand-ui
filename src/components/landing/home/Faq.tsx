@@ -41,7 +41,6 @@ export default function FaqSection() {
             Still wondering? We thought you might be.
           </motion.h2>
 
-          {/* FAQ Items — staggered */}
           <Accordion
             type="single"
             collapsible
@@ -85,7 +84,6 @@ export default function FaqSection() {
             ))}
           </Accordion>
 
-          {/* CTA Block */}
           <div className="mt-20 flex flex-col items-center gap-6 pb-12 text-center md:pb-20">
             <motion.h2
               className="text-black-500 max-w-4xl text-3xl font-semibold tracking-tight md:text-4xl lg:text-5xl"
@@ -129,7 +127,7 @@ export default function FaqSection() {
               >
                 <Link
                   href="/register"
-                  className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md"
+                  className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
                 >
                   <motion.span
                     className="absolute inset-0 bg-amber-500 z-0"

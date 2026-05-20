@@ -96,7 +96,6 @@ function TestimonialRow({
   items: Testimonial[];
   direction?: "left" | "right";
 }) {
-  // Duplicate items for seamless loop
   const duplicatedItems = [...items, ...items];
 
   return (

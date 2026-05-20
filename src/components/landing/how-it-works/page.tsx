@@ -27,7 +27,6 @@ const HowItWorks = () => {
 
   return (
     <main className="w-full bg-primary-50">
-      {/* Header — fires on mount since it's above the fold */}
       <div className="bg-primary-50 h-[300px] md:h-[400px] w-full relative flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="max-w-[721px] space-y-6 text-center z-10">
           <motion.h1
@@ -72,7 +71,6 @@ const HowItWorks = () => {
         />
       </div>
 
-      {/* Steps — all scroll triggered */}
       <div className="w-full bg-white">
         {steps.map((step, index) => {
           const isEven = index % 2 === 0;
@@ -84,7 +82,6 @@ const HowItWorks = () => {
                 isEven ? "md:flex-row" : "md:flex-row-reverse",
               )}
             >
-              {/* Text — slides in from its respective side */}
               <motion.div
                 className="space-y-8 md:space-y-[41px] max-w-[500px] w-full"
                 initial={{ opacity: 0, x: isEven ? -50 : 50 }}
@@ -119,7 +116,6 @@ const HowItWorks = () => {
                 </div>
               </motion.div>
 
-              {/* Image — slides in from the opposite side, slightly delayed */}
               <motion.div
                 className="w-full md:w-1/2 flex justify-center bg-accent p-10 rounded-xl"
                 initial={{ opacity: 0, x: isEven ? 50 : -50 }}
@@ -180,7 +176,7 @@ const HowItWorks = () => {
           >
             <Link
               href="/register"
-              className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md"
+              className="bg-primary text-primary-foreground relative inline-flex px-8 py-3.5 text-md font-medium shadow-md focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
             >
               <motion.span
                 className="absolute inset-0 bg-amber-500 z-0"
