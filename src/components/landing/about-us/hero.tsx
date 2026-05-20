@@ -79,7 +79,7 @@ export default function Hero() {
               alt=""
               width={1450}
               height={778}
-              className="w-[calc(100svw+300px)] max-w-[calc(100svw+300px)] -mx-35"
+              className="w-[calc(100svw+300px)] -mx-35 max-w-[2000px]"
               aria-hidden
             />
           </div>
