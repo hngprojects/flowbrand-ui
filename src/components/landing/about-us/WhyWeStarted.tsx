@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 
 export default function WhyWeStarted() {
   return (
-    <section className="w-full">
+    <section className="w-full bg-[var(--background)]">
       <div className="section-class flex flex-col md:flex-row md:items-center">
         <motion.div
-          className="w-full flex-shrink-0 md:mt-8 md:w-[50%]"
+          className="w-full flex-shrink-0 md:mt-8 md:w-[50%] md:pr-4 mb-4 md:mb-0 "
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.2 }}

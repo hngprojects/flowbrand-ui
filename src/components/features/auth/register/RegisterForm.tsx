@@ -420,7 +420,7 @@ const RegistrationForm = () => {
       <p className="text-foreground/50 px-4 pb-4 text-center text-[10px]">
         By signing up you agree to our{" "}
         <Link
-          href="/terms&conditions"
+          href="/terms-and-conditions"
           className="text-primary hover:text-accent underline"
         >
           Terms of Service
