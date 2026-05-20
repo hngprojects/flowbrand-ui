@@ -78,14 +78,14 @@ function FeatureCell({ value }: { value: FeatureValue }) {
   if (value === true) {
     return (
       <td className="px-6 py-4 text-center">
-        <Check className="mx-auto h-5 w-5 text-[#E58F17]" />
+        <Check className="mx-auto h-5 w-5 text-accent-500" />
       </td>
     );
   }
   if (value === false) {
     return (
       <td className="px-6 py-4 text-center">
-        <span className="mx-auto block text-center text-base font-medium text-[#E58F17]">
+        <span className="mx-auto block text-center text-base font-medium text-accent-500">
           —
         </span>
       </td>
@@ -93,7 +93,7 @@ function FeatureCell({ value }: { value: FeatureValue }) {
   }
   return (
     <td className="px-6 py-4 text-center">
-      <span className="text-sm text-[#030D1F] dark:text-gray-300">{value}</span>
+      <span className="text-sm text-black-700 dark:text-gray-300">{value}</span>
     </td>
   );
 }
@@ -131,11 +131,11 @@ export default function PricingPage() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
           >
             Affordable Pricing for your{" "}
-            <p className="text-[#E58F17]">Business</p>
+            <p className="text-accent-500">Business</p>
           </motion.h1>
           <p
-            className="mb-8 text-[#030D1F]
-           dark:text-[#030D1F]  "
+            className="mb-8 text-black-700
+           dark:text-black-700  "
           >
             Whether you&apos;re just figuring things out or ready to scale,
             FlowBrand gives you <br /> exactly what you need at every stage.
@@ -155,8 +155,8 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("monthly")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-[#326AD1] text-white shadow"
-                  : "text-[#030D1F] hover:text-[#565D69] dark:text-gray-400"
+                  ? "bg-primary-500 text-white shadow"
+                  : "text-black-700 hover:text-black-300 dark:text-gray-400"
               }`}
             >
               Monthly Pricing
@@ -165,8 +165,8 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("annual")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "annual"
-                  ? "bg-[#E58F17] text-white shadow"
-                  : "text-[#565D69] hover:text-[#030D1F] dark:text-gray-400"
+                  ? "bg-accent-500 text-white shadow"
+                  : "text-black-300 hover:text-black-700 dark:text-gray-400"
               }`}
             >
               Annual Pricing
@@ -178,7 +178,7 @@ export default function PricingPage() {
       <section className="relative z-10 w-full">
         <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
           {/* Outer wrapper with background — matches Figma card container */}
-          <div className="-mt-10 rounded-2xl bg-[#FFFFFF] p-6   border-white dark:bg-gray-900/50">
+          <div className="-mt-10 rounded-2xl bg-white p-6   border-white dark:bg-gray-900/50">
             <div className="grid gap-6 md:grid-cols-2">
               <motion.div
                 className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950"
@@ -191,13 +191,13 @@ export default function PricingPage() {
                 }}
               >
                 <motion.div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#030D1F] dark:text-white">
+                  <h3 className="text-xl font-bold text-black-700 dark:text-white">
                     Free Plan
                   </h3>
-                  <p className="mt-1 text-sm text-[#565D69] dark:text-gray-400">
+                  <p className="mt-1 text-sm text-black-300 dark:text-gray-400">
                     Perfect for one-person shops or small businesses
                   </p>
-                  <p className="mt-4 text-base font-semibold text-[#326AD1]">
+                  <p className="mt-4 text-base font-semibold text-primary-500">
                     Free
                   </p>
                   <div className="my-6 space-y-3">
@@ -206,36 +206,36 @@ export default function PricingPage() {
                         key={item}
                         className="flex items-center gap-3"
                       >
-                        <BadgeCheck className="h-4 w-4 shrink-0 text-[#030D1F] dark:text-white" />
-                        <span className="text-sm text-[#030D1F] dark:text-gray-300">
+                        <BadgeCheck className="h-4 w-4 shrink-0 text-black-700 dark:text-white" />
+                        <span className="text-sm text-black-700 dark:text-gray-300">
                           {item}
                         </span>
                       </motion.div>
                     ))}
                   </div>
                 </motion.div>
-                <Button className="mt-4 rounded-md w-full bg-[#326AD1] text-white hover:bg-[#2A56B0]">
+                <Button className="mt-4 rounded-md w-full bg-primary-500 text-white hover:bg-primary-600">
                   Start For Free
                 </Button>
               </motion.div>
 
               {/* Pro Plan — uses flex-col so button stays at bottom */}
-              <motion.div className="relative flex flex-col rounded-2xl border-2 border-[#F3F3F3] bg-white p-8 shadow-sm dark:bg-gray-950">
+              <motion.div className="relative flex flex-col rounded-2xl border-2 border-primary-60  bg-white p-8 shadow-sm dark:bg-gray-950">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="whitespace-nowrap rounded-full bg-[#E58F17] px-4 py-1 text-sm font-semibold text-white shadow">
+                  <span className="whitespace-nowrap rounded-full bg-accent-500 px-4 py-1 text-sm font-semibold text-white shadow">
                     Recommended
                   </span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#030D1F] dark:text-white">
+                  <h3 className="text-xl font-bold text-black-700 dark:text-white">
                     Pro Plan
                   </h3>
-                  <p className="mt-1 text-sm text-[#565D69] dark:text-gray-400">
+                  <p className="mt-1 text-sm text-black-300 dark:text-gray-400">
                     For businesses ready to grow further and faster.
                   </p>
-                  <p className="mt-4 text-[24px] font-bold text-[#A36610]">
+                  <p className="mt-4 text-[24px] font-bold text-accent-700">
                     ₦10,000
-                    <span className="text-[24px] font-normal text-[#A36610]">
+                    <span className="text-[24px] font-normal text-accent-700">
                       {" "}
                       /monthly
                     </span>
@@ -246,8 +246,8 @@ export default function PricingPage() {
                         key={item}
                         className="flex items-center gap-3"
                       >
-                        <BadgeCheck className="h-4 w-4 shrink-0 text-[#030D1F] dark:text-white" />
-                        <span className="text-sm text-[#030D1F] dark:text-gray-300">
+                        <BadgeCheck className="h-4 w-4 shrink-0 text-black-700 dark:text-white" />
+                        <span className="text-sm text-black-700 dark:text-gray-300">
                           {item}
                         </span>
                       </motion.div>
@@ -255,7 +255,7 @@ export default function PricingPage() {
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Free card button */}
-                <Button className="mt-4 rounded-md w-full border-2 border-[#E58F17] bg-transparent text-[#E58F17] hover:bg-orange-50 dark:hover:bg-orange-950">
+                <Button className="mt-4 rounded-md w-full border-2 border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950">
                   Get Full Access
                 </Button>
               </motion.div>
@@ -266,10 +266,10 @@ export default function PricingPage() {
 
       <section className="w-full py-16">
         <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
-          <h2 className="mb-3 text-center text-3xl font-bold text-[#030D1F] dark:text-white">
+          <h2 className="mb-3 text-center text-3xl font-bold text-black-700 dark:text-white">
             Compare Plans
           </h2>
-          <motion.p className="mb-10 text-center text-[#565D69] dark:text-gray-400">
+          <motion.p className="mb-10 text-center text-black-300 dark:text-gray-400">
             Find the right plan for where your business is now and where
             you&apos;re going.
           </motion.p>
@@ -288,13 +288,13 @@ export default function PricingPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#030D1F] dark:text-gray-300">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-black-700 dark:text-gray-300">
                     Feature
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-[#030D1F] dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-black-700 dark:text-gray-300">
                     Free
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-[#030D1F] dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-black-700 dark:text-gray-300">
                     Pro
                   </th>
                 </tr>
@@ -309,7 +309,7 @@ export default function PricingPage() {
                     viewport={{ once: true, amount: 0.1 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
                   >
-                    <td className="px-6 py-4 text-sm text-[#030D1F] dark:text-gray-300">
+                    <td className="px-6 py-4 text-sm text-black-700 dark:text-gray-300">
                       {feature.name}
                     </td>
                     <FeatureCell value={feature.free} />
@@ -323,10 +323,10 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="relative overflow-hidden bg-[#FBFCFF] px-4 py-16 dark:bg-amber-900/10">
+      <section className="relative overflow-hidden bg-primary-60 px-4 py-16 dark:bg-amber-900/10">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute top-1/2 -left-32 h-80 w-80 rounded-full  blur-3xl" />
-          <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-[#FBFCFF] blur-3xl" />
+          <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-primary-60 blur-3xl" />
         </div>
 
         <div className="relative mx-auto max-w-4xl">
@@ -343,7 +343,7 @@ export default function PricingPage() {
                 FAQs
               </span>
             </motion.div>
-            <h2 className="mb-4 text-3xl font-bold text-[#030D1F] dark:text-white">
+            <h2 className="mb-4 text-3xl font-bold text-black-700 dark:text-white">
               Still wondering? We thought you might be .
             </h2>
             {/* <p className="text-gray-600 dark:text-gray-400">
@@ -363,10 +363,10 @@ export default function PricingPage() {
                   value={`item-${index}`}
                   className="group rounded-xl border border-gray-200 bg-white px-2 py-1 dark:border-gray-700 dark:bg-gray-900"
                 >
-                  <AccordionTrigger className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:no-underline hover:text-[#E58F17] [&>svg]:hidden">
+                  <AccordionTrigger className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:no-underline hover:text-accent-500 [&>svg]:hidden">
                     <span>{faq.question}</span>
                     {/* + rotates 45deg to become × when open */}
-                    <span className="shrink-0 text-xl font-light text-[#E58F17] transition-transform duration-200 group-has-[[data-state=open]]:rotate-45">
+                    <span className="shrink-0 text-xl font-light text-accent-500 transition-transform duration-200 group-has-[[data-state=open]]:rotate-45">
                       +
                     </span>
                   </AccordionTrigger>
