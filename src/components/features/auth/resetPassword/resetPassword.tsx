@@ -310,7 +310,7 @@ const CreateNewPasswordForm = ({ token }: Readonly<{ token: string }>) => {
 
 const CreateNewPassword = () => {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token")?.trim() ?? "";
+  const token = searchParams?.get("token")?.trim() ?? "";
 
   if (!token) {
     return <InvalidResetLink />;

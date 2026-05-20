@@ -15,7 +15,7 @@ const navLinks = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
 
   return (
     <>
