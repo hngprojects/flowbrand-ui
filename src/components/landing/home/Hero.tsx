@@ -44,56 +44,53 @@ const imageVariants = {
 
 const Hero = () => {
   return (
-    <section
-      className="relative w-full pt-20 overflow-hidden bg-primary-50 to-white"
-      style={{ fontFamily: '"Inter", sans-serif' }}
-    >
+    <section className="relative w-full overflow-hidden bg-primary-50 to-white">
       <div className="absolute w-full h-full z-0 pointer-events-none">
         <Image
           src="/images/smallCloud.png"
           alt="Clouds"
           width={702}
           height={622}
-          className="absolute top-0 left-50 -translate-y-20"
+          className="absolute top-0 hidden lg:block"
         />
         <Image
           src="/images/bigCloud.png"
           alt="Clouds"
           width={286}
           height={264}
-          className="absolute top-30 right-60"
+          className="absolute top-[15%] right-0 hidden lg:block"
         />
       </div>
 
       <motion.div
-        className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 text-center flex flex-col items-center"
+        className="relative z-10 pt-[10%] max-w-7xl mx-auto px-4 md:px-8 text-center flex flex-col items-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         <motion.div
           variants={itemVariantsDown}
-          className="inline-flex items-center rounded-lg border border-amber-300 bg-white p-2 pr-5 mb-8 shadow-sm"
+          className="inline-flex items-center rounded-lg border-[1.5px] border-accent p-[10px] mb-6 shadow-sm"
         >
-          <span className="bg-amber-500 text-white text-xs md:text-sm font-semibold px-4 py-1.5 rounded-lg mr-3">
+          <span className="bg-accent text-white text-[16px] font-[500] h-[28px] w-[78px] rounded-lg mr-3 flex items-center justify-center">
             Simply
           </span>
-          <span className="text-foreground/80 text-xs md:text-sm font-medium">
+          <span className="text-foreground/80 text-[14px] font-[400]">
             Made for every kind of Business
           </span>
         </motion.div>
 
         <motion.h1
           variants={itemVariantsDown}
-          className="text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6 max-w-4xl tracking-tight"
+          className="text-[32px] md:text-[60px] font-[500] text-foreground leading-tight mb-6 max-w-3xl tracking-tight"
         >
           Grow your business with a smarter{" "}
-          <span className="text-amber-500">Marketing Strategy</span>
+          <span className="text-accent">Marketing Strategy</span>
         </motion.h1>
 
         <motion.p
           variants={itemVariants}
-          className="text-lg md:text-xl text-foreground/80 mb-10 max-w-2xl leading-relaxed"
+          className="text-[14px] md:text-[18px] font-[400] text-foreground/80 mb-5 max-w-2xl leading-relaxed"
         >
           Manage your entire customer journey from first contact to repeat
           sales, without stress with everything you need in one place.
@@ -101,7 +98,7 @@ const Hero = () => {
 
         <motion.div
           variants={itemVariants}
-          className="relative mb-16 flex flex-col items-center"
+          className="relative mb-6 flex flex-col items-center"
         >
           <motion.div
             className="inline-block rounded-lg overflow-hidden"
@@ -111,7 +108,7 @@ const Hero = () => {
           >
             <Link
               href="/register"
-              className="bg-[#3b71e1] text-white relative inline-flex px-8 py-3 font-medium focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
+              className="relative bg-primary-500 hover:bg-primary-600 text-[16px] text-white font-[500] py-3 px-8 rounded-lg transition-colors z-10 hover:cursor-pointer inline-flex overflow-hidden"
             >
               <motion.span
                 className="absolute inset-0 bg-amber-500 z-0"

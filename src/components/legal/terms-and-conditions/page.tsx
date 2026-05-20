@@ -30,7 +30,11 @@ const TermsAndConditionsView = () => {
           className="text-[14px] md:text-[20px] text-[#565D69]"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.15 }}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.15,
+          }}
         >
           Last updated : 10-Apr-2026
         </motion.p>
@@ -52,7 +56,11 @@ const TermsAndConditionsView = () => {
           <motion.div
             className="mb-10 border-t-3 border-gray-300 pt-10"
             {...fadeUp}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.05 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.05,
+            }}
           >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               1. Use of the Platform
@@ -73,7 +81,11 @@ const TermsAndConditionsView = () => {
 
           <motion.div
             {...fadeUp}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.1 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.1,
+            }}
           >
             <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
               2. User Responsibilities
@@ -94,7 +106,11 @@ const TermsAndConditionsView = () => {
 
           <motion.div
             {...fadeUp}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.15 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.15,
+            }}
           >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               3. Generated Content
@@ -113,7 +129,11 @@ const TermsAndConditionsView = () => {
 
           <motion.div
             {...fadeUp}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.2 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.2,
+            }}
           >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               4. Account & Access
@@ -132,7 +152,11 @@ const TermsAndConditionsView = () => {
 
           <motion.div
             {...fadeUp}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.25 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.25,
+            }}
           >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               5. Limitation of Liability
@@ -151,7 +175,11 @@ const TermsAndConditionsView = () => {
 
           <motion.div
             {...fadeUp}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.3 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.3,
+            }}
           >
             <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
               6. Changes to the Terms

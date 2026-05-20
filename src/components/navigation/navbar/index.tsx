@@ -20,7 +20,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-background border-border font-inter sticky top-0 z-50 border-b">
+      <nav className="bg-background border-border sticky top-0 z-50 border-b">
         <div className=" layout-components-class flex h-[83px]  items-center justify-between ">
           <Link href="/" className="cursor-pointer">
             <LogoIcon />
@@ -52,15 +52,13 @@ const Navbar = () => {
             >
               <Link
                 href="/login"
-                className="text-foreground hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+                className="text-primary hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors"
               >
                 Log In
               </Link>
               <motion.span
                 className="absolute bottom-2 left-6 right-6 h-[2px] bg-primary origin-left"
-                variants={{
-                  hover: { scaleX: 1 },
-                }}
+                variants={{ hover: { scaleX: 1 } }}
                 initial={{ scaleX: 0 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
               />
@@ -74,7 +72,8 @@ const Navbar = () => {
             >
               <Link
                 href="/register"
-                className="bg-primary text-primary-foreground relative inline-flex h-[51px] items-center justify-center rounded-[10px] px-6 py-3 font-semibold focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
+                className="bg-primary text-primary-foreground relative inline-flex h-[51px] items-center justify-center rounded-[10px] px-6 py-3 
+                font-semibold focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
               >
                 <motion.span
                   className="absolute inset-0 bg-amber-500 z-0"
@@ -101,11 +100,12 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`bg-background absolute top-full left-0 flex w-full flex-col gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
-            isOpen
-              ? "max-h-96 py-6 opacity-100"
-              : "pointer-events-none max-h-0 opacity-0"
-          }`}
+          className={`bg-background absolute top-full left-0 flex w-full flex-col gap-4 
+            overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
+              isOpen
+                ? "max-h-96 py-6 opacity-100"
+                : "pointer-events-none max-h-0 opacity-0"
+            }`}
           inert={!isOpen ? true : undefined}
         >
           {navLinks.map((link) => (
