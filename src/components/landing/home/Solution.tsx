@@ -74,7 +74,7 @@ const Solution = () => {
   const currentStep = steps[activeStep];
 
   return (
-    <section className="w-full">
+    <section className="w-full bg-primary-60">
       <div className="section-class">
         {/* Header Content */}
         <div className="mb-16 text-center md:mb-20">
@@ -125,10 +125,10 @@ const Solution = () => {
                   <span className="mb-4 block text-sm font-semibold tracking-wider text-gray-700 uppercase">
                     STEP {currentStep.number}
                   </span>
-                  <h3 className="mb-4 text-2xl font-bold text-[#0F172A] md:text-3xl">
+                  <h3 className="mb-4 text-[24px] md:text-[32px] font-[500] text-[#0F172A]">
                     {currentStep.title}
                   </h3>
-                  <p className="max-w-md text-lg leading-relaxed text-black-300">
+                  <p className="max-w-lg text-[14px] md:text-[18px] font-[400] leading-relaxed text-black-300">
                     {currentStep.description}
                   </p>
                 </motion.div>

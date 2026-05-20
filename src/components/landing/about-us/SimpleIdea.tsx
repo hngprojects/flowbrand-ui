@@ -1,12 +1,12 @@
 export default function SimpleIdea() {
   return (
     <section className="section-class flex flex-col items-center bg-[#FCFDFF] text-center">
-      <h2 className="mb-10 text-[20px] font-bold tracking-tight text-[#0D1117] md:text-[24px]">
+      <h2 className="mb-10 text-[20px] font-[500] tracking-tight text-[#0D1117] lg:text-[32px]">
         Seil started as a simple idea
       </h2>
 
       {/* Quote block — outer wrapper provides positioning context */}
-      <div className="relative w-full max-w-[640px] px-6 md:px-8">
+      <div className="relative w-full max-w-[830px] px-6 md:px-8">
         {/* Opening double-quote — top left, outside box */}
         <span
           aria-hidden
@@ -15,8 +15,8 @@ export default function SimpleIdea() {
           &ldquo;
         </span>
 
-        <div className="rounded-2xl border border-[#E2E8F0] bg-[#FCFDFF] px-8 py-8 md:px-12 md:py-10">
-          <p className="text-center text-[14px] leading-[1.9] text-black md:text-[16px]">
+        <div className="rounded-2xl border border-[#E2E8F0] bg-[#FCFDFF] p-5">
+          <p className="text-center text-[8px] lg:text-[20px] font-[400] leading-[1.9] text-black md:text-[20px]">
             what if we could ask someone a few questions about their business,
             and give them back a marketing strategy that actually fits, built in
             plain English, one step at a time?

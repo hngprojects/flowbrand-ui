@@ -19,7 +19,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-background border-border font-inter sticky top-0 z-50 border-b">
+      <nav className="bg-background border-border sticky top-0 z-50 border-b">
         <div className=" layout-components-class flex h-[83px]  items-center justify-between ">
           <Link href="/" className="cursor-pointer">
             <LogoIcon />
@@ -46,7 +46,7 @@ const Navbar = () => {
           <div className="hidden items-center gap-4 lg:flex">
             <Link
               href="/login"
-              className="text-foreground hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors"
+              className="text-primary hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors"
             >
               Log In
             </Link>

@@ -95,10 +95,14 @@ export default function SocialProof() {
   const duplicatedLogos = [...logos, ...logos, ...logos];
 
   return (
-    <section className="w-full bg-[#FCFDFF] py-8 md:py-12 overflow-hidden">
-      <div className="mx-auto flex flex-col items-center gap-10">
-        <p className="text-center text-[14px] text-gray-800 md:text-[16px] px-6 font-semibold">
-          Used by small businesses like yours to build and grow with confidence
+    <section className="w-full bg-primary-60 py-8 md:py-12 overflow-hidden">
+      <div className="mx-auto flex flex-col items-center gap-5">
+        <p className="text-center flex gap-1 text-[12px] md:text-[20px] text-black-300 px-6 font-[500]">
+          Used by small <span className="md:hidden">other</span> businesses like
+          yours
+          <span className="hidden md:block">
+            to build and grow with confidence
+          </span>
         </p>
 
         <div className="relative w-full">

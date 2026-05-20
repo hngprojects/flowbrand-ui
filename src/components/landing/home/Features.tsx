@@ -3,20 +3,20 @@ import { SectionLabelPill } from "@/components/ui/section-label-pill";
 
 const Features = () => {
   return (
-    <section className="w-full" style={{ fontFamily: '"Inter", sans-serif' }}>
+    <section className="w-full">
       <div className="flex flex-col items-center section-class">
         {/* Badge */}
         <SectionLabelPill>Features</SectionLabelPill>
 
         {/* Heading */}
-        <h2 className="text-3xl md:text-4xl font-semibold mb-12 text-foreground text-center tracking-tight">
+        <h2 className="text-[24px] md:text-[32px] font-semibold mb-12 text-foreground text-center tracking-tight">
           Everything you need to grow
         </h2>
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {/* Card 1: Guided Setup */}
-          <div className="bg-black rounded-[2rem] p-8 flex flex-col h-[405px] shadow-sm">
+          <div className="bg-black-600 rounded-[2rem] p-6 flex flex-col h-[405px] shadow-sm">
             <div className="flex-1 flex justify-start items-start">
               <Image
                 src="/images/feature-1.png"
@@ -27,12 +27,21 @@ const Features = () => {
               />
             </div>
             <div className="mt-auto">
-              <h3 className="text-white text-xl font-semibold mb-3">
-                Guided Setup
+              <h3 className="text-white text-[20px] md:text-[24px] font-[500] mb-3">
+                <span className="hidden md:block">Guided Setup</span>
+                <span className="md:hidden">
+                  A plan made for your own business
+                </span>
               </h3>
-              <p className="text-gray-400 text-xs font-medium leading-relaxed">
-                Build the best marketing strategy for your business with clear,
-                step by step support
+              <p className="text-gray-400 text-[16px] font-[400] leading-relaxed">
+                <span className="hidden md:block">
+                  Build the best marketing strategy for your business with
+                  clear, step by step support
+                </span>
+                <span className="md:hidden">
+                  Tell us what you sell and who buys it, we&lsquo;ll hand you
+                  the steps. No &quot;figure it out&quot;.
+                </span>
               </p>
             </div>
           </div>
@@ -49,10 +58,10 @@ const Features = () => {
             {/* Dark Gradient Overlay for text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a]/90 via-[#1a1a1a]/30 to-transparent"></div>
             <div className="relative z-10 mt-auto p-8">
-              <h3 className="text-white text-xl font-semibold mb-3">
+              <h3 className="text-white text-[20px] md:text-[24px] font-[500] mb-3">
                 Progress Tracking
               </h3>
-              <p className="text-gray-200 text-xs font-medium leading-relaxed">
+              <p className="text-gray-200 text-[16px] font-[400] leading-relaxed">
                 Track every stage of your marketing and see what to improve on
                 next, without guess work
               </p>
@@ -116,10 +125,10 @@ const Features = () => {
               </div>
 
               <div className="mt-20 px-2">
-                <h3 className="text-white text-xl font-semibold mb-3">
+                <h3 className="text-white text-[20px] md:text-[24px] font-[500] mb-3">
                   Smarter Conversions
                 </h3>
-                <p className="text-white/85 text-xs font-medium leading-relaxed">
+                <p className="text-white/85 text-[16px] font-[400] leading-relaxed">
                   Convert leads into real customers with better inquiry and
                   booking flows.
                 </p>

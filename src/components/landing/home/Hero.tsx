@@ -2,17 +2,14 @@ import Image from "next/image";
 
 const Hero = () => {
   return (
-    <section
-      className="relative w-full pt-20 overflow-hidden bg-primary-50 to-white"
-      style={{ fontFamily: '"Inter", sans-serif' }}
-    >
+    <section className="relative w-full overflow-hidden bg-primary-50 to-white">
       <div className="absolute w-full h-full z-0 pointer-events-none">
         <Image
           src="/images/smallCloud.png"
           alt="Clouds"
           width={702}
           height={622}
-          className="absolute top-0 left-50 -translate-y-20"
+          className="absolute top-0 hidden lg:block"
           preload={true}
         />
         <Image
@@ -20,37 +17,37 @@ const Hero = () => {
           alt="Clouds"
           width={286}
           height={264}
-          className=" absolute top-30 right-60"
+          className=" absolute top-[15%] right-0 hidden lg:block"
           preload={true}
         />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 text-center flex flex-col items-center">
+      <div className="relative z-10 pt-[10%] max-w-7xl mx-auto px-4 md:px-8 text-center flex flex-col items-center">
         {/* Badge */}
-        <div className="inline-flex items-center rounded-lg border border-amber-300 bg-white p-2 pr-5 mb-8 shadow-sm">
-          <span className="bg-amber-500 text-white text-xs md:text-sm font-semibold px-4 py-1.5 rounded-lg mr-3">
+        <div className="inline-flex items-center rounded-lg border-[1.5px] border-accent p-[10px] mb-6 shadow-sm">
+          <span className="bg-accent text-white text-[16px] font-[500] h-[28px] w-[78px] rounded-lg mr-3 flex items-center justify-center">
             Simply
           </span>
-          <span className="text-foreground/80 text-xs md:text-sm font-medium">
+          <span className="text-foreground/80 text-[14px] font-[400]">
             Made for every kind of Business
           </span>
         </div>
 
         {/* Heading */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6 max-w-4xl tracking-tight">
+        <h1 className="text-[32px] md:text-[60px] font-[500] text-foreground leading-tight mb-6 max-w-3xl tracking-tight">
           Grow your business with a smarter{" "}
-          <span className="text-amber-500">Marketing Strategy</span>
+          <span className="text-accent">Marketing Strategy</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-lg md:text-xl text-foreground/80 mb-10 max-w-2xl leading-relaxed">
+        <p className="text-[14px] md:text-[18px] font-[400] text-foreground/80 mb-5 max-w-2xl leading-relaxed">
           Manage your entire customer journey from first contact to repeat
           sales, without stress with everything you need in one place.
         </p>
 
         {/* CTA Button and dotted line */}
-        <div className="relative mb-16 flex flex-col items-center">
-          <button className="bg-[#3b71e1] hover:bg-blue-600 text-white font-medium py-3 px-8 rounded-lg transition-colors z-10">
+        <div className="relative mb-6 flex flex-col items-center">
+          <button className="bg-primary-500 hover:bg-primary-600 text-[16px] text-white font-[500] py-3 px-8 rounded-lg transition-colors z-10 hover:cursor-pointer">
             Create a free account
           </button>
         </div>

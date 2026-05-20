@@ -114,7 +114,7 @@ function TestimonialRow({
       >
         {duplicatedItems.map((t, index) => (
           <Card key={`${t.name}-${index}`} className={testimonialCardClassName}>
-            <p className="w-full text-sm leading-snug text-black-500 sm:text-base sm:leading-[130%] md:text-lg lg:text-[20px]">
+            <p className="w-full leading-snug text-black-500 text-[13px] md:text-[20px]">
               “{t.quote}”
             </p>
             <div className="flex w-full items-center justify-center gap-2 sm:gap-2.5">
@@ -125,7 +125,7 @@ function TestimonialRow({
                 height={40}
                 className="size-8 shrink-0 rounded-full sm:size-10"
               />
-              <span className="text-sm font-medium text-black-500 sm:text-base">
+              <span className="text-[13px] md:text-[20px] font-[500] text-black-500">
                 {t.name}
               </span>
             </div>
@@ -139,9 +139,9 @@ function TestimonialRow({
 export default function Testimonials() {
   return (
     <section className="w-full">
-      <div className="flex flex-col items-center justify-center text-center">
+      <div className="flex flex-col items-center justify-center text-center py-10">
         <SectionLabelPill>Testimonials</SectionLabelPill>
-        <h2 className="mb-6 px-4 text-2xl font-medium tracking-tight text-black-500 sm:mb-8 sm:text-4xl md:text-5xl">
+        <h2 className="mb-2 px-4 text-[24px] md:text-[32px] font-[500] max-w-xs md:max-w-none tracking-tight text-black-500">
           Trusted by growing businesses
         </h2>
         <div className="w-full space-y-4 sm:space-y-6 md:space-y-8">

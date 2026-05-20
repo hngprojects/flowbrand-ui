@@ -1,9 +1,9 @@
 import Hero from "@/components/landing/about-us/hero";
 import WhyWeStarted from "@/components/landing/about-us/WhyWeStarted";
 import MissionSection from "@/components/landing/about-us/mission";
-import CtaSection from "@/components/landing/about-us/cta-section";
 import SocialProof from "@/components/landing/home/SocialProof";
 import SimpleIdea from "@/components/landing/about-us/SimpleIdea";
+import CreateSection from "@/components/landing/home/Create";
 
 const AboutUs = () => {
   return (
@@ -13,7 +13,7 @@ const AboutUs = () => {
       <WhyWeStarted />
       <SimpleIdea />
       <MissionSection />
-      <CtaSection />
+      <CreateSection />
     </section>
   );
 };

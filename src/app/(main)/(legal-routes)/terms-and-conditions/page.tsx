@@ -1,4 +1,4 @@
-import TermsConditionsView from "@/components/landing/terms&conditions/page";
+import TermsConditionsView from "@/components/legal/terms-and-conditions/page";
 
 export default function TermsConditionsPage() {
   return <TermsConditionsView />;

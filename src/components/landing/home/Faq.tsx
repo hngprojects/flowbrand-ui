@@ -1,7 +1,6 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import Link from "next/link";
 import {
   Accordion,
   AccordionContent,
@@ -13,14 +12,12 @@ import { SectionLabelPill } from "@/components/ui/section-label-pill";
 
 export default function FaqSection() {
   return (
-    <section className="w-full">
+    <section className="w-full pt-15 bg-primary-60">
       <div className="flex flex-col items-center section-class">
-        <div className="flex w-full flex-col items-center gap-6">
-          <div className="mb-4">
-            <SectionLabelPill>FAQs</SectionLabelPill>
-          </div>
+        <div className="flex w-full flex-col items-center ">
+          <SectionLabelPill>FAQs</SectionLabelPill>
 
-          <h2 className="text-foreground text-center text-3xl font-semibold md:text-4xl">
+          <h2 className="text-foreground text-center text-[24px] md:text-[32px] font-[500] mb-8">
             Still wondering? We thought you might be.
           </h2>
 
@@ -36,7 +33,7 @@ export default function FaqSection() {
                 className="group overflow-hidden rounded-xl border border-[#EDEDED] bg-white px-0 data-[state=open]:border-blue-100 data-[state=open]:shadow-sm"
               >
                 <AccordionTrigger className="items-start px-6 py-6 text-left hover:no-underline [&>svg:last-child]:hidden">
-                  <span className="text-foreground pr-4 text-lg leading-tight font-medium">
+                  <span className="text-foreground pr-4 text-[16px] md:text-[18px] font-[500] leading-tight">
                     {item.question}
                   </span>
                   <div className="ml-auto flex shrink-0 pt-0.5">
@@ -44,7 +41,7 @@ export default function FaqSection() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pt-0 pb-6">
-                  <div className="space-y-4 border-t border-gray-100 pt-4 text-sm leading-relaxed text-gray-800 md:text-[15px]">
+                  <div className="space-y-4 border-t border-gray-100 pt-4 text-[14px] md:text-[18px] leading-relaxed text-gray-800">
                     {item.answerParagraphs.map(
                       (paragraph: string, paragraphIndex: number) => (
                         <p key={paragraphIndex}>{paragraph}</p>
@@ -55,22 +52,6 @@ export default function FaqSection() {
               </AccordionItem>
             ))}
           </Accordion>
-
-          <div className="mt-20 flex flex-col items-center gap-6 pb-12 text-center md:pb-20">
-            <h2 className="text-black-500 max-w-4xl text-3xl font-semibold tracking-tight md:text-4xl lg:text-5xl">
-              Get a step-by-step marketing strategy in minutes
-            </h2>
-            <p className="text-black-400 max-w-md text-sm leading-relaxed md:text-base">
-              A simple marketing plan that attracts, nurtures, and converts
-              customers without stress
-            </p>
-            <Link
-              href="/register"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 rounded-lg px-8 py-3.5 text-md font-medium shadow-md transition-all active:scale-95"
-            >
-              Create a free account
-            </Link>
-          </div>
         </div>
       </div>
     </section>
