@@ -1,10 +1,10 @@
 import WaitlistBody from "@/components/features/waitlist";
-import { PatternWaitlist } from "@/components/icons/patternSvg";
+import { PatternMesh } from "@/components/icons/patternSvg";
 
 export default function WaitlistView() {
   return (
     <div className="relative bg-gradient-to-r from-primary-100/20 via-primary-100/40 to-primary-100/60 min-h-screen">
-      <PatternWaitlist className="absolute inset-0 h-full w-full object-cover opacity-40 pointer-events-none -z-10" />
+      <PatternMesh className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover text-[#E1EAFA] opacity-40" />
       <WaitlistBody />
     </div>
   );

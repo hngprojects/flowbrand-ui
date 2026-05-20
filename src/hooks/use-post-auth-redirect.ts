@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { getPostAuthRedirect } from "~/actions/auth";
 import { clearRegisterVerifyEmail } from "@/lib/register-verify-storage";
-import { DASHBOARD_ROUTE } from "@/routes";
+import { ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 
 /** After sign-in, resolve onboarding vs funnel once the client session is ready. */
 export function usePostAuthRedirect() {
@@ -41,7 +41,7 @@ export function usePostAuthRedirect() {
           console.warn("[auth] post-auth redirect failed", error);
         }
         clearRegisterVerifyEmail();
-        router.replace(DASHBOARD_ROUTE);
+        router.replace(ONBOARDING_UPLOAD_ROUTE);
       });
   }, [isAuthenticated, router]);
 }

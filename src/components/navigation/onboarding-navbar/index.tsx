@@ -6,7 +6,8 @@ import { Menu, X } from "lucide-react";
 import LogoIcon from "@/components/icons/navbar/logo";
 import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
-import { useState } from "react";
+import { LogoutButton } from "@/components/auth/logout-button";
+import { useEffect, useRef, useState } from "react";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -17,11 +18,29 @@ const navLinks = [
 
 const OnboardingNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [profileOpen]);
 
   return (
     <>
-      <nav className="bg-background border-border sticky top-0 z-50 border-b">
+      <nav className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
         <div className="layout-components-class flex h-[83px] items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -49,16 +68,25 @@ const OnboardingNavbar = () => {
             >
               <BellIcon />
             </button>
-            <Link
-              href="/profile"
-              aria-label="Profile"
-              className="border-gray-500 flex h-11 items-center gap-[10px] rounded-[41px] border-[0.5px] px-3 py-[10px] lg:w-[103px]"
-            >
-              <ProfileIcon />
-              <span className="text-foreground hidden text-sm font-medium lg:block">
-                Profile
-              </span>
-            </Link>
+            <div ref={profileRef} className="relative">
+              <button
+                type="button"
+                aria-label="Profile menu"
+                aria-expanded={profileOpen}
+                onClick={() => setProfileOpen((open) => !open)}
+                className="border-gray-500 flex h-11 items-center gap-[10px] rounded-[41px] border-[0.5px] px-3 py-[10px] lg:w-[103px]"
+              >
+                <ProfileIcon />
+                <span className="text-foreground hidden text-sm font-medium lg:inline">
+                  Profile
+                </span>
+              </button>
+              {profileOpen ? (
+                <div className="border-border absolute top-[calc(100%+8px)] right-0 z-50 min-w-[160px] overflow-hidden rounded-xl border bg-white py-1 shadow-lg">
+                  <LogoutButton variant="menu" className="flex" />
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
 
