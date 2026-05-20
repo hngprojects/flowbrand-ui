@@ -60,10 +60,10 @@ export default function StepTwo(props: StepTwoProps) {
   return (
     <div className="space-y-default">
       <div className="space-y-small">
-        <h1 className="text-3xl font-base text-label tracking-tight">
+        <h1 className="lg:text-3xl text-2xl font-semibold text-label tracking-tight">
           Who is your ideal customer?
         </h1>
-        <p className="text-sm text-gray-800">
+        <p className="lg:text-base text-sm leading-snug text-muted-foreground max-w-2sm">
           Tap to build a picture of the person you most want to reach.
         </p>
       </div>

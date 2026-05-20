@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 import ProgressBar from "@/components/onboarding/ProgressBar";
 import StepOne from "@/components/onboarding/StepOne";
@@ -15,10 +16,8 @@ export default function OnboardingPage() {
   const router = useRouter();
   const store = useOnboardingStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorText, setErrorText] = useState<string | null>(null);
 
   const handleBackClick = () => {
-    setErrorText(null);
     if (store.step === 1) {
       router.push("/auth-routes");
     } else {
@@ -28,8 +27,6 @@ export default function OnboardingPage() {
 
   const handleCreateStrategy = async () => {
     if (isLoading) return;
-
-    setErrorText(null);
 
     const payload = {
       businessDescription: store.businessDescription,
@@ -44,36 +41,43 @@ export default function OnboardingPage() {
 
     const validation = onboardingSchema.safeParse(payload);
     if (!validation.success) {
-      const firstErrorMessage =
-        validation.error.issues?.[0]?.message || "Validation Error";
-      setErrorText(firstErrorMessage);
+      toast.error(validation.error.issues?.[0]?.message || "Invalid input");
       return;
     }
 
     try {
       setIsLoading(true);
-      const response = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const token = localStorage.getItem("accessToken");
 
-      if (!response.ok) {
-        let errorBodyMessage = "Submission pipeline failure.";
-        try {
-          const apiErrorData = await response.json();
-          if (apiErrorData?.message) errorBodyMessage = apiErrorData.message;
-        } catch {
-          // Fallback if parsing fails
-        }
-        throw new Error(errorBodyMessage);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/onboarding/complete`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(
+          `Server returned non-JSON response (Status: ${response.status})`,
+        );
       }
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to complete onboarding");
+      }
+
+      toast.success("Strategy created successfully!");
       router.push("/dashboard");
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Something went wrong.";
-      setErrorText(errorMessage);
+      toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsLoading(false);
     }
@@ -115,11 +119,9 @@ export default function OnboardingPage() {
             <StepOne
               value={store.businessDescription}
               onChange={(val) => {
-                setErrorText(null);
                 store.setBusinessDescription(val);
               }}
               onNext={() => {
-                setErrorText(null);
                 store.nextStep();
               }}
             />
@@ -129,26 +131,21 @@ export default function OnboardingPage() {
             <StepTwo
               theyAre={store.theyAre}
               toggleTheyAre={(val) => {
-                setErrorText(null);
                 store.toggleTheyAre(val);
               }}
               whoWantTo={store.whoWantTo}
               toggleWhoWantTo={(val) => {
-                setErrorText(null);
                 store.toggleWhoWantTo(val);
               }}
               locatedIn={store.locatedIn}
               toggleLocatedIn={(val) => {
-                setErrorText(null);
                 store.toggleLocatedIn(val);
               }}
               customInput={store.customCustomerInput}
               setCustomInput={(val) => {
-                setErrorText(null);
                 store.setCustomCustomerInput(val);
               }}
               onNext={() => {
-                setErrorText(null);
                 store.nextStep();
               }}
             />
@@ -158,7 +155,6 @@ export default function OnboardingPage() {
             <StepThree
               selected={store.trafficChannel}
               onSelect={(val) => {
-                setErrorText(null);
                 if (store.trafficChannel === val) {
                   store.setTrafficChannel("");
                 } else {
@@ -168,15 +164,6 @@ export default function OnboardingPage() {
               onSubmit={handleCreateStrategy}
               isLoading={isLoading}
             />
-          )}
-
-          {errorText && (
-            <div
-              role="alert"
-              className="text-2sm font-medium text-destructive bg-destructive/10 p-small rounded-sm transition-all"
-            >
-              {errorText}
-            </div>
           )}
         </div>
       </div>

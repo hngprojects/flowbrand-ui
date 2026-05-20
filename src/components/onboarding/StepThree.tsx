@@ -25,10 +25,10 @@ export default function StepThree({
   return (
     <div className="space-y-default">
       <div className="space-y-small">
-        <h1 className="text-3xl font-base">
+        <h1 className="text-xl lg:text-3xl font-semibold tracking-wide lg:tracking-tight leading-tight">
           How do most of your customer find you right now?
         </h1>
-        <p className="text-sm text-gray-800">
+        <p className="lg:text-sm leading-snug text-muted-foreground max-w-2sm">
           Pick the one channel that brings you the most customers right now.
         </p>
       </div>

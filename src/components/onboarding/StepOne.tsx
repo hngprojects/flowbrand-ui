@@ -13,10 +13,10 @@ export default function StepOne({ value, onChange, onNext }: StepOneProps) {
   return (
     <div className="space-y-default">
       <div className="space-y-small">
-        <h1 className="text-3xl font-base text-label tracking-tight">
+        <h1 className="lg:text-3xl text-2xl font-semibold text-label tracking-tight">
           What does your business sell?
         </h1>
-        <p className="text-base leading-snug text-muted-foreground max-w-2sm">
+        <p className="leading-snug text-muted-foreground max-w-2sm">
           Describe your product or service in your own words keep it simple.
           There are no wrong answers here.
         </p>
