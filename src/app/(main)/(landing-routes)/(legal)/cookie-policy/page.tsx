@@ -1,4 +1,4 @@
-import CookiesPolicyView from "@/components/landing/cookiesPolicy/page";
+import CookiesPolicyView from "@/components/landing/legal/cookies-policy/page";
 
 const CookiesPolicy = () => {
   return <CookiesPolicyView />;
