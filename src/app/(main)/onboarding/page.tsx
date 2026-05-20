@@ -45,33 +45,31 @@ export default function OnboardingPage() {
       return;
     }
 
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      toast.error("Session expired. Please sign in again.");
+      router.push("/auth-routes");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const token = localStorage.getItem("accessToken");
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/onboarding/complete`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "";
+
+      const response = await fetch(`${baseUrl}/api/onboarding/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error(
-          `Server returned non-JSON response (Status: ${response.status})`,
-        );
-      }
-
-      const data = await response.json();
+        // 3. Use validation.data (schema-normalized)
+        body: JSON.stringify(validation.data),
+      });
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to complete onboarding");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to complete onboarding");
       }
 
       toast.success("Strategy created successfully!");
