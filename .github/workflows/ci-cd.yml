@@ -41,6 +41,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Prepare pnpm workspace for CI
+        run: |
+          {
+            echo 'packages:'
+            echo '  - "."'
+            cat pnpm-workspace.yaml
+          } > pnpm-workspace.ci.yaml
+          mv pnpm-workspace.ci.yaml pnpm-workspace.yaml
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
