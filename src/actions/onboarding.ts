@@ -37,6 +37,7 @@ export async function startOnboarding(): Promise<OnboardingActionResult> {
   try {
     const res = await axios.post(onboardingUrl("/start"), null, {
       headers: { Authorization: `Bearer ${token}` },
+      timeout: 30000,
     });
     return { ok: true, status: res.status, data: res.data };
   } catch (error) {
@@ -68,6 +69,7 @@ export async function saveOnboardingStep(input: {
   try {
     const res = await axios.post(onboardingUrl("/step"), input, {
       headers: { Authorization: `Bearer ${token}` },
+      timeout: 30000,
     });
     return { ok: true, status: res.status, data: res.data };
   } catch (error) {
@@ -100,17 +102,13 @@ export async function completeOnboarding(
       { session_id },
       {
         headers: { Authorization: `Bearer ${token}` },
+        timeout: 30000,
       },
     );
     return { ok: true, status: res.status, data: res.data?.data ?? res.data };
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      console.error(
-        "[onboarding] complete FAILED",
-        status,
-        JSON.stringify(data),
-      );
       return {
         ok: false,
         error: formatAuthApiError(
@@ -137,6 +135,7 @@ export async function getOnboardingSession(): Promise<OnboardingActionResult> {
   try {
     const res = await axios.get(onboardingUrl("/session"), {
       headers: { Authorization: `Bearer ${token}` },
+      timeout: 30000,
     });
     return { ok: true, status: res.status, data: res.data };
   } catch (error) {

@@ -27,8 +27,11 @@ export default function OnboardingPage() {
     (async () => {
       const res = await startOnboarding();
       if (res.ok) {
-        const data = res.data as { data?: { session_id?: string } };
-        const id = data?.data?.session_id;
+        const body = res.data as {
+          session_id?: string;
+          data?: { session_id?: string };
+        };
+        const id = body?.data?.session_id ?? body?.session_id;
         if (id) store.setSessionId(id);
       } else if (res.status === 409) {
         router.push("/funnel");
@@ -36,6 +39,7 @@ export default function OnboardingPage() {
         toast.error(res.error);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleBackClick = () => {
