@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useMemo, useState } from "react";
 import { Check, ChevronRight, Plus, CircleHelp, FileText } from "lucide-react";
 import StrategySidebar from "@/components/strategy-layout/strategy-sidebar";
@@ -226,7 +225,7 @@ function Checkbox({
     <button
       onClick={onClick}
       className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-all duration-200 ${
-        checked ? "border-[#2F6FED] bg-[#2F6FED]" : "border-[#D0D5DD] bg-white"
+        checked ? "border-blue-400 bg-blue-400" : "border-[#D0D5DD] bg-white"
       }`}
     >
       {checked && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
@@ -412,7 +411,7 @@ export default function StrategyPage() {
                   onClick={() => setActiveStrategy(item.id)}
                   className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     active
-                      ? "bg-[#2F6FED] text-white"
+                      ? "bg-blue-400 text-white"
                       : "border border-[#EAECF0] bg-white text-[#667085]"
                   }`}
                 >

@@ -76,22 +76,47 @@ const Solution = () => {
   return (
     <section className="w-full">
       <div className="section-class">
-        {/* Header Content */}
         <div className="mb-16 text-center md:mb-20">
-          <SectionLabelPill>Our Solution</SectionLabelPill>
-          <h2 className="mb-4 text-4xl font-medium tracking-tight text-[#0F172A] md:text-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <SectionLabelPill>Our Solution</SectionLabelPill>
+          </motion.div>
+
+          <motion.h2
+            className="mb-4 text-4xl font-medium tracking-tight text-[#0F172A] md:text-5xl"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.1,
+            }}
+          >
             How it works
-          </h2>
-          <p className="text-base text-black-300 md:text-lg">
+          </motion.h2>
+
+          <motion.p
+            className="text-base text-black-300 md:text-lg"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{
+              duration: 0.7,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.2,
+            }}
+          >
             We get you up and running in just 3 steps
-          </p>
+          </motion.p>
         </div>
 
-        {/* Interactive Content */}
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          {/* Left Column: Text Content */}
           <div className="flex flex-col items-start">
-            {/* Dots Pagination */}
             <div className="mb-10 flex gap-3">
               {steps.map((_, idx) => (
                 <button
@@ -136,7 +161,6 @@ const Solution = () => {
             </div>
           </div>
 
-          {/* Right Column: Image Mockup */}
           <div className="flex justify-center lg:justify-end">
             <div
               className={`relative aspect-[606/468] w-full max-w-[606px] overflow-hidden rounded-[32px] bg-accent transition-all duration-500 ${

@@ -1,11 +1,19 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function WhyWeStarted() {
   return (
-    <section className="w-full ">
+    <section className="w-full bg-[var(--background)]">
       <div className="section-class flex flex-col md:flex-row md:items-center">
-        {/* Text — 45% */}
-        <div className="w-full flex-shrink-0 md:mt-8 md:w-[50%]">
+        <motion.div
+          className="w-full flex-shrink-0 md:mt-8 md:w-[50%] md:pr-4 mb-4 md:mb-0 "
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
+        >
           <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-[#E58F172B] px-3 py-1 text-[11px] font-semibold tracking-wide text-[#E58F17] uppercase">
             <span className="inline-block h-3 w-3 rounded-full bg-[#E58F17]" />
             Our Story
@@ -24,10 +32,19 @@ export default function WhyWeStarted() {
           <p className="text-[16px] leading-relaxed text-black md:text-[18px]">
             No strategy. No plan. Just effort and hope.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Image — 55% */}
-        <div className="w-full flex-shrink-0 md:w-[50%]">
+        <motion.div
+          className="w-full flex-shrink-0 md:w-[50%]"
+          initial={{ opacity: 0, x: 50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.15,
+          }}
+        >
           <Image
             src="/images/nkechi.png"
             alt="Nkechi at her provisions store"
@@ -42,7 +59,7 @@ export default function WhyWeStarted() {
             height={280}
             className="block h-[260px] w-full rounded-2xl object-cover md:hidden"
           />
-        </div>
+        </motion.div>
       </div>
     </section>
   );

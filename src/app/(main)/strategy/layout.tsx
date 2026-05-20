@@ -4,12 +4,6 @@ type Props = {
   children: ReactNode;
 };
 
-export default function StrategyLayout({
-  children,
-}: Props) {
-  return (
-    <main className="min-h-screen bg-[#FAFAFA]">
-      {children}
-    </main>
-  );
+export default function StrategyLayout({ children }: Props) {
+  return <main className="min-h-screen bg-[#FAFAFA]">{children}</main>;
 }

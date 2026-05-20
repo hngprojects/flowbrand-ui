@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import LogoIcon from "@/components/icons/navbar/logo";
+import { motion } from "framer-motion";
 import { useState } from "react";
 
 const navLinks = [
@@ -44,18 +45,46 @@ const Navbar = () => {
           </ul>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <Link
-              href="/login"
-              className="text-foreground hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors"
+            <motion.div
+              className="relative"
+              whileHover="hover"
+              whileTap={{ scale: 0.97 }}
             >
-              Log In
-            </Link>
-            <Link
-              href="/register"
-              className="bg-primary text-primary-foreground flex h-[51px] items-center justify-center rounded-[10px] px-6 py-3 font-semibold transition-opacity hover:opacity-90"
+              <Link
+                href="/login"
+                className="text-foreground hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-
+              >
+                Log In
+              </Link>
+              <motion.span
+                className="absolute bottom-2 left-6 right-6 h-[2px] bg-primary origin-left"
+                variants={{
+                  hover: { scaleX: 1 },
+                }}
+                initial={{ scaleX: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              />
+            </motion.div>
+
+            <motion.div
+              className="inline-block rounded-[10px] overflow-hidden"
+              whileHover="hover"
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
             >
-              Get started
-            </Link>
+              <Link
+                href="/register"
+                className="bg-primary text-primary-foreground relative inline-flex h-[51px] items-center justify-center rounded-[10px] px-6 py-3 font-semibold focus-visible:ring-2 focus-visible:ring-a
+              >
+                <motion.span
+                  className="absolute inset-0 bg-amber-500 z-0"
+                  variants={{ hover: { x: 0 } }}
+                  initial={{ x: "-100%" }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                />
+                <span className="relative z-10">Get started</span>
+              </Link>
+            </motion.div>
           </div>
 
           <button

@@ -1,15 +1,47 @@
+"use client";
+
+import { motion } from "framer-motion";
+
+const fadeUp = {
+  initial: { opacity: 0, y: 32 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+};
+
 const PrivacyPolicyView = () => {
   return (
     <>
-      <div className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]">
-        <h1 className="text-[20px] md:text-[40px]">Privacy Policy</h1>
-        <p className="text-[14px] md:text-[20px] text-[#565D69]">
+      <motion.div
+        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <motion.h1
+          className="text-[20px] md:text-[40px]"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
+        >
+          Privacy Policy
+        </motion.h1>
+        <motion.p
+          className="text-[14px] md:text-[20px] text-[#565D69]"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.15,
+          }}
+        >
           Last updated : 10-Apr-2026
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
       <div className="flex flex-col section-class space-y-5">
-        <div>
+        <motion.div {...fadeUp}>
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Your privacy matters to us
           </h2>
@@ -23,9 +55,16 @@ const PrivacyPolicyView = () => {
               policy.
             </span>
           </p>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          {...fadeUp}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.05,
+          }}
+        >
           <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
             How we use your information
           </h2>
@@ -38,9 +77,16 @@ const PrivacyPolicyView = () => {
               trends and refine the quality of our suggestions.
             </span>
           </p>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          {...fadeUp}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.1,
+          }}
+        >
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Data sharing
           </h2>
@@ -53,9 +99,16 @@ const PrivacyPolicyView = () => {
               rights, safety, and integrity of Seil and its users.
             </span>
           </p>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          {...fadeUp}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.15,
+          }}
+        >
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Data security
           </h2>
@@ -68,9 +121,16 @@ const PrivacyPolicyView = () => {
               any concerns.
             </span>
           </p>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          {...fadeUp}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.2,
+          }}
+        >
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Your rights
           </h2>
@@ -83,9 +143,16 @@ const PrivacyPolicyView = () => {
               respond within a reasonable timeframe.
             </span>
           </p>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          {...fadeUp}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1] as const,
+            delay: 0.25,
+          }}
+        >
           <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
             Changes to the policy
           </h2>
@@ -98,7 +165,7 @@ const PrivacyPolicyView = () => {
               handled.
             </span>
           </p>
-        </div>
+        </motion.div>
       </div>
     </>
   );

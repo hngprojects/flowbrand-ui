@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ChevronRight,
-  Plus,
-  CircleHelp,
-  FileText,
-} from "lucide-react";
+import { ChevronRight, Plus, CircleHelp, FileText } from "lucide-react";
 
 type StrategySection = {
   id: string;
@@ -34,7 +29,7 @@ export default function StrategySidebar({
         <div className="flex items-center justify-between rounded-[18px] border border-[#EAECF0] bg-white px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#EAECF0]">
-              <FileText className="h-5 w-5 text-[#2F6FED]" />
+              <FileText className="h-5 w-5 text-blue-400" />
             </div>
 
             <div>
@@ -42,9 +37,7 @@ export default function StrategySidebar({
                 Business requ...
               </p>
 
-              <p className="mt-1 text-xs font-semibold text-[#2F6FED]">
-                DOCX
-              </p>
+              <p className="mt-1 text-xs font-semibold text-blue-400">DOCX</p>
             </div>
           </div>
 
@@ -53,8 +46,8 @@ export default function StrategySidebar({
       </div>
 
       <p className="mt-10 text-[15px] leading-7 text-[#667085]">
-        We have created a tailored marketing strategy for your unique use
-        case and problem.
+        We have created a tailored marketing strategy for your unique use case
+        and problem.
       </p>
 
       <div className="mt-10">
@@ -77,7 +70,7 @@ export default function StrategySidebar({
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="mt-[3px] h-5 w-5 rounded-full border-[5px] border-[#2F6FED]" />
+                  <div className="mt-[3px] h-5 w-5 rounded-full border-[5px] border-blue-400" />
 
                   <div>
                     <div className="flex items-center gap-1">
@@ -103,13 +96,13 @@ export default function StrategySidebar({
 
       <div className="mt-10">
         <p className="mb-5 text-[15px] leading-7 text-[#667085]">
-          If you need to create more funnels for specific use cases, click
-          on the button below.
+          If you need to create more funnels for specific use cases, click on
+          the button below.
         </p>
 
         <button className="flex w-full items-center justify-between rounded-[24px] bg-[#D9DEE8] px-5 py-5 transition-all duration-200 hover:bg-[#CED5E2]">
           <div className="flex items-center gap-4">
-            <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[16px] bg-[#2F6FED] shadow-sm">
+            <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[16px] bg-blue-400 shadow-sm">
               <Plus className="h-7 w-7 text-white" strokeWidth={2.2} />
             </div>
 
@@ -118,10 +111,7 @@ export default function StrategySidebar({
             </p>
           </div>
 
-          <ChevronRight
-            className="h-7 w-7 text-[#101828]"
-            strokeWidth={2}
-          />
+          <ChevronRight className="h-7 w-7 text-[#101828]" strokeWidth={2} />
         </button>
       </div>
     </aside>
