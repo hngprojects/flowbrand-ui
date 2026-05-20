@@ -65,26 +65,15 @@ export default function OnboardingPage() {
       return;
     }
 
+    if (!store.sessionId) {
+      toast.error("Session not ready. Please try again.");
+      return;
+    }
+
     try {
       setIsLoading(true);
 
-      const start = await startOnboarding();
-      if (!start.ok) {
-        if (start.status === 409) {
-          router.push("/funnel");
-          return;
-        }
-        toast.error(start.error);
-        return;
-      }
-
-      const startData = start.data as { data?: { session_id?: string } };
-      const sessionId = startData?.data?.session_id;
-      if (!sessionId) {
-        toast.error("Session not ready. Please try again.");
-        return;
-      }
-      store.setSessionId(sessionId);
+      const sessionId = store.sessionId;
 
       const steps = [
         {
@@ -125,7 +114,7 @@ export default function OnboardingPage() {
       }
 
       const done = await completeOnboarding(sessionId);
-      if (!done.ok) {
+      if (!done.ok && done.status !== 409) {
         toast.error(done.error);
         return;
       }

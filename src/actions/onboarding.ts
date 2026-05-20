@@ -106,6 +106,11 @@ export async function completeOnboarding(
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
+      console.error(
+        "[onboarding] complete FAILED",
+        status,
+        JSON.stringify(data),
+      );
       return {
         ok: false,
         error: formatAuthApiError(
