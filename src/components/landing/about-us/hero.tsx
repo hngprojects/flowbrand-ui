@@ -38,7 +38,7 @@ export default function Hero() {
       {/* ── Image + overlay ── */}
       <div className="relative z-10 w-full mt-12 md:mt-0">
         {/* Desktop */}
-        <div className="relative mx-auto hidden w-full md:block w-full lg:max-w-[1800px] lg:mx-auto">
+        <div className="relative mx-auto hidden w-full md:block w-full max-w-[1200px]">
           <Image
             src="/images/new-hero.png"
             alt="Small business owners — Maimuna, David, Sarah and Aisha"
