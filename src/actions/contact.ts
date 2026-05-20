@@ -54,7 +54,7 @@ export async function submitContact(
       },
     );
 
-    if (response.status === 201) {
+    if (response.status >= 200 && response.status < 300) {
       return {
         ok: true,
         message: readSuccessMessage(response.data, "Message sent successfully"),
@@ -102,10 +102,7 @@ export async function submitContact(
 
     return {
       ok: false,
-      message: readSuccessMessage(
-        response.data,
-        "Could not send your message. Please try again.",
-      ),
+      message: "Unexpected response from server. Please try again.",
       status: response.status,
     };
   } catch {
