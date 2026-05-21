@@ -5,5 +5,5 @@ type Props = {
 };
 
 export default function StrategyLayout({ children }: Props) {
-  return <main className="min-h-screen bg-[#FAFAFA]">{children}</main>;
+  return <div className="min-h-screen bg-[#FAFAFA]">{children}</div>;
 }

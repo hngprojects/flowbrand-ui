@@ -6,6 +6,7 @@ import { FileUp, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const WIZARD_ROUTE = ["", "onboarding", "step-1"].join("/");
+const STRATEGY_ROUTE = ["", "strategy"].join("/");
 
 interface UploadedFile {
   id: string;
@@ -99,6 +100,10 @@ export default function OnboardingPage() {
 
   const goToWizard = useCallback(() => {
     router.push(WIZARD_ROUTE);
+  }, [router]);
+
+  const goToStrategy = useCallback(() => {
+    router.push(STRATEGY_ROUTE);
   }, [router]);
 
   const simulateUpload = useCallback((id: string) => {
@@ -226,7 +231,7 @@ export default function OnboardingPage() {
           )}
 
           <Button
-            onClick={goToWizard}
+            onClick={goToStrategy}
             disabled={!allDone}
             className="mt-5 w-full rounded-md bg-[#2D4EAB] py-6 text-base font-semibold text-white hover:bg-[#1E3A8A] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 mb-5 dark:hover:bg-blue-800/90"
           >
@@ -236,7 +241,7 @@ export default function OnboardingPage() {
 
           <button
             onClick={goToWizard}
-            className="mt-5 flex w-full items-center justify-center gap-1 text-sm text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-400dark:hover:text-gray-200"
+            className="mt-5 flex w-full items-center justify-center gap-1 text-sm text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
           >
             {"Don't know what to do? Click here"}
             <ChevronRight size={15} />
