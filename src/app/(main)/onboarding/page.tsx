@@ -162,8 +162,8 @@ export default function OnboardingPage() {
 
   return (
     <main className="min-h-screen bg-[#F7F8FA] dark:bg-gray-950">
-      <div className="mx-auto flex w-full max-w-[620px] flex-col items-center px-4 py-14 md:py-20">
-        <h1 className="mb-2 text-center text-3xl font-semibold text-black-900 dark:text-gray-100 md:text-4xl">
+      <div className="mx-auto flex w-full max-w-[680px] flex-col items-center px-4 py-14 md:py-20">
+        <h1 className="mb-2 text-center text-4xl font-bold text-black dark:text-gray-100 md:text-[34px]">
           Start creating your marketing strategy
         </h1>
         <p className="mb-10 text-center text-sm text-gray-600 dark:text-gray-400">

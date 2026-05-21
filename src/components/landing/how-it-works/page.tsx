@@ -133,6 +133,7 @@ const HowItWorks = () => {
         })}
       </div>
 
+<<<<<<< HEAD
       {/* Bottom CTA */}
       <div className="flex flex-col items-center justify-center gap-8 text-center section-class">
         <motion.div
@@ -182,6 +183,9 @@ const HowItWorks = () => {
           </motion.div>
         </motion.div>
       </div>
+=======
+      <CreateSection />
+>>>>>>> e69fac897499fed846895ea8cc8f8c854a5c723e
     </main>
   );
 };

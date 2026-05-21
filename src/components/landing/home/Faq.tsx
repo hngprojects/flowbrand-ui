@@ -83,6 +83,7 @@ export default function FaqSection() {
             ))}
           </Accordion>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
           <div className="mt-20 flex flex-col items-center gap-6 pb-12 text-center md:pb-20">
             <motion.h2
@@ -142,6 +143,8 @@ export default function FaqSection() {
           </div>
 =======
 >>>>>>> 2a0bd0dfa69d4ab53479f1b5dbfe7738be46daac
+=======
+>>>>>>> e69fac897499fed846895ea8cc8f8c854a5c723e
         </div>
       </div>
     </section>

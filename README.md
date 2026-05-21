@@ -68,7 +68,7 @@ Replaces the legacy `middleware.ts` (Next.js 16 renamed it). It runs before the 
 
 - Generates an `x-request-id` and forwards it to the request headers + response
 - Sets baseline security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`)
-- Skips static assets via the matcher
+- Skips static images via the matcher
 
 Add auth gating, rewrites, or redirects there as needed. Note: `runtime` config is **not** allowed in `proxy.ts` — it always runs on Node.js.
 

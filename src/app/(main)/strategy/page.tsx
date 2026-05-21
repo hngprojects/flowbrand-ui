@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Check, ChevronRight, Plus, CircleHelp, FileText } from "lucide-react";
-import StrategySidebar from "@/components/strategy-layout/strategy-sidebar";
+import StrategySidebar from "@/components/strategy-layout/strategy-side";
 
 type ResourceLink = {
   label: string;
