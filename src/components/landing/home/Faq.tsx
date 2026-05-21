@@ -147,9 +147,7 @@ export default function FaqSection() {
                       ease: "easeInOut",
                     }}
                   />
-                  <span className="relative z-10">
-                    Create a free account
-                  </span>
+                  <span className="relative z-10">Create a free account</span>
                 </Link>
               </motion.div>
             </motion.div>
