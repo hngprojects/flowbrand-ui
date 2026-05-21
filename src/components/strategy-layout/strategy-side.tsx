@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { ChevronRight, Plus, CircleHelp, FileText } from "lucide-react";
@@ -119,4 +117,3 @@ export default function StrategySidebar({
     </aside>
   );
 }
-
