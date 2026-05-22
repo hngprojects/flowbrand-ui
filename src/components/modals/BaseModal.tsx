@@ -30,7 +30,10 @@ const BaseModal = ({
 }: BaseModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]">
+      <DialogContent
+    className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]"
+    overlayClassName="bg-[#030D1F]/80"
+  >
         <VisuallyHidden>
           <DialogTitle>{title ?? "Modal"}</DialogTitle>
         </VisuallyHidden>
@@ -60,7 +63,7 @@ const BaseModal = ({
             )}
 
             {subtitle && (
-              <p className="text-black-300 text-sm leading-relaxed">
+              <p className=" text-sm md:text-base leading-relaxed md:font-bold font-medium text-[#565d69]">
                 {subtitle}
               </p>
             )}
