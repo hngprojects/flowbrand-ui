@@ -129,31 +129,37 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
   const onSubmit = async (
     values: z.infer<typeof ResetPasswordWithOtpFormSchema>,
   ) => {
-    const result = await resetPasswordWithOtp({
-      email,
-      otp_code: joinOtpFormDigits(values),
-      password: values.password,
-    });
+    try {
+      const result = await resetPasswordWithOtp({
+        email,
+        otp_code: joinOtpFormDigits(values),
+        password: values.password,
+      });
 
-    if (!result.ok) {
-      if (isInvalidResetOtpError(result.error)) {
-        toast.error("Invalid code", { description: result.error });
-        clearOtpFields();
-        queueOtpFocus(0);
+      if (!result.ok) {
+        if (isInvalidResetOtpError(result.error)) {
+          toast.error("Invalid code", { description: result.error });
+          clearOtpFields();
+          queueOtpFocus(0);
+          return;
+        }
+        toast.error("Could not update password", {
+          description: result.error,
+        });
         return;
       }
-      toast.error("Could not update password", {
-        description: result.error,
-      });
-      return;
-    }
 
-    clearForgotResetStorage();
-    await signOut({ redirect: false });
-    toast.success("Password reset successful", {
-      description: "Sign in with your new password.",
-    });
-    router.push("/login");
+      clearForgotResetStorage();
+      await signOut({ redirect: false });
+      toast.success("Password reset successful", {
+        description: "Sign in with your new password.",
+      });
+      router.push("/login");
+    } catch {
+      toast.error("Could not update password", {
+        description: "Network error. Please try again.",
+      });
+    }
   };
 
   return (
@@ -176,7 +182,10 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
           className="space-y-3 sm:space-y-4"
         >
           <div className="space-y-2">
-            <label className="text-foreground/80 text-xs font-semibold sm:text-sm">
+            <label
+              id="reset-code-label"
+              className="text-foreground/80 text-xs font-semibold sm:text-sm"
+            >
               Reset code
             </label>
             <div className="grid w-full grid-cols-6 gap-2 sm:gap-3">
@@ -190,6 +199,8 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
                       <FormControl>
                         <Input
                           {...field}
+                          aria-label={`Reset code digit ${i + 1}`}
+                          aria-describedby="reset-code-label"
                           ref={(el) => {
                             field.ref(el);
                             otpInputRefs.current[i] = el;

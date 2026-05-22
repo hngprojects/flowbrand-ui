@@ -134,7 +134,13 @@ export function LoginForm() {
     toast.error("Google sign-in failed", {
       description: "Please try again or use email and password.",
     });
-    window.history.replaceState({}, "", "/login");
+    params.delete("google_error");
+    const nextQuery = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`,
+    );
   }, []);
 
   const isBusy = form.formState.isSubmitting || isAuthenticated;

@@ -316,6 +316,8 @@
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px white inset;
-  box-shadow: 0 0 0px 1000px white inset;
+  -webkit-box-shadow: 0 0 0px 1000px var(--background) inset;
+  box-shadow: 0 0 0px 1000px var(--background) inset;
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
 }
