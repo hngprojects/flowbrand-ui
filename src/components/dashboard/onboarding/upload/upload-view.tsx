@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   uploadFunnelDocuments,
@@ -73,7 +73,13 @@ function statusLabel(item: UploadedFile) {
   return `${item.progress}% Processing`;
 }
 
-function FileRow({ item }: { item: UploadedFile }) {
+function FileRow({
+  item,
+  onRemove,
+}: {
+  item: UploadedFile;
+  onRemove: (id: string) => void;
+}) {
   const ext = fileExt(item.file.name);
 
   return (
@@ -100,6 +106,15 @@ function FileRow({ item }: { item: UploadedFile }) {
           />
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onRemove(item.id)}
+        className="mt-0.5 shrink-0 text-[#D0D5DD] transition-colors hover:text-[#667085]"
+        aria-label="Remove file"
+      >
+        <X size={16} />
+      </button>
     </div>
   );
 }
@@ -107,6 +122,9 @@ function FileRow({ item }: { item: UploadedFile }) {
 export function UploadView() {
   const router = useRouter();
   const addUploadedDocument = useOnboardingStore((s) => s.addUploadedDocument);
+  const removeUploadedDocument = useOnboardingStore(
+    (s) => s.removeUploadedDocument,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
@@ -212,6 +230,16 @@ export function UploadView() {
     },
     [addUploadedDocument],
   );
+
+  const removeFile = (id: string) => {
+    if (pollIntervals.current[id]) {
+      clearInterval(pollIntervals.current[id]);
+      delete pollIntervals.current[id];
+    }
+    const row = files.find((f) => f.id === id);
+    if (row?.uploadId) removeUploadedDocument(row.uploadId);
+    setFiles((prev) => prev.filter((f) => f.id !== id));
+  };
 
   const addFiles = useCallback(
     async (incoming: FileList | null) => {
@@ -419,7 +447,7 @@ export function UploadView() {
           {hasFiles && (
             <div className="mt-6 flex flex-col gap-5">
               {files.map((item) => (
-                <FileRow key={item.id} item={item} />
+                <FileRow key={item.id} item={item} onRemove={removeFile} />
               ))}
             </div>
           )}
