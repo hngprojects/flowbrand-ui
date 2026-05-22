@@ -131,7 +131,7 @@ jobs:
               exit 1
             fi
             APP_PORT="$(grep -E '^PORT=' .env | tail -n 1 | cut -d= -f2- | tr -d '"' | tr -d "'")"
-            APP_PORT="${APP_PORT:-3000}"
+            APP_PORT="${APP_PORT:-4000}"
             if ! echo "$APP_PORT" | grep -Eq '^[0-9]+$'; then
               echo "PORT must be numeric. Got: $APP_PORT"
               exit 1
@@ -154,7 +154,7 @@ jobs:
             PORT="$APP_PORT" pm2 start pnpm --name "${{ env.APP_NAME }}" --cwd "${{ env.APP_PATH }}" -- start
             echo "Waiting for app to start on port ${APP_PORT}..."
 
-            HEALTH_URL="http://127.0.0.1:${APP_PORT}/api/health"
+            HEALTH_URL="http://127.0.0.1:${APP_PORT}/docs"
             for attempt in $(seq 1 12); do
               if curl -fsS "$HEALTH_URL"; then
                 echo "Health check passed."
