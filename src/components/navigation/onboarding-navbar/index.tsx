@@ -8,7 +8,11 @@ import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
 import { useEffect, useRef, useState } from "react";
 import StrategySidebar from "@/components/dashboard/strategy/strategy-sidebar";
-import SettingsModal from "@/components/settings/SettingsModal";
+import FunnelModal from "@/components/modals/FunnelModal";
+import MyProfileTab from "@/components/settings/tabs/MyProfileTab";
+import PasswordSecurityTab from "@/components/settings/tabs/PasswordSecurityTab";
+import NotificationPreferencesTab from "@/components/settings/tabs/NotificationsPrefrencesTab";
+import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
 import {
   DUMMY_STRATEGY_PHASES,
@@ -98,9 +102,35 @@ const OnboardingNavbar = ({
         </div>
       </nav>
 
-      <SettingsModal
+      <FunnelModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        defaultTab="profile"
+        title="Settings"
+        tabs={[
+          {
+            id: "profile",
+            label: "My Profile",
+            content: <MyProfileTab onClose={() => setSettingsOpen(false)} />,
+          },
+          {
+            id: "password",
+            label: "Password & Security",
+            content: <PasswordSecurityTab />,
+          },
+          {
+            id: "notifications",
+            label: "Notification Preferences",
+            content: <NotificationPreferencesTab />,
+          },
+          {
+            id: "delete",
+            label: "Delete Account",
+            content: (
+              <DeleteAccountTab onClose={() => setSettingsOpen(false)} />
+            ),
+          },
+        ]}
       />
 
       {isStrategyRoute && (
