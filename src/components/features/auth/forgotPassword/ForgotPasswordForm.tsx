@@ -2,13 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { requestPasswordReset } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { setForgotResetEmail } from "@/lib/forgot-password-storage";
 import { cn } from "@/lib/utils";
 
 const forgotPasswordSchema = z.object({
@@ -18,8 +19,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 export function ForgotPasswordForm() {
-  const [submitted, setSubmitted] = useState(false);
-  const [submittedEmail, setSubmittedEmail] = useState("");
+  const router = useRouter();
 
   const form = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -27,33 +27,16 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = async (values: ForgotPasswordValues) => {
-    try {
-      await requestPasswordReset(values.email);
-      setSubmittedEmail(values.email);
-      setSubmitted(true);
-    } catch {
-      toast.error("Could not send reset link", {
-        description: "Please try again.",
-      });
+    const result = await requestPasswordReset(values.email);
+    if (!result.ok) {
+      toast.error("Could not send reset code", { description: result.error });
+      return;
     }
-  };
 
-  if (submitted) {
-    return (
-      <div className="space-y-4 py-4 text-center">
-        <h2 className="text-xl font-medium text-[#152D58] sm:text-2xl">
-          Check your email
-        </h2>
-        <p className="text-foreground/70 text-sm">
-          If an account exists for <strong>{submittedEmail}</strong>, we sent a
-          password reset link.
-        </p>
-        <Button asChild className="mt-4 w-full">
-          <Link href="/login">Back to log in</Link>
-        </Button>
-      </div>
-    );
-  }
+    setForgotResetEmail(values.email.trim());
+    toast.success(result.message);
+    router.push("/reset-password");
+  };
 
   const emailError = form.formState.errors.email?.message;
 
@@ -67,7 +50,7 @@ export function ForgotPasswordForm() {
           Forgot your password?
         </h2>
         <p className="text-foreground/70 text-sm sm:text-base">
-          Enter your email and we&apos;ll send you a reset link.
+          Enter your email and we&apos;ll send you a 6-digit reset code.
         </p>
       </div>
 
@@ -96,7 +79,7 @@ export function ForgotPasswordForm() {
         disabled={form.formState.isSubmitting}
         className="h-auto w-full rounded-lg py-2.5 text-sm font-bold"
       >
-        {form.formState.isSubmitting ? "Sending..." : "Send reset link"}
+        {form.formState.isSubmitting ? "Sending..." : "Send reset code"}
       </Button>
 
       <Link

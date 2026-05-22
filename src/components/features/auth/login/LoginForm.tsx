@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import { type ChangeEventHandler, useState } from "react";
+import { type ChangeEventHandler, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import * as z from "zod";
@@ -125,6 +125,17 @@ export function LoginForm() {
   });
 
   usePostAuthRedirect();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("google_error")) {
+      return;
+    }
+    toast.error("Google sign-in failed", {
+      description: "Please try again or use email and password.",
+    });
+    window.history.replaceState({}, "", "/login");
+  }, []);
 
   const isBusy = form.formState.isSubmitting || isAuthenticated;
   const rememberMe =
@@ -302,7 +313,7 @@ export function LoginForm() {
 
       <p className="text-foreground/50 px-4 text-center text-[10px]">
         By logging in, you agree to our{" "}
-        <Link href="/terms&conditions" className="text-primary underline">
+        <Link href="/terms-and-conditions" className="text-primary underline">
           Terms of Service
         </Link>{" "}
         and{" "}

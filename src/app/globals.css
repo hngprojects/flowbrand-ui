@@ -152,6 +152,7 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: #326ad1;
   --primary-50: #ebf0fa;
+  --primary-60: #fbfcff;
   --primary-100: #bfd1f1;
   --primary-200: #a1baea;
   --primary-300: #769be0;
@@ -187,6 +188,7 @@
   --accent-700: #a36610;
   --accent-800: #7e4f0d;
   --accent-900: #603c0a;
+  --accent-950: #e58f172b;
   --accent-foreground: oklch(0.205 0 0);
   --green-50: #eefaeb;
   --green-100: #cbf1bf;
@@ -303,10 +305,17 @@
    * Use on the inner wrapper inside a full-bleed <section>.
    */
   .section-class {
-    @apply mx-auto w-full max-w-[1440px]  py-10 lg:py-20 px-4 sm:px-6 lg:px-18;
+    @apply mx-auto w-full max-w-[1440px]  py-10 px-4 sm:px-6 lg:px-18;
   }
 
   .layout-components-class {
     @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-18;
   }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px white inset;
+  box-shadow: 0 0 0px 1000px white inset;
 }

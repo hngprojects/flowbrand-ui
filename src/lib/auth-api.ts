@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { User } from "@/types/auth";
+import { extractApiErrorMessages } from "@/lib/api-errors";
 
 export const AUTH_API_PREFIX = "/api/auth";
 
@@ -101,13 +102,78 @@ export function messageFromApiBody(data: unknown, fallback: string): string {
   return fallback;
 }
 
+const GENERIC_VALIDATION_MARKERS = [
+  "validation failed",
+  "validation error",
+  "bad request",
+];
+
+function isGenericValidationMessage(message: string): boolean {
+  const lower = message.toLowerCase().trim();
+  return (
+    lower.length === 0 ||
+    GENERIC_VALIDATION_MARKERS.some(
+      (marker) => lower === marker || lower.startsWith(`${marker}.`),
+    )
+  );
+}
+
+/** Turn vague API validation text into actionable registration guidance. */
+export function humanizeAuthValidationMessage(
+  message: string,
+  fallback?: string,
+): string {
+  const text = message.trim();
+  const lower = text.toLowerCase();
+
+  if (isGenericValidationMessage(text)) {
+    return (
+      fallback ??
+      "Please check your details. Password must be 8–128 characters and include uppercase, lowercase, a number, and a symbol (@, #, $, %)."
+    );
+  }
+
+  if (
+    lower.includes("password") &&
+    (lower.includes("long") ||
+      lower.includes("max") ||
+      lower.includes("too large"))
+  ) {
+    return "Password is too long. Use at most 128 characters.";
+  }
+
+  if (
+    lower.includes("password") &&
+    (lower.includes("short") || lower.includes("min"))
+  ) {
+    return "Password is too short. Use at least 8 characters.";
+  }
+
+  return text;
+}
+
+function resolveAuthApiMessage(data: unknown, fallback: string): string {
+  const primary = messageFromApiBody(data, "");
+  const extracted = extractApiErrorMessages(data);
+
+  if (!isGenericValidationMessage(primary)) {
+    return humanizeAuthValidationMessage(primary, fallback);
+  }
+
+  if (extracted.length > 0) {
+    return humanizeAuthValidationMessage(extracted, fallback);
+  }
+
+  return humanizeAuthValidationMessage(primary, fallback);
+}
+
 /** User-facing error from an API failure (status + Nest-style body). */
 export function formatAuthApiError(
   status: number | undefined,
   data: unknown,
   fallback: string,
 ): string {
-  const apiMessage = messageFromApiBody(data, "");
+  const apiMessage = resolveAuthApiMessage(data, fallback);
 
   if (status === 500) {
     return apiMessage && apiMessage !== "Internal server error"
@@ -120,7 +186,7 @@ export function formatAuthApiError(
   }
 
   if (status === 400 || status === 422) {
-    return apiMessage || "Please check your details and try again.";
+    return apiMessage || humanizeAuthValidationMessage("", fallback);
   }
 
   if (apiMessage.length > 0) {

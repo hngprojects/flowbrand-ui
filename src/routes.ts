@@ -1,10 +1,13 @@
 export const DASHBOARD_ROUTE = "/dashboard";
-/** Used when onboarding/funnel land on this branch (routes added in follow-up PRs). */
-export const ONBOARDING_ROUTE = "/onboarding";
-export const FUNNEL_ROUTE = "/funnel";
+export const ONBOARDING_ROUTE = "/dashboard/onboarding";
+export const ONBOARDING_UPLOAD_ROUTE = "/dashboard/onboarding/upload";
+export const ONBOARDING_QUESTIONS_ROUTE = "/dashboard/onboarding/questions";
+export const FUNNEL_ROUTE = "/dashboard/funnel";
 
-/** Default after auth on feat/auth-flow until onboarding ships on this branch. */
-export const DEFAULT_LOGIN_REDIRECT = DASHBOARD_ROUTE;
+/** Default when API does not specify a redirect (new users → upload). */
+export const DEFAULT_LOGIN_REDIRECT = ONBOARDING_UPLOAD_ROUTE;
+
+export const GOOGLE_OAUTH_CALLBACK_ROUTE = "/api/oauth/google/callback";
 
 export const authRoutes = [
   "/login",
@@ -24,13 +27,18 @@ export function mapApiRedirectToAppPath(redirectUrl?: string): string | null {
 
   const path = redirectUrl.trim();
 
-  if (path === "/funnel" || path.startsWith("/funnel/")) {
+  if (
+    path === "/funnel" ||
+    path.startsWith("/funnel/") ||
+    path === "funnel_generation" ||
+    path === "strategy_dashboard"
+  ) {
     return FUNNEL_ROUTE;
   }
   if (path === "/onboarding" || path.startsWith("/onboarding/")) {
-    return ONBOARDING_ROUTE;
+    return ONBOARDING_UPLOAD_ROUTE;
   }
-  if (path === "/dashboard" || path.startsWith("/dashboard/")) {
+  if (path === DASHBOARD_ROUTE || path.startsWith(`${DASHBOARD_ROUTE}/`)) {
     return DASHBOARD_ROUTE;
   }
 

@@ -1,0 +1,185 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - devops
+      - staging
+      - main
+  push:
+    branches:
+      - dev
+      - devops
+      - staging
+      - main
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PNPM_VERSION: 9.15.9
+  NODE_VERSION: 20
+  HUSKY: 0
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  static-checks:
+    name: Static frontend checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Prepare pnpm workspace for CI
+        run: |
+          {
+            echo 'packages:'
+            echo '  - "."'
+            cat pnpm-workspace.yaml
+          } > pnpm-workspace.ci.yaml
+          mv pnpm-workspace.ci.yaml pnpm-workspace.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm check-format
+
+      # - name: Lint
+      #   run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+  deploy:
+    name: Deploy frontend
+    runs-on: ubuntu-latest
+    needs: static-checks
+    if: github.event_name == 'push'
+    environment: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'devops' && 'dev' || github.ref_name }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure deployment target
+        env:
+          APP_PATH_VALUE: ${{ vars.APP_PATH }}
+          APP_NAME_VALUE: ${{ vars.APP_NAME }}
+        run: |
+          if [ -z "$APP_PATH_VALUE" ]; then
+            echo "APP_PATH environment variable is required."
+            exit 1
+          fi
+
+          if [ -z "$APP_NAME_VALUE" ]; then
+            echo "APP_NAME environment variable is required."
+            exit 1
+          fi
+
+          if ! [[ "$APP_NAME_VALUE" =~ ^[A-Za-z0-9_-]+$ ]]; then
+            echo "APP_NAME may only contain letters, numbers, hyphens, and underscores."
+            exit 1
+          fi
+
+          if ! [[ "$APP_PATH_VALUE" =~ ^/[A-Za-z0-9._/-]+$ ]]; then
+            echo "APP_PATH must be an absolute path using only letters, numbers, slashes, dots, hyphens, and underscores."
+            exit 1
+          fi
+
+          printf 'APP_PATH=%s\n' "$APP_PATH_VALUE" >> "$GITHUB_ENV"
+          printf 'APP_NAME=%s\n' "$APP_NAME_VALUE" >> "$GITHUB_ENV"
+
+      - name: Prepare app directory
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            mkdir -p "${{ env.APP_PATH }}"
+            find "${{ env.APP_PATH }}" -mindepth 1 \
+              -maxdepth 1 \
+              ! -name ".env" \
+              ! -name "node_modules" \
+              -exec rm -rf {} +
+
+      - name: Copy project files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "."
+          target: ${{ env.APP_PATH }}
+          overwrite: true
+          strip_components: 0
+          exclude: ".git,node_modules,.next,coverage,.env"
+
+      - name: Install, build, and restart app
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            cd "${{ env.APP_PATH }}"
+            if [ ! -f .env ]; then
+              echo ".env file is missing on the server."
+              exit 1
+            fi
+            APP_PORT="$(grep -E '^PORT=' .env | tail -n 1 | cut -d= -f2- | tr -d '"' | tr -d "'")"
+            APP_PORT="${APP_PORT:-4000}"
+            if ! echo "$APP_PORT" | grep -Eq '^[0-9]+$'; then
+              echo "PORT must be numeric. Got: $APP_PORT"
+              exit 1
+            fi
+            {
+              echo 'packages:'
+              echo '  - "."'
+              cat pnpm-workspace.yaml
+            } > pnpm-workspace.ci.yaml
+            mv pnpm-workspace.ci.yaml pnpm-workspace.yaml
+            corepack enable
+            corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+            pnpm --version
+
+            export HUSKY=0
+            export NEXT_TELEMETRY_DISABLED=1
+            pnpm install --frozen-lockfile --prod=false
+            pnpm build
+            pm2 delete "${{ env.APP_NAME }}" || true
+            PORT="$APP_PORT" pm2 start pnpm --name "${{ env.APP_NAME }}" --cwd "${{ env.APP_PATH }}" -- start -p "$APP_PORT"
+            echo "Waiting for app to start on port ${APP_PORT}..."
+
+            HEALTH_URL="http://127.0.0.1:${APP_PORT}/api/health"
+            for attempt in $(seq 1 12); do
+              if curl -fsS "$HEALTH_URL"; then
+                echo "Health check passed."
+                pm2 save
+                exit 0
+              fi
+
+              echo "Health check attempt $attempt failed. Retrying in 5s..."
+              sleep 5
+            done
+
+            echo "Health check failed. App did not start correctly."
+            pm2 describe "${{ env.APP_NAME }}" || true
+            pm2 logs "${{ env.APP_NAME }}" --lines 100 --nostream || true
+            exit 1

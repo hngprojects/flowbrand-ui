@@ -5,6 +5,7 @@ import type { Organisation, User } from "@/types/auth";
 export const {
   handlers: { GET, POST },
   auth,
+  signIn,
   unstable_update,
 } = NextAuth({
   ...authConfig,

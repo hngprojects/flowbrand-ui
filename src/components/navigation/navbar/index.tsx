@@ -19,8 +19,8 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-background border-border font-inter sticky top-0 z-50 border-b">
-        <div className=" layout-components-class flex h-[83px]  items-center justify-between ">
+      <nav className="bg-background border-border sticky top-0 z-50 border-b">
+        <div className="layout-components-class flex h-[83px] items-center justify-between">
           <Link href="/" className="cursor-pointer">
             <LogoIcon />
           </Link>
@@ -30,12 +30,13 @@ const Navbar = () => {
               <li key={link.label}>
                 <Link
                   href={link.path}
-                  className={`hover:text-primary flex h-12 items-center justify-center py-3 text-base font-medium text-black-300 transition-colors ${
-                    pathname === link.path ||
-                    (link.path !== "/" && pathname.startsWith(link.path))
-                      ? "text-primary font-semibold"
-                      : ""
-                  }`}
+                  className={`hover:text-primary flex h-12 items-center justify-center py-3 
+                    text-base font-medium text-black-300 transition-colors ${
+                      pathname === link.path ||
+                      (link.path !== "/" && pathname.startsWith(link.path))
+                        ? "text-primary font-semibold"
+                        : ""
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -46,13 +47,17 @@ const Navbar = () => {
           <div className="hidden items-center gap-4 lg:flex">
             <Link
               href="/login"
-              className="text-foreground hover:text-primary flex h-[51px] items-center justify-center px-6 py-3 text-base font-medium transition-colors"
+              className="text-primary hover:text-primary flex h-[51px] items-center 
+              justify-center px-6 py-3 text-base font-medium transition-colors"
             >
               Log In
             </Link>
             <Link
               href="/register"
-              className="bg-primary text-primary-foreground flex h-[51px] items-center justify-center rounded-[10px] px-6 py-3 font-semibold transition-opacity hover:opacity-90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 
+              inline-flex h-[51px] items-center justify-center 
+              rounded-[10px] px-6 py-3 font-semibold transition-colors focus-visible:ring-2 
+              focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
             >
               Get started
             </Link>
@@ -72,11 +77,12 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`bg-background absolute top-full left-0 flex w-full flex-col gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
-            isOpen
-              ? "max-h-96 py-6 opacity-100"
-              : "pointer-events-none max-h-0 opacity-0"
-          }`}
+          className={`bg-background absolute top-full left-0 flex w-full flex-col 
+            gap-4 overflow-hidden text-sm font-semibold transition-all duration-300 ease-in-out lg:hidden ${
+              isOpen
+                ? "max-h-96 py-6 opacity-100"
+                : "pointer-events-none max-h-0 opacity-0"
+            }`}
           inert={!isOpen ? true : undefined}
         >
           {navLinks.map((link) => (

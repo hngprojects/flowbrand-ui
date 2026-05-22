@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-// import { Button } from "~/components/ui/button";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { BadgeCheck, Check } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 type FeatureValue = boolean | string;
 
@@ -74,19 +74,18 @@ const faqs = [
   },
 ];
 
-// Compare table: normal orange Check for true, orange dash for false
 function FeatureCell({ value }: { value: FeatureValue }) {
   if (value === true) {
     return (
       <td className="px-6 py-4 text-center">
-        <Check className="mx-auto h-5 w-5 text-orange-500" />
+        <Check className="mx-auto h-5 w-5 text-accent-500" />
       </td>
     );
   }
   if (value === false) {
     return (
       <td className="px-6 py-4 text-center">
-        <span className="mx-auto block text-center text-base font-medium text-orange-400">
+        <span className="mx-auto block text-center text-base font-medium text-accent-500">
           —
         </span>
       </td>
@@ -94,7 +93,7 @@ function FeatureCell({ value }: { value: FeatureValue }) {
   }
   return (
     <td className="px-6 py-4 text-center">
-      <span className="text-sm text-gray-700 dark:text-gray-300">{value}</span>
+      <span className="text-sm text-black-700 dark:text-gray-300">{value}</span>
     </td>
   );
 }
@@ -106,9 +105,7 @@ export default function PricingPage() {
 
   return (
     <main className="min-h-screen bg-white dark:bg-black">
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-px-4 pb-20 pt-16 sm:pt-20 w-full bg-primary-50">
-        {/* Cloud images from Figma — */}
+      <section className="relative overflow-hidden pb-20 pt-16 sm:pt-20 w-full bg-primary-50">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <Image
             src="/images/bigCloud.png"
@@ -127,26 +124,39 @@ export default function PricingPage() {
         </div>
 
         <div className="relative section-class text-center">
-          <h1 className="mb-2 text-4xl font-bold sm:text-5xl">
-            Affordable Pricing for your{" "}
-            <span className="text-orange-500">Business</span>
-          </h1>
-          <p
-            className="mb-8 text-gray-900
-           dark:text-gray-900 "
+          <motion.h1
+            className="mb-2 text-4xl font-bold sm:text-5xl"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
           >
-            Whether you&apos;re just figuring things out or ready to scale, Seil
-            gives you exactly what you need at every stage.
+            Affordable Pricing for your{" "}
+            <p className="text-accent-500">Business</p>
+          </motion.h1>
+          <p
+            className="mb-8 text-black-700
+           dark:text-black-700  "
+          >
+            Whether you&apos;re just figuring things out or ready to scale,
+            FlowBrand gives you <br /> exactly what you need at every stage.
           </p>
 
-          {/* Toggle — slightly rounded rectangle, not full pill */}
-          <div className="mt-12 inline-flex items-center rounded-lg border border-gray-200 bg-white p-1 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+          <motion.div
+            className="mt-12 inline-flex items-center rounded-lg border border-gray-200 bg-white p-1 shadow-sm dark:border-gray-700 dark:bg-gray-900"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.6,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.25,
+            }}
+          >
             <button
               onClick={() => setBillingCycle("monthly")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-blue-500 text-white shadow"
-                  : "text-gray-900 hover:text-gray-800 dark:text-gray-400"
+                  ? "bg-primary-500 text-white shadow"
+                  : "text-black-700 hover:text-black-300 dark:text-gray-400"
               }`}
             >
               Monthly Pricing
@@ -155,158 +165,190 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("annual")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "annual"
-                  ? "bg-orange-500 text-white shadow"
-                  : "text-gray-800 hover:text-gray-900 dark:text-gray-400"
+                  ? "bg-accent-500 text-white shadow"
+                  : "text-black-300 hover:text-black-700 dark:text-gray-400"
               }`}
             >
               Annual Pricing
             </button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* PRICING CARDS — wrapped in a light background div, overlapping hero */}
       <section className="relative z-10 w-full">
         <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
           {/* Outer wrapper with background — matches Figma card container */}
-          <div className="-mt-10 rounded-2xl bg-gray-50 p-6 shadow-sm dark:bg-gray-900/50">
+          <div className="-mt-10 rounded-2xl bg-white p-6   border-white dark:bg-gray-900/50">
             <div className="grid gap-6 md:grid-cols-2">
-              {/* Free Plan — uses flex-col so button stays at bottom */}
-              <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              <motion.div
+                className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950"
+                initial={{ opacity: 0, x: -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.22, 1, 0.36, 1] as const,
+                }}
+              >
+                <motion.div className="flex-1">
+                  <h3 className="text-xl font-bold text-black-700 dark:text-white">
                     Free Plan
                   </h3>
-                  <p className="mt-1 text-sm text-gray-800 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-black-300 dark:text-gray-400">
                     Perfect for one-person shops or small businesses
                   </p>
-                  <p className="mt-4 text-base font-semibold text-blue-500">
+                  <p className="mt-4 text-base font-semibold text-primary-500">
                     Free
                   </p>
-                  {/* BadgeCheck bullet — black color as requested */}
                   <div className="my-6 space-y-3">
                     {freeFeatures.map((item) => (
-                      <div key={item} className="flex items-center gap-3">
-                        <BadgeCheck className="h-4 w-4 shrink-0 text-gray-900 dark:text-white" />
-                        <span className="text-sm text-gray-900 dark:text-gray-300">
+                      <motion.div
+                        key={item}
+                        className="flex items-center gap-3"
+                      >
+                        <BadgeCheck className="h-4 w-4 shrink-0 text-black-700 dark:text-white" />
+                        <span className="text-sm text-black-700 dark:text-gray-300">
                           {item}
                         </span>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
-                </div>
-                {/* Button pinned to bottom so it aligns with Pro card button */}
-                <Button className="mt-4 rounded-md w-full bg-blue-600 text-white hover:bg-blue-700">
+                </motion.div>
+                <Button className="mt-4 rounded-md w-full bg-primary-500 text-white hover:bg-primary-600">
                   Start For Free
                 </Button>
-              </div>
+              </motion.div>
 
               {/* Pro Plan — uses flex-col so button stays at bottom */}
-              <div className="relative flex flex-col rounded-2xl border-2 border-orange-500 bg-white p-8 shadow-sm dark:bg-gray-950">
+              <motion.div className="relative flex flex-col rounded-2xl border-2 border-primary-60  bg-white p-8 shadow-sm dark:bg-gray-950">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="whitespace-nowrap rounded-full bg-orange-500 px-4 py-1 text-xs font-semibold text-white shadow">
+                  <span className="whitespace-nowrap rounded-full bg-accent-500 px-4 py-1 text-sm font-semibold text-white shadow">
                     Recommended
                   </span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h3 className="text-xl font-bold text-black-700 dark:text-white">
                     Pro Plan
                   </h3>
-                  <p className="mt-1 text-sm text-gray-800 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-black-300 dark:text-gray-400">
                     For businesses ready to grow further and faster.
                   </p>
-                  <p className="mt-4 text-2xl font-bold text-orange-700">
+                  <p className="mt-4 text-[24px] font-bold text-accent-700">
                     ₦10,000
-                    <span className="text-sm font-normal text-orange-600">
+                    <span className="text-[24px] font-normal text-accent-700">
                       {" "}
                       /monthly
                     </span>
                   </p>
-                  {/* BadgeCheck bullet — black color as requested */}
                   <div className="my-6 space-y-3">
                     {proFeatures.map((item) => (
-                      <div key={item} className="flex items-center gap-3">
-                        <BadgeCheck className="h-4 w-4 shrink-0 text-gray-900 dark:text-white" />
-                        <span className="text-sm text-gray-900 dark:text-gray-300">
+                      <motion.div
+                        key={item}
+                        className="flex items-center gap-3"
+                      >
+                        <BadgeCheck className="h-4 w-4 shrink-0 text-black-700 dark:text-white" />
+                        <span className="text-sm text-black-700 dark:text-gray-300">
                           {item}
                         </span>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Free card button */}
-                <Button className="mt-4 rounded-md w-full border-2 border-orange-500 bg-transparent text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950">
+                <Button className="mt-4 rounded-md w-full border-2 border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950">
                   Get Full Access
                 </Button>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* COMPARE TABLE */}
       <section className="w-full py-16">
-        <div className="mx-auto w-full max-w-5xl px-6 md:px-12 lg:px-20">
-          <h2 className="mb-3 text-center text-3xl font-bold text-black dark:text-white">
+        <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
+          <h2 className="mb-3 text-center text-3xl font-bold text-black-700 dark:text-white">
             Compare Plans
           </h2>
-          <p className="mb-10 text-center text-gray-800 dark:text-gray-400">
+          <motion.p className="mb-10 text-center text-black-300 dark:text-gray-400">
             Find the right plan for where your business is now and where
             you&apos;re going.
-          </p>
+          </motion.p>
 
-          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-900">
+          <motion.div
+            className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-900"
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.22, 1, 0.36, 1] as const,
+              delay: 0.15,
+            }}
+          >
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-black-700 dark:text-gray-300">
                     Feature
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-black-700 dark:text-gray-300">
                     Free
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-300">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-black-700 dark:text-gray-300">
                     Pro
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {features.map((feature, index) => (
-                  <tr
+                  <motion.tr
                     key={index}
                     className="border-b text-black border-gray-100 dark:border-gray-900"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true, amount: 0.1 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
                   >
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-300">
+                    <td className="px-6 py-4 text-sm text-black-700 dark:text-gray-300">
                       {feature.name}
                     </td>
                     <FeatureCell value={feature.free} />
                     <FeatureCell value={feature.pro} />
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="relative overflow-hidden bg-slate-50/60 px-4 py-16 dark:bg-amber-900/10">
+      <section className="relative overflow-hidden bg-primary-60 px-4 py-16 dark:bg-amber-900/10">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-1/2 -left-32 h-80 w-80 rounded-full bg-yellow-200/20 blur-3xl" />
-          <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-yellow-200/15 blur-3xl" />
+          <div className="absolute top-1/2 -left-32 h-80 w-80 rounded-full  blur-3xl" />
+          <div className="absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-primary-60 blur-3xl" />
         </div>
 
         <div className="relative mx-auto max-w-4xl">
           <div className="mb-12 text-center">
-            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 dark:border-orange-800 dark:bg-orange-950">
+            <motion.div
+              className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 dark:border-orange-800 dark:bg-orange-950"
+              initial={{ opacity: 0, y: -16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
               <span className="h-2 w-2 rounded-full bg-orange-400" />
               <span className="text-xs font-semibold text-orange-600 dark:text-orange-300">
                 FAQs
               </span>
-            </div>
-            <h2 className="mb-4 text-3xl font-bold text-black dark:text-white">
+            </motion.div>
+            <h2 className="mb-4 text-3xl font-bold text-black-700 dark:text-white">
               Still wondering? We thought you might be .
             </h2>
+            {/* <p className="text-gray-600 dark:text-gray-400">
+              Get answers to common questions about our plans and features.
+            </p> */}
           </div>
 
           <Accordion
@@ -315,22 +357,23 @@ export default function PricingPage() {
             className="grid gap-4 md:grid-cols-2"
           >
             {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="group rounded-xl border border-gray-200 bg-white px-5 py-1 dark:border-gray-700 dark:bg-gray-900"
-              >
-                <AccordionTrigger className="flex w-full items-center justify-between gap-3 text-left text-sm font-medium hover:no-underline hover:text-orange-500 [&>svg]:hidden">
-                  <span>{faq.question}</span>
-                  {/* + rotates 45deg to become × when open */}
-                  <span className="shrink-0 text-xl font-light text-orange-500 transition-transform duration-200 group-has-[[data-state=open]]:rotate-45">
-                    +
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-gray-600 dark:text-gray-400">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
+              <motion.div key={index}>
+                <AccordionItem
+                  value={`item-${index}`}
+                  className="group rounded-xl border border-gray-200 bg-white px-2 py-1 dark:border-gray-700 dark:bg-gray-900"
+                >
+                  <AccordionTrigger className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:no-underline hover:text-accent-500 [&>svg]:hidden">
+                    <span>{faq.question}</span>
+                    {/* + rotates 45deg to become × when open */}
+                    <span className="shrink-0 text-xl font-light text-accent-500 transition-transform duration-200 group-has-[[data-state=open]]:rotate-45">
+                      +
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
             ))}
           </Accordion>
         </div>
