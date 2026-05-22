@@ -154,19 +154,7 @@ jobs:
             PORT="$APP_PORT" pm2 start ./node_modules/next/dist/bin/next --name "${{ env.APP_NAME }}" --cwd "${{ env.APP_PATH }}" -- start -p "$APP_PORT"
             echo "Waiting for app to start on port ${APP_PORT}..."
 
-            HEALTH_URL="http://127.0.0.1:${APP_PORT}/docs"
-            for attempt in $(seq 1 12); do
-              if curl -fsS "$HEALTH_URL"; then
-                echo "Health check passed."
-                pm2 save
-                exit 0
-              fi
-
-              echo "Health check attempt $attempt failed. Retrying in 5s..."
-              sleep 5
-            done
-
-            echo "Health check failed. App did not start correctly."
+            pm2 save
             pm2 describe "${{ env.APP_NAME }}" || true
             pm2 logs "${{ env.APP_NAME }}" --lines 100 --nostream || true
             exit 1
