@@ -29,6 +29,7 @@ import { Input } from "~/components/ui/input";
 import { Select } from "~/components/ui/select";
 import {
   getPasswordChecks,
+  PASSWORD_MAX_LENGTH,
   PASSWORD_RULE_ROWS,
   RegistrationFormSchema,
 } from "@/schema/auth.schema";
@@ -42,6 +43,43 @@ const inputClassWithError = (hasError: boolean) => {
       "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/40 border-2",
   );
 };
+
+const passwordWrapperClass = (hasError: boolean) =>
+  cn(
+    "flex h-10 w-full items-center gap-1 rounded-lg border border-input bg-background px-2.5 transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:px-3",
+    hasError &&
+      "border-2 border-destructive focus-within:border-destructive focus-within:ring-destructive/40",
+  );
+
+const passwordInputClass =
+  "h-full min-h-0 min-w-0 flex-1 border-0 bg-transparent p-0 text-sm shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-sm";
+
+function PasswordVisibilityToggle({
+  visible,
+  onToggle,
+  disabled,
+}: {
+  visible: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={visible ? "Hide password" : "Show password"}
+      disabled={disabled}
+      className="text-foreground/45 hover:text-foreground/70 flex size-9 shrink-0 items-center justify-center disabled:opacity-50"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onToggle}
+    >
+      {visible ? (
+        <EyeOff className="size-5" aria-hidden />
+      ) : (
+        <Eye className="size-5" aria-hidden />
+      )}
+    </button>
+  );
+}
 
 const RegistrationForm = () => {
   const router = useRouter();
@@ -91,7 +129,16 @@ const RegistrationForm = () => {
           : undefined;
 
       if (!isSuccess) {
-        toast.error("An error occurred", { description: errorDescription });
+        const message =
+          errorDescription ?? "Registration could not be completed.";
+        if (/password/i.test(message)) {
+          form.setError("password", { type: "server", message });
+        } else if (/email/i.test(message)) {
+          form.setError("email", { type: "server", message });
+        } else if (/name|full name/i.test(message)) {
+          form.setError("full_name", { type: "server", message });
+        }
+        toast.error("Could not create account", { description: message });
         return;
       }
 
@@ -237,39 +284,30 @@ const RegistrationForm = () => {
                     Password
                   </FormLabel>
                   <FormControl>
-                    <div className="relative">
+                    <div
+                      className={passwordWrapperClass(
+                        !!form.formState.errors.password,
+                      )}
+                    >
                       <Input
                         type={showPasswordPlain ? "text" : "password"}
                         placeholder="Your password"
                         disabled={isSubmitting}
                         autoComplete="new-password"
+                        maxLength={PASSWORD_MAX_LENGTH}
                         {...field}
                         onFocus={() => setPasswordFocused(true)}
                         onBlur={() => {
                           setPasswordFocused(false);
                           field.onBlur();
                         }}
-                        className={cn(
-                          inputClassWithError(!!form.formState.errors.password),
-                          "pr-10",
-                        )}
+                        className={passwordInputClass}
                       />
-                      <button
-                        type="button"
-                        aria-label={
-                          showPasswordPlain ? "Hide password" : "Show password"
-                        }
+                      <PasswordVisibilityToggle
+                        visible={showPasswordPlain}
                         disabled={isSubmitting}
-                        className="text-foreground/45 hover:text-foreground/70 absolute inset-y-0 right-0 flex items-center pr-2.5 disabled:opacity-50 sm:pr-3"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => setShowPasswordPlain((v) => !v)}
-                      >
-                        {showPasswordPlain ? (
-                          <EyeOff className="size-5" aria-hidden />
-                        ) : (
-                          <Eye className="size-5" aria-hidden />
-                        )}
-                      </button>
+                        onToggle={() => setShowPasswordPlain((v) => !v)}
+                      />
                     </div>
                   </FormControl>
                   <div
@@ -287,8 +325,8 @@ const RegistrationForm = () => {
                         aria-hidden={!showPasswordGuide}
                       >
                         <p className="text-foreground/50 mt-2 text-xs">
-                          Use 8+ characters with uppercase, lowercase, and a
-                          symbol from @, #, $, or %
+                          Use 8–128 characters with uppercase, lowercase, a
+                          number, and a symbol from @, #, $, or %
                         </p>
                         <ul className="mt-3 space-y-2 pt-3">
                           {PASSWORD_RULE_ROWS.map(({ key, label }) => {
@@ -337,38 +375,25 @@ const RegistrationForm = () => {
                   Confirm password
                 </FormLabel>
                 <FormControl>
-                  <div className="relative">
+                  <div
+                    className={passwordWrapperClass(
+                      !!form.formState.errors.confirmPassword,
+                    )}
+                  >
                     <Input
                       type={showConfirmPasswordPlain ? "text" : "password"}
                       placeholder="Confirm your password"
                       disabled={isSubmitting}
                       autoComplete="new-password"
+                      maxLength={PASSWORD_MAX_LENGTH}
                       {...field}
-                      className={cn(
-                        inputClassWithError(
-                          !!form.formState.errors.confirmPassword,
-                        ),
-                        "pr-10",
-                      )}
+                      className={passwordInputClass}
                     />
-                    <button
-                      type="button"
-                      aria-label={
-                        showConfirmPasswordPlain
-                          ? "Hide password"
-                          : "Show password"
-                      }
+                    <PasswordVisibilityToggle
+                      visible={showConfirmPasswordPlain}
                       disabled={isSubmitting}
-                      className="text-foreground/45 hover:text-foreground/70 absolute inset-y-0 right-0 flex items-center pr-2.5 disabled:opacity-50 sm:pr-3"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => setShowConfirmPasswordPlain((v) => !v)}
-                    >
-                      {showConfirmPasswordPlain ? (
-                        <EyeOff className="size-5" aria-hidden />
-                      ) : (
-                        <Eye className="size-5" aria-hidden />
-                      )}
-                    </button>
+                      onToggle={() => setShowConfirmPasswordPlain((v) => !v)}
+                    />
                   </div>
                 </FormControl>
                 <FormMessage />
