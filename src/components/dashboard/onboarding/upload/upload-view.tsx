@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileUp, ChevronRight, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DocsImg } from "@/components/icons/docs-img";
 import { PptImg } from "@/components/icons/ppt-img";
@@ -15,17 +16,25 @@ import {
 } from "@/lib/dashboard-mock-session";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { FUNNEL_ROUTE, ONBOARDING_QUESTIONS_ROUTE } from "@/routes";
+import {
+  uploadFunnelDocuments,
+  getFunnelUploadProgress,
+} from "@/actions/funnels";
 import { cn } from "@/lib/utils";
+
+type UploadStatus = "uploading" | "parsing" | "ready" | "failed";
 
 interface UploadedFile {
   id: string;
+  uploadId?: string;
   file: File;
   progress: number;
-  done: boolean;
+  status: UploadStatus;
 }
 
 const ACCEPTED = ".doc,.docx,.pdf,.ppt,.pptx";
 const MAX_MB = 5;
+const MAX_FILES = 3;
 const ALLOWED_EXTENSIONS = ["DOC", "DOCX", "PDF", "PPT", "PPTX"];
 
 function formatMB(bytes: number) {
@@ -41,6 +50,13 @@ function FileTypeIcon({ ext }: { ext: string }) {
   if (ext === "PPT" || ext === "PPTX")
     return <PptImg className="h-8 w-8 shrink-0" />;
   return <DocsImg className="h-8 w-8 shrink-0" />;
+}
+
+function statusLabel(item: UploadedFile) {
+  if (item.status === "ready") return formatMB(item.file.size);
+  if (item.status === "failed") return "Failed";
+  if (item.status === "uploading") return "Uploading…";
+  return `${item.progress}% Processing`;
 }
 
 function FileRow({
@@ -62,20 +78,23 @@ function FileRow({
             {item.file.name}
           </p>
           <span className="shrink-0 text-sm text-[#6B7280]">
-            {item.done
-              ? formatMB(item.file.size)
-              : `${item.progress}% Uploading`}
+            {statusLabel(item)}
           </span>
         </div>
 
         <div className="mt-2 h-[6px] w-full overflow-hidden rounded-full bg-[#F3F4F6]">
           <div
-            className="h-full rounded-full bg-[#F59E0B] transition-all duration-300"
-            style={{ width: `${item.done ? 100 : item.progress}%` }}
+            className={cn(
+              "h-full rounded-full transition-all duration-300",
+              item.status === "failed" ? "bg-red-500" : "bg-[#F59E0B]",
+            )}
+            style={{
+              width: `${item.status === "ready" ? 100 : item.progress}%`,
+            }}
           />
         </div>
 
-        {!item.done && (
+        {item.status !== "ready" && (
           <p className="mt-1 text-xs text-[#9CA3AF]">
             {formatMB(item.file.size)}
           </p>
@@ -104,7 +123,7 @@ export function UploadView() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
 
-  const uploadIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const pollIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const goToQuestions = useCallback(() => {
     router.push(ONBOARDING_QUESTIONS_ROUTE);
@@ -127,80 +146,178 @@ export function UploadView() {
     router.push(FUNNEL_ROUTE);
   }, [router]);
 
-  const simulateUpload = useCallback(
-    (id: string) => {
-      let progress = 0;
+  const pollProgress = useCallback(
+    (rowId: string, uploadId: string, file: File) => {
+      const interval = setInterval(async () => {
+        const res = await getFunnelUploadProgress(uploadId);
 
-      const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 18) + 8;
+        if (!res.ok) {
+          clearInterval(interval);
+          delete pollIntervals.current[rowId];
+          setFiles((prev) =>
+            prev.map((f) => (f.id === rowId ? { ...f, status: "failed" } : f)),
+          );
+          toast.error(res.error);
+          return;
+        }
+
+        const body = res.data as {
+          status?: string;
+          percentComplete?: number;
+          data?: { status?: string; percentComplete?: number };
+        };
+        const node = body?.data ?? body;
+        const pct =
+          typeof node.percentComplete === "number" ? node.percentComplete : 0;
+        const status = (node.status as UploadStatus) ?? "parsing";
 
         setFiles((prev) =>
           prev.map((f) =>
-            f.id === id ? { ...f, progress: Math.min(progress, 100) } : f,
+            f.id === rowId ? { ...f, progress: pct, status } : f,
           ),
         );
 
-        if (progress >= 100) {
+        if (status === "ready" || status === "failed") {
           clearInterval(interval);
-          setFiles((prev) => {
-            const updated = prev.map((f) =>
-              f.id === id ? { ...f, done: true } : f,
-            );
-            const finished = updated.find((f) => f.id === id);
-            if (finished) {
-              addUploadedDocument({
-                id: finished.id,
-                name: finished.file.name,
-                size: formatFileSize(finished.file.size),
-                type: fileNameToDocType(finished.file.name),
-              });
-            }
-            return updated;
-          });
-          delete uploadIntervals.current[id];
+          delete pollIntervals.current[rowId];
+          if (status === "ready") {
+            addUploadedDocument({
+              id: uploadId,
+              name: file.name,
+              size: formatFileSize(file.size),
+              type: fileNameToDocType(file.name),
+            });
+          } else {
+            toast.error(`${file.name} failed to process.`);
+          }
         }
-      }, 350);
+      }, 1500);
 
-      uploadIntervals.current[id] = interval;
+      pollIntervals.current[rowId] = interval;
     },
     [addUploadedDocument],
   );
 
   const addFiles = useCallback(
-    (incoming: FileList | null) => {
+    async (incoming: FileList | null) => {
       if (!incoming) return;
 
-      Array.from(incoming).forEach((file) => {
+      const candidates = Array.from(incoming).filter((file) => {
         const ext = fileExt(file.name);
-        if (!ALLOWED_EXTENSIONS.includes(ext)) return;
-        if (file.size > MAX_MB * 1024 * 1024) return;
+        if (!ALLOWED_EXTENSIONS.includes(ext)) {
+          toast.error(`${file.name}: unsupported file type`);
+          return false;
+        }
+        if (file.size > MAX_MB * 1024 * 1024) {
+          toast.error(`${file.name}: exceeds ${MAX_MB}MB`);
+          return false;
+        }
+        return true;
+      });
 
-        const id = `${file.name}-${Date.now()}-${Math.random()}`;
-        setFiles((prev) => [...prev, { id, file, progress: 0, done: false }]);
-        simulateUpload(id);
+      if (candidates.length === 0) return;
+
+      const remainingSlots = MAX_FILES - files.length;
+      if (remainingSlots <= 0) {
+        toast.error(`You can upload up to ${MAX_FILES} files.`);
+        return;
+      }
+
+      const toUpload = candidates.slice(0, remainingSlots);
+      if (toUpload.length < candidates.length) {
+        toast.error(`Only ${MAX_FILES} files allowed. Some were skipped.`);
+      }
+
+      const rows: UploadedFile[] = toUpload.map((file) => ({
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        file,
+        progress: 0,
+        status: "uploading",
+      }));
+      setFiles((prev) => [...prev, ...rows]);
+
+      const form = new FormData();
+      toUpload.forEach((file) => form.append("files", file));
+
+      const res = await uploadFunnelDocuments(form);
+      if (!res.ok) {
+        toast.error(res.error);
+        setFiles((prev) =>
+          prev.map((f) =>
+            rows.some((r) => r.id === f.id) ? { ...f, status: "failed" } : f,
+          ),
+        );
+        return;
+      }
+
+      type UploadEntry = {
+        uploadId: string;
+        fileName: string;
+        status: string;
+        percentComplete: number;
+      };
+      const body = res.data as {
+        uploads?: UploadEntry[];
+        data?: {
+          uploads?: UploadEntry[];
+          data?: { uploads?: UploadEntry[] };
+        };
+      };
+      const uploads: UploadEntry[] =
+        body?.data?.data?.uploads ?? body?.data?.uploads ?? body?.uploads ?? [];
+
+      setFiles((prev) =>
+        prev.map((f) => {
+          const idx = rows.findIndex((r) => r.id === f.id);
+          if (idx === -1) return f;
+          const up = uploads[idx];
+          if (!up) return { ...f, status: "failed" };
+          return {
+            ...f,
+            uploadId: up.uploadId,
+            progress: up.percentComplete ?? 0,
+            status: (up.status as UploadStatus) ?? "parsing",
+          };
+        }),
+      );
+
+      rows.forEach((r, idx) => {
+        const up = uploads[idx];
+        if (!up) return;
+        if (up.status === "ready") {
+          addUploadedDocument({
+            id: up.uploadId,
+            name: r.file.name,
+            size: formatFileSize(r.file.size),
+            type: fileNameToDocType(r.file.name),
+          });
+        } else if (up.status !== "failed") {
+          pollProgress(r.id, up.uploadId, r.file);
+        }
       });
     },
-    [simulateUpload],
+    [files.length, pollProgress, addUploadedDocument],
   );
 
   const removeFile = (id: string) => {
-    if (uploadIntervals.current[id]) {
-      clearInterval(uploadIntervals.current[id]);
-      delete uploadIntervals.current[id];
+    if (pollIntervals.current[id]) {
+      clearInterval(pollIntervals.current[id]);
+      delete pollIntervals.current[id];
     }
-    removeUploadedDocument(id);
+    const row = files.find((f) => f.id === id);
+    if (row?.uploadId) removeUploadedDocument(row.uploadId);
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
   useEffect(() => {
-    const intervals = uploadIntervals.current;
+    const intervals = pollIntervals.current;
     return () => {
       Object.values(intervals).forEach(clearInterval);
     };
   }, []);
 
   const hasFiles = files.length > 0;
-  const allDone = hasFiles && files.every((f) => f.done);
+  const allDone = hasFiles && files.every((f) => f.status === "ready");
 
   return (
     <main className="flex flex-1 flex-col">

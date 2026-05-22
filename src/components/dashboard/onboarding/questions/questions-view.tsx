@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
 import {
   buildSessionFromOnboarding,
   saveDashboardMockSession,
 } from "@/lib/dashboard-mock-session";
 import { FUNNEL_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
+import {
+  startOnboarding,
+  saveOnboardingStep,
+  completeOnboarding,
+} from "@/actions/onboarding";
 
 import ProgressBar from "./ProgressBar";
 import StepOne from "./StepOne";
@@ -21,10 +27,28 @@ export function QuestionsView() {
   const router = useRouter();
   const store = useOnboardingStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorText, setErrorText] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (store.sessionId) return;
+    (async () => {
+      const res = await startOnboarding();
+      if (res.ok) {
+        const body = res.data as {
+          session_id?: string;
+          data?: { session_id?: string };
+        };
+        const id = body?.data?.session_id ?? body?.session_id;
+        if (id) store.setSessionId(id);
+      } else if (res.status === 409) {
+        router.push(FUNNEL_ROUTE);
+      } else {
+        toast.error(res.error);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleBackClick = () => {
-    setErrorText(null);
     if (store.step === 1) {
       router.push(ONBOARDING_UPLOAD_ROUTE);
     } else {
@@ -34,8 +58,6 @@ export function QuestionsView() {
 
   const handleCreateStrategy = async () => {
     if (isLoading) return;
-
-    setErrorText(null);
 
     const payload = {
       businessDescription: store.businessDescription,
@@ -50,30 +72,85 @@ export function QuestionsView() {
 
     const validation = onboardingSchema.safeParse(payload);
     if (!validation.success) {
-      const firstErrorMessage =
-        validation.error.issues?.[0]?.message || "Validation Error";
-      setErrorText(firstErrorMessage);
+      toast.error(validation.error.issues?.[0]?.message || "Validation Error");
       return;
     }
 
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    if (!store.sessionId) {
+      toast.error("Session not ready. Please try again.");
+      return;
+    }
 
-    saveDashboardMockSession(
-      buildSessionFromOnboarding({
-        businessDescription: store.businessDescription,
-        theyAre: store.theyAre,
-        whoWantTo: store.whoWantTo,
-        locatedIn: store.locatedIn,
-        customCustomerInput: store.customCustomerInput,
-        trafficChannel: store.trafficChannel,
-        uploadedDocuments: store.uploadedDocuments,
-      }),
-    );
+    try {
+      setIsLoading(true);
 
-    showFunnelPreviewToast();
-    router.push(FUNNEL_ROUTE);
-    setIsLoading(false);
+      const sessionId = store.sessionId;
+
+      const steps = [
+        {
+          step: 1,
+          answer: { business_description: store.businessDescription },
+        },
+        {
+          step: 2,
+          answer: {
+            customer_tags: {
+              type: [
+                ...store.theyAre,
+                ...store.whoWantTo,
+                ...store.locatedIn,
+                ...(store.customCustomerInput.trim()
+                  ? [store.customCustomerInput.trim()]
+                  : []),
+              ],
+            },
+          },
+        },
+        {
+          step: 3,
+          answer: { discovery_channel: store.trafficChannel },
+        },
+      ];
+
+      for (const s of steps) {
+        const res = await saveOnboardingStep({
+          session_id: sessionId,
+          step: s.step,
+          answer: s.answer,
+        });
+        if (!res.ok) {
+          toast.error(res.error);
+          return;
+        }
+      }
+
+      const done = await completeOnboarding(sessionId);
+      if (!done.ok && done.status !== 409) {
+        toast.error(done.error);
+        return;
+      }
+
+      store.setSessionId(null);
+
+      saveDashboardMockSession(
+        buildSessionFromOnboarding({
+          businessDescription: store.businessDescription,
+          theyAre: store.theyAre,
+          whoWantTo: store.whoWantTo,
+          locatedIn: store.locatedIn,
+          customCustomerInput: store.customCustomerInput,
+          trafficChannel: store.trafficChannel,
+          uploadedDocuments: store.uploadedDocuments,
+        }),
+      );
+
+      showFunnelPreviewToast();
+      router.push(FUNNEL_ROUTE);
+    } catch {
+      toast.error("Something went wrong.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -111,11 +188,9 @@ export function QuestionsView() {
             <StepOne
               value={store.businessDescription}
               onChange={(val) => {
-                setErrorText(null);
                 store.setBusinessDescription(val);
               }}
               onNext={() => {
-                setErrorText(null);
                 store.nextStep();
               }}
             />
@@ -125,26 +200,21 @@ export function QuestionsView() {
             <StepTwo
               theyAre={store.theyAre}
               toggleTheyAre={(val) => {
-                setErrorText(null);
                 store.toggleTheyAre(val);
               }}
               whoWantTo={store.whoWantTo}
               toggleWhoWantTo={(val) => {
-                setErrorText(null);
                 store.toggleWhoWantTo(val);
               }}
               locatedIn={store.locatedIn}
               toggleLocatedIn={(val) => {
-                setErrorText(null);
                 store.toggleLocatedIn(val);
               }}
               customInput={store.customCustomerInput}
               setCustomInput={(val) => {
-                setErrorText(null);
                 store.setCustomCustomerInput(val);
               }}
               onNext={() => {
-                setErrorText(null);
                 store.nextStep();
               }}
             />
@@ -154,7 +224,6 @@ export function QuestionsView() {
             <StepThree
               selected={store.trafficChannel}
               onSelect={(val) => {
-                setErrorText(null);
                 if (store.trafficChannel === val) {
                   store.setTrafficChannel("");
                 } else {
@@ -164,15 +233,6 @@ export function QuestionsView() {
               onSubmit={handleCreateStrategy}
               isLoading={isLoading}
             />
-          )}
-
-          {errorText && (
-            <div
-              role="alert"
-              className="text-2sm font-medium text-destructive bg-destructive/10 p-small rounded-sm transition-all"
-            >
-              {errorText}
-            </div>
           )}
         </div>
       </div>
