@@ -11,6 +11,7 @@ import {
 import { BadgeCheck, Check } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 type FeatureValue = boolean | string;
 
@@ -123,9 +124,9 @@ export default function PricingPage() {
           />
         </div>
 
-        <div className="relative section-class text-center">
+        <div className="-mb-10 relative section-class text-center">
           <motion.h1
-            className="mb-2 text-4xl font-bold sm:text-5xl"
+            className="mb-2 text-5xl font-bold sm:text-6xl"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
@@ -137,12 +138,12 @@ export default function PricingPage() {
             className="mb-8 text-black-700
            dark:text-black-700  "
           >
-            Whether you&apos;re just figuring things out or ready to scale,
-            FlowBrand gives you <br /> exactly what you need at every stage.
+            Whether you&apos;re just figuring things out or ready to scale, Seil
+            gives you <br /> exactly what you need at every stage.
           </p>
 
           <motion.div
-            className="mt-12 inline-flex items-center rounded-lg border border-gray-200 bg-white p-1 shadow-sm dark:border-gray-700 dark:bg-gray-900"
+            className="mt-15 -mb-36 inline-flex items-center  rounded-lg border border-gray-200 bg-white p-1 shadow-sm dark:border-gray-700 dark:bg-gray-900"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{
@@ -155,7 +156,7 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("monthly")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-primary-500 text-white shadow"
+                  ? "bg-accent-500 text-white shadow"
                   : "text-black-700 hover:text-black-300 dark:text-gray-400"
               }`}
             >
@@ -165,7 +166,7 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("annual")}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-all ${
                 billingCycle === "annual"
-                  ? "bg-accent-500 text-white shadow"
+                  ? "bg-primary-500 text-white shadow"
                   : "text-black-300 hover:text-black-700 dark:text-gray-400"
               }`}
             >
@@ -181,7 +182,7 @@ export default function PricingPage() {
           <div className="-mt-10 rounded-2xl bg-white p-6   border-white dark:bg-gray-900/50">
             <div className="grid gap-6 md:grid-cols-2">
               <motion.div
-                className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950"
+                className="flex flex-col rounded-2xl  bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-950"
                 initial={{ opacity: 0, x: -40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -198,7 +199,7 @@ export default function PricingPage() {
                     Perfect for one-person shops or small businesses
                   </p>
                   <p className="mt-4 text-base font-semibold text-primary-500">
-                    Free
+                    {billingCycle === "monthly" ? "Free" : "Free Forever"}
                   </p>
                   <div className="my-6 space-y-3">
                     {freeFeatures.map((item) => (
@@ -214,15 +215,17 @@ export default function PricingPage() {
                     ))}
                   </div>
                 </motion.div>
-                <Button className="mt-4 rounded-md w-full bg-primary-500 text-white hover:bg-primary-600">
-                  Start For Free
-                </Button>
+                <Link href="/auth/register">
+                  <Button className="mt-4 rounded-md w-full bg-primary-500 text-white hover:bg-primary-600">
+                    Start For Free
+                  </Button>
+                </Link>
               </motion.div>
 
               {/* Pro Plan — uses flex-col so button stays at bottom */}
-              <motion.div className="relative flex flex-col rounded-2xl border-2 border-primary-60  bg-white p-8 shadow-sm dark:bg-gray-950">
+              <motion.div className="relative flex flex-col rounded-2xl border-primary-60  bg-white p-8 shadow-sm  dark:bg-gray-950">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="whitespace-nowrap rounded-full bg-accent-500 px-4 py-1 text-sm font-semibold text-white shadow">
+                  <span className="whitespace-nowrap rounded-full bg-accent-500 px-4 py-1 text-sm  font-semibold text-white shadow">
                     Recommended
                   </span>
                 </div>
@@ -234,10 +237,10 @@ export default function PricingPage() {
                     For businesses ready to grow further and faster.
                   </p>
                   <p className="mt-4 text-[24px] font-bold text-accent-700">
-                    ₦10,000
+                    {billingCycle === "monthly" ? "₦10,000" : "₦100,000"}
                     <span className="text-[24px] font-normal text-accent-700">
                       {" "}
-                      /monthly
+                      /{billingCycle === "monthly" ? "monthly" : "yearly"}
                     </span>
                   </p>
                   <div className="my-6 space-y-3">
@@ -255,9 +258,11 @@ export default function PricingPage() {
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Free card button */}
-                <Button className="mt-4 rounded-md w-full border-2 border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950">
-                  Get Full Access
-                </Button>
+                <Link href="/pricing/pro">
+                  <Button className="mt-4 rounded-md w-full border-2 cursor-pointer border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950">
+                    Get Full Access
+                  </Button>
+                </Link>
               </motion.div>
             </div>
           </div>
@@ -266,7 +271,7 @@ export default function PricingPage() {
 
       <section className="w-full py-16">
         <div className="mx-auto w-full max-w-4xl px-6 md:px-12 lg:px-20">
-          <h2 className="mb-3 text-center text-3xl font-bold text-black-700 dark:text-white">
+          <h2 className="mb-3 text-center text-2xl font-bold text-black-700 dark:text-white">
             Compare Plans
           </h2>
           <motion.p className="mb-10 text-center text-black-300 dark:text-gray-400">
