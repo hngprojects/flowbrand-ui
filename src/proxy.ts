@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { fetchAuthMe } from "@/lib/auth-api";
-import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
-import { envConfig } from "@/config/env.config";
-import { authRoutes, ONBOARDING_UPLOAD_ROUTE, protectedRoutes } from "@/routes";
+import { resolveDashboardEntryPathWithToken } from "@/lib/dashboard-entry";
+import {
+  authRoutes,
+  FUNNEL_ROUTE,
+  ONBOARDING_ROUTE,
+  ONBOARDING_UPLOAD_ROUTE,
+  protectedRoutes,
+} from "@/routes";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -38,11 +42,26 @@ export const proxy = auth(async (request) => {
     let redirectPath = ONBOARDING_UPLOAD_ROUTE;
 
     if (typeof accessToken === "string") {
-      const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
-      redirectPath = resolvePostAuthPath(me);
+      redirectPath = await resolveDashboardEntryPathWithToken(accessToken);
     }
 
     return NextResponse.redirect(new URL(redirectPath, nextUrl.origin));
+  }
+
+  const isOnboardingPath =
+    pathname === ONBOARDING_ROUTE ||
+    pathname.startsWith(`${ONBOARDING_ROUTE}/`);
+
+  if (isLoggedIn && isOnboardingPath) {
+    const isNewStrategy = nextUrl.searchParams.get("newStrategy") === "1";
+    const accessToken = request.auth?.access_token;
+
+    if (!isNewStrategy && typeof accessToken === "string") {
+      const entryPath = await resolveDashboardEntryPathWithToken(accessToken);
+      if (entryPath === FUNNEL_ROUTE) {
+        return NextResponse.redirect(new URL(FUNNEL_ROUTE, nextUrl.origin));
+      }
+    }
   }
 
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();

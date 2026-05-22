@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
@@ -11,47 +11,151 @@ import {
   saveDashboardMockSession,
 } from "@/lib/dashboard-mock-session";
 import { FUNNEL_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
+import { clearNewStrategyFlow, isNewStrategyFlow } from "@/lib/new-strategy";
 import {
-  startOnboarding,
-  saveOnboardingStep,
-  completeOnboarding,
-} from "@/actions/onboarding";
-
+  buildStep1Answer,
+  buildStep2Answer,
+  buildStep3Answer,
+  customerTagsFromAnswers,
+  isOnboardingSessionComplete,
+  stepNumberFromSession,
+} from "@/lib/onboarding-api";
+import { parseOnboardingSessionId } from "@/lib/onboarding-query-fns";
+import {
+  useCompleteOnboardingMutation,
+  useOnboardingSessionQuery,
+  useSaveOnboardingStepMutation,
+} from "@/hooks/queries/use-onboarding-queries";
+import { useStartFunnelGenerationMutation } from "@/hooks/mutations/use-funnel-mutations";
+import { redirectToExistingFunnelIfAny } from "@/lib/onboarding-client-recovery";
 import ProgressBar from "./ProgressBar";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 
+const step1Schema = onboardingSchema.pick({ businessDescription: true });
+const step2Schema = onboardingSchema.pick({ idealCustomer: true });
+
 export function QuestionsView() {
   const router = useRouter();
   const store = useOnboardingStore();
-  const [isLoading, setIsLoading] = useState(false);
+  const saveStep = useSaveOnboardingStepMutation();
+  const completeOnboarding = useCompleteOnboardingMutation();
+  const startGeneration = useStartFunnelGenerationMutation();
+
+  const sessionQuery = useOnboardingSessionQuery(true);
 
   useEffect(() => {
-    if (store.sessionId) return;
-    (async () => {
-      try {
-        const res = await startOnboarding();
-        if (res.ok) {
-          const body = res.data as {
-            session_id?: string;
-            data?: { session_id?: string };
-          };
-          const id = body?.data?.session_id ?? body?.session_id;
-          if (id) store.setSessionId(id);
-        } else if (res.status === 409) {
-          router.push(FUNNEL_ROUTE);
-        } else {
-          toast.error(res.error);
-        }
-      } catch {
-        toast.error(
-          "Could not start onboarding. Please refresh and try again.",
-        );
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!sessionQuery.isSuccess || !sessionQuery.data) return;
+
+    const { session, raw } = sessionQuery.data;
+
+    if (!isNewStrategyFlow() && isOnboardingSessionComplete(session)) {
+      void redirectToExistingFunnelIfAny(router, "wizard").then(
+        (redirected) => {
+          if (!redirected) router.replace(FUNNEL_ROUTE);
+        },
+      );
+      return;
+    }
+
+    const id = parseOnboardingSessionId(raw);
+    if (id) store.setSessionId(id);
+
+    const tags = customerTagsFromAnswers(session.answers);
+    store.hydrateFromApiSession({
+      businessDescription: session.answers.step_1?.business_description,
+      customerTags: tags.length > 0 ? tags : undefined,
+      trafficChannel: session.answers.step_3?.discovery_channel,
+      step: stepNumberFromSession(session),
+    });
+  }, [sessionQuery.isSuccess, sessionQuery.data, router, store]);
+
+  useEffect(() => {
+    if (sessionQuery.isError) {
+      toast.error(
+        sessionQuery.error instanceof Error
+          ? sessionQuery.error.message
+          : "Could not start onboarding. Please refresh and try again.",
+      );
+    }
+  }, [sessionQuery.isError, sessionQuery.error]);
+
+  const isBootstrapping = sessionQuery.isPending;
+  const isLoading =
+    saveStep.isPending ||
+    completeOnboarding.isPending ||
+    startGeneration.isPending;
+
+  const ensureSessionId = (): string | null => {
+    const id = useOnboardingStore.getState().sessionId;
+    if (!id) {
+      toast.error("Session not ready. Please wait a moment and try again.");
+    }
+    return id;
+  };
+
+  const handleStep1Next = async () => {
+    const result = step1Schema.safeParse({
+      businessDescription: store.businessDescription,
+    });
+    if (!result.success) {
+      toast.error(result.error.issues[0]?.message ?? "Validation error");
+      return;
+    }
+
+    const sessionId = ensureSessionId();
+    if (!sessionId) return;
+
+    try {
+      await saveStep.mutateAsync({
+        session_id: sessionId,
+        step: 1,
+        answer: buildStep1Answer(store.businessDescription),
+      });
+      store.nextStep();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not save your answer.",
+      );
+    }
+  };
+
+  const handleStep2Next = async () => {
+    const result = step2Schema.safeParse({
+      idealCustomer: {
+        theyAre: store.theyAre,
+        whoWantTo: store.whoWantTo,
+        locatedIn: store.locatedIn,
+        customInput: store.customCustomerInput,
+      },
+    });
+    if (!result.success) {
+      toast.error(result.error.issues[0]?.message ?? "Validation error");
+      return;
+    }
+
+    const sessionId = ensureSessionId();
+    if (!sessionId) return;
+
+    try {
+      await saveStep.mutateAsync({
+        session_id: sessionId,
+        step: 2,
+        answer: buildStep2Answer({
+          theyAre: store.theyAre,
+          whoWantTo: store.whoWantTo,
+          locatedIn: store.locatedIn,
+          customCustomerInput: store.customCustomerInput,
+        }),
+      });
+      store.nextStep();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not save your answer.",
+      );
+    }
+  };
 
   const handleBackClick = () => {
     if (store.step === 1) {
@@ -62,7 +166,7 @@ export function QuestionsView() {
   };
 
   const handleCreateStrategy = async () => {
-    if (isLoading) return;
+    if (isLoading || isBootstrapping) return;
 
     const payload = {
       businessDescription: store.businessDescription,
@@ -81,61 +185,32 @@ export function QuestionsView() {
       return;
     }
 
-    if (!store.sessionId) {
-      toast.error("Session not ready. Please try again.");
-      return;
-    }
+    const sessionId = ensureSessionId();
+    if (!sessionId) return;
 
     try {
-      setIsLoading(true);
+      await saveStep.mutateAsync({
+        session_id: sessionId,
+        step: 3,
+        answer: buildStep3Answer(store.trafficChannel),
+      });
 
-      const sessionId = store.sessionId;
+      await completeOnboarding.mutateAsync(sessionId);
+      store.setSessionId(null);
 
-      const steps = [
-        {
-          step: 1,
-          answer: { business_description: store.businessDescription },
-        },
-        {
-          step: 2,
-          answer: {
-            customer_tags: {
-              type: [
-                ...store.theyAre,
-                ...store.whoWantTo,
-                ...store.locatedIn,
-                ...(store.customCustomerInput.trim()
-                  ? [store.customCustomerInput.trim()]
-                  : []),
-              ],
-            },
-          },
-        },
-        {
-          step: 3,
-          answer: { discovery_channel: store.trafficChannel },
-        },
-      ];
-
-      for (const s of steps) {
-        const res = await saveOnboardingStep({
-          session_id: sessionId,
-          step: s.step,
-          answer: s.answer,
-        });
-        if (!res.ok) {
-          toast.error(res.error);
+      if (!isNewStrategyFlow()) {
+        if (await redirectToExistingFunnelIfAny(router, "wizard")) {
+          clearNewStrategyFlow();
           return;
         }
       }
 
-      const done = await completeOnboarding(sessionId);
-      if (!done.ok && done.status !== 409) {
-        toast.error(done.error);
-        return;
-      }
-
-      store.setSessionId(null);
+      const uploadIds = store.uploadedDocuments.map((doc) => doc.id);
+      await startGeneration.mutateAsync({
+        source: uploadIds.length > 0 ? "document_upload" : "wizard",
+        idempotencyKey: crypto.randomUUID(),
+        uploadIds: uploadIds.length > 0 ? uploadIds : undefined,
+      });
 
       saveDashboardMockSession(
         buildSessionFromOnboarding({
@@ -149,12 +224,19 @@ export function QuestionsView() {
         }),
       );
 
-      toast.success("Your marketing strategy is ready!");
+      clearNewStrategyFlow();
+      toast.success("Building your marketing strategy…");
       router.push(FUNNEL_ROUTE);
-    } catch {
-      toast.error("Something went wrong.");
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      if (await redirectToExistingFunnelIfAny(router, "wizard")) {
+        clearNewStrategyFlow();
+        return;
+      }
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not start strategy generation",
+      );
     }
   };
 
@@ -166,6 +248,7 @@ export function QuestionsView() {
             variant="ghost"
             size="sm"
             onClick={handleBackClick}
+            disabled={isLoading || isBootstrapping}
             className="px-2 text-label bg-card border border-border hover:bg-card/50 font-medium text-sm transition-opacity hover:opacity-80"
           >
             <svg
@@ -195,9 +278,7 @@ export function QuestionsView() {
               onChange={(val) => {
                 store.setBusinessDescription(val);
               }}
-              onNext={() => {
-                store.nextStep();
-              }}
+              onNext={handleStep1Next}
             />
           )}
 
@@ -219,9 +300,7 @@ export function QuestionsView() {
               setCustomInput={(val) => {
                 store.setCustomCustomerInput(val);
               }}
-              onNext={() => {
-                store.nextStep();
-              }}
+              onNext={handleStep2Next}
             />
           )}
 
@@ -236,7 +315,7 @@ export function QuestionsView() {
                 }
               }}
               onSubmit={handleCreateStrategy}
-              isLoading={isLoading}
+              isLoading={isLoading || isBootstrapping}
             />
           )}
         </div>

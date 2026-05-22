@@ -1,0 +1,136 @@
+import {
+  getFunnelDetail,
+  getFunnelStage,
+  getFunnelStages,
+} from "@/actions/funnels";
+import type { FunnelDetailApi } from "@/lib/funnel-api-types";
+import {
+  funnelDetailIsReady,
+  funnelHasDisplayContent,
+  funnelHasMinimalContent,
+  parseFunnelDetail,
+  parseFunnelStage,
+  parseFunnelStagesList,
+} from "@/lib/funnel-api-types";
+import { getFocusStage } from "@/lib/funnel-display";
+
+export type FetchFunnelOptions = {
+  /** When true, return stages even if tasks are not loaded yet (used after long polls). */
+  allowPartial?: boolean;
+};
+
+async function mergeStageTasks(
+  funnelId: string,
+  detail: FunnelDetailApi,
+): Promise<FunnelDetailApi> {
+  let stages = [...(detail.stages ?? [])];
+  if (stages.length === 0) return detail;
+
+  const needsTasks = stages.some((s) => (s.tasks?.length ?? 0) === 0);
+  if (!needsTasks) return detail;
+
+  const ordered = [getFocusStage({ ...detail, stages }), ...stages].filter(
+    (s): s is NonNullable<typeof s> => Boolean(s?.stageId),
+  );
+
+  const seen = new Set<string>();
+  for (const target of ordered) {
+    const stageId = target.stageId;
+    if (!stageId || seen.has(stageId)) continue;
+    seen.add(stageId);
+
+    const existing = stages.find((s) => s.stageId === stageId);
+    if ((existing?.tasks?.length ?? 0) > 0) continue;
+
+    const stageRes = await getFunnelStage(funnelId, stageId);
+    if (!stageRes.ok) continue;
+
+    const full = parseFunnelStage(stageRes.data);
+    if (!full) continue;
+
+    stages = stages.map((stage) =>
+      stage.stageId === full.stageId ? { ...stage, ...full } : stage,
+    );
+
+    if (stages.some((s) => (s.tasks?.length ?? 0) > 0)) {
+      break;
+    }
+  }
+
+  return { ...detail, stages };
+}
+
+async function loadFunnelCore(
+  funnelId: string,
+): Promise<
+  { ok: true; detail: FunnelDetailApi } | { ok: false; error: string }
+> {
+  const res = await getFunnelDetail(funnelId);
+  if (!res.ok) {
+    return { ok: false, error: res.error };
+  }
+
+  let detail = parseFunnelDetail(res.data);
+  if (!detail) {
+    return { ok: false, error: "Could not read your strategy." };
+  }
+
+  if ((detail.stages?.length ?? 0) === 0) {
+    const stagesRes = await getFunnelStages(funnelId);
+    if (stagesRes.ok) {
+      const stages = parseFunnelStagesList(stagesRes.data);
+      if (stages.length > 0) {
+        detail = { ...detail, stages };
+      }
+    }
+  }
+
+  return { ok: true, detail };
+}
+
+/** Load funnel detail and fall back to /stages + /stages/:id when the summary is empty. */
+export async function fetchEnrichedFunnelDetail(
+  funnelId: string,
+  options: FetchFunnelOptions = {},
+): Promise<
+  | { ok: true; detail: FunnelDetailApi; partial?: boolean }
+  | { ok: false; error: string }
+> {
+  const core = await loadFunnelCore(funnelId);
+  if (!core.ok) return core;
+
+  let detail = core.detail;
+
+  if (funnelHasDisplayContent(detail)) {
+    detail = await mergeStageTasks(funnelId, detail);
+    if (funnelDetailIsReady(detail)) {
+      return { ok: true, detail };
+    }
+  }
+
+  if (options.allowPartial && funnelHasMinimalContent(detail)) {
+    detail = await mergeStageTasks(funnelId, detail);
+    return { ok: true, detail, partial: !funnelHasDisplayContent(detail) };
+  }
+
+  return {
+    ok: false,
+    error:
+      "Your strategy is still being prepared. Please wait a moment and refresh.",
+  };
+}
+
+/** Fast check used while polling — skips per-stage task fetches unless content is ready. */
+export async function probeFunnelDisplayReady(
+  funnelId: string,
+): Promise<FunnelDetailApi | null> {
+  const core = await loadFunnelCore(funnelId);
+  if (!core.ok) return null;
+
+  if (!funnelHasDisplayContent(core.detail)) {
+    return null;
+  }
+
+  const enriched = await mergeStageTasks(funnelId, core.detail);
+  return funnelDetailIsReady(enriched) ? enriched : null;
+}

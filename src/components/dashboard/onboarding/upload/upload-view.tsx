@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { FileUp, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
@@ -16,9 +16,17 @@ import {
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { FUNNEL_ROUTE, ONBOARDING_QUESTIONS_ROUTE } from "@/routes";
 import {
-  uploadFunnelDocuments,
-  getFunnelUploadProgress,
-} from "@/actions/funnels";
+  clearNewStrategyFlow,
+  isNewStrategyFlow,
+  NEW_STRATEGY_QUERY,
+} from "@/lib/new-strategy";
+import { redirectToExistingFunnelIfAny } from "@/lib/onboarding-client-recovery";
+import { useDashboardEntryPathQuery } from "@/hooks/queries/use-onboarding-queries";
+import { useStartFunnelGenerationMutation } from "@/hooks/mutations/use-funnel-mutations";
+import {
+  useUploadDocumentsMutation,
+  useUploadProgressQueries,
+} from "@/hooks/queries/use-upload-queries";
 import { cn } from "@/lib/utils";
 
 type UploadStatus = "uploading" | "parsing" | "ready" | "failed";
@@ -40,18 +48,6 @@ function formatMB(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1) + "MB";
 }
 
-function normalizeStatus(raw: unknown): UploadStatus {
-  switch (raw) {
-    case "uploading":
-    case "parsing":
-    case "ready":
-    case "failed":
-      return raw;
-    default:
-      return "parsing";
-  }
-}
-
 function fileExt(name: string) {
   return name.split(".").pop()?.toUpperCase() ?? "FILE";
 }
@@ -67,7 +63,8 @@ function statusLabel(item: UploadedFile) {
   if (item.status === "ready") return formatMB(item.file.size);
   if (item.status === "failed") return "Failed";
   if (item.status === "uploading") return "Uploading…";
-  return `${item.progress}% Processing`;
+  const pct = Math.round(Math.min(100, Math.max(0, item.progress)));
+  return `${pct}% Processing`;
 }
 
 function FileRow({
@@ -133,108 +130,153 @@ export function UploadView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
+  const uploadMutation = useUploadDocumentsMutation();
+  const startGeneration = useStartFunnelGenerationMutation();
+  const entryQuery = useDashboardEntryPathQuery(!isNewStrategyFlow());
 
-  const pollIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const activeUploadIds = useMemo(
+    () =>
+      files.map((f) => f.uploadId).filter((id): id is string => Boolean(id)),
+    [files],
+  );
+  const progressQueries = useUploadProgressQueries(activeUploadIds);
+  const registeredReadyIds = useRef<Set<string>>(new Set());
+  const failedToastIds = useRef<Set<string>>(new Set());
+
+  const progressByUploadId = useMemo(() => {
+    const map = new Map<string, (typeof progressQueries)[number]>();
+    activeUploadIds.forEach((id, index) => {
+      map.set(id, progressQueries[index]);
+    });
+    return map;
+  }, [activeUploadIds, progressQueries]);
+
+  const displayFiles = useMemo(() => {
+    return files.map((row) => {
+      if (!row.uploadId) return row;
+
+      const query = progressByUploadId.get(row.uploadId);
+      if (query?.isError) {
+        return { ...row, status: "failed" as const };
+      }
+
+      const parsed = query?.data;
+      if (!parsed) {
+        if (row.status === "uploading") {
+          return {
+            ...row,
+            status: "parsing" as const,
+            progress: Math.max(row.progress, 5),
+          };
+        }
+        return row;
+      }
+
+      return {
+        ...row,
+        progress: Math.min(100, Math.max(0, parsed.percentComplete)),
+        status: parsed.status,
+      };
+    });
+  }, [files, progressByUploadId]);
+
+  useEffect(() => {
+    if (entryQuery.data === FUNNEL_ROUTE) {
+      router.replace(FUNNEL_ROUTE);
+    }
+  }, [entryQuery.data, router]);
+
+  const questionsHref = isNewStrategyFlow()
+    ? `${ONBOARDING_QUESTIONS_ROUTE}?${NEW_STRATEGY_QUERY}=1`
+    : ONBOARDING_QUESTIONS_ROUTE;
 
   const goToQuestions = useCallback(() => {
-    router.push(ONBOARDING_QUESTIONS_ROUTE);
-  }, [router]);
+    router.push(questionsHref);
+  }, [router, questionsHref]);
 
-  const goToFunnel = useCallback(() => {
+  const isGenerating = startGeneration.isPending;
+
+  const goToFunnel = useCallback(async () => {
     const state = useOnboardingStore.getState();
-    saveDashboardMockSession(
-      buildSessionFromOnboarding({
-        businessDescription: state.businessDescription,
-        theyAre: state.theyAre,
-        whoWantTo: state.whoWantTo,
-        locatedIn: state.locatedIn,
-        customCustomerInput: state.customCustomerInput,
-        trafficChannel: state.trafficChannel,
-        uploadedDocuments: state.uploadedDocuments,
-      }),
-    );
-    toast.success("Documents uploaded. Building your strategy…");
-    router.push(FUNNEL_ROUTE);
-  }, [router]);
+    const uploadIds = state.uploadedDocuments.map((doc) => doc.id);
 
-  const pollProgress = useCallback(
-    (rowId: string, uploadId: string, file: File) => {
-      let attempts = 0;
-      const MAX_ATTEMPTS = 20;
+    if (uploadIds.length === 0) {
+      toast.error(
+        "Upload at least one document before creating your strategy.",
+      );
+      return;
+    }
 
-      const interval = setInterval(async () => {
-        attempts += 1;
-        try {
-          const res = await getFunnelUploadProgress(uploadId);
+    try {
+      await startGeneration.mutateAsync({
+        source: "document_upload",
+        idempotencyKey: crypto.randomUUID(),
+        uploadIds,
+      });
 
-          if (!res.ok) {
-            clearInterval(interval);
-            delete pollIntervals.current[rowId];
-            setFiles((prev) =>
-              prev.map((f) =>
-                f.id === rowId ? { ...f, status: "failed" } : f,
-              ),
-            );
-            toast.error(res.error);
-            return;
-          }
+      saveDashboardMockSession(
+        buildSessionFromOnboarding({
+          businessDescription: state.businessDescription,
+          theyAre: state.theyAre,
+          whoWantTo: state.whoWantTo,
+          locatedIn: state.locatedIn,
+          customCustomerInput: state.customCustomerInput,
+          trafficChannel: state.trafficChannel,
+          uploadedDocuments: state.uploadedDocuments,
+        }),
+      );
+      clearNewStrategyFlow();
+      toast.success("Documents uploaded. Building your strategy…");
+      router.push(FUNNEL_ROUTE);
+    } catch (error) {
+      if (await redirectToExistingFunnelIfAny(router, "document_upload")) {
+        clearNewStrategyFlow();
+        return;
+      }
 
-          const body = res.data as {
-            status?: string;
-            percentComplete?: number;
-            data?: { status?: string; percentComplete?: number };
-          };
-          const node = body?.data ?? body;
-          const pct =
-            typeof node.percentComplete === "number" ? node.percentComplete : 0;
-          const status = normalizeStatus(node.status);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Network error. Please try again.";
+      toast.error("Could not start strategy generation", {
+        description: message,
+      });
+      if (
+        message.toLowerCase().includes("onboarding") ||
+        message.toLowerCase().includes("incomplete")
+      ) {
+        toast.info("Complete the onboarding questions first.");
+        router.push(questionsHref);
+      }
+    }
+  }, [router, questionsHref, startGeneration]);
 
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === rowId ? { ...f, progress: pct, status } : f,
-            ),
-          );
+  useEffect(() => {
+    for (const row of displayFiles) {
+      if (!row.uploadId) continue;
 
-          if (status === "ready" || status === "failed") {
-            clearInterval(interval);
-            delete pollIntervals.current[rowId];
-            if (status === "ready") {
-              addUploadedDocument({
-                id: uploadId,
-                name: file.name,
-                size: formatFileSize(file.size),
-                type: fileNameToDocType(file.name),
-              });
-            } else {
-              toast.error(`${file.name} failed to process.`);
-            }
-            return;
-          }
-
-          if (attempts >= MAX_ATTEMPTS) {
-            clearInterval(interval);
-            delete pollIntervals.current[rowId];
-            setFiles((prev) =>
-              prev.map((f) =>
-                f.id === rowId ? { ...f, status: "failed" } : f,
-              ),
-            );
-            toast.error(`${file.name} is taking too long. Please try again.`);
-          }
-        } catch {
-          clearInterval(interval);
-          delete pollIntervals.current[rowId];
-          setFiles((prev) =>
-            prev.map((f) => (f.id === rowId ? { ...f, status: "failed" } : f)),
-          );
-          toast.error(`${file.name}: could not check upload progress.`);
+      if (row.status === "failed") {
+        if (!failedToastIds.current.has(row.uploadId)) {
+          failedToastIds.current.add(row.uploadId);
+          toast.error(`${row.file.name} failed to process.`);
         }
-      }, 1500);
+        continue;
+      }
 
-      pollIntervals.current[rowId] = interval;
-    },
-    [addUploadedDocument],
-  );
+      if (
+        row.status === "ready" &&
+        !registeredReadyIds.current.has(row.uploadId)
+      ) {
+        registeredReadyIds.current.add(row.uploadId);
+        addUploadedDocument({
+          id: row.uploadId,
+          name: row.file.name,
+          size: formatFileSize(row.file.size),
+          type: fileNameToDocType(row.file.name),
+        });
+      }
+    }
+  }, [displayFiles, addUploadedDocument]);
 
   const addFiles = useCallback(
     async (incoming: FileList | null) => {
@@ -278,38 +320,10 @@ export function UploadView() {
       toUpload.forEach((file) => form.append("files", file));
 
       try {
-        const res = await uploadFunnelDocuments(form);
-        if (!res.ok) {
-          toast.error(res.error);
-          setFiles((prev) =>
-            prev.map((f) =>
-              rows.some((r) => r.id === f.id) ? { ...f, status: "failed" } : f,
-            ),
-          );
-          return;
-        }
-
-        type UploadEntry = {
-          uploadId: string;
-          fileName: string;
-          status: string;
-          percentComplete: number;
-        };
-        const body = res.data as {
-          uploads?: UploadEntry[];
-          data?: {
-            uploads?: UploadEntry[];
-            data?: { uploads?: UploadEntry[] };
-          };
-        };
-        const uploads: UploadEntry[] =
-          body?.data?.data?.uploads ??
-          body?.data?.uploads ??
-          body?.uploads ??
-          [];
+        const uploads = await uploadMutation.mutateAsync(form);
 
         const usedIdx = new Set<number>();
-        const rowToUpload = new Map<string, UploadEntry>();
+        const rowToUpload = new Map<string, (typeof uploads)[number]>();
         for (const r of rows) {
           const matchIdx = uploads.findIndex(
             (u, i) => !usedIdx.has(i) && u.fileName === r.file.name,
@@ -328,8 +342,8 @@ export function UploadView() {
             return {
               ...f,
               uploadId: up.uploadId,
-              progress: up.percentComplete ?? 0,
-              status: normalizeStatus(up.status),
+              progress: up.percentComplete,
+              status: up.status,
             };
           }),
         );
@@ -337,20 +351,21 @@ export function UploadView() {
         rows.forEach((r) => {
           const up = rowToUpload.get(r.id);
           if (!up) return;
-          const status = normalizeStatus(up.status);
-          if (status === "ready") {
+          if (up.status === "ready") {
             addUploadedDocument({
               id: up.uploadId,
               name: r.file.name,
               size: formatFileSize(r.file.size),
               type: fileNameToDocType(r.file.name),
             });
-          } else if (status !== "failed") {
-            pollProgress(r.id, up.uploadId, r.file);
           }
         });
-      } catch {
-        toast.error("Could not upload your documents. Please try again.");
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not upload your documents. Please try again.",
+        );
         setFiles((prev) =>
           prev.map((f) =>
             rows.some((r) => r.id === f.id) ? { ...f, status: "failed" } : f,
@@ -358,28 +373,17 @@ export function UploadView() {
         );
       }
     },
-    [files.length, pollProgress, addUploadedDocument],
+    [files.length, uploadMutation, addUploadedDocument],
   );
 
   const removeFile = (id: string) => {
-    if (pollIntervals.current[id]) {
-      clearInterval(pollIntervals.current[id]);
-      delete pollIntervals.current[id];
-    }
     const row = files.find((f) => f.id === id);
     if (row?.uploadId) removeUploadedDocument(row.uploadId);
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  useEffect(() => {
-    const intervals = pollIntervals.current;
-    return () => {
-      Object.values(intervals).forEach(clearInterval);
-    };
-  }, []);
-
-  const hasFiles = files.length > 0;
-  const allDone = hasFiles && files.every((f) => f.status === "ready");
+  const hasFiles = displayFiles.length > 0;
+  const allDone = hasFiles && displayFiles.every((f) => f.status === "ready");
 
   return (
     <main className="flex flex-1 flex-col">
@@ -440,7 +444,7 @@ export function UploadView() {
 
           {hasFiles && (
             <div className="mt-6 flex flex-col gap-4 border-t border-[#F3F4F6] pt-6">
-              {files.map((item) => (
+              {displayFiles.map((item) => (
                 <FileRow key={item.id} item={item} onRemove={removeFile} />
               ))}
             </div>
@@ -448,11 +452,11 @@ export function UploadView() {
 
           <Button
             type="button"
-            onClick={goToFunnel}
-            disabled={!allDone}
+            onClick={() => void goToFunnel()}
+            disabled={!allDone || isGenerating}
             className="mt-6 h-auto w-full rounded-[10px] bg-primary py-4 text-base font-semibold text-white hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Create my strategy
+            {isGenerating ? "Starting strategy…" : "Create my strategy"}
           </Button>
 
           <button

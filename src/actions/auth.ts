@@ -4,8 +4,7 @@ import axios from "axios";
 import * as z from "zod";
 import { auth } from "@/auth";
 import { envConfig } from "~/config/env.config";
-import { fetchAuthMe } from "@/lib/auth-api";
-import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
+import { resolveDashboardEntryPathWithToken } from "@/lib/dashboard-entry";
 import type {
   RegisterUserResult,
   RequestPasswordResetResult,
@@ -71,8 +70,7 @@ export async function getPostAuthRedirect(): Promise<string> {
     return "/login";
   }
 
-  const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
-  return resolvePostAuthPath(me);
+  return resolveDashboardEntryPathWithToken(accessToken);
 }
 
 export type RegisterUserInput = {

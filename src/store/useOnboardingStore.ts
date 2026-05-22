@@ -23,18 +23,29 @@ interface OnboardingState {
   setTrafficChannel: (val: string) => void;
   addUploadedDocument: (doc: MockUploadedDoc) => void;
   removeUploadedDocument: (id: string) => void;
+  hydrateFromApiSession: (input: {
+    businessDescription?: string;
+    customerTags?: string[];
+    trafficChannel?: string;
+    step?: number;
+  }) => void;
+  reset: () => void;
 }
 
-export const useOnboardingStore = create<OnboardingState>((set) => ({
+const initialOnboardingState = {
   step: 1,
   businessDescription: "",
-  theyAre: [],
-  whoWantTo: [],
-  locatedIn: [],
+  theyAre: [] as string[],
+  whoWantTo: [] as string[],
+  locatedIn: [] as string[],
   customCustomerInput: "",
   trafficChannel: "",
-  uploadedDocuments: [],
-  sessionId: null,
+  uploadedDocuments: [] as MockUploadedDoc[],
+  sessionId: null as string | null,
+};
+
+export const useOnboardingStore = create<OnboardingState>((set) => ({
+  ...initialOnboardingState,
   setStep: (step) => set({ step: Math.max(1, Math.min(step, 3)) }),
   setSessionId: (id) => set({ sessionId: id }),
   nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 3) })),
@@ -70,4 +81,13 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     set((state) => ({
       uploadedDocuments: state.uploadedDocuments.filter((d) => d.id !== id),
     })),
+  hydrateFromApiSession: (input) =>
+    set((state) => ({
+      businessDescription:
+        input.businessDescription ?? state.businessDescription,
+      theyAre: input.customerTags ?? state.theyAre,
+      trafficChannel: input.trafficChannel ?? state.trafficChannel,
+      step: input.step ?? state.step,
+    })),
+  reset: () => set({ ...initialOnboardingState }),
 }));

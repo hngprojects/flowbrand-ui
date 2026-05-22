@@ -10,24 +10,25 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import FunnelSidebar from "@/components/dashboard/funnel/funnel-sidebar";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
-import {
-  DUMMY_STRATEGY_PHASES,
-  DEFAULT_UPLOADED_DOCS,
-} from "@/lib/dashboard-mock-data";
+import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { FUNNEL_ROUTE } from "@/routes";
 
 interface OnboardingNavbarProps {
   steps?: ReactNode;
   loading?: boolean;
   documents?: MockUploadedDoc[];
-  strategyPhases?: readonly { title: string; tasks: string }[];
+  strategyPhases?: readonly StrategyPhaseDisplay[];
+  strategySummary?: string;
+  onCreateNewStrategy?: () => void;
 }
 
 const OnboardingNavbar = ({
   steps = null,
   loading = false,
-  documents = DEFAULT_UPLOADED_DOCS,
-  strategyPhases = DUMMY_STRATEGY_PHASES,
+  documents = [],
+  strategyPhases = [],
+  strategySummary,
+  onCreateNewStrategy,
 }: OnboardingNavbarProps) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -140,6 +141,8 @@ const OnboardingNavbar = ({
               loading={loading}
               documents={documents}
               strategyPhases={strategyPhases}
+              strategySummary={strategySummary}
+              onCreateNewStrategy={onCreateNewStrategy}
               className="block! h-full! w-full! border-none"
             />
           </div>

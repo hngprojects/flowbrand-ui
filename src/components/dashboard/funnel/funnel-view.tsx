@@ -2,47 +2,56 @@
 
 import FunnelSidebar from "@/components/dashboard/funnel/funnel-sidebar";
 import Loader from "@/components/ui/loader";
-import { useState, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { beginNewStrategyFlow } from "@/lib/begin-new-strategy";
 import { StrategyIcon } from "@/components/icons/strategy";
-import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
-import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
-import { getDashboardMockSessionOrDefaults } from "@/lib/dashboard-mock-session";
-import {
-  DUMMY_FUNNEL_FOCUS,
-  DUMMY_FUNNEL_TASKS,
-  DUMMY_STRATEGY_PHASES,
-} from "@/lib/dashboard-mock-data";
-
-const LOADING_MS = 4500;
+import { loadDashboardMockSession } from "@/lib/dashboard-mock-session";
+import { funnelSidebarSummary } from "@/lib/funnel-display";
+import { useStrategyFunnel } from "@/hooks/queries/use-strategy-funnel";
+import { ONBOARDING_UPLOAD_ROUTE } from "@/routes";
+import { cn } from "@/lib/utils";
 
 export function FunnelView() {
-  const [session] = useState(() => getDashboardMockSessionOrDefaults());
-  const [loading, setLoading] = useState(true);
-  const [stepIndex, setStepIndex] = useState(0);
+  const router = useRouter();
+  const session = useMemo(() => loadDashboardMockSession(), []);
+  const {
+    loading,
+    loadingMessage,
+    error,
+    funnel,
+    strategyPhases,
+    focus,
+    tasks,
+    retry,
+  } = useStrategyFunnel();
 
-  useEffect(() => {
-    showFunnelPreviewToast();
-  }, []);
+  const documents = session?.uploadedDocuments ?? [];
 
   const loadingSteps = useMemo(
     () => [
       <div key="step-1" className="flex flex-col gap-4">
         <h3 className="text-[16px] text-black-300">Information Provided</h3>
-        <p className="text-[18px] text-gray-900 p-3">
-          {session.businessDescription}
-        </p>
-        <p className="text-[16px] text-black-300 px-3">
-          Ideal customer: {session.idealCustomerSummary}
-        </p>
-        <p className="text-[16px] text-black-300 px-3">
-          Main channel: {session.trafficChannel}
-        </p>
+        {session?.businessDescription ? (
+          <p className="text-[18px] text-gray-900 p-3">
+            {session.businessDescription}
+          </p>
+        ) : null}
+        {session?.idealCustomerSummary ? (
+          <p className="text-[16px] text-black-300 px-3">
+            Ideal customer: {session.idealCustomerSummary}
+          </p>
+        ) : null}
+        {session?.trafficChannel ? (
+          <p className="text-[16px] text-black-300 px-3">
+            Main channel: {session.trafficChannel}
+          </p>
+        ) : null}
         <div className="mt-2 p-3">
           <p className="text-[16px] text-foreground">
-            We have created a tailored marketing strategy for your unique use
-            case and problem.
+            We are building a tailored marketing strategy for your business.
           </p>
         </div>
       </div>,
@@ -50,105 +59,119 @@ export function FunnelView() {
     [session],
   );
 
-  const sidebarSteps = loadingSteps[stepIndex] ?? loadingSteps[0] ?? null;
+  const sidebarSteps = loadingSteps[0] ?? null;
+  const strategySummary = funnelSidebarSummary(funnel);
 
-  useEffect(() => {
-    let currentStep = 0;
+  const handleCreateNewStrategy = useCallback(() => {
+    router.push(beginNewStrategyFlow());
+  }, [router]);
 
-    const stepInterval = setInterval(() => {
-      if (currentStep < loadingSteps.length) {
-        setStepIndex(currentStep);
-        currentStep++;
-      }
-    }, 2000);
-
-    const timer = setTimeout(() => {
-      clearInterval(stepInterval);
-      setLoading(false);
-    }, LOADING_MS);
-
-    return () => {
-      clearInterval(stepInterval);
-      clearTimeout(timer);
-    };
-  }, [loadingSteps.length]);
+  if (error && !loading) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-default">
+        <p className="max-w-md text-center text-sm text-destructive">{error}</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button type="button" variant="outline" onClick={() => retry()}>
+            Try again
+          </Button>
+          <Button
+            type="button"
+            onClick={() => router.push(ONBOARDING_UPLOAD_ROUTE)}
+          >
+            Back to onboarding
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <>
       <OnboardingNavbar
         steps={sidebarSteps}
         loading={loading}
-        documents={session.uploadedDocuments}
-        strategyPhases={DUMMY_STRATEGY_PHASES}
+        documents={documents}
+        strategyPhases={strategyPhases}
+        strategySummary={loading ? undefined : strategySummary}
+        onCreateNewStrategy={loading ? undefined : handleCreateNewStrategy}
       />
       <div className="flex">
         <FunnelSidebar
           steps={sidebarSteps}
           loading={loading}
-          documents={session.uploadedDocuments}
-          strategyPhases={DUMMY_STRATEGY_PHASES}
+          documents={documents}
+          strategyPhases={strategyPhases}
+          strategySummary={strategySummary}
+          onCreateNewStrategy={handleCreateNewStrategy}
         />
         <div className="w-full p-default md:w-2/3">
           {loading ? (
-            <Loader
-              className="h-screen w-full"
-              text="Building your marketing strategy..."
-            />
+            <Loader className="h-screen w-full" text={loadingMessage} />
           ) : (
             <div className="flex w-full flex-col items-end space-y-large">
-              <div className="w-full">
-                <div className="flex justify-between text-[16px] text-black-300">
-                  <p>This week&apos;s focus</p>
-                  <p>{DUMMY_FUNNEL_FOCUS.progress}</p>
+              {focus ? (
+                <div className="w-full">
+                  <div className="flex justify-between text-[16px] text-black-300">
+                    <p>This week&apos;s focus</p>
+                    <p>{focus.progress}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="flex items-center gap-[12px] text-[24px] text-foreground">
+                      <StrategyIcon /> {focus.phase}
+                    </p>
+                    <p className="text-[14px] text-black-300 md:text-[16px]">
+                      {focus.subtitle}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="flex items-center gap-[12px] text-[24px] text-foreground">
-                    <StrategyIcon /> {DUMMY_FUNNEL_FOCUS.phase}
+              ) : (
+                <div className="w-full space-y-3 rounded-[18px] border border-gray-500 bg-white p-section">
+                  <p className="text-sm text-black-300">
+                    Your strategy was created, but stage details are still
+                    loading. Wait a moment, then try again.
                   </p>
-                  <p className="text-[14px] text-black-300 md:text-[16px]">
-                    {DUMMY_FUNNEL_FOCUS.subtitle}
-                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-fit"
+                    onClick={() => retry()}
+                  >
+                    Refresh strategy
+                  </Button>
                 </div>
-              </div>
+              )}
 
               <div className="w-full space-y-default">
-                {DUMMY_FUNNEL_TASKS.map((task) => (
-                  <div
-                    key={task.id}
-                    className="w-full space-y-2 rounded-[18px] border border-gray-500 bg-[#FFFFFF] p-section"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h2>{task.title}</h2>
-                      <input
-                        type="checkbox"
-                        aria-label={`Mark ${task.title} complete`}
-                      />
+                {tasks.length > 0 ? (
+                  tasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="w-full space-y-2 rounded-[18px] border border-gray-500 bg-[#FFFFFF] p-section"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <h2 className="text-lg font-medium">{task.title}</h2>
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full px-2 py-0.5 text-xs capitalize",
+                            task.status === "complete"
+                              ? "bg-primary/10 text-primary"
+                              : "bg-gray-100 text-black-300",
+                          )}
+                        >
+                          {task.status ?? "pending"}
+                        </span>
+                      </div>
+                      <p className="text-sm text-black-300">
+                        {task.description}
+                      </p>
                     </div>
-                    <div className="space-y-3 text-sm text-black-300">
-                      <p>{task.description}</p>
-                      {task.resources.length > 0 && (
-                        <div>
-                          <p className="text-[14px] capitalize text-black-300">
-                            More Resources
-                          </p>
-                          <div className="mt-2 flex flex-col gap-2">
-                            {task.resources.map((resource) => (
-                              <div
-                                key={resource.label}
-                                className="flex items-center gap-[4px]"
-                              >
-                                <LinkIcon />
-                                <p className="text-sm text-primary">
-                                  {resource.label}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="rounded-[18px] border border-gray-500 bg-white p-section text-sm text-black-300">
+                    No tasks for the current stage yet. Try refreshing in a
+                    moment.
+                  </p>
+                )}
               </div>
 
               <Button className="w-[310px] rounded-[10px] bg-primary-100">

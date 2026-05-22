@@ -4,6 +4,9 @@ import {
   ONBOARDING_UPLOAD_ROUTE,
 } from "@/routes";
 import type { AuthMeProfile } from "@/lib/auth-api";
+import { isOnboardingComplete } from "@/lib/new-strategy";
+
+export { isOnboardingComplete };
 
 /** Decide where to send the user after login/register based on profile flags. */
 export function resolvePostAuthPath(
@@ -15,7 +18,7 @@ export function resolvePostAuthPath(
     return fromApi;
   }
 
-  if (me?.has_strategy || me?.onboarding_completed) {
+  if (isOnboardingComplete(me)) {
     return FUNNEL_ROUTE;
   }
 

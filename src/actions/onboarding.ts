@@ -3,7 +3,7 @@
 import axios from "axios";
 import { auth } from "@/auth";
 import { envConfig } from "@/config/env.config";
-import { formatAuthApiError } from "@/lib/auth-api";
+import { formatHttpApiError } from "@/lib/api-errors";
 
 function onboardingUrl(path: string): string {
   const base = envConfig.BASEURL.replace(/\/$/, "");
@@ -45,7 +45,7 @@ export async function startOnboarding(): Promise<OnboardingActionResult> {
       const { status, data } = error.response;
       return {
         ok: false,
-        error: formatAuthApiError(status, data, "Could not start onboarding."),
+        error: formatHttpApiError(status, data, "Could not start onboarding."),
         status,
       };
     }
@@ -77,7 +77,7 @@ export async function saveOnboardingStep(input: {
       const { status, data } = error.response;
       return {
         ok: false,
-        error: formatAuthApiError(status, data, "Could not save your answer."),
+        error: formatHttpApiError(status, data, "Could not save your answer."),
         status,
       };
     }
@@ -111,7 +111,7 @@ export async function completeOnboarding(
       const { status, data } = error.response;
       return {
         ok: false,
-        error: formatAuthApiError(
+        error: formatHttpApiError(
           status,
           data,
           "Could not complete onboarding.",
@@ -143,7 +143,7 @@ export async function getOnboardingSession(): Promise<OnboardingActionResult> {
       const { status, data } = error.response;
       return {
         ok: false,
-        error: formatAuthApiError(status, data, "Could not load your session."),
+        error: formatHttpApiError(status, data, "Could not load your session."),
         status,
       };
     }
