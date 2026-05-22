@@ -3,13 +3,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { resetPasswordWithToken } from "~/actions/auth";
-import { Button } from "~/components/ui/button";
+import { requestPasswordReset, resetPasswordWithOtp } from "@/actions/auth";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,112 +24,261 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  clearForgotResetStorage,
+  getForgotResetEmail,
+  subscribeToForgotResetStorage,
+} from "@/lib/forgot-password-storage";
+import { isInvalidResetOtpError } from "@/lib/password-reset-errors";
 import {
   getPasswordChecks,
+  joinOtpFormDigits,
+  OTP_FIELD_NAMES,
   PASSWORD_RULE_ROWS,
-  ResetPasswordSchema,
+  ResetPasswordWithOtpFormSchema,
 } from "@/schema/auth.schema";
 import { cn } from "@/lib/utils";
 
-const inputClassWithError = (hasError: boolean) =>
+const passwordWrapperClass = (hasError: boolean) =>
   cn(
-    "rounded-lg px-2.5 py-2 text-sm sm:px-3 sm:py-2.5",
-    hasError &&
-      "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/40 border-2",
+    "flex w-full items-center overflow-hidden rounded-lg border bg-transparent",
+    hasError
+      ? "border-destructive focus-within:ring-destructive/40 border-2"
+      : "border-input",
   );
 
-const InvalidResetLink = () => (
-  <div className="space-y-4 py-8 sm:space-y-5">
-    <h2 className="text-xl font-medium text-[#152D58] sm:text-4xl">
-      Invalid reset link
-    </h2>
-    <p className="text-foreground/70 text-sm sm:text-[15px]">
-      This password reset link is invalid or has expired. Please request a new
-      one.
-    </p>
-  </div>
-);
+const passwordInputClass =
+  "min-w-0 flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0";
 
-const ResetPasswordSuccess = () => (
-  <div className="flex flex-col items-center space-y-6 py-8 text-center sm:space-y-8 sm:py-10">
-    <div className="bg-primary/10 border-border flex h-12 w-12 items-center justify-center rounded-full border sm:h-14 sm:w-14">
-      <Check
-        className="text-primary size-6 stroke-[2.5] sm:size-7"
-        aria-hidden
-      />
-    </div>
-    <h2 className="text-xl font-medium text-[#152D58] sm:text-3xl">
-      Password reset successful
-    </h2>
-    <p className="text-foreground/70 mx-auto max-w-md text-sm leading-relaxed sm:text-[15px]">
-      Your password has been updated. You can now log in with your new password.
-    </p>
-    <Button
-      asChild
-      className="h-auto w-full rounded-lg py-2.5 text-sm font-bold sm:py-3 sm:text-base"
-    >
-      <Link href="/login">Continue to log in</Link>
-    </Button>
-  </div>
-);
-
-function CreateNewPasswordForm({ token }: Readonly<{ token: string }>) {
-  const [resetComplete, setResetComplete] = useState(false);
+function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
+  const router = useRouter();
   const [showNewPasswordPlain, setShowNewPasswordPlain] = useState(false);
   const [showConfirmPasswordPlain, setShowConfirmPasswordPlain] =
     useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [otpFocusRequest, setOtpFocusRequest] = useState<{
+    id: number;
+    index: number;
+  } | null>(null);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const form = useForm<z.infer<typeof ResetPasswordSchema>>({
-    resolver: zodResolver(ResetPasswordSchema),
+  const form = useForm<z.infer<typeof ResetPasswordWithOtpFormSchema>>({
+    resolver: zodResolver(ResetPasswordWithOtpFormSchema),
     mode: "onTouched",
     reValidateMode: "onChange",
-    defaultValues: { password: "", confirmPassword: "" },
+    defaultValues: {
+      d0: "",
+      d1: "",
+      d2: "",
+      d3: "",
+      d4: "",
+      d5: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
+
+  const focusOtpDigit = useCallback((index: number) => {
+    otpInputRefs.current[index]?.focus();
+  }, []);
+
+  const queueOtpFocus = useCallback((index: number) => {
+    setOtpFocusRequest((prev) => ({
+      id: (prev?.id ?? 0) + 1,
+      index,
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (!otpFocusRequest) return;
+    otpInputRefs.current[otpFocusRequest.index]?.focus();
+  }, [otpFocusRequest]);
+
+  const clearOtpFields = useCallback(() => {
+    for (const name of OTP_FIELD_NAMES) {
+      form.setValue(name, "");
+    }
+  }, [form]);
 
   const { isSubmitting } = form.formState;
 
-  const onSubmit = async (values: z.infer<typeof ResetPasswordSchema>) => {
+  const handleResend = async () => {
+    if (isResending) return;
+    setIsResending(true);
     try {
-      const result = await resetPasswordWithToken({
-        token,
+      const result = await requestPasswordReset(email);
+      if (result.ok) {
+        toast.success("Code sent", { description: result.message });
+        clearOtpFields();
+        queueOtpFocus(0);
+      } else {
+        toast.error("Could not resend", { description: result.error });
+      }
+    } catch {
+      toast.error("Could not resend", {
+        description: "Network error. Please try again.",
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const onSubmit = async (
+    values: z.infer<typeof ResetPasswordWithOtpFormSchema>,
+  ) => {
+    try {
+      const result = await resetPasswordWithOtp({
+        email,
+        otp_code: joinOtpFormDigits(values),
         password: values.password,
       });
-      if (result.ok) {
-        setResetComplete(true);
+
+      if (!result.ok) {
+        if (isInvalidResetOtpError(result.error)) {
+          toast.error("Invalid code", { description: result.error });
+          clearOtpFields();
+          queueOtpFocus(0);
+          return;
+        }
+        toast.error("Could not update password", {
+          description: result.error,
+        });
         return;
       }
-      toast.error("Could not update password", { description: result.error });
+
+      clearForgotResetStorage();
+      await signOut({ redirect: false });
+      toast.success("Password reset successful", {
+        description: "Sign in with your new password.",
+      });
+      router.push("/login");
     } catch {
       toast.error("Could not update password", {
-        description: "Please try again.",
+        description: "Network error. Please try again.",
       });
     }
   };
 
-  if (resetComplete) {
-    return <ResetPasswordSuccess />;
-  }
-
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
-      <div className="bg-primary/10 text-primary inline-block max-w-fit rounded-full px-2.5 py-0.5 text-[10px] font-medium sm:px-3 sm:py-1 sm:text-xs">
-        Password recovery
-      </div>
-      <h2 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+      <h2 className="text-[20px] lg:text-[40px] font-medium text-[#152D58]">
         Create a new password
       </h2>
-      <p className="text-foreground/70 text-sm sm:text-[15px]">
-        Enter a new password to continue
+      <p className="text-foreground/70 text-[20px]">
+        Enter the 6-digit code sent to{" "}
+        <span className="text-foreground font-semibold">{email}</span> and Enter
+        a new password to continue.
       </p>
 
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void form.handleSubmit(onSubmit)(event);
+          }}
           className="space-y-3 sm:space-y-4"
         >
+          <div className="space-y-2">
+            <label
+              id="reset-code-label"
+              className="text-foreground/80 text-xs font-semibold sm:text-sm"
+            >
+              Reset code
+            </label>
+            <div className="grid w-full grid-cols-6 gap-2 sm:gap-3">
+              {OTP_FIELD_NAMES.map((name, i) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name}
+                  render={({ field }) => (
+                    <FormItem className="w-full min-w-0 space-y-0">
+                      <FormControl>
+                        <Input
+                          {...field}
+                          aria-label={`Reset code digit ${i + 1}`}
+                          aria-describedby="reset-code-label"
+                          ref={(el) => {
+                            field.ref(el);
+                            otpInputRefs.current[i] = el;
+                          }}
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={1}
+                          disabled={isSubmitting}
+                          onChange={(e) => {
+                            const v = e.target.value
+                              .replace(/\D/g, "")
+                              .slice(-1);
+                            field.onChange(v);
+                            if (v && i < 5) focusOtpDigit(i + 1);
+                          }}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "Backspace" &&
+                              !field.value &&
+                              i > 0
+                            ) {
+                              focusOtpDigit(i - 1);
+                            }
+                          }}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const paste = e.clipboardData
+                              .getData("text")
+                              .replace(/\D/g, "")
+                              .slice(0, 6);
+                            if (!paste) return;
+                            const next = { ...form.getValues() };
+                            paste.split("").forEach((ch, j) => {
+                              if (i + j < 6) {
+                                next[OTP_FIELD_NAMES[i + j]] = ch;
+                              }
+                            });
+                            form.reset(next);
+                            focusOtpDigit(Math.min(i + paste.length, 5));
+                          }}
+                          className={cn(
+                            "h-14 w-full min-w-0 rounded-md p-0 text-center text-lg font-bold sm:h-[66px] sm:rounded-lg sm:text-xl",
+                            (form.formState.errors.d0 ||
+                              form.formState.errors.d1 ||
+                              form.formState.errors.d2 ||
+                              form.formState.errors.d3 ||
+                              form.formState.errors.d4 ||
+                              form.formState.errors.d5) &&
+                              "border-destructive",
+                          )}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+            {OTP_FIELD_NAMES.some((name) => form.formState.errors[name]) ? (
+              <p className="text-destructive text-xs">
+                {form.formState.errors.d0?.message ??
+                  "Enter the full 6-digit code."}
+              </p>
+            ) : null}
+            <p className="text-foreground/70 text-xs">
+              Didn&apos;t get a code?{" "}
+              <Button
+                type="button"
+                variant="link"
+                disabled={isResending || isSubmitting}
+                onClick={handleResend}
+                className="text-primary hover:text-primary/90 h-auto p-0 text-xs font-bold"
+              >
+                Resend
+              </Button>
+            </p>
+          </div>
+
           <FormField
             control={form.control}
             name="password"
@@ -137,22 +293,24 @@ function CreateNewPasswordForm({ token }: Readonly<{ token: string }>) {
                     New password
                   </FormLabel>
                   <FormControl>
-                    <div className="relative">
+                    <div
+                      className={passwordWrapperClass(
+                        !!form.formState.errors.password,
+                      )}
+                    >
                       <Input
                         type={showNewPasswordPlain ? "text" : "password"}
                         placeholder="Your new password"
                         disabled={isSubmitting}
                         autoComplete="new-password"
+                        maxLength={128}
                         {...field}
                         onFocus={() => setPasswordFocused(true)}
                         onBlur={() => {
                           setPasswordFocused(false);
                           field.onBlur();
                         }}
-                        className={cn(
-                          inputClassWithError(!!form.formState.errors.password),
-                          "pr-10",
-                        )}
+                        className={passwordInputClass}
                       />
                       <button
                         type="button"
@@ -162,7 +320,7 @@ function CreateNewPasswordForm({ token }: Readonly<{ token: string }>) {
                             : "Show password"
                         }
                         disabled={isSubmitting}
-                        className="text-foreground/45 hover:text-foreground/70 absolute inset-y-0 right-0 flex items-center pr-2.5 disabled:opacity-50 sm:pr-3"
+                        className="text-foreground/45 hover:text-foreground/70 shrink-0 px-2.5 disabled:opacity-50 sm:px-3"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => setShowNewPasswordPlain((v) => !v)}
                       >
@@ -176,41 +334,33 @@ function CreateNewPasswordForm({ token }: Readonly<{ token: string }>) {
                   </FormControl>
                   {showPasswordGuide ? (
                     <ul className="mt-3 space-y-2 pt-3">
-                      {PASSWORD_RULE_ROWS.map(
-                        ({
-                          key,
-                          label,
-                        }: {
-                          key: keyof typeof checks;
-                          label: string;
-                        }) => {
-                          const met = checks[key];
-                          return (
-                            <li
-                              key={key}
-                              className="flex items-start gap-2.5 text-xs sm:text-[13px]"
+                      {PASSWORD_RULE_ROWS.map(({ key, label }) => {
+                        const met = checks[key];
+                        return (
+                          <li
+                            key={key}
+                            className="flex items-start gap-2.5 text-xs sm:text-[13px]"
+                          >
+                            <Check
+                              aria-hidden
+                              className={cn(
+                                "mt-0.5 size-4 shrink-0 stroke-[2.5]",
+                                met ? "text-primary" : "text-foreground/25",
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                "leading-snug",
+                                met
+                                  ? "text-primary font-medium"
+                                  : "text-foreground/50",
+                              )}
                             >
-                              <Check
-                                aria-hidden
-                                className={cn(
-                                  "mt-0.5 size-4 shrink-0 stroke-[2.5]",
-                                  met ? "text-primary" : "text-foreground/25",
-                                )}
-                              />
-                              <span
-                                className={cn(
-                                  "leading-snug",
-                                  met
-                                    ? "text-primary font-medium"
-                                    : "text-foreground/50",
-                                )}
-                              >
-                                {label}
-                              </span>
-                            </li>
-                          );
-                        },
-                      )}
+                              {label}
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   ) : null}
                   <FormMessage />
@@ -228,19 +378,19 @@ function CreateNewPasswordForm({ token }: Readonly<{ token: string }>) {
                   Confirm password
                 </FormLabel>
                 <FormControl>
-                  <div className="relative">
+                  <div
+                    className={passwordWrapperClass(
+                      !!form.formState.errors.confirmPassword,
+                    )}
+                  >
                     <Input
                       type={showConfirmPasswordPlain ? "text" : "password"}
                       placeholder="Confirm your password"
                       disabled={isSubmitting}
                       autoComplete="new-password"
+                      maxLength={128}
                       {...field}
-                      className={cn(
-                        inputClassWithError(
-                          !!form.formState.errors.confirmPassword,
-                        ),
-                        "pr-10",
-                      )}
+                      className={passwordInputClass}
                     />
                     <button
                       type="button"
@@ -250,7 +400,7 @@ function CreateNewPasswordForm({ token }: Readonly<{ token: string }>) {
                           : "Show password"
                       }
                       disabled={isSubmitting}
-                      className="text-foreground/45 hover:text-foreground/70 absolute inset-y-0 right-0 flex items-center pr-2.5 disabled:opacity-50 sm:pr-3"
+                      className="text-foreground/45 hover:text-foreground/70 shrink-0 px-2.5 disabled:opacity-50 sm:px-3"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setShowConfirmPasswordPlain((v) => !v)}
                     >
@@ -272,21 +422,38 @@ function CreateNewPasswordForm({ token }: Readonly<{ token: string }>) {
             disabled={isSubmitting}
             className="h-auto w-full rounded-lg py-2.5 text-sm font-bold sm:py-3 sm:text-base"
           >
-            Done
+            {isSubmitting ? "Updating..." : "Reset password"}
           </Button>
         </form>
       </Form>
+
+      <Link
+        href="/login"
+        className="text-foreground/70 flex justify-center text-sm hover:underline"
+      >
+        Back to log in
+      </Link>
     </div>
   );
 }
 
-export default function CreateNewPassword() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token")?.trim() ?? "";
+export default function ResetPasswordPage() {
+  const router = useRouter();
+  const email = useSyncExternalStore(
+    subscribeToForgotResetStorage,
+    getForgotResetEmail,
+    () => null,
+  );
 
-  if (!token) {
-    return <InvalidResetLink />;
+  useEffect(() => {
+    if (email === null) {
+      router.replace("/forgot-password");
+    }
+  }, [email, router]);
+
+  if (!email) {
+    return null;
   }
 
-  return <CreateNewPasswordForm token={token} />;
+  return <ResetPasswordForm email={email} />;
 }

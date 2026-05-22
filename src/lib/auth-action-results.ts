@@ -12,7 +12,22 @@ export type RegisterUserFailure = {
 
 export type RegisterUserResult = RegisterUserSuccess | RegisterUserFailure;
 
-export type ResetPasswordResult = { ok: true } | { ok: false; error: string };
+export type ResetPasswordSuccess = {
+  ok: true;
+  accessToken: string;
+  message?: string;
+  redirectUrl?: string;
+};
+
+export type ResetPasswordResult =
+  | ResetPasswordSuccess
+  | { ok: false; error: string };
+
+export type RequestPasswordResetSuccess = { ok: true; message: string };
+
+export type RequestPasswordResetResult =
+  | RequestPasswordResetSuccess
+  | { ok: false; error: string };
 
 export type ResendOtpSuccess = {
   status: number;

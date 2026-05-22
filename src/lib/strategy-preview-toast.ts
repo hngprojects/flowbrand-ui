@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 
-const SESSION_KEY = "flowbrand-funnel-preview-toast";
+const SESSION_KEY = "flowbrand-strategy-preview-toast";
 
-/** Once per browser session — funnel still uses placeholder data. */
-export function showFunnelPreviewToast(): void {
+/** Once per browser session — strategy view still uses placeholder data. */
+export function showStrategyPreviewToast(): void {
   if (typeof window === "undefined") return;
   if (sessionStorage.getItem(SESSION_KEY)) return;
 

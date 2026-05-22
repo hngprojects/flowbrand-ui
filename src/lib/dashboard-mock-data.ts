@@ -37,27 +37,27 @@ export const DEFAULT_UPLOADED_DOCS: MockUploadedDoc[] = [
 ];
 
 export const DUMMY_STRATEGY_PHASES = [
-  { title: "Get Noticed", tasks: "1/5 tasks this week" },
-  { title: "Spark interest", tasks: "0/10 tasks this week" },
-  { title: "Make first sale", tasks: "0/7 tasks this week" },
-  { title: "Bring them back", tasks: "0/3 tasks this week" },
+  { title: "Get Noticed", tasks: "0/3 task this week" },
+  { title: "Spark Interest", tasks: "0/3 task this week" },
+  { title: "Make first sale", tasks: "0/3 task this week" },
+  { title: "Bring them back", tasks: "0/3 task this week" },
 ] as const;
 
-export type FunnelTask = {
+export type StrategyTask = {
   id: string;
   title: string;
   description: string;
   resources: { label: string; href: string }[];
 };
 
-export const DUMMY_FUNNEL_FOCUS = {
+export const DUMMY_STRATEGY_FOCUS = {
   phase: "Get Noticed",
   progress: "1 of 4",
   subtitle:
     "To get noticed, help people discover your product for the first time, using these methods outlined below.",
 };
 
-export const DUMMY_FUNNEL_TASKS: FunnelTask[] = [
+export const DUMMY_STRATEGY_TASKS: StrategyTask[] = [
   {
     id: "clear-description",
     title: "Clear Description",
