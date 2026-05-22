@@ -4,6 +4,11 @@ import Image from "next/image";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
+import { toast } from "sonner";
+import {
+  uploadFunnelDocuments,
+  getFunnelUploadProgress,
+} from "@/actions/funnels";
 import { WideDashedBorder } from "@/components/dashboard/wide-dashed-border";
 import { DocsImg } from "@/components/icons/docs-img";
 import { PptImg } from "@/components/icons/ppt-img";
@@ -18,20 +23,36 @@ import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { STRATEGY_ROUTE, ONBOARDING_QUESTIONS_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
 
+type UploadStatus = "uploading" | "parsing" | "ready" | "failed";
+
 interface UploadedFile {
   id: string;
+  uploadId?: string;
   file: File;
   progress: number;
-  done: boolean;
+  status: UploadStatus;
 }
 
 const ACCEPTED = ".doc,.docx,.pdf,.ppt,.pptx";
 const MAX_MB = 5;
+const MAX_FILES = 3;
 const ALLOWED_EXTENSIONS = ["DOC", "DOCX", "PDF", "PPT", "PPTX"];
 const PROGRESS_ORANGE = "#E88320";
 
 function formatMB(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1) + "MB";
+}
+
+function normalizeStatus(raw: unknown): UploadStatus {
+  switch (raw) {
+    case "uploading":
+    case "parsing":
+    case "ready":
+    case "failed":
+      return raw;
+    default:
+      return "parsing";
+  }
 }
 
 function fileExt(name: string) {
@@ -43,6 +64,13 @@ function FileTypeIcon({ ext }: { ext: string }) {
   if (ext === "PPT" || ext === "PPTX")
     return <PptImg className="h-10 w-10 shrink-0" />;
   return <DocsImg className="h-10 w-10 shrink-0" />;
+}
+
+function statusLabel(item: UploadedFile) {
+  if (item.status === "ready") return formatMB(item.file.size);
+  if (item.status === "failed") return "Failed";
+  if (item.status === "uploading") return "Uploading…";
+  return `${item.progress}% Processing`;
 }
 
 function FileRow({ item }: { item: UploadedFile }) {
@@ -58,9 +86,7 @@ function FileRow({ item }: { item: UploadedFile }) {
             {item.file.name}
           </p>
           <span className="shrink-0 text-sm text-[#667085]">
-            {item.done
-              ? formatMB(item.file.size)
-              : `${item.progress}% Uploading`}
+            {statusLabel(item)}
           </span>
         </div>
 
@@ -68,7 +94,7 @@ function FileRow({ item }: { item: UploadedFile }) {
           <div
             className="h-full rounded-full transition-all duration-300"
             style={{
-              width: `${item.done ? 100 : item.progress}%`,
+              width: `${item.status === "ready" ? 100 : item.progress}%`,
               backgroundColor: PROGRESS_ORANGE,
             }}
           />
@@ -85,7 +111,7 @@ export function UploadView() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
 
-  const uploadIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const pollIntervals = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const goToQuestions = useCallback(() => {
     router.push(ONBOARDING_QUESTIONS_ROUTE);
@@ -108,71 +134,219 @@ export function UploadView() {
     router.push(STRATEGY_ROUTE);
   }, [router]);
 
-  const simulateUpload = useCallback(
-    (id: string) => {
-      let progress = 0;
+  const pollProgress = useCallback(
+    (rowId: string, uploadId: string, file: File) => {
+      let attempts = 0;
+      const MAX_ATTEMPTS = 20;
 
-      const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 18) + 8;
+      const interval = setInterval(async () => {
+        attempts += 1;
+        try {
+          const res = await getFunnelUploadProgress(uploadId);
 
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === id ? { ...f, progress: Math.min(progress, 100) } : f,
-          ),
-        );
-
-        if (progress >= 100) {
-          clearInterval(interval);
-          setFiles((prev) => {
-            const updated = prev.map((f) =>
-              f.id === id ? { ...f, done: true, progress: 100 } : f,
+          if (!res.ok) {
+            clearInterval(interval);
+            delete pollIntervals.current[rowId];
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === rowId ? { ...f, status: "failed" } : f,
+              ),
             );
-            const finished = updated.find((f) => f.id === id);
-            if (finished) {
-              addUploadedDocument({
-                id: finished.id,
-                name: finished.file.name,
-                size: formatFileSize(finished.file.size),
-                type: fileNameToDocType(finished.file.name),
-              });
-            }
-            return updated;
-          });
-          delete uploadIntervals.current[id];
-        }
-      }, 350);
+            toast.error(res.error);
+            return;
+          }
 
-      uploadIntervals.current[id] = interval;
+          const body = res.data as {
+            status?: string;
+            percentComplete?: number;
+            data?: { status?: string; percentComplete?: number };
+          };
+          const node = body?.data ?? body;
+          const pct =
+            typeof node.percentComplete === "number" ? node.percentComplete : 0;
+          const status = normalizeStatus(node.status);
+
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === rowId ? { ...f, progress: pct, status } : f,
+            ),
+          );
+
+          if (status === "ready" || status === "failed") {
+            clearInterval(interval);
+            delete pollIntervals.current[rowId];
+            if (status === "ready") {
+              addUploadedDocument({
+                id: uploadId,
+                name: file.name,
+                size: formatFileSize(file.size),
+                type: fileNameToDocType(file.name),
+              });
+            } else {
+              toast.error(`${file.name} failed to process.`);
+            }
+            return;
+          }
+
+          if (attempts >= MAX_ATTEMPTS) {
+            clearInterval(interval);
+            delete pollIntervals.current[rowId];
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === rowId ? { ...f, status: "failed" } : f,
+              ),
+            );
+            toast.error(`${file.name} is taking too long. Please try again.`);
+          }
+        } catch {
+          clearInterval(interval);
+          delete pollIntervals.current[rowId];
+          setFiles((prev) =>
+            prev.map((f) => (f.id === rowId ? { ...f, status: "failed" } : f)),
+          );
+          toast.error(`${file.name}: could not check upload progress.`);
+        }
+      }, 1500);
+
+      pollIntervals.current[rowId] = interval;
     },
     [addUploadedDocument],
   );
 
   const addFiles = useCallback(
-    (incoming: FileList | null) => {
+    async (incoming: FileList | null) => {
       if (!incoming) return;
 
-      Array.from(incoming).forEach((file) => {
+      const candidates = Array.from(incoming).filter((file) => {
         const ext = fileExt(file.name);
-        if (!ALLOWED_EXTENSIONS.includes(ext)) return;
-        if (file.size > MAX_MB * 1024 * 1024) return;
-
-        const id = `${file.name}-${Date.now()}-${Math.random()}`;
-        setFiles((prev) => [...prev, { id, file, progress: 0, done: false }]);
-        simulateUpload(id);
+        if (!ALLOWED_EXTENSIONS.includes(ext)) {
+          toast.error(`${file.name}: unsupported file type`);
+          return false;
+        }
+        if (file.size > MAX_MB * 1024 * 1024) {
+          toast.error(`${file.name}: exceeds ${MAX_MB}MB`);
+          return false;
+        }
+        return true;
       });
+
+      if (candidates.length === 0) return;
+
+      const remainingSlots = MAX_FILES - files.length;
+      if (remainingSlots <= 0) {
+        toast.error(`You can upload up to ${MAX_FILES} files.`);
+        return;
+      }
+
+      const toUpload = candidates.slice(0, remainingSlots);
+      if (toUpload.length < candidates.length) {
+        toast.error(`Only ${MAX_FILES} files allowed. Some were skipped.`);
+      }
+
+      const rows: UploadedFile[] = toUpload.map((file) => ({
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        file,
+        progress: 0,
+        status: "uploading",
+      }));
+      setFiles((prev) => [...prev, ...rows]);
+
+      const form = new FormData();
+      toUpload.forEach((file) => form.append("files", file));
+
+      try {
+        const res = await uploadFunnelDocuments(form);
+        if (!res.ok) {
+          toast.error(res.error);
+          setFiles((prev) =>
+            prev.map((f) =>
+              rows.some((r) => r.id === f.id) ? { ...f, status: "failed" } : f,
+            ),
+          );
+          return;
+        }
+
+        type UploadEntry = {
+          uploadId: string;
+          fileName: string;
+          status: string;
+          percentComplete: number;
+        };
+        const body = res.data as {
+          uploads?: UploadEntry[];
+          data?: {
+            uploads?: UploadEntry[];
+            data?: { uploads?: UploadEntry[] };
+          };
+        };
+        const uploads: UploadEntry[] =
+          body?.data?.data?.uploads ??
+          body?.data?.uploads ??
+          body?.uploads ??
+          [];
+
+        const usedIdx = new Set<number>();
+        const rowToUpload = new Map<string, UploadEntry>();
+        for (const r of rows) {
+          const matchIdx = uploads.findIndex(
+            (u, i) => !usedIdx.has(i) && u.fileName === r.file.name,
+          );
+          if (matchIdx !== -1) {
+            usedIdx.add(matchIdx);
+            rowToUpload.set(r.id, uploads[matchIdx]);
+          }
+        }
+
+        setFiles((prev) =>
+          prev.map((f) => {
+            if (!rows.some((r) => r.id === f.id)) return f;
+            const up = rowToUpload.get(f.id);
+            if (!up) return { ...f, status: "failed" };
+            return {
+              ...f,
+              uploadId: up.uploadId,
+              progress: up.percentComplete ?? 0,
+              status: normalizeStatus(up.status),
+            };
+          }),
+        );
+
+        rows.forEach((r) => {
+          const up = rowToUpload.get(r.id);
+          if (!up) return;
+          const status = normalizeStatus(up.status);
+          if (status === "ready") {
+            addUploadedDocument({
+              id: up.uploadId,
+              name: r.file.name,
+              size: formatFileSize(r.file.size),
+              type: fileNameToDocType(r.file.name),
+            });
+          } else if (status !== "failed") {
+            pollProgress(r.id, up.uploadId, r.file);
+          }
+        });
+      } catch {
+        toast.error("Could not upload your documents. Please try again.");
+        setFiles((prev) =>
+          prev.map((f) =>
+            rows.some((r) => r.id === f.id) ? { ...f, status: "failed" } : f,
+          ),
+        );
+      }
     },
-    [simulateUpload],
+    [files.length, pollProgress, addUploadedDocument],
   );
 
   useEffect(() => {
-    const intervals = uploadIntervals.current;
+    const intervals = pollIntervals.current;
     return () => {
       Object.values(intervals).forEach(clearInterval);
     };
   }, []);
 
   const hasFiles = files.length > 0;
-  const allDone = hasFiles && files.every((f) => f.done);
+  const allDone = hasFiles && files.every((f) => f.status === "ready");
 
   return (
     <main className="flex flex-1 flex-col">
