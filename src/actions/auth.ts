@@ -8,6 +8,7 @@ import { fetchAuthMe } from "@/lib/auth-api";
 import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import type {
   RegisterUserResult,
+  RequestPasswordResetResult,
   ResendOtpResult,
   ResetPasswordResult,
   VerifyOtpResult,
@@ -19,12 +20,15 @@ import {
   messageFromApiBody,
   parseLoginEnvelope,
   readOtpCooldownSeconds,
-} from "~/lib/auth-api";
+} from "@/lib/auth-api";
 import { credentialsAuth } from "@/lib/credentials-auth";
 import {
+  registerFullNameField,
   registrationPasswordField,
   VerifyOtpCodeSchema,
 } from "@/schema/auth.schema";
+import { googleOAuthStartUrl } from "@/lib/google-oauth";
+import { mapApiRedirectToAppPath } from "@/routes";
 
 function validateAuthEmail(
   email: string,
@@ -51,7 +55,7 @@ function validateOtpCode(code: string): { code: string } | { error: string } {
 }
 
 export async function getGoogleOAuthUrl(): Promise<string> {
-  return authApiUrl(envConfig.BASEURL, "/google");
+  return googleOAuthStartUrl(envConfig.BASEURL);
 }
 
 /** Where to send the user after login/register (uses GET /api/auth/me when possible). */
@@ -86,7 +90,7 @@ const registerUser = async (
 
   const registrationBodySchema = z.object({
     email: z.string().email(),
-    fullName: z.string().trim().min(1, { message: "Full name is required." }),
+    fullName: registerFullNameField,
     password: registrationPasswordField,
     termsAccepted: z.literal(true),
   });
@@ -99,11 +103,15 @@ const registerUser = async (
   });
 
   if (!validated.success) {
+    const messages = validated.error.issues
+      .map((issue) => issue.message)
+      .filter(Boolean);
     return {
       ok: false,
       error:
-        validated.error.issues[0]?.message ??
-        "Registration failed. Please check your inputs.",
+        messages.length > 0
+          ? messages.join(" ")
+          : "Registration failed. Please check your inputs.",
     };
   }
 
@@ -276,7 +284,7 @@ const verifyOtp = async (
 
 const requestPasswordReset = async (
   email: string,
-): Promise<{ ok: true } | { ok: false; error: string }> => {
+): Promise<RequestPasswordResetResult> => {
   const validated = validateAuthEmail(email);
   if ("error" in validated) {
     return { ok: false, error: validated.error };
@@ -284,52 +292,111 @@ const requestPasswordReset = async (
 
   const baseURL = envConfig.BASEURL;
   try {
-    await axios.post(
-      authApiUrl(baseURL, "/password/forgot"),
+    const url = authApiUrl(baseURL, "/forgot-password");
+    const response = await axios.post(
+      url,
       { email: validated.email },
-      { withCredentials: true },
+      {
+        withCredentials: true,
+        timeout: 30_000,
+        headers: { "Content-Type": "application/json" },
+      },
     );
-    return { ok: true };
+
+    if (process.env.NODE_ENV === "development") {
+      console.info("[auth] forgot-password", {
+        url,
+        status: response.status,
+        body: response.data,
+      });
+    }
+
+    return {
+      ok: true,
+      message: messageFromApiBody(
+        response.data,
+        "If your email is registered, you will receive a password reset code.",
+      ),
+    };
   } catch (error) {
-    return axios.isAxiosError(error) && error.response
-      ? {
-          ok: false,
-          error: messageFromApiBody(
-            error.response.data,
-            "Could not send reset link.",
-          ),
-        }
-      : { ok: false, error: "An unexpected error occurred." };
+    if (axios.isAxiosError(error) && error.response) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("[auth] forgot-password failed", {
+          status: error.response.status,
+          body: error.response.data,
+        });
+      }
+      return {
+        ok: false,
+        error: formatAuthApiError(
+          error.response.status,
+          error.response.data,
+          "Could not send reset code.",
+        ),
+      };
+    }
+    return { ok: false, error: "An unexpected error occurred." };
   }
 };
 
-const resetPasswordWithToken = async (input: {
-  token: string;
+const resetPasswordWithOtp = async (input: {
+  email: string;
+  otp_code: string;
   password: string;
 }): Promise<ResetPasswordResult> => {
-  if (typeof input.token !== "string" || typeof input.password !== "string") {
-    return { ok: false, error: "Invalid request payload." };
+  const validatedEmail = validateAuthEmail(input.email);
+  if ("error" in validatedEmail) {
+    return { ok: false, error: validatedEmail.error };
   }
 
-  const trimmed = input.token.trim();
-  if (!trimmed) {
-    return { ok: false, error: "Reset link is invalid or expired." };
+  const validatedCode = validateOtpCode(input.otp_code);
+  if ("error" in validatedCode) {
+    return { ok: false, error: validatedCode.error };
   }
-  if (input.password.trim().length === 0) {
-    return { ok: false, error: "Password is required." };
+
+  const passwordResult = registrationPasswordField.safeParse(input.password);
+  if (!passwordResult.success) {
+    return {
+      ok: false,
+      error:
+        passwordResult.error.issues[0]?.message ??
+        "Password does not meet requirements.",
+    };
   }
 
   const baseURL = envConfig.BASEURL;
   try {
-    await axios.post(
-      authApiUrl(baseURL, "/password/reset"),
+    const response = await axios.post(
+      authApiUrl(baseURL, "/reset-password"),
       {
-        token: trimmed,
-        password: input.password,
+        email: validatedEmail.email,
+        otp_code: validatedCode.code,
+        password: passwordResult.data,
       },
       { withCredentials: true, timeout: 30_000 },
     );
-    return { ok: true };
+
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed?.access_token) {
+      return {
+        ok: false,
+        error:
+          "Password was reset but the server response was invalid. Please sign in.",
+      };
+    }
+
+    const redirectUrl =
+      mapApiRedirectToAppPath(parsed.redirect_url) ?? parsed.redirect_url;
+
+    return {
+      ok: true,
+      accessToken: parsed.access_token,
+      message: messageFromApiBody(
+        response.data,
+        "Password reset successful. You have been automatically logged in.",
+      ),
+      redirectUrl,
+    };
   } catch (error) {
     if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
       return {
@@ -341,7 +408,8 @@ const resetPasswordWithToken = async (input: {
     return axios.isAxiosError(error) && error.response
       ? {
           ok: false,
-          error: messageFromApiBody(
+          error: formatAuthApiError(
+            error.response.status,
             error.response.data,
             "Could not reset password. Please try again.",
           ),
@@ -355,7 +423,7 @@ export {
   registerUser,
   requestPasswordReset,
   resendOtp,
-  resetPasswordWithToken,
+  resetPasswordWithOtp,
   sendOtp,
   verifyOtp,
 };
