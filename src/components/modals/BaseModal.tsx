@@ -31,9 +31,9 @@ const BaseModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-    className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]"
-    overlayClassName="bg-[#030D1F]/80"
-  >
+        className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]"
+        overlayClassName="bg-[#030D1F]/80"
+      >
         <VisuallyHidden>
           <DialogTitle>{title ?? "Modal"}</DialogTitle>
         </VisuallyHidden>

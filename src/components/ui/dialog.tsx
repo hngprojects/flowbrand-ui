@@ -47,10 +47,6 @@ function DialogOverlay({
   );
 }
 
-
-
-
-
 function DialogContent({
   className,
   children,
@@ -89,9 +85,6 @@ function DialogContent({
     </DialogPortal>
   );
 }
-
-
-
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
