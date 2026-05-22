@@ -34,7 +34,7 @@ export function LogoutButton({
     setIsLoading(true);
     try {
       onAfterLogout?.();
-      sessionStorage.removeItem("flowbrand-funnel-preview-toast");
+      sessionStorage.removeItem("flowbrand-strategy-preview-toast");
       // Full redirect so middleware sees a cleared session (client router.push races the cookie).
       await signOut({ callbackUrl: "/login", redirect: true });
     } catch {

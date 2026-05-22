@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { showStrategyPreviewToast } from "@/lib/strategy-preview-toast";
 import {
   buildSessionFromOnboarding,
   saveDashboardMockSession,
 } from "@/lib/dashboard-mock-session";
-import { FUNNEL_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
+import { STRATEGY_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 import {
   startOnboarding,
   saveOnboardingStep,
@@ -40,7 +41,7 @@ export function QuestionsView() {
           const id = body?.data?.session_id ?? body?.session_id;
           if (id) store.setSessionId(id);
         } else if (res.status === 409) {
-          router.push(FUNNEL_ROUTE);
+          router.push(STRATEGY_ROUTE);
         } else {
           toast.error(res.error);
         }
@@ -149,8 +150,8 @@ export function QuestionsView() {
         }),
       );
 
-      toast.success("Your marketing strategy is ready!");
-      router.push(FUNNEL_ROUTE);
+      showStrategyPreviewToast();
+      router.push(STRATEGY_ROUTE);
     } catch {
       toast.error("Something went wrong.");
     } finally {
