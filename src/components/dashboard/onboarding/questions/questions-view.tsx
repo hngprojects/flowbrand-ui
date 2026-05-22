@@ -6,7 +6,6 @@ import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
 import {
   buildSessionFromOnboarding,
   saveDashboardMockSession,
@@ -150,7 +149,7 @@ export function QuestionsView() {
         }),
       );
 
-      showFunnelPreviewToast();
+      toast.success("Your marketing strategy is ready!");
       router.push(FUNNEL_ROUTE);
     } catch {
       toast.error("Something went wrong.");

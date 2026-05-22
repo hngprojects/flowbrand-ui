@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { DocsImg } from "@/components/icons/docs-img";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
-import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
 import { fileNameToDocType, formatFileSize } from "@/lib/dashboard-mock-data";
 import {
   buildSessionFromOnboarding,
@@ -154,7 +153,7 @@ export function UploadView() {
         uploadedDocuments: state.uploadedDocuments,
       }),
     );
-    showFunnelPreviewToast();
+    toast.success("Documents uploaded. Building your strategy…");
     router.push(FUNNEL_ROUTE);
   }, [router]);
 
