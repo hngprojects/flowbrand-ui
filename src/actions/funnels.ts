@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { formatAuthApiError } from "@/lib/auth-api";
 
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
 function funnelsUrl(path: string): string {
   const base = envConfig.BASEURL.replace(/\/$/, "");
   const suffix = path.startsWith("/") ? path : `/${path}`;
@@ -40,15 +42,13 @@ export async function uploadFunnelDocuments(
     const res = await axios.post(funnelsUrl("/upload"), formData, {
       headers: { Authorization: `Bearer ${token}` },
       timeout: 60000,
-      maxBodyLength: Infinity,
-      maxContentLength: Infinity,
+      maxBodyLength: MAX_UPLOAD_BYTES,
+      maxContentLength: MAX_UPLOAD_BYTES,
     });
-    console.log("[funnels] upload OK", res.status, JSON.stringify(res.data));
     return { ok: true, status: res.status, data: res.data };
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      console.error("[funnels] upload FAILED", status, JSON.stringify(data));
       return {
         ok: false,
         error: formatAuthApiError(
@@ -59,7 +59,6 @@ export async function uploadFunnelDocuments(
         status,
       };
     }
-    console.error("[funnels] upload NETWORK ERROR", error);
     return { ok: false, error: "Could not reach the server." };
   }
 }
@@ -80,12 +79,10 @@ export async function getFunnelUploadProgress(
       headers: { Authorization: `Bearer ${token}` },
       timeout: 30000,
     });
-    console.log("[funnels] progress", uploadId, JSON.stringify(res.data));
     return { ok: true, status: res.status, data: res.data };
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      console.error("[funnels] progress FAILED", status, JSON.stringify(data));
       return {
         ok: false,
         error: formatAuthApiError(
@@ -96,7 +93,6 @@ export async function getFunnelUploadProgress(
         status,
       };
     }
-    console.error("[funnels] progress NETWORK ERROR", error);
     return { ok: false, error: "Could not reach the server." };
   }
 }

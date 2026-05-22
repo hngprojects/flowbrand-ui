@@ -31,18 +31,24 @@ export function QuestionsView() {
   useEffect(() => {
     if (store.sessionId) return;
     (async () => {
-      const res = await startOnboarding();
-      if (res.ok) {
-        const body = res.data as {
-          session_id?: string;
-          data?: { session_id?: string };
-        };
-        const id = body?.data?.session_id ?? body?.session_id;
-        if (id) store.setSessionId(id);
-      } else if (res.status === 409) {
-        router.push(FUNNEL_ROUTE);
-      } else {
-        toast.error(res.error);
+      try {
+        const res = await startOnboarding();
+        if (res.ok) {
+          const body = res.data as {
+            session_id?: string;
+            data?: { session_id?: string };
+          };
+          const id = body?.data?.session_id ?? body?.session_id;
+          if (id) store.setSessionId(id);
+        } else if (res.status === 409) {
+          router.push(FUNNEL_ROUTE);
+        } else {
+          toast.error(res.error);
+        }
+      } catch {
+        toast.error(
+          "Could not start onboarding. Please refresh and try again.",
+        );
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
