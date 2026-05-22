@@ -1,5 +1,7 @@
 "use client";
 
+import { useGenerateFunnel, useUploadDocuments } from "@/app/hooks/useFunnels";
+
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileUp, ChevronRight, X } from "lucide-react";
@@ -30,6 +32,8 @@ interface UploadedFile {
   progress: number;
   status: UploadStatus;
 }
+
+// const uploadMutation = useUploadDocuments();
 
 const ACCEPTED = ".doc,.docx,.pdf,.ppt,.pptx";
 const MAX_MB = 5;
@@ -125,6 +129,8 @@ function FileRow({
 }
 
 export function UploadView() {
+  const uploadMutation = useUploadDocuments();
+  const generateMutation = useGenerateFunnel();
   const router = useRouter();
   const addUploadedDocument = useOnboardingStore((s) => s.addUploadedDocument);
   const removeUploadedDocument = useOnboardingStore(
@@ -140,7 +146,7 @@ export function UploadView() {
     router.push(ONBOARDING_QUESTIONS_ROUTE);
   }, [router]);
 
-  const goToFunnel = useCallback(() => {
+  const goToFunnel = useCallback(asy() => {
     const state = useOnboardingStore.getState();
     saveDashboardMockSession(
       buildSessionFromOnboarding({
@@ -154,6 +160,10 @@ export function UploadView() {
       }),
     );
     toast.success("Documents uploaded. Building your strategy…");
+    const generated = await generateMutation.mutateAsync({
+  businessDescription: state.businessDescription,
+  theyAre: state.theyAre,
+});
     router.push(FUNNEL_ROUTE);
   }, [router]);
 
@@ -278,7 +288,7 @@ export function UploadView() {
       toUpload.forEach((file) => form.append("files", file));
 
       try {
-        const res = await uploadFunnelDocuments(form);
+        const res = await uploadMutation.mutateAsync(form);
         if (!res.ok) {
           toast.error(res.error);
           setFiles((prev) =>
