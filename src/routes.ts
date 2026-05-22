@@ -7,6 +7,8 @@ export const FUNNEL_ROUTE = "/dashboard/funnel";
 /** Default when API does not specify a redirect (new users → upload). */
 export const DEFAULT_LOGIN_REDIRECT = ONBOARDING_UPLOAD_ROUTE;
 
+export const GOOGLE_OAUTH_CALLBACK_ROUTE = "/api/oauth/google/callback";
+
 export const authRoutes = [
   "/login",
   "/register",
