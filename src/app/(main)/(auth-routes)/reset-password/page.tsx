@@ -1,10 +1,10 @@
-import CreateNewPassword from "@/components/features/auth/resetPassword/resetPasswordForm";
+import ResetPasswordPage from "@/components/features/auth/resetPassword/resetPasswordForm";
 import AuthSplitLayout from "@/components/features/auth/authSplitLayout";
 
-export default function ResetPasswordPage() {
+export default function Page() {
   return (
     <AuthSplitLayout>
-      <CreateNewPassword />
+      <ResetPasswordPage />
     </AuthSplitLayout>
   );
 }

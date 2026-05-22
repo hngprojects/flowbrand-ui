@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { getPostAuthRedirect } from "~/actions/auth";
+import { clearForgotResetStorage } from "@/lib/forgot-password-storage";
 import { clearRegisterVerifyEmail } from "@/lib/register-verify-storage";
 import { ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 
@@ -33,6 +34,7 @@ export function usePostAuthRedirect() {
     void getPostAuthRedirect()
       .then((path) => {
         clearRegisterVerifyEmail();
+        clearForgotResetStorage();
         router.replace(path);
       })
       .catch((error) => {
@@ -41,6 +43,7 @@ export function usePostAuthRedirect() {
           console.warn("[auth] post-auth redirect failed", error);
         }
         clearRegisterVerifyEmail();
+        clearForgotResetStorage();
         router.replace(ONBOARDING_UPLOAD_ROUTE);
       });
   }, [isAuthenticated, router]);
