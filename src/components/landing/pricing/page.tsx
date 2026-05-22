@@ -362,9 +362,8 @@ export default function PricingPage() {
             className="grid gap-4 md:grid-cols-2"
           >
             {faqs.map((faq, index) => (
-              <motion.div>
+              <motion.div key={index}>
                 <AccordionItem
-                  key={index}
                   value={`item-${index}`}
                   className="group rounded-xl border border-gray-200 bg-white px-2 py-1 dark:border-gray-700 dark:bg-gray-900"
                 >
