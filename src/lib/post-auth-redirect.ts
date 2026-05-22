@@ -1,5 +1,5 @@
 import {
-  FUNNEL_ROUTE,
+  STRATEGY_ROUTE,
   mapApiRedirectToAppPath,
   ONBOARDING_UPLOAD_ROUTE,
 } from "@/routes";
@@ -16,7 +16,7 @@ export function resolvePostAuthPath(
   }
 
   if (me?.has_strategy || me?.onboarding_completed) {
-    return FUNNEL_ROUTE;
+    return STRATEGY_ROUTE;
   }
 
   return ONBOARDING_UPLOAD_ROUTE;

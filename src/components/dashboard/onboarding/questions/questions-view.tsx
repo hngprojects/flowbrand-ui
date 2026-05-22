@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
-import { showFunnelPreviewToast } from "@/lib/funnel-preview-toast";
+import { showStrategyPreviewToast } from "@/lib/strategy-preview-toast";
 import {
   buildSessionFromOnboarding,
   saveDashboardMockSession,
 } from "@/lib/dashboard-mock-session";
-import { FUNNEL_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
+import { STRATEGY_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 
 import ProgressBar from "./ProgressBar";
 import StepOne from "./StepOne";
@@ -71,8 +71,8 @@ export function QuestionsView() {
       }),
     );
 
-    showFunnelPreviewToast();
-    router.push(FUNNEL_ROUTE);
+    showStrategyPreviewToast();
+    router.push(STRATEGY_ROUTE);
     setIsLoading(false);
   };
 

@@ -7,7 +7,7 @@ import { getPostAuthRedirect } from "~/actions/auth";
 import { clearRegisterVerifyEmail } from "@/lib/register-verify-storage";
 import { ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 
-/** After sign-in, resolve onboarding vs funnel once the client session is ready. */
+/** After sign-in, resolve onboarding vs strategy once the client session is ready. */
 export function usePostAuthRedirect() {
   const router = useRouter();
   const { data: session, status } = useSession();

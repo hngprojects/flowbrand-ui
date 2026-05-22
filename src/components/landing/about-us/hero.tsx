@@ -62,11 +62,7 @@ export default function Hero() {
         className="relative z-10 w-full mt-12 md:mt-0 md:-mb-14"
         initial={{ opacity: 0, y: 60 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 1,
-          ease: [0.22, 1, 0.36, 1] as const,
-          delay: 0.2,
-        }}
+        transition={{ duration: 1, ease: easeOut, delay: 0.2 }}
       >
         <div className="relative mx-auto hidden w-full lg:block">
           <Image
