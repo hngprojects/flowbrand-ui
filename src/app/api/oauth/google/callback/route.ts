@@ -1,3 +1,5 @@
+import { AuthError } from "next-auth";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { signIn } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { fetchAuthMe } from "@/lib/auth-api";
@@ -20,16 +22,28 @@ export async function GET(request: Request) {
     return Response.redirect(loginErrorRedirect(requestUrl.origin));
   }
 
+  let me;
   try {
-    const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
-    const destination =
-      mapApiRedirectToAppPath(redirectUrl) ?? resolvePostAuthPath(me);
+    me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+  } catch {
+    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+  }
 
+  const destination =
+    mapApiRedirectToAppPath(redirectUrl) ?? resolvePostAuthPath(me);
+
+  try {
     return await signIn("access-token", {
       accessToken,
       redirectTo: destination,
     });
-  } catch {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+  } catch (err) {
+    if (isRedirectError(err)) {
+      throw err;
+    }
+    if (err instanceof AuthError) {
+      return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    }
+    throw err;
   }
 }

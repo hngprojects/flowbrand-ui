@@ -137,9 +137,9 @@ export function LoginForm() {
     params.delete("google_error");
     const nextQuery = params.toString();
     window.history.replaceState(
-      {},
+      window.history.state,
       "",
-      `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}`,
+      `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`,
     );
   }, []);
 
