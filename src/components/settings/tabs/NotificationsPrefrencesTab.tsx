@@ -30,15 +30,14 @@ export default function NotificationPreferencesTab() {
             key={item.id}
             className="flex items-center justify-between px-5 py-4"
           >
-            <span className="text-base  text-[#1A1A1A]">
-              {item.label}
-            </span>
+            <span className="text-base  text-[#1A1A1A]">{item.label}</span>
             <button
               type="button"
               role="switch"
               aria-checked={item.enabled}
+              aria-label={item.label}
               onClick={() => toggle(item.id)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                 item.enabled ? "bg-primary" : "bg-gray-200"
               }`}
             >

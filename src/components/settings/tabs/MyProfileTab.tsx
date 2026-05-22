@@ -107,6 +107,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
+          id="profile-form"
           className="flex flex-col gap-[21px] rounded-[12px] border-[0.5px] border-[#E4E4E4] p-[24px] w-full"
         >
           <h4 className="text-[16px] font-medium leading-[150%] text-[#152D58]">
@@ -213,6 +214,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
           <button
             type="submit"
             disabled={isSubmitting}
+            form="profile-form"
             className="rounded-[10px] bg-primary px-10 py-3 text-sm md:text-base font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Saving..." : "Save Changes"}

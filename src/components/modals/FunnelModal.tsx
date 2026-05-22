@@ -27,7 +27,12 @@ export default function FunnelModal({
   title = "Funnel",
 }: FunnelModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent
         showCloseButton={false}
         className="
@@ -68,6 +73,7 @@ export default function FunnelModal({
         </VisuallyHidden>
 
         <Tabs
+          key={isOpen ? "open" : "closed"}
           defaultValue={defaultTab ?? tabs[0]?.id}
           className="flex flex-col h-full gap-0"
         >
