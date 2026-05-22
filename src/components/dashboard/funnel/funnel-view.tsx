@@ -75,7 +75,12 @@ export function FunnelView() {
 
   return (
     <>
-      <OnboardingNavbar />
+      <OnboardingNavbar
+        steps={sidebarSteps}
+        loading={loading}
+        documents={session.uploadedDocuments}
+        strategyPhases={DUMMY_STRATEGY_PHASES}
+      />
       <div className="flex">
         <FunnelSidebar
           steps={sidebarSteps}

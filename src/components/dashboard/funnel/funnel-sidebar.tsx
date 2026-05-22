@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DocsImg } from "@/components/icons/docs-img";
@@ -21,16 +22,23 @@ export default function FunnelSidebar({
   loading,
   documents = DEFAULT_UPLOADED_DOCS,
   strategyPhases = DUMMY_STRATEGY_PHASES,
+  className,
 }: {
   steps: ReactNode;
   loading: boolean;
   documents?: MockUploadedDoc[];
   strategyPhases?: readonly { title: string; tasks: string }[];
+  className?: string;
 }) {
   const docs = documents.length > 0 ? documents : DEFAULT_UPLOADED_DOCS;
 
   return (
-    <aside className="sticky top-0 left-0 hidden h-screen overflow-auto border-r border-gray-200 bg-[#FFFFFF] px-section py-large space-y-section md:block md:w-1/3">
+    <aside
+      className={cn(
+        "sticky top-0 left-0 hidden h-screen overflow-auto border-r border-gray-200 bg-[#FFFFFF] px-section py-large space-y-section md:block md:w-1/3",
+        className,
+      )}
+    >
       <div className="space-y-3">
         <div>
           <h2 className="text-[16px] text-black-300">Documents uploaded</h2>
