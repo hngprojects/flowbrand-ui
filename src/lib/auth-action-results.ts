@@ -23,6 +23,16 @@ export type ResetPasswordResult =
   | ResetPasswordSuccess
   | { ok: false; error: string };
 
+export type VerifyResetOtpSuccess = {
+  ok: true;
+  resetToken: string;
+  message?: string;
+};
+
+export type VerifyResetOtpResult =
+  | VerifyResetOtpSuccess
+  | { ok: false; error: string };
+
 export type RequestPasswordResetSuccess = { ok: true; message: string };
 
 export type RequestPasswordResetResult =

@@ -14,8 +14,11 @@ export const authRoutes = [
   "/register",
   "/register/verify",
   "/forgot-password",
+  "/verify-reset-otp",
   "/reset-password",
 ] as const;
+
+export const VERIFY_RESET_OTP_ROUTE = "/verify-reset-otp";
 
 export const protectedRoutes = [DASHBOARD_ROUTE] as const;
 

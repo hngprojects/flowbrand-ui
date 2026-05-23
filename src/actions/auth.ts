@@ -12,12 +12,14 @@ import type {
   ResetPasswordResult,
   VerifyOtpResult,
   VerifyOtpSuccess,
+  VerifyResetOtpResult,
 } from "~/lib/auth-action-results";
 import {
   authApiUrl,
   formatAuthApiError,
   messageFromApiBody,
   parseLoginEnvelope,
+  parseResetTokenEnvelope,
   readOtpCooldownSeconds,
 } from "@/lib/auth-api";
 import { credentialsAuth } from "@/lib/credentials-auth";
@@ -329,11 +331,10 @@ const requestPasswordReset = async (
   }
 };
 
-const resetPasswordWithOtp = async (input: {
+const verifyResetOtp = async (input: {
   email: string;
   otp_code: string;
-  password: string;
-}): Promise<ResetPasswordResult> => {
+}): Promise<VerifyResetOtpResult> => {
   const validatedEmail = validateAuthEmail(input.email);
   if ("error" in validatedEmail) {
     return { ok: false, error: validatedEmail.error };
@@ -342,6 +343,64 @@ const resetPasswordWithOtp = async (input: {
   const validatedCode = validateOtpCode(input.otp_code);
   if ("error" in validatedCode) {
     return { ok: false, error: validatedCode.error };
+  }
+
+  const baseURL = envConfig.BASEURL;
+  try {
+    const response = await axios.post(
+      authApiUrl(baseURL, "/verify-reset-otp"),
+      {
+        email: validatedEmail.email,
+        otp_code: validatedCode.code,
+      },
+      { withCredentials: true, timeout: 30_000 },
+    );
+
+    const resetToken = parseResetTokenEnvelope(response.data);
+    if (!resetToken) {
+      return {
+        ok: false,
+        error:
+          "Verification succeeded but no reset token was returned. Please try again.",
+      };
+    }
+
+    return {
+      ok: true,
+      resetToken,
+      message: messageFromApiBody(
+        response.data,
+        "OTP verified. Use the reset token to set your new password.",
+      ),
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
+      return {
+        ok: false,
+        error:
+          "The verification service did not respond in time. Please try again.",
+      };
+    }
+    return axios.isAxiosError(error) && error.response
+      ? {
+          ok: false,
+          error: formatAuthApiError(
+            error.response.status,
+            error.response.data,
+            "Invalid or expired reset code.",
+          ),
+        }
+      : { ok: false, error: "An unexpected error occurred." };
+  }
+};
+
+const resetPasswordWithToken = async (input: {
+  reset_token: string;
+  password: string;
+}): Promise<ResetPasswordResult> => {
+  const resetToken = input.reset_token?.trim();
+  if (!resetToken) {
+    return { ok: false, error: "Reset session expired. Please start again." };
   }
 
   const passwordResult = registrationPasswordField.safeParse(input.password);
@@ -359,8 +418,7 @@ const resetPasswordWithOtp = async (input: {
     const response = await axios.post(
       authApiUrl(baseURL, "/reset-password"),
       {
-        email: validatedEmail.email,
-        otp_code: validatedCode.code,
+        reset_token: resetToken,
         password: passwordResult.data,
       },
       { withCredentials: true, timeout: 30_000 },
@@ -413,7 +471,8 @@ export {
   registerUser,
   requestPasswordReset,
   resendOtp,
-  resetPasswordWithOtp,
+  resetPasswordWithToken,
   sendOtp,
   verifyOtp,
+  verifyResetOtp,
 };

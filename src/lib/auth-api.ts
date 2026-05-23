@@ -291,6 +291,22 @@ export function parseLoginEnvelope(
   };
 }
 
+/** Parse reset_token from POST /auth/verify-reset-otp. */
+export function parseResetTokenEnvelope(body: unknown): string | null {
+  for (const record of collectApiRecords(body)) {
+    const token =
+      typeof record.reset_token === "string"
+        ? record.reset_token
+        : typeof record.resetToken === "string"
+          ? record.resetToken
+          : undefined;
+    if (token?.trim()) {
+      return token.trim();
+    }
+  }
+  return null;
+}
+
 function readBoolean(
   record: Record<string, unknown>,
   ...keys: string[]

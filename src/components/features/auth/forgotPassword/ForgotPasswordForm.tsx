@@ -36,7 +36,7 @@ export function ForgotPasswordForm() {
 
       setForgotResetEmail(values.email.trim());
       toast.success(result.message);
-      router.push("/reset-password");
+      router.push("/verify-reset-otp");
     } catch {
       toast.error("Could not send reset code", {
         description: "Network error. Please try again.",
