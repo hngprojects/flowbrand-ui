@@ -73,7 +73,7 @@ const OnboardingNavbar = ({
               </button>
             )}
 
-            <Link href="/" className="cursor-pointer">
+            <Link href="/dashboard" className="cursor-pointer">
               <LogoIcon />
             </Link>
           </div>
@@ -151,7 +151,7 @@ const OnboardingNavbar = ({
             )}
           >
             <div className="flex items-center justify-between border-b border-[#EAECF0] px-4 py-4">
-              <Link href="/" className="cursor-pointer">
+              <Link href="/dashboard" className="cursor-pointer">
                 <LogoIcon />
               </Link>
               <button
