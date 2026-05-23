@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -43,6 +44,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   });
 
   const { isSubmitting } = form.formState;
+  const fullName = useWatch({ control: form.control, name: "fullName" });
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -56,8 +58,8 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const onSubmit = async (values: MyProfileFormValues) => {
-    console.log("save profile", { ...values, avatar });
+  const onSubmit = async () => {
+    // Profile save API not wired yet.
   };
 
   return (
@@ -67,14 +69,17 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
       <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-[#E4E4E4] p-[24px] w-full">
         <div className="h-[122px] w-[122px] overflow-hidden rounded-full bg-gray-100">
           {avatar ? (
-            <img
+            <Image
               src={avatar}
               alt="Profile"
+              width={122}
+              height={122}
+              unoptimized
               className="h-full w-full object-cover"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-gray-400 text-2xl font-medium">
-              {form.watch("fullName")?.charAt(0).toUpperCase() ?? "?"}
+              {fullName?.charAt(0).toUpperCase() ?? "?"}
             </div>
           )}
         </div>
@@ -90,14 +95,16 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="h-[40px] whitespace-nowrap rounded-[8px] border border-gray-300 px-[24px] py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors"
+            className="h-[40px] whitespace-nowrap rounded-[8px] border border-gray-300 px-[24px] 
+            py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors"
           >
             Upload new picture
           </button>
           <button
             type="button"
             onClick={handleDeleteAvatar}
-            className="h-[40px] whitespace-nowrap rounded-[8px] border border-[#F1BFBF] bg-[#FAEBEB] px-[24px] py-[8px] text-sm md:text-base  text-[#D13232] hover:opacity-90 transition-opacity"
+            className="h-[40px] whitespace-nowrap rounded-[8px] border border-[#F1BFBF] bg-[#FAEBEB] 
+            px-[24px] py-[8px] text-sm md:text-base  text-[#D13232] hover:opacity-90 transition-opacity"
           >
             Delete
           </button>
@@ -127,7 +134,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
                     type="text"
                     disabled={isSubmitting}
                     {...field}
-                    className="w-full h-[44px] rounded-[8px] border border-[#326AD1] px-[16px] py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] outline-none focus:border-[#326AD1] transition-colors disabled:opacity-50"
+                    className="w-full h-[44px] rounded-[8px] border border-[#326AD1] px-[16px] 
+                    py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] outline-none 
+                    focus:border-[#326AD1] transition-colors disabled:opacity-50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -149,7 +158,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
                       type="email"
                       disabled={isSubmitting}
                       {...field}
-                      className="w-full h-[44px] rounded-[8px] border border-[#326AD1] px-[16px] py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] outline-none focus:border-[#326AD1] transition-colors disabled:opacity-50"
+                      className="w-full h-[44px] rounded-[8px] border border-[#326AD1] px-[16px] 
+                      py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] outline-none 
+                      focus:border-[#326AD1] transition-colors disabled:opacity-50"
                     />
                   </FormControl>
                   <FormMessage />
@@ -170,7 +181,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
                       <select
                         disabled={isSubmitting}
                         {...field}
-                        className="w-full h-[44px] appearance-none rounded-[8px] border border-[#326AD1] px-[16px] py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] outline-none focus:border-[#326AD1] transition-colors bg-white disabled:opacity-50"
+                        className="w-full h-[44px] appearance-none rounded-[8px] border border-[#326AD1] 
+                        px-[16px] py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] 
+                        outline-none focus:border-[#326AD1] transition-colors bg-white disabled:opacity-50"
                       >
                         {COUNTRY_OPTIONS.map((c) => (
                           <option
@@ -208,14 +221,16 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <LogoutButton
             variant="menu"
-            className="rounded-[8px] border border-[#F1BFBF] bg-[#FAEBEB] px-10 py-3 text-sm md:text-base font-medium text-[#D13232] hover:opacity-90 w-auto text-center"
+            className="rounded-[8px] border border-[#F1BFBF] bg-[#FAEBEB] px-10 py-3 text-sm 
+            md:text-base font-medium text-[#D13232] hover:opacity-90 w-auto text-center"
             onAfterLogout={onClose}
           />
           <button
             type="submit"
             disabled={isSubmitting}
             form="profile-form"
-            className="rounded-[10px] bg-primary px-10 py-3 text-sm md:text-base font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-[10px] bg-primary px-10 py-3 text-sm md:text-base font-medium 
+            text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Saving..." : "Save Changes"}
           </button>

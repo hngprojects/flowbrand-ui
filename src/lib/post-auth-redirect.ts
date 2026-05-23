@@ -1,23 +1,10 @@
-import {
-  STRATEGY_ROUTE,
-  mapApiRedirectToAppPath,
-  ONBOARDING_UPLOAD_ROUTE,
-} from "@/routes";
 import type { AuthMeProfile } from "@/lib/auth-api";
+import { resolveDashboardEntryPath } from "@/lib/dashboard-entry";
 
-/** Decide where to send the user after login/register based on profile flags. */
+/** Decide where to send the user after login/register (OAuth, etc.). */
 export function resolvePostAuthPath(
   me: AuthMeProfile | null,
   apiRedirectUrl?: string,
 ): string {
-  const fromApi = mapApiRedirectToAppPath(apiRedirectUrl);
-  if (fromApi) {
-    return fromApi;
-  }
-
-  if (me?.has_strategy || me?.onboarding_completed) {
-    return STRATEGY_ROUTE;
-  }
-
-  return ONBOARDING_UPLOAD_ROUTE;
+  return resolveDashboardEntryPath({ me, apiRedirectUrl });
 }

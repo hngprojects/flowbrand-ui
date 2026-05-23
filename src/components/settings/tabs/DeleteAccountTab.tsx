@@ -16,7 +16,6 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
 
   const handleDelete = () => {
     if (!isConfirmed) return;
-    console.log("delete account");
     onClose();
   };
 
@@ -63,7 +62,8 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
           <button
             type="button"
             onClick={() => setConfirmOpen(true)}
-            className="rounded-[10px] bg-[#be2e2e] px-10 py-3 text-sm md:text-base font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-[10px] bg-[#be2e2e] px-10 py-3 text-sm md:text-base font-medium text-white
+            hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Delete Account
           </button>
