@@ -115,7 +115,6 @@ jobs:
             find "${{ env.APP_PATH }}" -mindepth 1 \
               -maxdepth 1 \
               ! -name ".env" \
-              ! -name "node_modules" \
               -exec rm -rf {} +
 
       - name: Copy projects files
