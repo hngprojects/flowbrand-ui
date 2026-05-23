@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export const PartyIcon = (props: SVGProps<SVGSVGElement>) => (
+export const TrashIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     width="102"
     height="102"

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { X, CheckCheck, Trash2, PartyPopper } from "lucide-react";
+import { X, CheckCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import BaseModal from "@/components/modals/BaseModal";
 import NotificationTabs, { type NotificationTab } from "./notification-tabs";
 import NotificationItem from "./notification-item";
 import { mockNotifications } from "./mock-data";
 import type { Notification } from "@/types/notification";
+import { PartyIcon } from "@/components/icons/modals/partyIcon";
+import { TrashIcon } from "@/components/icons/modals/trashIcon";
 
 type NotificationsModalProps = {
   isOpen: boolean;
@@ -134,7 +136,7 @@ export default function NotificationsModal({
       <BaseModal
         isOpen={deleteTargetId !== null}
         onClose={() => setDeleteTargetId(null)}
-        icon={<Trash2 className="text-primary h-12 w-12" />}
+        icon={<TrashIcon className="text-primary h-12 w-12" />}
         title="Delete Notification"
         subtitle="Are you sure you want to delete this notification?"
         confirmText="Delete"
@@ -147,7 +149,7 @@ export default function NotificationsModal({
       <BaseModal
         isOpen={isAllReadModalOpen}
         onClose={() => setIsAllReadModalOpen(false)}
-        icon={<PartyPopper className="text-primary h-12 w-12" />}
+        icon={<PartyIcon className="text-primary h-12 w-12" />}
         title="You are all caught up"
         subtitle="All notifications are now read."
         confirmText="Done"
