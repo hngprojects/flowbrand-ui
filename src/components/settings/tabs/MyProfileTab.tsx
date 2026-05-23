@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -43,6 +44,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   });
 
   const { isSubmitting } = form.formState;
+  const fullName = useWatch({ control: form.control, name: "fullName" });
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,14 +69,17 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
       <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-[#E4E4E4] p-[24px] w-full">
         <div className="h-[122px] w-[122px] overflow-hidden rounded-full bg-gray-100">
           {avatar ? (
-            <img
+            <Image
               src={avatar}
               alt="Profile"
+              width={122}
+              height={122}
+              unoptimized
               className="h-full w-full object-cover"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-gray-400 text-2xl font-medium">
-              {form.watch("fullName")?.charAt(0).toUpperCase() ?? "?"}
+              {fullName?.charAt(0).toUpperCase() ?? "?"}
             </div>
           )}
         </div>
