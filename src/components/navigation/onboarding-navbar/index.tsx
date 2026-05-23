@@ -10,6 +10,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { useEffect, useRef, useState } from "react";
 import StrategySidebar from "@/components/dashboard/strategy/strategy-sidebar";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
+import { mockNotifications } from "@/components/modals/notifications/mock-data";
 import {
   DUMMY_STRATEGY_PHASES,
   DEFAULT_UPLOADED_DOCS,
@@ -35,6 +36,7 @@ const OnboardingNavbar = ({
   const pathname = usePathname();
   const drawerOpen = drawerPath === pathname;
   const [isNotification, setIsNotification] = useState(false);
+  const unreadCount = mockNotifications.filter((n) => !n.isRead).length;
 
   const isStrategyRoute = pathname === STRATEGY_ROUTE;
   const isDashboardFlow =
@@ -96,10 +98,12 @@ const OnboardingNavbar = ({
               type="button"
               aria-label="Notifications"
               onClick={() => setIsNotification(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-border md:h-11 md:w-11"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border md:h-11 md:w-11"
             >
               <BellIcon />
-              <span className="bg-error absolute -top-1 -right-1 h-2 w-2 rounded-full" />
+              {unreadCount > 0 && (
+                <span className="bg-error absolute -top-1 -right-1 h-2 w-2 rounded-full" />
+              )}
             </button>
             <NotificationsModal
               isOpen={isNotification}

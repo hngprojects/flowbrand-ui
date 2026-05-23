@@ -49,7 +49,11 @@ export default function NotificationItem({
             {time}
           </span>
           {!notification.isRead && (
-            <span className="bg-primary h-2 w-2 rounded-full" />
+            <span
+              role="status"
+              aria-label="Unread notification"
+              className="bg-primary h-2 w-2 rounded-full"
+            />
           )}
         </div>
 

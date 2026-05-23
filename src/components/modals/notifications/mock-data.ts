@@ -110,11 +110,11 @@ export const mockNotifications: Notification[] = [
   },
   {
     id: "12",
-    title: 'Time to take action on "Get Noticed"',
-    body: "You have 4 tasks left to complete this week",
-    iconType: "bell",
-    iconColor: "blue",
+    title: "Welcome to FlowBrand",
+    body: "Complete your profile to get the most out of your funnel.",
+    iconType: "user",
+    iconColor: "green",
     isRead: true,
-    createdAt: daysAgo(140),
+    createdAt: daysAgo(160),
   },
 ];

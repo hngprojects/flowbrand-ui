@@ -10,6 +10,7 @@ import { mockNotifications } from "./mock-data";
 import type { Notification } from "@/types/notification";
 import { PartyIcon } from "@/components/icons/modals/partyIcon";
 import { TrashIcon } from "@/components/icons/modals/trashIcon";
+import { cn } from "@/lib/utils";
 
 type NotificationsModalProps = {
   isOpen: boolean;
@@ -76,10 +77,19 @@ export default function NotificationsModal({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) onClose();
+        }}
+      >
         <DialogContent
           showCloseButton={false}
-          className="fixed lg:top-3 lg:right-4 top-0 right-0 left-auto h-screen w-full lg:w-1/2 lg:max-w-[720px] max-w-none translate-x-0 translate-y-0 lg:rounded-lg rounded-none"
+          className={cn(
+            "fixed top-0 right-0 left-auto h-screen w-full max-w-none",
+            "translate-x-0 translate-y-0 rounded-none",
+            "lg:top-3 lg:right-4 lg:w-1/2 lg:max-w-[720px] lg:rounded-lg",
+          )}
         >
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <DialogTitle className="text-foreground text-lg font-semibold">
@@ -95,7 +105,7 @@ export default function NotificationsModal({
             </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-3">
+          <div className="flex flex-col gap-3 px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
             <NotificationTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -106,7 +116,13 @@ export default function NotificationsModal({
             <button
               type="button"
               onClick={handleMarkAllRead}
-              className="text-primary border-primary hover:bg-primary/5 flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors self-start sm:self-auto"
+              disabled={unreadCount === 0}
+              className={cn(
+                "text-primary border-primary hover:bg-primary/5",
+                "flex items-center gap-1.5 rounded-lg border px-3 py-1.5",
+                "text-sm font-medium transition-colors self-start sm:self-auto",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+              )}
             >
               <CheckCheck className="h-4 w-4" />
               Mark all as read

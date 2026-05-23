@@ -2,6 +2,7 @@ import { format, isToday, isYesterday, isThisYear } from "date-fns";
 
 export function formatNotificationTime(createdAt: string): string {
   const date = new Date(createdAt);
+  if (isNaN(date.getTime())) return "";
   const now = new Date();
   const diffMins = Math.floor((now.getTime() - date.getTime()) / 60_000);
 
