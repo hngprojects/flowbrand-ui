@@ -29,14 +29,14 @@ const ICON_MAP = {
 };
 
 const COLOR_MAP: Record<NotificationIconColor, string> = {
-  purple: "bg-purple-100 text-purple-600",
-  green: "bg-green-100 text-green-600",
-  orange: "bg-orange-100 text-orange-600",
-  blue: "bg-blue-100 text-blue-600",
-  yellow: "bg-yellow-100 text-yellow-600",
-  red: "bg-red-100 text-red-600",
-  pink: "bg-pink-100 text-pink-600",
-  gray: "bg-gray-100 text-gray-600",
+  purple: "bg-purple-500",
+  green: "bg-green-500",
+  orange: "bg-orange-500",
+  blue: "bg-blue-500",
+  yellow: "bg-yellow-500",
+  red: "bg-red-500",
+  pink: "bg-pink-500",
+  gray: "bg-gray-800",
 };
 
 type NotificationIconProps = {
@@ -53,7 +53,7 @@ export default function NotificationIcon({
     <div
       className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${COLOR_MAP[color]}`}
     >
-      <Icon className="h-5 w-5" />
+      <Icon className="h-5 w-5 text-white" />
     </div>
   );
 }

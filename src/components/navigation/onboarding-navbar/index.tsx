@@ -96,9 +96,10 @@ const OnboardingNavbar = ({
               type="button"
               aria-label="Notifications"
               onClick={() => setIsNotification(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#EAECF0] md:h-11 md:w-11"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border md:h-11 md:w-11"
             >
               <BellIcon />
+              <span className="bg-error absolute -top-1 -right-1 h-2 w-2 rounded-full" />
             </button>
             <NotificationsModal
               isOpen={isNotification}
