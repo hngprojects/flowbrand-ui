@@ -9,8 +9,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { getGoogleOAuthUrl, registerUser, sendOtp } from "~/actions/auth";
-import { isResendOtpSuccess } from "~/lib/auth-action-results";
+import { getGoogleOAuthUrl, registerUser } from "~/actions/auth";
+import { readOtpCooldownSeconds } from "~/lib/auth-api";
 import {
   setRegisterVerifyCooldown,
   setRegisterVerifyEmail,
@@ -142,25 +142,14 @@ const RegistrationForm = () => {
         return;
       }
 
-      const otpResult = await sendOtp(values.email);
       setRegisterVerifyEmail(values.email);
-      if (otpResult.cooldownSeconds) {
-        setRegisterVerifyCooldown(otpResult.cooldownSeconds);
-      }
-
-      if (!isResendOtpSuccess(otpResult)) {
-        toast.error("Account created", {
-          description:
-            otpResult.error ??
-            "We could not send a verification code. Try signing in to resend.",
-        });
-        router.push("/register/verify");
-        return;
+      const cooldownSeconds = readOtpCooldownSeconds(data.data);
+      if (cooldownSeconds) {
+        setRegisterVerifyCooldown(cooldownSeconds);
       }
 
       toast.success("Account created", {
-        description:
-          otpResult.message ?? "Check your email for a 6-digit code.",
+        description: "Check your email for a 6-digit code.",
       });
       router.push("/register/verify");
     } catch {
