@@ -118,7 +118,7 @@ export default function FunnelModal({
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="h-full rounded-[10px] font-medium transition-all duration-200 whitespace-nowrap px-4  text-center text-[16px] leading-[150%] text-[#565D69] data-active:bg-[#326AD1] data-active:text-white cursor-pointer border-0 data-active:shadow-none"
+                className="h-full rounded-[10px] font-medium transition-all duration-200 whitespace-nowrap px-4 text-center text-[16px] leading-[150%] text-[#565D69] data-active:bg-[#326AD1] data-active:text-white cursor-pointer border-0 data-active:shadow-none hover:bg-transparent hover:text-[#565D69] data-active:hover:bg-[#326AD1] data-active:hover:text-white"
               >
                 {tab.label}
               </TabsTrigger>
