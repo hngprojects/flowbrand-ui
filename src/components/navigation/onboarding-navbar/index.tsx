@@ -16,6 +16,7 @@ import {
 } from "@/lib/dashboard-mock-data";
 import { STRATEGY_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
+import NotificationsModal from "@/components/modals/notifications";
 
 interface OnboardingNavbarProps {
   loading?: boolean;
@@ -33,6 +34,7 @@ const OnboardingNavbar = ({
   const profileRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const drawerOpen = drawerPath === pathname;
+  const [isNotification, setIsNotification] = useState(false);
 
   const isStrategyRoute = pathname === STRATEGY_ROUTE;
   const isDashboardFlow =
@@ -93,10 +95,15 @@ const OnboardingNavbar = ({
             <button
               type="button"
               aria-label="Notifications"
+              onClick={() => setIsNotification(true)}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-[#EAECF0] md:h-11 md:w-11"
             >
               <BellIcon />
             </button>
+            <NotificationsModal
+              isOpen={isNotification}
+              onClose={() => setIsNotification(false)}
+            />
             <div ref={profileRef} className="relative">
               <button
                 type="button"
