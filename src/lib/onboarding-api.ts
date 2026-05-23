@@ -1,5 +1,7 @@
 /** Helpers for /api/onboarding per staging OpenAPI. */
 
+import { collectApiRecords } from "@/lib/api-envelope";
+
 export type OnboardingSessionAnswers = {
   step_1?: { business_description?: string };
   step_2?: { customer_tags?: { type?: string[] } };
@@ -12,27 +14,6 @@ export type ParsedOnboardingSession = {
   stepsCompleted: number;
   answers: OnboardingSessionAnswers;
 };
-
-function readRecord(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== "object") return null;
-  return value as Record<string, unknown>;
-}
-
-function collectApiRecords(data: unknown): Record<string, unknown>[] {
-  const records: Record<string, unknown>[] = [];
-  const seen = new Set<unknown>();
-
-  const visit = (value: unknown) => {
-    const record = readRecord(value);
-    if (!record || seen.has(record)) return;
-    seen.add(record);
-    records.push(record);
-    visit(record.data);
-  };
-
-  visit(data);
-  return records;
-}
 
 export function parseOnboardingSessionId(data: unknown): string | null {
   for (const record of collectApiRecords(data)) {

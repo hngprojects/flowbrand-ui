@@ -4,6 +4,7 @@ import axios from "axios";
 import { auth } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { formatHttpApiError } from "@/lib/api-errors";
+import { flowLog, flowLogApiResult } from "@/lib/flow-debug-log";
 
 function onboardingUrl(path: string): string {
   const base = envConfig.BASEURL.replace(/\/$/, "");
@@ -26,30 +27,54 @@ export type OnboardingActionResult<T = unknown> =
   | { ok: false; error: string; status?: number };
 
 export async function startOnboarding(): Promise<OnboardingActionResult> {
+  flowLog("onboarding", "POST /api/onboarding/start → request");
   const token = await getAccessToken();
-  if (!token)
-    return {
-      ok: false,
+  if (!token) {
+    const result = {
+      ok: false as const,
       error: "Session expired. Please sign in again.",
       status: 401,
     };
+    flowLogApiResult("onboarding", "POST /api/onboarding/start", result);
+    return result;
+  }
 
   try {
     const res = await axios.post(onboardingUrl("/start"), null, {
       headers: { Authorization: `Bearer ${token}` },
       timeout: 30000,
+      validateStatus: (status) => status === 200 || status === 201,
     });
-    return { ok: true, status: res.status, data: res.data };
+    const result = { ok: true as const, status: res.status, data: res.data };
+    flowLogApiResult("onboarding", "POST /api/onboarding/start", result);
+    return result;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      return {
-        ok: false,
+      if (status === 409) {
+        const result = {
+          ok: false as const,
+          error: formatHttpApiError(
+            status,
+            data,
+            "Onboarding already complete.",
+          ),
+          status,
+        };
+        flowLogApiResult("onboarding", "POST /api/onboarding/start", result);
+        return result;
+      }
+      const result = {
+        ok: false as const,
         error: formatHttpApiError(status, data, "Could not start onboarding."),
         status,
       };
+      flowLogApiResult("onboarding", "POST /api/onboarding/start", result);
+      return result;
     }
-    return { ok: false, error: "Could not reach the server." };
+    const result = { ok: false as const, error: "Could not reach the server." };
+    flowLogApiResult("onboarding", "POST /api/onboarding/start", result);
+    return result;
   }
 }
 
@@ -58,43 +83,70 @@ export async function saveOnboardingStep(input: {
   step: number;
   answer: Record<string, unknown>;
 }): Promise<OnboardingActionResult> {
+  flowLog("onboarding", "POST /api/onboarding/step → request", {
+    step: input.step,
+    session_id: input.session_id,
+  });
   const token = await getAccessToken();
-  if (!token)
-    return {
-      ok: false,
+  if (!token) {
+    const result = {
+      ok: false as const,
       error: "Session expired. Please sign in again.",
       status: 401,
     };
+    flowLogApiResult("onboarding", "POST /api/onboarding/step", result, {
+      step: input.step,
+    });
+    return result;
+  }
 
   try {
     const res = await axios.post(onboardingUrl("/step"), input, {
       headers: { Authorization: `Bearer ${token}` },
       timeout: 30000,
     });
-    return { ok: true, status: res.status, data: res.data };
+    const result = { ok: true as const, status: res.status, data: res.data };
+    flowLogApiResult("onboarding", "POST /api/onboarding/step", result, {
+      step: input.step,
+    });
+    return result;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      return {
-        ok: false,
+      const result = {
+        ok: false as const,
         error: formatHttpApiError(status, data, "Could not save your answer."),
         status,
       };
+      flowLogApiResult("onboarding", "POST /api/onboarding/step", result, {
+        step: input.step,
+      });
+      return result;
     }
-    return { ok: false, error: "Could not reach the server." };
+    const result = { ok: false as const, error: "Could not reach the server." };
+    flowLogApiResult("onboarding", "POST /api/onboarding/step", result, {
+      step: input.step,
+    });
+    return result;
   }
 }
 
 export async function completeOnboarding(
   session_id: string,
 ): Promise<OnboardingActionResult<{ redirect?: { to?: string } }>> {
+  flowLog("onboarding", "POST /api/onboarding/complete → request", {
+    session_id,
+  });
   const token = await getAccessToken();
-  if (!token)
-    return {
-      ok: false,
+  if (!token) {
+    const result = {
+      ok: false as const,
       error: "Session expired. Please sign in again.",
       status: 401,
     };
+    flowLogApiResult("onboarding", "POST /api/onboarding/complete", result);
+    return result;
+  }
 
   try {
     const res = await axios.post(
@@ -103,6 +155,7 @@ export async function completeOnboarding(
       {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 30000,
+        validateStatus: (status) => status === 200 || status === 409,
       },
     );
     return { ok: true, status: res.status, data: res.data?.data ?? res.data };
@@ -137,16 +190,22 @@ export async function getOnboardingSession(): Promise<OnboardingActionResult> {
       headers: { Authorization: `Bearer ${token}` },
       timeout: 30000,
     });
-    return { ok: true, status: res.status, data: res.data };
+    const result = { ok: true as const, status: res.status, data: res.data };
+    flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
+    return result;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      return {
-        ok: false,
+      const result = {
+        ok: false as const,
         error: formatHttpApiError(status, data, "Could not load your session."),
         status,
       };
+      flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
+      return result;
     }
-    return { ok: false, error: "Could not reach the server." };
+    const result = { ok: false as const, error: "Could not reach the server." };
+    flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
+    return result;
   }
 }

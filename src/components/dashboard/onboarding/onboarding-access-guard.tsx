@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FUNNEL_ROUTE } from "@/routes";
+import { STRATEGY_ROUTE } from "@/routes";
 import {
   isNewStrategyFlow,
   isNewStrategySearchParam,
@@ -32,7 +32,7 @@ export function OnboardingAccessGuard({
 
   const allowed =
     skipEntryCheck ||
-    (entryQuery.isSuccess && entryQuery.data !== FUNNEL_ROUTE);
+    (entryQuery.isSuccess && entryQuery.data !== STRATEGY_ROUTE);
 
   useEffect(() => {
     if (skipEntryCheck && isNewStrategy) {
@@ -42,8 +42,8 @@ export function OnboardingAccessGuard({
 
   useEffect(() => {
     if (skipEntryCheck || entryQuery.isPending) return;
-    if (entryQuery.data === FUNNEL_ROUTE) {
-      router.replace(FUNNEL_ROUTE);
+    if (entryQuery.data === STRATEGY_ROUTE) {
+      router.replace(STRATEGY_ROUTE);
     }
   }, [skipEntryCheck, entryQuery.isPending, entryQuery.data, router]);
 

@@ -5,6 +5,8 @@ import {
   type MockUploadedDoc,
 } from "@/lib/dashboard-mock-data";
 
+export type { DashboardMockSession, MockUploadedDoc };
+
 const SESSION_KEY = "flowbrand-dashboard-mock-session";
 
 export function saveDashboardMockSession(session: DashboardMockSession): void {

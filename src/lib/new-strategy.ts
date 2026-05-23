@@ -1,4 +1,4 @@
-import { ONBOARDING_UPLOAD_ROUTE, FUNNEL_ROUTE } from "@/routes";
+import { ONBOARDING_UPLOAD_ROUTE, STRATEGY_ROUTE } from "@/routes";
 import type { AuthMeProfile } from "@/lib/auth-api";
 
 export const NEW_STRATEGY_QUERY = "newStrategy";
@@ -39,5 +39,5 @@ export function newStrategyOnboardingPath(): string {
 
 /** Where to send users who already finished onboarding (not starting over). */
 export function strategyHomePath(): string {
-  return FUNNEL_ROUTE;
+  return STRATEGY_ROUTE;
 }

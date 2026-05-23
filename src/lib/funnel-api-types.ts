@@ -42,34 +42,13 @@ export type FunnelGenerationSnapshot = {
   error?: { code?: string; message?: string; retry_endpoint?: string };
 };
 
-function readRecord(data: unknown): Record<string, unknown> | null {
-  if (!data || typeof data !== "object") return null;
-  return data as Record<string, unknown>;
-}
+import { collectApiRecords, readRecord } from "@/lib/api-envelope";
 
 function unwrapData(data: unknown): Record<string, unknown> | null {
   const root = readRecord(data);
   if (!root) return null;
   const nested = readRecord(root.data);
   return nested ?? root;
-}
-
-function collectApiRecords(data: unknown): Record<string, unknown>[] {
-  const records: Record<string, unknown>[] = [];
-  const seen = new Set<unknown>();
-
-  const visit = (value: unknown) => {
-    const record = readRecord(value);
-    if (!record || seen.has(record)) return;
-    seen.add(record);
-    records.push(record);
-    visit(record.data);
-    visit(record.result);
-    visit(record.funnel);
-  };
-
-  visit(data);
-  return records;
 }
 
 function readFunnelIdFromRecord(

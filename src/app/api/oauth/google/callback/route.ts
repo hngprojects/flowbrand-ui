@@ -1,9 +1,10 @@
 import { AuthError } from "next-auth";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { signIn } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { fetchAuthMe } from "@/lib/auth-api";
 import { parseGoogleOAuthCallbackParams } from "@/lib/google-oauth";
-import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
+import { resolveDashboardEntryPathWithToken } from "@/lib/dashboard-entry";
 import { mapApiRedirectToAppPath } from "@/routes";
 
 function loginErrorRedirect(origin: string) {
@@ -21,9 +22,15 @@ export async function GET(request: Request) {
     return Response.redirect(loginErrorRedirect(requestUrl.origin));
   }
 
-  const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+  try {
+    await fetchAuthMe(envConfig.BASEURL, accessToken);
+  } catch {
+    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+  }
+
   const destination =
-    mapApiRedirectToAppPath(redirectUrl) ?? resolvePostAuthPath(me);
+    mapApiRedirectToAppPath(redirectUrl) ??
+    (await resolveDashboardEntryPathWithToken(accessToken, redirectUrl));
 
   try {
     return await signIn("access-token", {
@@ -31,6 +38,9 @@ export async function GET(request: Request) {
       redirectTo: destination,
     });
   } catch (err) {
+    if (isRedirectError(err)) {
+      throw err;
+    }
     if (err instanceof AuthError) {
       return Response.redirect(loginErrorRedirect(requestUrl.origin));
     }

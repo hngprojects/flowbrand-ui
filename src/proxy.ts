@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { resolveDashboardEntryPathWithToken } from "@/lib/dashboard-entry";
 import {
   authRoutes,
-  FUNNEL_ROUTE,
+  STRATEGY_ROUTE,
   ONBOARDING_ROUTE,
   ONBOARDING_UPLOAD_ROUTE,
   protectedRoutes,
@@ -58,8 +58,8 @@ export const proxy = auth(async (request) => {
 
     if (!isNewStrategy && typeof accessToken === "string") {
       const entryPath = await resolveDashboardEntryPathWithToken(accessToken);
-      if (entryPath === FUNNEL_ROUTE) {
-        return NextResponse.redirect(new URL(FUNNEL_ROUTE, nextUrl.origin));
+      if (entryPath === STRATEGY_ROUTE) {
+        return NextResponse.redirect(new URL(STRATEGY_ROUTE, nextUrl.origin));
       }
     }
   }

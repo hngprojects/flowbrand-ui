@@ -12,7 +12,9 @@ import {
   parseFunnelStage,
   parseFunnelStagesList,
 } from "@/lib/funnel-api-types";
+import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
 import { getFocusStage } from "@/lib/funnel-display";
+import { flowLog } from "@/lib/flow-debug-log";
 
 export type FetchFunnelOptions = {
   /** When true, return stages even if tasks are not loaded yet (used after long polls). */
@@ -97,26 +99,50 @@ export async function fetchEnrichedFunnelDetail(
   | { ok: false; error: string }
 > {
   const core = await loadFunnelCore(funnelId);
-  if (!core.ok) return core;
+  if (!core.ok) {
+    flowLog("strategy", "fetchEnrichedFunnelDetail → core load failed", {
+      funnelId,
+      error: core.error,
+    });
+    return core;
+  }
 
   let detail = core.detail;
+  const stageCount = detail.stages?.length ?? 0;
 
   if (funnelHasDisplayContent(detail)) {
     detail = await mergeStageTasks(funnelId, detail);
     if (funnelDetailIsReady(detail)) {
+      flowLog("strategy", "fetchEnrichedFunnelDetail → ready", {
+        funnelId,
+        stageCount,
+      });
       return { ok: true, detail };
     }
   }
 
   if (options.allowPartial && funnelHasMinimalContent(detail)) {
     detail = await mergeStageTasks(funnelId, detail);
-    return { ok: true, detail, partial: !funnelHasDisplayContent(detail) };
+    const partial = !funnelHasDisplayContent(detail);
+    flowLog("strategy", "fetchEnrichedFunnelDetail → partial", {
+      funnelId,
+      stageCount,
+      partial,
+      hasDisplayContent: funnelHasDisplayContent(detail),
+    });
+    return { ok: true, detail, partial };
   }
 
+  flowLog("strategy", "fetchEnrichedFunnelDetail → not ready", {
+    funnelId,
+    stageCount,
+    allowPartial: options.allowPartial,
+    hasMinimal: funnelHasMinimalContent(detail),
+    hasDisplay: funnelHasDisplayContent(detail),
+  });
   return {
     ok: false,
-    error:
-      "Your strategy is still being prepared. Please wait a moment and refresh.",
+    error: STRATEGY_GENERATION_FAILED_MESSAGE,
   };
 }
 
@@ -128,9 +154,15 @@ export async function probeFunnelDisplayReady(
   if (!core.ok) return null;
 
   if (!funnelHasDisplayContent(core.detail)) {
+    flowLog("strategy", "probeFunnelDisplayReady → empty content", {
+      funnelId,
+      stageCount: core.detail.stages?.length ?? 0,
+    });
     return null;
   }
 
   const enriched = await mergeStageTasks(funnelId, core.detail);
-  return funnelDetailIsReady(enriched) ? enriched : null;
+  const ready = funnelDetailIsReady(enriched);
+  flowLog("strategy", "probeFunnelDisplayReady → result", { funnelId, ready });
+  return ready ? enriched : null;
 }

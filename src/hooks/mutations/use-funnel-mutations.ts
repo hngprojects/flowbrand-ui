@@ -10,6 +10,7 @@ export function useStartFunnelGenerationMutation() {
 
   return useMutation({
     mutationFn: (input: GenerateFunnelInput) => startFunnelGeneration(input),
+    retry: false,
     onSuccess: (funnelId) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.funnels.all() });
       void queryClient.invalidateQueries({

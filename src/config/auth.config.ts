@@ -6,14 +6,16 @@ import { credentialsAuth } from "@/lib/credentials-auth";
 import { envConfig } from "@/config/env.config";
 import { fetchAuthMe } from "@/lib/auth-api";
 import { inDevEnvironment } from "@/lib/utils";
+import { loginFailureCode } from "@/lib/login-errors";
 import { LoginCredentialsSchema } from "@/schema/auth.schema";
 import { CustomJWT } from "@/types/auth";
 
-const INVALID_CREDENTIAL_STATUSES = new Set([400, 401, 403, 422, 502]);
-
-/** Surfaces API copy in the Auth.js `code` query param for client signIn(redirect: false). */
-class InvalidLoginCredentials extends CredentialsSignin {
-  code = "invalid_email_or_password";
+/** Surfaces API failure as Auth.js `code` for client signIn(redirect: false). */
+class LoginFailure extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
 }
 
 function readAuthSecret(): string | undefined {
@@ -57,11 +59,9 @@ const authConfig: NextAuthConfig = {
             });
           }
 
-          if (INVALID_CREDENTIAL_STATUSES.has(statusCode)) {
-            throw new InvalidLoginCredentials();
-          }
-
-          throw new Error(response.message);
+          throw new LoginFailure(
+            loginFailureCode(statusCode, response.message),
+          );
         }
 
         if (!("data" in response) || !response.data?.id) {

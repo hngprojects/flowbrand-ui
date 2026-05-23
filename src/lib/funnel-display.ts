@@ -28,31 +28,46 @@ function stageTaskSummary(stage: FunnelStageApi): string {
 
 export function mapStagesToStrategyPhases(
   stages: FunnelStageApi[] | undefined,
+  completedStageIds: string[] = [],
 ): StrategyPhaseDisplay[] {
   if (!stages?.length) return [];
 
   return stages.map((stage) => ({
     title: stage.name,
     tasks: stageTaskSummary(stage),
-    status: stage.status,
+    status:
+      stage.stageId && completedStageIds.includes(stage.stageId)
+        ? "complete"
+        : stage.status,
   }));
 }
 
-function pickFocusStage(stages: FunnelStageApi[]): FunnelStageApi | undefined {
-  return (
-    stages.find((s) => s.status === "active") ??
-    stages.find((s) => s.status !== "complete") ??
-    stages[0]
+function pickFocusStage(
+  stages: FunnelStageApi[],
+  completedStageIds: string[] = [],
+): FunnelStageApi | undefined {
+  if (!stages.length) return undefined;
+
+  const ordered = [...stages].sort(
+    (a, b) => (a.position ?? 0) - (b.position ?? 0),
   );
+
+  const next = ordered.find(
+    (stage) => stage.stageId && !completedStageIds.includes(stage.stageId),
+  );
+  if (next) return next;
+
+  return ordered[ordered.length - 1];
 }
 
 export function mapFunnelToFocus(
   funnel: FunnelDetailApi | null,
+  completedStageIds: string[] = [],
 ): FunnelFocusDisplay | null {
   const stages = funnel?.stages;
   if (!stages?.length) return null;
 
-  const focus = pickFocusStage(stages);
+  const focus = pickFocusStage(stages, completedStageIds);
   if (!focus) return null;
 
   const index = stages.findIndex((s) => s.stageId === focus.stageId);
@@ -89,9 +104,10 @@ export function mapStageTasksToDisplay(
 
 export function getFocusStage(
   funnel: FunnelDetailApi | null,
+  completedStageIds: string[] = [],
 ): FunnelStageApi | undefined {
   if (!funnel?.stages?.length) return undefined;
-  return pickFocusStage(funnel.stages);
+  return pickFocusStage(funnel.stages, completedStageIds);
 }
 
 export function funnelSidebarSummary(funnel: FunnelDetailApi | null): string {

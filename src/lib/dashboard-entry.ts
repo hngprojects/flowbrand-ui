@@ -3,38 +3,15 @@ import { envConfig } from "@/config/env.config";
 import { fetchAuthMe, type AuthMeProfile } from "@/lib/auth-api";
 import { parseFunnelList } from "@/lib/funnel-api-types";
 import {
-  isOnboardingSessionComplete,
-  parseOnboardingSession,
-} from "@/lib/onboarding-api";
-import { isOnboardingComplete } from "@/lib/new-strategy";
-import {
-  FUNNEL_ROUTE,
+  STRATEGY_ROUTE,
   mapApiRedirectToAppPath,
   ONBOARDING_UPLOAD_ROUTE,
 } from "@/routes";
-
-function onboardingSessionUrl(): string {
-  const base = envConfig.BASEURL.replace(/\/$/, "");
-  return `${base}/api/onboarding/session`;
-}
+import { flowLog } from "@/lib/flow-debug-log";
 
 function funnelsListUrl(): string {
   const base = envConfig.BASEURL.replace(/\/$/, "");
   return `${base}/api/funnels`;
-}
-
-async function fetchOnboardingSessionRaw(
-  accessToken: string,
-): Promise<unknown | null> {
-  try {
-    const res = await axios.get(onboardingSessionUrl(), {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      timeout: 30000,
-    });
-    return res.data;
-  } catch {
-    return null;
-  }
 }
 
 async function fetchFunnelsListRaw(
@@ -52,47 +29,43 @@ async function fetchFunnelsListRaw(
   }
 }
 
-/** True when profile, onboarding session, or an existing funnel indicates the user is past onboarding. */
+/**
+ * True when the user has a funnel record to open on the strategy page.
+ * We do not trust `has_strategy` on /me alone — the backend can set it while
+ * GET /api/funnels is still empty (or the funnel was removed).
+ */
+export function hasStrategyToView(input: {
+  funnelsListData?: unknown;
+}): boolean {
+  if (!input.funnelsListData) {
+    return false;
+  }
+
+  const funnels = parseFunnelList(input.funnelsListData);
+  return funnels.length > 0;
+}
+
+/** True when the user should land on the strategy page after login. */
 export function shouldUseStrategyHome(input: {
   me?: AuthMeProfile | null;
-  onboardingSessionData?: unknown;
   funnelsListData?: unknown;
   apiRedirectUrl?: string;
 }): boolean {
   const fromApi = mapApiRedirectToAppPath(input.apiRedirectUrl);
-  if (fromApi === FUNNEL_ROUTE) {
+  if (fromApi === STRATEGY_ROUTE) {
     return true;
   }
 
-  if (isOnboardingComplete(input.me ?? null)) {
-    return true;
-  }
-
-  if (input.onboardingSessionData) {
-    const session = parseOnboardingSession(input.onboardingSessionData);
-    if (isOnboardingSessionComplete(session)) {
-      return true;
-    }
-  }
-
-  if (input.funnelsListData) {
-    const funnels = parseFunnelList(input.funnelsListData);
-    if (funnels.length > 0) {
-      return true;
-    }
-  }
-
-  return false;
+  return hasStrategyToView(input);
 }
 
 export function resolveDashboardEntryPath(input: {
   me?: AuthMeProfile | null;
-  onboardingSessionData?: unknown;
   funnelsListData?: unknown;
   apiRedirectUrl?: string;
 }): string {
   if (shouldUseStrategyHome(input)) {
-    return FUNNEL_ROUTE;
+    return STRATEGY_ROUTE;
   }
 
   const fromApi = mapApiRedirectToAppPath(input.apiRedirectUrl);
@@ -110,24 +83,33 @@ export async function resolveDashboardEntryPathWithToken(
 ): Promise<string> {
   const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
 
-  if (isOnboardingComplete(me)) {
-    return FUNNEL_ROUTE;
-  }
-
   const fromApi = mapApiRedirectToAppPath(apiRedirectUrl);
-  if (fromApi === FUNNEL_ROUTE) {
-    return FUNNEL_ROUTE;
+  if (fromApi === STRATEGY_ROUTE) {
+    return STRATEGY_ROUTE;
   }
 
-  const [onboardingSessionData, funnelsListData] = await Promise.all([
-    fetchOnboardingSessionRaw(accessToken),
-    fetchFunnelsListRaw(accessToken),
-  ]);
+  const funnelsListData = await fetchFunnelsListRaw(accessToken);
 
-  return resolveDashboardEntryPath({
+  const path = resolveDashboardEntryPath({
     me,
-    onboardingSessionData: onboardingSessionData ?? undefined,
     funnelsListData: funnelsListData ?? undefined,
     apiRedirectUrl,
   });
+  const funnelCount = funnelsListData
+    ? parseFunnelList(funnelsListData).length
+    : 0;
+  flowLog("entry", "resolveDashboardEntryPathWithToken → result", {
+    path,
+    has_strategy: me?.has_strategy,
+    funnelCount,
+    usedHasStrategyFlag: false,
+    reason:
+      path === STRATEGY_ROUTE
+        ? "funnels_list_non_empty"
+        : funnelCount === 0 && me?.has_strategy
+          ? "has_strategy_but_no_funnels → upload"
+          : "no_funnels",
+    apiRedirectUrl,
+  });
+  return path;
 }

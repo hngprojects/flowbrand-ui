@@ -1,15 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPostAuthRedirect } from "@/actions/auth";
 import { queryKeys } from "@/lib/query-keys";
 import {
   completeOnboardingMutation,
-  fetchOnboardingSessionResolved,
+  getOrCreateOnboardingSession,
+  OnboardingAlreadyCompleteError,
+  parseOnboardingSessionId,
   saveOnboardingStepMutation,
   type OnboardingSessionPayload,
 } from "@/lib/onboarding-query-fns";
 import { isNewStrategyFlow } from "@/lib/new-strategy";
+import { useOnboardingStore } from "@/store/useOnboardingStore";
 
 export function useDashboardEntryPathQuery(enabled = true) {
   return useQuery({
@@ -23,11 +27,29 @@ export function useDashboardEntryPathQuery(enabled = true) {
 export function useOnboardingSessionQuery(enabled = true) {
   return useQuery({
     queryKey: queryKeys.onboarding.session(),
-    queryFn: fetchOnboardingSessionResolved,
+    queryFn: getOrCreateOnboardingSession,
     enabled,
     staleTime: Infinity,
-    retry: 1,
+    retry: (failureCount, error) => {
+      if (error instanceof OnboardingAlreadyCompleteError) return false;
+      return failureCount < 1;
+    },
   });
+}
+
+/** Ensures an onboarding session exists on the upload step (POST /onboarding/start). */
+export function useEnsureOnboardingSession() {
+  const query = useOnboardingSessionQuery(true);
+
+  useEffect(() => {
+    if (!query.isSuccess || !query.data) return;
+    const id = parseOnboardingSessionId(query.data.raw);
+    if (id) {
+      useOnboardingStore.getState().setSessionId(id);
+    }
+  }, [query.isSuccess, query.data]);
+
+  return query;
 }
 
 export function useSaveOnboardingStepMutation() {

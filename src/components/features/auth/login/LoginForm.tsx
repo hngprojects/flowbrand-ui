@@ -3,14 +3,36 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { signIn, useSession } from "next-auth/react";
-import { type ChangeEventHandler, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  getCsrfToken,
+  getProviders,
+  signIn,
+  useSession,
+} from "next-auth/react";
+import {
+  type ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import * as z from "zod";
 import { LoginSchema } from "@/schema/auth.schema";
 import { usePostAuthRedirect } from "@/hooks/use-post-auth-redirect";
-import { getLoginErrorMessage, isSignInFailure } from "@/lib/login-errors";
+import { resendOtp } from "@/actions/auth";
+import { isResendOtpSuccess } from "@/lib/auth-action-results";
+import {
+  EMAIL_VERIFICATION_REQUIRED_MESSAGE,
+  getLoginErrorMessage,
+  isSignInFailure,
+  isSignInVerificationRequired,
+} from "@/lib/login-errors";
+import {
+  setRegisterVerifyCooldown,
+  setRegisterVerifyEmail,
+} from "@/lib/register-verify-storage";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
@@ -107,6 +129,7 @@ function AuthField({
 }
 
 export function LoginForm() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const isAuthenticated =
     status === "authenticated" &&
@@ -127,6 +150,11 @@ export function LoginForm() {
   usePostAuthRedirect();
 
   useEffect(() => {
+    void Promise.all([getCsrfToken(), getProviders()]);
+    router.prefetch("/register/verify");
+  }, [router]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (!params.has("google_error")) {
       return;
@@ -134,7 +162,13 @@ export function LoginForm() {
     toast.error("Google sign-in failed", {
       description: "Please try again or use email and password.",
     });
-    window.history.replaceState({}, "", "/login");
+    params.delete("google_error");
+    const nextQuery = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`,
+    );
   }, []);
 
   const isBusy = form.formState.isSubmitting || isAuthenticated;
@@ -144,10 +178,38 @@ export function LoginForm() {
       name: "rememberMe",
     }) ?? false;
 
-  const onSubmit = async (values: LoginValues) => {
-    form.clearErrors("password");
-    form.clearErrors("root");
+  const redirectToEmailVerification = useCallback(
+    (email: string) => {
+      const trimmed = email.trim();
+      if (!trimmed) return;
 
+      setRegisterVerifyEmail(trimmed);
+      router.replace("/register/verify");
+
+      void (async () => {
+        const otpResult = await resendOtp(trimmed);
+
+        if (isResendOtpSuccess(otpResult)) {
+          if (otpResult.cooldownSeconds) {
+            setRegisterVerifyCooldown(otpResult.cooldownSeconds);
+          }
+          toast.info("Verification code sent", {
+            description:
+              otpResult.message ??
+              "Check your email for a 6-digit code, then enter it below.",
+          });
+        } else if (
+          "cooldownSeconds" in otpResult &&
+          otpResult.cooldownSeconds
+        ) {
+          setRegisterVerifyCooldown(otpResult.cooldownSeconds);
+        }
+      })();
+    },
+    [router],
+  );
+
+  const onSubmit = async (values: LoginValues) => {
     try {
       const response = await signIn("credentials", {
         email: values.email,
@@ -157,11 +219,16 @@ export function LoginForm() {
       });
 
       if (isSignInFailure(response)) {
-        const message = getLoginErrorMessage(response);
-        toast.error("Could not sign in", { description: message });
-        form.setError("password", {
-          type: "server",
-          message,
+        if (isSignInVerificationRequired(response, response?.url)) {
+          toast.info("Verify your email", {
+            description: EMAIL_VERIFICATION_REQUIRED_MESSAGE,
+          });
+          redirectToEmailVerification(values.email);
+          return;
+        }
+
+        toast.error("Could not sign in", {
+          description: getLoginErrorMessage(response),
         });
         return;
       }
@@ -176,10 +243,6 @@ export function LoginForm() {
       toast.error("Could not sign in", {
         description: LOGIN_ERROR_MESSAGE,
       });
-      form.setError("root", {
-        type: "server",
-        message: LOGIN_ERROR_MESSAGE,
-      });
     }
   };
 
@@ -187,7 +250,6 @@ export function LoginForm() {
   const passwordRegistration = form.register("password");
   const emailError = form.formState.errors.email?.message;
   const passwordError = form.formState.errors.password?.message;
-  const rootError = form.formState.errors.root?.message;
 
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
@@ -211,11 +273,7 @@ export function LoginForm() {
           type="email"
           error={emailError}
           register={emailRegistration}
-          onChange={() => {
-            form.clearErrors("email");
-            form.clearErrors("password");
-            form.clearErrors("root");
-          }}
+          onChange={() => form.clearErrors("email")}
         />
 
         <div className="space-y-3">
@@ -229,10 +287,7 @@ export function LoginForm() {
             showPassword={showPassword}
             onTogglePassword={() => setShowPassword((current) => !current)}
             register={passwordRegistration}
-            onChange={() => {
-              form.clearErrors("password");
-              form.clearErrors("root");
-            }}
+            onChange={() => form.clearErrors("password")}
           />
 
           <div className="flex items-center justify-between gap-4">
@@ -257,15 +312,6 @@ export function LoginForm() {
             </Link>
           </div>
         </div>
-
-        {rootError ? (
-          <p
-            role="alert"
-            className="text-sm leading-[20px] font-normal text-[#D13232] sm:text-xs sm:leading-[18px] sm:font-medium"
-          >
-            {rootError}
-          </p>
-        ) : null}
 
         <Button
           type="submit"

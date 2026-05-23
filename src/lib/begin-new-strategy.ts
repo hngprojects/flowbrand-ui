@@ -1,5 +1,9 @@
 import { clearDashboardMockSession } from "@/lib/dashboard-mock-session";
-import { clearActiveFunnelGeneration } from "@/lib/funnel-generation-storage";
+import {
+  clearActiveFunnelGeneration,
+  clearPendingGeneration,
+  markStrategyAutoResolveSkipped,
+} from "@/lib/funnel-generation-storage";
 import {
   markNewStrategyFlow,
   newStrategyOnboardingPath,
@@ -12,6 +16,8 @@ export function beginNewStrategyFlow(): string {
     useOnboardingStore.getState().reset();
     clearDashboardMockSession();
     clearActiveFunnelGeneration();
+    clearPendingGeneration();
+    markStrategyAutoResolveSkipped();
     markNewStrategyFlow();
   }
   return newStrategyOnboardingPath();

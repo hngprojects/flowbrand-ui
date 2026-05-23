@@ -2,15 +2,15 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import {
   buildSessionFromOnboarding,
   saveDashboardMockSession,
 } from "@/lib/dashboard-mock-session";
-import { FUNNEL_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
+import { STRATEGY_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 import { clearNewStrategyFlow, isNewStrategyFlow } from "@/lib/new-strategy";
 import {
   buildStep1Answer,
@@ -28,6 +28,9 @@ import {
 } from "@/hooks/queries/use-onboarding-queries";
 import { useStartFunnelGenerationMutation } from "@/hooks/mutations/use-funnel-mutations";
 import { redirectToExistingFunnelIfAny } from "@/lib/onboarding-client-recovery";
+import { GenerateFunnelError } from "@/lib/funnel-query-fns";
+import { reserveIdempotencyKey } from "@/lib/funnel-generation-storage";
+import { OnboardingAlreadyCompleteError } from "@/lib/onboarding-query-fns";
 import ProgressBar from "./ProgressBar";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
@@ -39,6 +42,10 @@ const step2Schema = onboardingSchema.pick({ idealCustomer: true });
 export function QuestionsView() {
   const router = useRouter();
   const store = useOnboardingStore();
+  const setSessionId = useOnboardingStore((s) => s.setSessionId);
+  const hydrateFromApiSession = useOnboardingStore(
+    (s) => s.hydrateFromApiSession,
+  );
   const saveStep = useSaveOnboardingStepMutation();
   const completeOnboarding = useCompleteOnboardingMutation();
   const startGeneration = useStartFunnelGenerationMutation();
@@ -53,35 +60,44 @@ export function QuestionsView() {
     if (!isNewStrategyFlow() && isOnboardingSessionComplete(session)) {
       void redirectToExistingFunnelIfAny(router, "wizard").then(
         (redirected) => {
-          if (!redirected) router.replace(FUNNEL_ROUTE);
+          if (!redirected) router.replace(STRATEGY_ROUTE);
         },
       );
       return;
     }
 
     const id = parseOnboardingSessionId(raw);
-    if (id) store.setSessionId(id);
+    if (id) setSessionId(id);
 
     const tags = customerTagsFromAnswers(session.answers);
-    store.hydrateFromApiSession({
+    hydrateFromApiSession({
       businessDescription: session.answers.step_1?.business_description,
       customerTags: tags.length > 0 ? tags : undefined,
       trafficChannel: session.answers.step_3?.discovery_channel,
       step: stepNumberFromSession(session),
     });
-  }, [sessionQuery.isSuccess, sessionQuery.data, router, store]);
+  }, [
+    sessionQuery.isSuccess,
+    sessionQuery.data,
+    router,
+    setSessionId,
+    hydrateFromApiSession,
+  ]);
+
+  const onboardingAlreadyComplete =
+    sessionQuery.error instanceof OnboardingAlreadyCompleteError;
 
   useEffect(() => {
-    if (sessionQuery.isError) {
-      toast.error(
-        sessionQuery.error instanceof Error
-          ? sessionQuery.error.message
-          : "Could not start onboarding. Please refresh and try again.",
-      );
-    }
-  }, [sessionQuery.isError, sessionQuery.error]);
+    if (!sessionQuery.isError) return;
+    if (onboardingAlreadyComplete) return;
+    toast.error(
+      sessionQuery.error instanceof Error
+        ? sessionQuery.error.message
+        : "Could not start onboarding. Please refresh and try again.",
+    );
+  }, [sessionQuery.isError, sessionQuery.error, onboardingAlreadyComplete]);
 
-  const isBootstrapping = sessionQuery.isPending;
+  const isBootstrapping = sessionQuery.isPending && !onboardingAlreadyComplete;
   const isLoading =
     saveStep.isPending ||
     completeOnboarding.isPending ||
@@ -101,6 +117,11 @@ export function QuestionsView() {
     });
     if (!result.success) {
       toast.error(result.error.issues[0]?.message ?? "Validation error");
+      return;
+    }
+
+    if (onboardingAlreadyComplete) {
+      store.nextStep();
       return;
     }
 
@@ -132,6 +153,11 @@ export function QuestionsView() {
     });
     if (!result.success) {
       toast.error(result.error.issues[0]?.message ?? "Validation error");
+      return;
+    }
+
+    if (onboardingAlreadyComplete) {
+      store.nextStep();
       return;
     }
 
@@ -185,18 +211,20 @@ export function QuestionsView() {
       return;
     }
 
-    const sessionId = ensureSessionId();
-    if (!sessionId) return;
-
     try {
-      await saveStep.mutateAsync({
-        session_id: sessionId,
-        step: 3,
-        answer: buildStep3Answer(store.trafficChannel),
-      });
+      if (!onboardingAlreadyComplete) {
+        const sessionId = ensureSessionId();
+        if (!sessionId) return;
 
-      await completeOnboarding.mutateAsync(sessionId);
-      store.setSessionId(null);
+        await saveStep.mutateAsync({
+          session_id: sessionId,
+          step: 3,
+          answer: buildStep3Answer(store.trafficChannel),
+        });
+
+        await completeOnboarding.mutateAsync(sessionId);
+        store.setSessionId(null);
+      }
 
       if (!isNewStrategyFlow()) {
         if (await redirectToExistingFunnelIfAny(router, "wizard")) {
@@ -205,11 +233,10 @@ export function QuestionsView() {
         }
       }
 
-      const uploadIds = store.uploadedDocuments.map((doc) => doc.id);
+      // PATH 1: wizard — no upload_ids (document path is upload page only).
       await startGeneration.mutateAsync({
-        source: uploadIds.length > 0 ? "document_upload" : "wizard",
-        idempotencyKey: crypto.randomUUID(),
-        uploadIds: uploadIds.length > 0 ? uploadIds : undefined,
+        source: "wizard",
+        idempotencyKey: reserveIdempotencyKey("wizard"),
       });
 
       saveDashboardMockSession(
@@ -226,12 +253,18 @@ export function QuestionsView() {
 
       clearNewStrategyFlow();
       toast.success("Building your marketing strategy…");
-      router.push(FUNNEL_ROUTE);
+      router.push(STRATEGY_ROUTE);
     } catch (error) {
       if (await redirectToExistingFunnelIfAny(router, "wizard")) {
         clearNewStrategyFlow();
         return;
       }
+
+      if (error instanceof GenerateFunnelError && error.rateLimited) {
+        toast.error(error.message);
+        return;
+      }
+
       toast.error(
         error instanceof Error
           ? error.message

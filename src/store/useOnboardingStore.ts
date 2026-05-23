@@ -47,7 +47,8 @@ const initialOnboardingState = {
 export const useOnboardingStore = create<OnboardingState>((set) => ({
   ...initialOnboardingState,
   setStep: (step) => set({ step: Math.max(1, Math.min(step, 3)) }),
-  setSessionId: (id) => set({ sessionId: id }),
+  setSessionId: (id) =>
+    set((state) => (state.sessionId === id ? state : { sessionId: id })),
   nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 3) })),
   prevStep: () => set((state) => ({ step: Math.max(state.step - 1, 1) })),
   setBusinessDescription: (val) => set({ businessDescription: val }),
@@ -82,12 +83,31 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
       uploadedDocuments: state.uploadedDocuments.filter((d) => d.id !== id),
     })),
   hydrateFromApiSession: (input) =>
-    set((state) => ({
-      businessDescription:
-        input.businessDescription ?? state.businessDescription,
-      theyAre: input.customerTags ?? state.theyAre,
-      trafficChannel: input.trafficChannel ?? state.trafficChannel,
-      step: input.step ?? state.step,
-    })),
+    set((state) => {
+      const step = input.step ?? state.step;
+      const businessDescription =
+        input.businessDescription ?? state.businessDescription;
+      const theyAre =
+        input.customerTags !== undefined ? input.customerTags : state.theyAre;
+      const trafficChannel = input.trafficChannel ?? state.trafficChannel;
+
+      if (
+        step === state.step &&
+        businessDescription === state.businessDescription &&
+        trafficChannel === state.trafficChannel &&
+        theyAre.length === state.theyAre.length &&
+        theyAre.every((tag, index) => tag === state.theyAre[index])
+      ) {
+        return state;
+      }
+
+      return {
+        ...state,
+        step,
+        businessDescription,
+        theyAre,
+        trafficChannel,
+      };
+    }),
   reset: () => set({ ...initialOnboardingState }),
 }));

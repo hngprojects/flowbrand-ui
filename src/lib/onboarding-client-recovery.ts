@@ -8,7 +8,7 @@ import {
   type ParsedOnboardingSession,
 } from "@/lib/onboarding-api";
 import { isNewStrategyFlow } from "@/lib/new-strategy";
-import { FUNNEL_ROUTE } from "@/routes";
+import { STRATEGY_ROUTE } from "@/routes";
 
 /** Send users with a finished session or existing funnel to the strategy page. */
 export async function redirectToStrategyHomeIfReady(
@@ -19,8 +19,8 @@ export async function redirectToStrategyHomeIfReady(
   }
 
   const path = await getPostAuthRedirect();
-  if (path === FUNNEL_ROUTE) {
-    router.replace(FUNNEL_ROUTE);
+  if (path === STRATEGY_ROUTE) {
+    router.replace(STRATEGY_ROUTE);
     return true;
   }
 
@@ -51,7 +51,7 @@ export async function redirectToExistingFunnelIfAny(
     idempotencyKey: crypto.randomUUID(),
     source,
   });
-  router.replace(FUNNEL_ROUTE);
+  router.replace(STRATEGY_ROUTE);
   return true;
 }
 

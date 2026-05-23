@@ -1,11 +1,17 @@
-/** Grid mesh pattern; set line color via `className` (e.g. `text-[#E1EAFA]` or `text-[#E8EAED]`). */
-export const PatternMesh = (props: React.SVGProps<SVGSVGElement>) => (
+import { cn } from "@/lib/utils";
+
+/** Grid mesh pattern; stretches to fill its container. Set line color via `className`. */
+export const PatternMesh = ({
+  className,
+  ...props
+}: React.SVGProps<SVGSVGElement>) => (
   <svg
-    width="1440"
-    height="1024"
     viewBox="0 0 1440 1024"
+    preserveAspectRatio="none"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className={cn("h-full w-full", className)}
+    aria-hidden
     {...props}
   >
     <path d="M0 -80V1105" stroke="currentColor" />

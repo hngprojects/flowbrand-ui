@@ -9,8 +9,9 @@ import { clearForgotResetStorage } from "@/lib/forgot-password-storage";
 import { clearRegisterVerifyEmail } from "@/lib/register-verify-storage";
 import { queryKeys } from "@/lib/query-keys";
 import { ONBOARDING_UPLOAD_ROUTE } from "@/routes";
+import { flowLog } from "@/lib/flow-debug-log";
 
-/** After sign-in, resolve onboarding vs funnel once the client session is ready. */
+/** After sign-in, resolve onboarding vs strategy once the client session is ready. */
 export function usePostAuthRedirect() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -42,6 +43,7 @@ export function usePostAuthRedirect() {
     redirectStarted.current = true;
     clearRegisterVerifyEmail();
     clearForgotResetStorage();
+    flowLog("auth", "post-auth redirect", { path: entryQuery.data });
     router.replace(entryQuery.data);
   }, [isAuthenticated, entryQuery.isPending, entryQuery.data, router]);
 

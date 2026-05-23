@@ -384,7 +384,7 @@ const resetPasswordWithOtp = async (input: {
     }
 
     const redirectUrl =
-      mapApiRedirectToAppPath(parsed.redirect_url) ?? parsed.redirect_url;
+      mapApiRedirectToAppPath(parsed.redirect_url) ?? undefined;
 
     return {
       ok: true,
