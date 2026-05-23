@@ -118,7 +118,7 @@ jobs:
               ! -name "node_modules" \
               -exec rm -rf {} +
 
-      - name: Copy project files
+      - name: Copy projects files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
