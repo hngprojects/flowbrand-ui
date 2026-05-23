@@ -79,7 +79,7 @@ export default function NotificationsModal({
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent
           showCloseButton={false}
-          className="fixed lg:top-3 lg:right-4 top-0 right-0 left-auto h-screen w-full lg:w-1/2 lg:max-w-[720px] max-w-none translate-x-0 translate-y-0 rounded-none"
+          className="fixed lg:top-3 lg:right-4 top-0 right-0 left-auto h-screen w-full lg:w-1/2 lg:max-w-[720px] max-w-none translate-x-0 translate-y-0 lg:rounded-lg rounded-none"
         >
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <DialogTitle className="text-foreground text-lg font-semibold">
