@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 import LogoIcon from "@/components/icons/navbar/logo";
 import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import StrategySidebar from "@/components/dashboard/strategy/strategy-sidebar";
 import FunnelModal from "@/components/modals/FunnelModal";
 import MyProfileTab from "@/components/settings/tabs/MyProfileTab";
