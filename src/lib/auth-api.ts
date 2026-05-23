@@ -282,7 +282,9 @@ export function parseLoginEnvelope(
       avatar_url:
         typeof userRecord.avatar_url === "string"
           ? userRecord.avatar_url
-          : null,
+          : typeof userRecord.avatarUrl === "string"
+            ? userRecord.avatarUrl
+            : null,
     }),
     access_token,
     redirect_url,
@@ -342,6 +344,27 @@ export function parseMeEnvelope(body: unknown): AuthMeProfile | null {
       readBoolean(data, "hasStrategy", "has_strategy") ??
       readBoolean(userRecord, "hasStrategy", "has_strategy"),
   };
+}
+
+/** Exchange short-lived Google OAuth code for access token (refresh token via Set-Cookie). */
+export async function exchangeGoogleOAuthCode(
+  baseUrl: string,
+  code: string,
+): Promise<{
+  user: User;
+  access_token: string;
+  redirect_url?: string;
+} | null> {
+  try {
+    const response = await axios.post(
+      authApiUrl(baseUrl, "/google/exchange"),
+      { code },
+      { withCredentials: true },
+    );
+    return parseLoginEnvelope(response.data);
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchAuthMe(

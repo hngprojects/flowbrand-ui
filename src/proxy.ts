@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { resolveDashboardEntryPathWithToken } from "@/lib/dashboard-entry";
+import { fetchAuthMe } from "@/lib/auth-api";
 import {
-  authRoutes,
-  STRATEGY_ROUTE,
-  ONBOARDING_ROUTE,
-  ONBOARDING_UPLOAD_ROUTE,
-  protectedRoutes,
-} from "@/routes";
+  buildGoogleOAuthCallbackUrl,
+  GOOGLE_OAUTH_CALLBACK_PATH,
+  hasGoogleOAuthExchangeParams,
+} from "@/lib/google-oauth";
+import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
+import { envConfig } from "@/config/env.config";
+import { authRoutes, ONBOARDING_UPLOAD_ROUTE, protectedRoutes } from "@/routes";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -24,8 +25,18 @@ function isProtectedPath(pathname: string): boolean {
 
 export const proxy = auth(async (request) => {
   const { nextUrl } = request;
-  const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
   const pathname = nextUrl.pathname;
+
+  if (
+    pathname !== GOOGLE_OAUTH_CALLBACK_PATH &&
+    hasGoogleOAuthExchangeParams(nextUrl.searchParams)
+  ) {
+    return NextResponse.redirect(
+      buildGoogleOAuthCallbackUrl(nextUrl.origin, nextUrl.searchParams),
+    );
+  }
+
+  const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
 
   const isAuthRoute = authRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
@@ -42,26 +53,11 @@ export const proxy = auth(async (request) => {
     let redirectPath = ONBOARDING_UPLOAD_ROUTE;
 
     if (typeof accessToken === "string") {
-      redirectPath = await resolveDashboardEntryPathWithToken(accessToken);
+      const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+      redirectPath = resolvePostAuthPath(me);
     }
 
     return NextResponse.redirect(new URL(redirectPath, nextUrl.origin));
-  }
-
-  const isOnboardingPath =
-    pathname === ONBOARDING_ROUTE ||
-    pathname.startsWith(`${ONBOARDING_ROUTE}/`);
-
-  if (isLoggedIn && isOnboardingPath) {
-    const isNewStrategy = nextUrl.searchParams.get("newStrategy") === "1";
-    const accessToken = request.auth?.access_token;
-
-    if (!isNewStrategy && typeof accessToken === "string") {
-      const entryPath = await resolveDashboardEntryPathWithToken(accessToken);
-      if (entryPath === STRATEGY_ROUTE) {
-        return NextResponse.redirect(new URL(STRATEGY_ROUTE, nextUrl.origin));
-      }
-    }
   }
 
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
