@@ -24,7 +24,6 @@ interface OnboardingNavbarProps {
   strategyPhases?: readonly StrategyPhaseDisplay[];
   strategySummary?: string;
   onCreateNewStrategy?: () => void;
-  onCancelGeneration?: () => void;
 }
 
 const OnboardingNavbar = ({
@@ -33,7 +32,6 @@ const OnboardingNavbar = ({
   strategyPhases = [],
   strategySummary,
   onCreateNewStrategy,
-  onCancelGeneration,
 }: OnboardingNavbarProps) => {
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -174,7 +172,6 @@ const OnboardingNavbar = ({
                 strategyPhases={strategyPhases}
                 strategySummary={strategySummary}
                 onCreateNewStrategy={onCreateNewStrategy}
-                onCancelGeneration={onCancelGeneration}
                 className="!static !top-auto !flex !h-auto !max-w-none !w-full !overflow-visible !border-0 px-0 py-0"
               />
             </div>

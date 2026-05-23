@@ -8,10 +8,9 @@ export type FlowDebugArea =
   | "strategy"
   | "upload";
 
-/** Enable in dev, with FLOWBRAND_DEBUG=1, or sessionStorage flowbrand_debug=1 in the browser. */
+/** Enable with FLOWBRAND_DEBUG=1 or sessionStorage flowbrand_debug=1 in the browser. */
 export function isFlowDebugEnabled(): boolean {
   if (process.env.FLOWBRAND_DEBUG === "1") return true;
-  if (process.env.NODE_ENV === "development") return true;
   if (typeof window !== "undefined") {
     try {
       return sessionStorage.getItem("flowbrand_debug") === "1";

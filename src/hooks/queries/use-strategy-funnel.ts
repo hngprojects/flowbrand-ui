@@ -16,7 +16,7 @@ import {
 import { queryKeys } from "@/lib/query-keys";
 import {
   clearActiveFunnelGeneration,
-  clearPendingGeneration,
+  clearStrategyAutoResolveSkipped,
   loadActiveFunnelGeneration,
   markStrategyAutoResolveSkipped,
   saveActiveFunnelGeneration,
@@ -38,10 +38,16 @@ const MAX_WALL_MS = 8 * 60 * 1000;
 const AGGRESSIVE_PROBE_AFTER_MS = 15 * 1000;
 const TICK_MS = 1000;
 
-export const STRATEGY_GENERATION_HINT = "Usually takes 1–2 minutes.";
+export const STRATEGY_LOADING_MESSAGE = "Building your marketing strategy...";
 
 export const NO_STRATEGY_ERROR =
   "No strategy found. Complete onboarding to create one.";
+
+export const NO_STRATEGY_AVAILABLE_MESSAGE =
+  "You don't have a strategy yet. Create one through onboarding to get started.";
+
+export const STRATEGY_NOT_VIEWABLE_MESSAGE =
+  "We couldn't load your strategy. It may still be generating or is no longer available.";
 
 function generationPollIntervalMs(
   pollStartedAt: number | null,
@@ -66,32 +72,13 @@ function displayContentPollIntervalMs(
   return elapsed < FAST_POLL_WINDOW_MS ? FAST_POLL_MS : POLL_MS;
 }
 
-function formatElapsed(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return s > 0 ? `${m}m ${s}s` : `${m}m`;
-}
-
+/** SSR-safe defaults — sessionStorage is hydrated in useEffect after mount. */
 function readInitialStrategyState() {
-  if (typeof window === "undefined") {
-    return {
-      funnelId: null as string | null,
-      resolvedId: false,
-      pollStartedAt: null as number | null,
-      hydratedFromStorage: false,
-    };
-  }
-
-  const skipResolve = shouldSkipStrategyAutoResolve();
-  const stored = loadActiveFunnelGeneration();
-  const funnelId = stored?.funnelId ?? null;
-
   return {
-    funnelId,
-    resolvedId: funnelId !== null || skipResolve,
-    pollStartedAt: funnelId ? Date.now() : null,
-    hydratedFromStorage: funnelId !== null || skipResolve,
+    funnelId: null as string | null,
+    resolvedId: false,
+    pollStartedAt: null as number | null,
+    hydratedFromStorage: false,
   };
 }
 
@@ -108,6 +95,7 @@ export function useStrategyFunnel() {
   const [hydratedFromStorage, setHydratedFromStorage] = useState(
     initial.hydratedFromStorage,
   );
+  const [generationAborted, setGenerationAborted] = useState(false);
 
   const completedStageIds = useMemo(() => {
     void stageProgressVersion;
@@ -115,15 +103,31 @@ export function useStrategyFunnel() {
     return getCompletedStages(funnelId);
   }, [funnelId, stageProgressVersion]);
 
-  useEffect(() => {
-    if (funnelId) return;
-    if (shouldSkipStrategyAutoResolve()) return;
+  const resolveFunnelId = useCallback(
+    async (isActive: () => boolean = () => true): Promise<string | null> => {
+      if (!isActive()) return null;
 
-    let cancelled = false;
+      if (shouldSkipStrategyAutoResolve()) {
+        if (!isActive()) return null;
+        setResolvedId(true);
+        setHydratedFromStorage(true);
+        return null;
+      }
 
-    void fetchFunnelList(1)
-      .then((funnels) => {
-        if (cancelled) return;
+      const stored = loadActiveFunnelGeneration();
+      if (stored?.funnelId) {
+        if (!isActive()) return null;
+        setFunnelId(stored.funnelId);
+        setPollStartedAt(Date.now());
+        setGenerationAborted(false);
+        setResolvedId(true);
+        setHydratedFromStorage(true);
+        return stored.funnelId;
+      }
+
+      try {
+        const funnels = await fetchFunnelList(1);
+        if (!isActive()) return null;
         const latest = funnels[0]?.funnelId ?? null;
         if (latest) {
           flowLog("strategy", "resolve funnelId → latest from list", {
@@ -136,30 +140,36 @@ export function useStrategyFunnel() {
           });
           setFunnelId(latest);
           setPollStartedAt(Date.now());
+          setGenerationAborted(false);
         } else {
           flowLog("strategy", "resolve funnelId → list empty");
         }
         setResolvedId(true);
         setHydratedFromStorage(true);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setResolvedId(true);
-          setHydratedFromStorage(true);
-        }
-      });
+        return latest;
+      } catch {
+        if (!isActive()) return null;
+        setResolvedId(true);
+        setHydratedFromStorage(true);
+        return null;
+      }
+    },
+    [],
+  );
 
+  useEffect(() => {
+    if (funnelId) return;
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      void resolveFunnelId(() => active);
+    });
     return () => {
-      cancelled = true;
+      active = false;
     };
-  }, [funnelId]);
+  }, [funnelId, resolveFunnelId]);
 
   const timedOut = pollStartedAt !== null && now - pollStartedAt > MAX_WALL_MS;
-
-  const elapsedSec =
-    pollStartedAt !== null
-      ? Math.max(0, Math.round((now - pollStartedAt) / 1000))
-      : 0;
 
   const aggressiveProbe =
     pollStartedAt !== null && now - pollStartedAt >= AGGRESSIVE_PROBE_AFTER_MS;
@@ -182,6 +192,8 @@ export function useStrategyFunnel() {
         "Strategy generation failed. Please try again.")
       : null;
 
+  const statusSettled = statusQuery.isFetched || statusQuery.isError;
+
   const shouldPollDisplay =
     Boolean(funnelId) &&
     resolvedId &&
@@ -189,7 +201,8 @@ export function useStrategyFunnel() {
     (aggressiveProbe ||
       status === "active" ||
       status === "generating" ||
-      timedOut);
+      timedOut ||
+      statusSettled);
 
   const displayQuery = useQuery({
     queryKey: funnelId
@@ -285,12 +298,6 @@ export function useStrategyFunnel() {
     status,
   ]);
 
-  const loadingMessage = useMemo(() => {
-    const elapsed = formatElapsed(elapsedSec);
-    if (!funnelId) return "Starting…";
-    return `Building strategy… (${elapsed})`;
-  }, [funnelId, elapsedSec]);
-
   const displayReady = Boolean(
     hasRealContent && strategyPhases.length > 0 && focus,
   );
@@ -298,6 +305,9 @@ export function useStrategyFunnel() {
   const error = useMemo(() => {
     if (!resolvedId) return null;
     if (!funnelId) {
+      if (generationAborted || shouldSkipStrategyAutoResolve()) {
+        return null;
+      }
       return NO_STRATEGY_ERROR;
     }
     if (generationFailed) {
@@ -319,6 +329,7 @@ export function useStrategyFunnel() {
   }, [
     resolvedId,
     funnelId,
+    generationAborted,
     generationFailed,
     statusQuery.error,
     displayQuery.error,
@@ -359,26 +370,35 @@ export function useStrategyFunnel() {
     funnel?.stages?.length,
   ]);
 
-  const retry = useCallback(() => {
+  const retry = useCallback(async () => {
+    setGenerationAborted(false);
+    clearStrategyAutoResolveSkipped();
     setPollStartedAt(Date.now());
     setNow(Date.now());
-    setResolvedId(true);
+
     void queryClient.invalidateQueries({ queryKey: queryKeys.funnels.all() });
-    if (funnelId) {
+
+    const id = funnelId;
+    if (id) {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.funnels.generationStatus(funnelId),
+        queryKey: queryKeys.funnels.generationStatus(id),
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.funnels.display(funnelId),
+        queryKey: queryKeys.funnels.display(id),
       });
+      return;
     }
-  }, [queryClient, funnelId]);
+
+    setResolvedId(false);
+    setHydratedFromStorage(false);
+    await resolveFunnelId();
+  }, [queryClient, funnelId, resolveFunnelId]);
 
   const abortActiveGeneration = useCallback(() => {
     const id = funnelId;
     clearActiveFunnelGeneration();
-    clearPendingGeneration();
     markStrategyAutoResolveSkipped();
+    setGenerationAborted(true);
     setFunnelId(null);
     setPollStartedAt(null);
     setResolvedId(true);
@@ -397,9 +417,9 @@ export function useStrategyFunnel() {
 
   return {
     loading,
-    loadingMessage,
-    loadingHint: STRATEGY_GENERATION_HINT,
+    loadingMessage: STRATEGY_LOADING_MESSAGE,
     error,
+    displayReady,
     funnel,
     funnelId,
     activeStageId,
@@ -410,6 +430,7 @@ export function useStrategyFunnel() {
     tasks,
     retry,
     abortActiveGeneration,
+    generationAborted,
     hydratedFromStorage,
   };
 }

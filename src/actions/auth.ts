@@ -301,14 +301,6 @@ const requestPasswordReset = async (
       },
     );
 
-    if (process.env.NODE_ENV === "development") {
-      console.info("[auth] forgot-password", {
-        url,
-        status: response.status,
-        body: response.data,
-      });
-    }
-
     return {
       ok: true,
       message: messageFromApiBody(

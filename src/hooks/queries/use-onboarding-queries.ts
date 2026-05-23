@@ -12,24 +12,32 @@ import {
   saveOnboardingStepMutation,
   type OnboardingSessionPayload,
 } from "@/lib/onboarding-query-fns";
-import { isNewStrategyFlow } from "@/lib/new-strategy";
+import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 
 export function useDashboardEntryPathQuery(enabled = true) {
+  const isNewStrategy = useNewStrategyFlow();
+
   return useQuery({
     queryKey: queryKeys.auth.entryPath(),
     queryFn: () => getPostAuthRedirect(),
-    enabled: enabled && !isNewStrategyFlow(),
+    enabled: enabled && !isNewStrategy,
     staleTime: 60_000,
   });
 }
 
 export function useOnboardingSessionQuery(enabled = true) {
+  const isNewStrategy = useNewStrategyFlow();
+  const sessionQueryKey = queryKeys.onboarding.session(
+    isNewStrategy ? "new-strategy" : "default",
+  );
+
   return useQuery({
-    queryKey: queryKeys.onboarding.session(),
+    queryKey: sessionQueryKey,
     queryFn: getOrCreateOnboardingSession,
     enabled,
-    staleTime: Infinity,
+    staleTime: 0,
+    refetchOnMount: true,
     retry: (failureCount, error) => {
       if (error instanceof OnboardingAlreadyCompleteError) return false;
       return failureCount < 1;
@@ -54,11 +62,15 @@ export function useEnsureOnboardingSession() {
 
 export function useSaveOnboardingStepMutation() {
   const queryClient = useQueryClient();
+  const isNewStrategy = useNewStrategyFlow();
+  const sessionQueryKey = queryKeys.onboarding.session(
+    isNewStrategy ? "new-strategy" : "default",
+  );
 
   return useMutation({
     mutationFn: saveOnboardingStepMutation,
     onSuccess: (data: OnboardingSessionPayload) => {
-      queryClient.setQueryData(queryKeys.onboarding.session(), data);
+      queryClient.setQueryData(sessionQueryKey, data);
     },
   });
 }

@@ -4,7 +4,8 @@ export const queryKeys = {
   },
   onboarding: {
     all: () => ["onboarding"] as const,
-    session: () => ["onboarding", "session"] as const,
+    session: (scope: "default" | "new-strategy" = "default") =>
+      ["onboarding", "session", scope] as const,
   },
   funnels: {
     all: () => ["funnels"] as const,

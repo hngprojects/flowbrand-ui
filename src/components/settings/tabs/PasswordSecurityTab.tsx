@@ -56,8 +56,7 @@ export default function PasswordSecurityTab() {
 
   const { isSubmitting } = form.formState;
 
-  const onSubmit = async (values: PasswordSecurityFormValues) => {
-    console.log("change password", values);
+  const onSubmit = async () => {
     setSuccessOpen(true);
     form.reset();
   };

@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { STRATEGY_ROUTE } from "@/routes";
-import {
-  isNewStrategyFlow,
-  isNewStrategySearchParam,
-  markNewStrategyFlow,
-} from "@/lib/new-strategy";
+import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
 import { useDashboardEntryPathQuery } from "@/hooks/queries/use-onboarding-queries";
 import Loader from "@/components/ui/loader";
 
@@ -21,31 +17,19 @@ export function OnboardingAccessGuard({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const isNewStrategy = isNewStrategySearchParam(
-    searchParams.get("newStrategy"),
-  );
-  const skipEntryCheck = isNewStrategy || isNewStrategyFlow();
-
-  const entryQuery = useDashboardEntryPathQuery(!skipEntryCheck);
+  const isNewStrategy = useNewStrategyFlow();
+  const entryQuery = useDashboardEntryPathQuery(!isNewStrategy);
 
   const allowed =
-    skipEntryCheck ||
+    isNewStrategy ||
     (entryQuery.isSuccess && entryQuery.data !== STRATEGY_ROUTE);
 
   useEffect(() => {
-    if (skipEntryCheck && isNewStrategy) {
-      markNewStrategyFlow();
-    }
-  }, [skipEntryCheck, isNewStrategy]);
-
-  useEffect(() => {
-    if (skipEntryCheck || entryQuery.isPending) return;
+    if (isNewStrategy || entryQuery.isPending) return;
     if (entryQuery.data === STRATEGY_ROUTE) {
       router.replace(STRATEGY_ROUTE);
     }
-  }, [skipEntryCheck, entryQuery.isPending, entryQuery.data, router]);
+  }, [isNewStrategy, entryQuery.isPending, entryQuery.data, router]);
 
   if (!allowed) {
     return (

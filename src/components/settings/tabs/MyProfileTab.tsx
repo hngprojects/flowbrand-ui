@@ -58,8 +58,8 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const onSubmit = async (values: MyProfileFormValues) => {
-    console.log("save profile", { ...values, avatar });
+  const onSubmit = async () => {
+    // Profile save API not wired yet.
   };
 
   return (

@@ -6,6 +6,7 @@ import { DocsImg } from "@/components/icons/docs-img";
 import { InlineSpinner } from "@/components/icons/loader/inline-spinner";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
+import { STRATEGY_LOADING_MESSAGE } from "@/hooks/queries/use-strategy-funnel";
 import { StrategyIcon } from "@/components/icons/strategy";
 
 const STRATEGY_SIDEBAR_ASIDE_CLASS =
@@ -42,7 +43,6 @@ export default function StrategySidebar({
   strategyPhases = [],
   strategySummary,
   onCreateNewStrategy,
-  onCancelGeneration,
   className,
 }: {
   loading: boolean;
@@ -50,7 +50,6 @@ export default function StrategySidebar({
   strategyPhases?: readonly StrategyPhaseDisplay[];
   strategySummary?: string;
   onCreateNewStrategy?: () => void;
-  onCancelGeneration?: () => void;
   className?: string;
 }) {
   const hasPhases = strategyPhases.length > 0;
@@ -83,20 +82,11 @@ export default function StrategySidebar({
           ) : null}
 
           {loading && (
-            <div className="flex flex-col gap-2 pt-0.5">
-              <div className="flex items-center gap-2">
-                <InlineSpinner size={20} />
-                <p className="text-sm text-[#344054]">Building strategy…</p>
-              </div>
-              {onCancelGeneration ? (
-                <button
-                  type="button"
-                  onClick={onCancelGeneration}
-                  className="mt-1 w-full rounded-xl border border-[#EAECF0] px-4 py-2.5 text-sm font-medium text-[#344054] hover:bg-[#FAFBFC]"
-                >
-                  Cancel
-                </button>
-              ) : null}
+            <div className="flex items-center gap-2 pt-0.5">
+              <InlineSpinner size={20} />
+              <p className="text-sm text-[#344054]">
+                {STRATEGY_LOADING_MESSAGE}
+              </p>
             </div>
           )}
         </div>

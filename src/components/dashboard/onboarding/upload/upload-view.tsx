@@ -16,11 +16,8 @@ import {
 } from "@/lib/dashboard-mock-session";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { STRATEGY_ROUTE, ONBOARDING_QUESTIONS_ROUTE } from "@/routes";
-import {
-  clearNewStrategyFlow,
-  isNewStrategyFlow,
-  NEW_STRATEGY_QUERY,
-} from "@/lib/new-strategy";
+import { clearNewStrategyFlow, NEW_STRATEGY_QUERY } from "@/lib/new-strategy";
+import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
 import { redirectToExistingFunnelIfAny } from "@/lib/onboarding-client-recovery";
 import {
   useDashboardEntryPathQuery,
@@ -131,7 +128,8 @@ export function UploadView() {
   const [dragging, setDragging] = useState(false);
   const uploadMutation = useUploadDocumentsMutation();
   const startGeneration = useStartFunnelGenerationMutation();
-  const entryQuery = useDashboardEntryPathQuery(!isNewStrategyFlow());
+  const isNewStrategy = useNewStrategyFlow();
+  const entryQuery = useDashboardEntryPathQuery(!isNewStrategy);
   useEnsureOnboardingSession();
 
   const activeUploadIds = useMemo(
@@ -175,13 +173,13 @@ export function UploadView() {
   }, [files, progressByUploadId]);
 
   useEffect(() => {
-    if (isNewStrategyFlow()) return;
+    if (isNewStrategy) return;
     if (entryQuery.data === STRATEGY_ROUTE) {
       router.replace(STRATEGY_ROUTE);
     }
-  }, [entryQuery.data, router]);
+  }, [isNewStrategy, entryQuery.data, router]);
 
-  const questionsHref = isNewStrategyFlow()
+  const questionsHref = isNewStrategy
     ? `${ONBOARDING_QUESTIONS_ROUTE}?${NEW_STRATEGY_QUERY}=1`
     : ONBOARDING_QUESTIONS_ROUTE;
 

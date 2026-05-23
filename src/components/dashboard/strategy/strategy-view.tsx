@@ -3,47 +3,78 @@
 import StrategySidebar from "@/components/dashboard/strategy/strategy-sidebar";
 import { StrategyMainPanel } from "@/components/dashboard/mesh-background";
 import Loader from "@/components/ui/loader";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { StrategyIcon } from "@/components/icons/strategy";
 import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
 import { beginNewStrategyFlow } from "@/lib/begin-new-strategy";
-import { loadDashboardMockSession } from "@/lib/dashboard-mock-session";
-import type { DashboardMockSession } from "@/lib/dashboard-mock-data";
+import { useDashboardMockSession } from "@/hooks/use-dashboard-mock-session";
 import {
   funnelSidebarSummary,
   type FunnelTaskDisplay,
 } from "@/lib/funnel-display";
 import {
-  NO_STRATEGY_ERROR,
+  NO_STRATEGY_AVAILABLE_MESSAGE,
+  STRATEGY_NOT_VIEWABLE_MESSAGE,
   useStrategyFunnel,
 } from "@/hooks/queries/use-strategy-funnel";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
-import { isNewStrategyFlow } from "@/lib/new-strategy";
-import { ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
 
 function StrategyGenerationLoading({
   message,
-  hint,
   onCancel,
 }: {
   message: string;
-  hint?: string;
   onCancel: () => void;
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 overflow-y-auto px-4 py-8">
-      <Loader text={message} hint={hint} />
+      <Loader text={message} />
       <button
         type="button"
         onClick={onCancel}
-        className="shrink-0 rounded-xl border border-[#EAECF0] px-4 py-2 text-sm font-medium text-[#667085] hover:bg-[#FAFBFC] hover:text-[#101828]"
+        className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600"
       >
         Cancel
       </button>
+    </div>
+  );
+}
+
+function StrategyActionPanel({
+  message,
+  onTryAgain,
+  onBackToOnboarding,
+}: {
+  message: string;
+  onTryAgain?: () => void;
+  onBackToOnboarding: () => void;
+}) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 overflow-y-auto px-4 py-8">
+      <p className="max-w-md text-center text-sm text-[#667085]">{message}</p>
+      <div className="flex flex-wrap justify-center gap-3">
+        {onTryAgain ? (
+          <button
+            type="button"
+            onClick={onTryAgain}
+            className="rounded-xl border border-[#EAECF0] bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-600 cursor-pointer"
+          >
+            Try again
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={onBackToOnboarding}
+          className="rounded-xl bg-[#326AD1] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2859B8]"
+        >
+          Back to onboarding
+        </button>
+      </div>
     </div>
   );
 }
@@ -176,15 +207,14 @@ function StrategyStageTasks({
 
 export function StrategyView() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const uploadedFromStore = useOnboardingStore((s) => s.uploadedDocuments);
-  const [session] = useState<DashboardMockSession | null>(() =>
-    typeof window !== "undefined" ? loadDashboardMockSession() : null,
-  );
+  const session = useDashboardMockSession();
   const {
     loading,
     loadingMessage,
-    loadingHint,
     error,
+    displayReady,
     funnelId,
     funnel,
     activeStageId,
@@ -195,20 +225,9 @@ export function StrategyView() {
     tasks,
     retry,
     abortActiveGeneration,
+    generationAborted,
     hydratedFromStorage,
   } = useStrategyFunnel();
-
-  const shouldRedirectToOnboarding =
-    hydratedFromStorage &&
-    !loading &&
-    !funnelId &&
-    !isNewStrategyFlow() &&
-    error === NO_STRATEGY_ERROR;
-
-  useEffect(() => {
-    if (!shouldRedirectToOnboarding) return;
-    router.replace(ONBOARDING_UPLOAD_ROUTE);
-  }, [shouldRedirectToOnboarding, router]);
 
   const documents = useMemo(() => {
     const fromSession = session?.uploadedDocuments ?? [];
@@ -219,46 +238,42 @@ export function StrategyView() {
   const strategySummary = funnelSidebarSummary(funnel);
 
   const handleCreateNewStrategy = useCallback(() => {
-    router.push(beginNewStrategyFlow());
-  }, [router]);
+    router.push(beginNewStrategyFlow(queryClient));
+  }, [queryClient, router]);
 
-  const goBackToDocumentUpload = useCallback(() => {
-    const uploadPath = beginNewStrategyFlow();
+  const handleCancelGeneration = useCallback(() => {
     abortActiveGeneration();
-    router.replace(uploadPath);
-  }, [abortActiveGeneration, router]);
+  }, [abortActiveGeneration]);
 
-  if (shouldRedirectToOnboarding) {
-    return (
-      <main className="flex min-h-screen items-center justify-center px-4">
-        <Loader text="Loading..." />
-      </main>
-    );
-  }
+  const goBackToOnboarding = useCallback(() => {
+    router.replace(beginNewStrategyFlow(queryClient));
+  }, [queryClient, router]);
 
-  if (error && !loading) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 py-16">
-        <p className="max-w-md text-center text-sm text-red-600">{error}</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => retry()}
-            className="rounded-xl border border-[#EAECF0] px-4 py-2 text-sm font-medium text-[#101828] hover:bg-[#FAFBFC]"
-          >
-            Try again
-          </button>
-          <button
-            type="button"
-            onClick={goBackToDocumentUpload}
-            className="rounded-xl bg-[#326AD1] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2859B8]"
-          >
-            Back to document upload
-          </button>
-        </div>
-      </main>
-    );
-  }
+  const showCancelledPanel = generationAborted && !loading && !funnelId;
+
+  const showRecoveryPanel =
+    hydratedFromStorage &&
+    !loading &&
+    !generationAborted &&
+    !showCancelledPanel &&
+    !displayReady;
+
+  const recoveryMessage = !funnelId
+    ? NO_STRATEGY_AVAILABLE_MESSAGE
+    : (error ?? STRATEGY_NOT_VIEWABLE_MESSAGE);
+
+  const mainPanelContent = showCancelledPanel ? (
+    <StrategyActionPanel
+      message="Strategy generation was cancelled."
+      onTryAgain={() => retry()}
+      onBackToOnboarding={goBackToOnboarding}
+    />
+  ) : showRecoveryPanel ? (
+    <StrategyActionPanel
+      message={recoveryMessage}
+      onBackToOnboarding={goBackToOnboarding}
+    />
+  ) : null;
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-white">
@@ -268,7 +283,6 @@ export function StrategyView() {
         strategyPhases={strategyPhases}
         strategySummary={loading ? undefined : strategySummary}
         onCreateNewStrategy={loading ? undefined : handleCreateNewStrategy}
-        onCancelGeneration={loading ? goBackToDocumentUpload : undefined}
       />
 
       {loading ? (
@@ -278,13 +292,11 @@ export function StrategyView() {
               loading
               documents={documents}
               strategyPhases={strategyPhases}
-              onCancelGeneration={goBackToDocumentUpload}
             />
             <StrategyMainPanel className="min-h-[calc(100vh-83px)] w-full">
               <StrategyGenerationLoading
                 message={loadingMessage}
-                hint={loadingHint}
-                onCancel={goBackToDocumentUpload}
+                onCancel={handleCancelGeneration}
               />
             </StrategyMainPanel>
           </div>
@@ -292,11 +304,23 @@ export function StrategyView() {
           <StrategyMainPanel className="min-h-[calc(100vh-72px)] flex-1 lg:hidden">
             <StrategyGenerationLoading
               message={loadingMessage}
-              hint={loadingHint}
-              onCancel={goBackToDocumentUpload}
+              onCancel={handleCancelGeneration}
             />
           </StrategyMainPanel>
         </>
+      ) : mainPanelContent ? (
+        <div className="dashboard-layout-class flex flex-1 flex-col lg:flex-row">
+          <StrategySidebar
+            loading={false}
+            documents={documents}
+            strategyPhases={strategyPhases}
+            strategySummary={strategySummary}
+            onCreateNewStrategy={handleCreateNewStrategy}
+          />
+          <StrategyMainPanel className="min-h-0 min-w-0 flex-1 md:w-2/3">
+            {mainPanelContent}
+          </StrategyMainPanel>
+        </div>
       ) : (
         <div className="dashboard-layout-class flex flex-1 flex-col lg:flex-row">
           <StrategySidebar

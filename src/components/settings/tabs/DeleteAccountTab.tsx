@@ -16,7 +16,6 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
 
   const handleDelete = () => {
     if (!isConfirmed) return;
-    console.log("delete account");
     onClose();
   };
 

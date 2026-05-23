@@ -11,7 +11,8 @@ import {
   saveDashboardMockSession,
 } from "@/lib/dashboard-mock-session";
 import { STRATEGY_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
-import { clearNewStrategyFlow, isNewStrategyFlow } from "@/lib/new-strategy";
+import { clearNewStrategyFlow } from "@/lib/new-strategy";
+import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
 import {
   buildStep1Answer,
   buildStep2Answer,
@@ -20,7 +21,8 @@ import {
   isOnboardingSessionComplete,
   stepNumberFromSession,
 } from "@/lib/onboarding-api";
-import { parseOnboardingSessionId } from "@/lib/onboarding-query-fns";
+import { parseOnboardingSessionId } from "@/lib/onboarding-api";
+import { resolveOnboardingSessionId } from "@/lib/onboarding-session-id";
 import {
   useCompleteOnboardingMutation,
   useOnboardingSessionQuery,
@@ -50,6 +52,7 @@ export function QuestionsView() {
   const completeOnboarding = useCompleteOnboardingMutation();
   const startGeneration = useStartFunnelGenerationMutation();
 
+  const isNewStrategy = useNewStrategyFlow();
   const sessionQuery = useOnboardingSessionQuery(true);
 
   useEffect(() => {
@@ -57,7 +60,7 @@ export function QuestionsView() {
 
     const { session, raw } = sessionQuery.data;
 
-    if (!isNewStrategyFlow() && isOnboardingSessionComplete(session)) {
+    if (!isNewStrategy && isOnboardingSessionComplete(session)) {
       void redirectToExistingFunnelIfAny(router, "wizard").then(
         (redirected) => {
           if (!redirected) router.replace(STRATEGY_ROUTE);
@@ -79,6 +82,7 @@ export function QuestionsView() {
   }, [
     sessionQuery.isSuccess,
     sessionQuery.data,
+    isNewStrategy,
     router,
     setSessionId,
     hydrateFromApiSession,
@@ -103,12 +107,37 @@ export function QuestionsView() {
     completeOnboarding.isPending ||
     startGeneration.isPending;
 
-  const ensureSessionId = (): string | null => {
-    const id = useOnboardingStore.getState().sessionId;
-    if (!id) {
-      toast.error("Session not ready. Please wait a moment and try again.");
+  const ensureSessionId = async (): Promise<string | null> => {
+    const syncId = resolveOnboardingSessionId(
+      useOnboardingStore.getState().sessionId,
+      sessionQuery.data,
+    );
+    if (syncId) {
+      if (!useOnboardingStore.getState().sessionId) {
+        setSessionId(syncId);
+      }
+      return syncId;
     }
-    return id;
+
+    if (sessionQuery.isPending || sessionQuery.isFetching) {
+      toast.error("Session not ready. Please wait a moment and try again.");
+      return null;
+    }
+
+    const refetched = await sessionQuery.refetch();
+    const id = resolveOnboardingSessionId(
+      useOnboardingStore.getState().sessionId,
+      refetched.data,
+    );
+    if (id) {
+      setSessionId(id);
+      return id;
+    }
+
+    toast.error(
+      "Could not load onboarding session. Please refresh and try again.",
+    );
+    return null;
   };
 
   const handleStep1Next = async () => {
@@ -125,7 +154,7 @@ export function QuestionsView() {
       return;
     }
 
-    const sessionId = ensureSessionId();
+    const sessionId = await ensureSessionId();
     if (!sessionId) return;
 
     try {
@@ -161,7 +190,7 @@ export function QuestionsView() {
       return;
     }
 
-    const sessionId = ensureSessionId();
+    const sessionId = await ensureSessionId();
     if (!sessionId) return;
 
     try {
@@ -213,7 +242,7 @@ export function QuestionsView() {
 
     try {
       if (!onboardingAlreadyComplete) {
-        const sessionId = ensureSessionId();
+        const sessionId = await ensureSessionId();
         if (!sessionId) return;
 
         await saveStep.mutateAsync({
@@ -223,10 +252,9 @@ export function QuestionsView() {
         });
 
         await completeOnboarding.mutateAsync(sessionId);
-        store.setSessionId(null);
       }
 
-      if (!isNewStrategyFlow()) {
+      if (!isNewStrategy) {
         if (await redirectToExistingFunnelIfAny(router, "wizard")) {
           clearNewStrategyFlow();
           return;
