@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { fetchAuthMe } from "@/lib/auth-api";
+import {
+  buildGoogleOAuthCallbackUrl,
+  GOOGLE_OAUTH_CALLBACK_PATH,
+  hasGoogleOAuthExchangeParams,
+} from "@/lib/google-oauth";
 import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import { envConfig } from "@/config/env.config";
 import { authRoutes, ONBOARDING_UPLOAD_ROUTE, protectedRoutes } from "@/routes";
@@ -20,8 +25,18 @@ function isProtectedPath(pathname: string): boolean {
 
 export const proxy = auth(async (request) => {
   const { nextUrl } = request;
-  const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
   const pathname = nextUrl.pathname;
+
+  if (
+    pathname !== GOOGLE_OAUTH_CALLBACK_PATH &&
+    hasGoogleOAuthExchangeParams(nextUrl.searchParams)
+  ) {
+    return NextResponse.redirect(
+      buildGoogleOAuthCallbackUrl(nextUrl.origin, nextUrl.searchParams),
+    );
+  }
+
+  const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
 
   const isAuthRoute = authRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),

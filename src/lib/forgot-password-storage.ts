@@ -10,6 +10,7 @@ function notifyForgotResetStorageChanged() {
 }
 
 export function setForgotResetEmail(email: string) {
+  if (typeof window === "undefined") return;
   sessionStorage.setItem(FORGOT_RESET_EMAIL_KEY, email);
   notifyForgotResetStorageChanged();
 }
@@ -26,6 +27,9 @@ export function clearForgotResetStorage() {
 }
 
 export function subscribeToForgotResetStorage(onStoreChange: () => void) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
   window.addEventListener(FORGOT_RESET_STORAGE_CHANGED_EVENT, onStoreChange);
   window.addEventListener("storage", onStoreChange);
   return () => {

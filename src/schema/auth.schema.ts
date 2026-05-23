@@ -107,6 +107,7 @@ export function nameHasNoDigits(value: string): boolean {
 const registerNamePartField = (label: "First" | "Last") =>
   z
     .string()
+    .trim()
     .min(1, { message: `${label} name is required.` })
     .min(3, { message: `${label} name must be at least 3 characters` })
     .refine(nameHasNoDigits, { message: NAME_NO_DIGITS_MESSAGE });

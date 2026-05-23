@@ -1,6 +1,7 @@
 import axios from "axios";
 import type { User } from "@/types/auth";
 import { extractApiErrorMessages } from "@/lib/api-errors";
+import { collectApiRecords } from "@/lib/api-envelope";
 
 export const AUTH_API_PREFIX = "/api/auth";
 
@@ -213,21 +214,34 @@ function readFullName(userRecord: Record<string, unknown>): string {
   return "";
 }
 
+function findLoginPayload(body: unknown): Record<string, unknown> | null {
+  for (const record of collectApiRecords(body)) {
+    const userRecord = readUserRecord(record.user);
+    if (!userRecord) continue;
+
+    const token =
+      typeof record.access_token === "string"
+        ? record.access_token
+        : typeof record.accessToken === "string"
+          ? record.accessToken
+          : undefined;
+
+    if (token?.trim()) {
+      return record;
+    }
+  }
+  return null;
+}
+
 export function parseLoginEnvelope(
   body: unknown,
 ): { user: User; access_token: string; redirect_url?: string } | null {
-  if (!body || typeof body !== "object") {
+  const data = findLoginPayload(body);
+  if (!data) {
     return null;
   }
 
-  const record = body as Record<string, unknown>;
-  const data =
-    record.data && typeof record.data === "object"
-      ? (record.data as Record<string, unknown>)
-      : record;
-
-  const rawUser = data.user;
-  const userRecord = readUserRecord(rawUser);
+  const userRecord = readUserRecord(data.user);
   if (!userRecord) {
     return null;
   }
@@ -235,7 +249,9 @@ export function parseLoginEnvelope(
   const id =
     userRecord.id != null && String(userRecord.id).length > 0
       ? String(userRecord.id)
-      : undefined;
+      : userRecord.userId != null && String(userRecord.userId).length > 0
+        ? String(userRecord.userId)
+        : undefined;
   const email =
     typeof userRecord.email === "string" ? userRecord.email : undefined;
   const full_name = readFullName(userRecord);
@@ -266,7 +282,9 @@ export function parseLoginEnvelope(
       avatar_url:
         typeof userRecord.avatar_url === "string"
           ? userRecord.avatar_url
-          : null,
+          : typeof userRecord.avatarUrl === "string"
+            ? userRecord.avatarUrl
+            : null,
     }),
     access_token,
     redirect_url,
@@ -326,6 +344,27 @@ export function parseMeEnvelope(body: unknown): AuthMeProfile | null {
       readBoolean(data, "hasStrategy", "has_strategy") ??
       readBoolean(userRecord, "hasStrategy", "has_strategy"),
   };
+}
+
+/** Exchange short-lived Google OAuth code for access token (refresh token via Set-Cookie). */
+export async function exchangeGoogleOAuthCode(
+  baseUrl: string,
+  code: string,
+): Promise<{
+  user: User;
+  access_token: string;
+  redirect_url?: string;
+} | null> {
+  try {
+    const response = await axios.post(
+      authApiUrl(baseUrl, "/google/exchange"),
+      { code },
+      { withCredentials: true },
+    );
+    return parseLoginEnvelope(response.data);
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchAuthMe(

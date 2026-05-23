@@ -27,15 +27,21 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = async (values: ForgotPasswordValues) => {
-    const result = await requestPasswordReset(values.email);
-    if (!result.ok) {
-      toast.error("Could not send reset code", { description: result.error });
-      return;
-    }
+    try {
+      const result = await requestPasswordReset(values.email);
+      if (!result.ok) {
+        toast.error("Could not send reset code", { description: result.error });
+        return;
+      }
 
-    setForgotResetEmail(values.email.trim());
-    toast.success(result.message);
-    router.push("/reset-password");
+      setForgotResetEmail(values.email.trim());
+      toast.success(result.message);
+      router.push("/reset-password");
+    } catch {
+      toast.error("Could not send reset code", {
+        description: "Network error. Please try again.",
+      });
+    }
   };
 
   const emailError = form.formState.errors.email?.message;
