@@ -6,9 +6,13 @@ import { Menu, X } from "lucide-react";
 import LogoIcon from "@/components/icons/navbar/logo";
 import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
-import { LogoutButton } from "@/components/auth/logout-button";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import StrategySidebar from "@/components/dashboard/strategy/strategy-sidebar";
+import FunnelModal from "@/components/modals/FunnelModal";
+import MyProfileTab from "@/components/settings/tabs/MyProfileTab";
+import PasswordSecurityTab from "@/components/settings/tabs/PasswordSecurityTab";
+import NotificationPreferencesTab from "@/components/settings/tabs/NotificationsPrefrencesTab";
+import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
 import { mockNotifications } from "@/components/modals/notifications/mock-data";
 import {
@@ -31,8 +35,7 @@ const OnboardingNavbar = ({
   strategyPhases = DUMMY_STRATEGY_PHASES,
 }: OnboardingNavbarProps) => {
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const pathname = usePathname();
   const drawerOpen = drawerPath === pathname;
   const [isNotification, setIsNotification] = useState(false);
@@ -43,20 +46,6 @@ const OnboardingNavbar = ({
     pathname.startsWith("/dashboard/onboarding") || isStrategyRoute;
 
   const showMenuButton = isDashboardFlow;
-
-  useEffect(() => {
-    if (!profileOpen) return;
-    const onPointerDown = (event: MouseEvent) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
-        setProfileOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
-  }, [profileOpen]);
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
@@ -109,28 +98,51 @@ const OnboardingNavbar = ({
               isOpen={isNotification}
               onClose={() => setIsNotification(false)}
             />
-            <div ref={profileRef} className="relative">
-              <button
-                type="button"
-                aria-label="Profile menu"
-                aria-expanded={profileOpen}
-                onClick={() => setProfileOpen((open) => !open)}
-                className="flex h-10 items-center gap-2 rounded-full border border-[#EAECF0] px-2.5 py-2 md:h-11 md:gap-[10px] md:px-3 md:py-[10px] lg:w-[103px]"
-              >
-                <ProfileIcon />
-                <span className="hidden text-sm font-medium text-[#101828] lg:inline">
-                  Profile
-                </span>
-              </button>
-              {profileOpen && (
-                <div className="absolute top-[calc(100%+8px)] right-0 z-50 min-w-[160px] overflow-hidden rounded-xl border border-[#EAECF0] bg-white py-1 shadow-lg">
-                  <LogoutButton variant="menu" className="flex" />
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              aria-label="Profile settings"
+              onClick={() => setSettingsOpen(true)}
+              className="flex h-10 items-center gap-2 rounded-full border border-[#EAECF0] px-2.5 py-2 md:h-11 md:gap-[10px] md:px-3 md:py-[10px] lg:w-[103px]"
+            >
+              <ProfileIcon />
+              <span className="hidden text-sm font-medium text-[#101828] lg:inline">
+                Profile
+              </span>
+            </button>
           </div>
         </div>
       </nav>
+
+      <FunnelModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        defaultTab="profile"
+        title="Settings"
+        tabs={[
+          {
+            id: "profile",
+            label: "My Profile",
+            content: <MyProfileTab onClose={() => setSettingsOpen(false)} />,
+          },
+          {
+            id: "password",
+            label: "Password & Security",
+            content: <PasswordSecurityTab />,
+          },
+          {
+            id: "notifications",
+            label: "Notification Preferences",
+            content: <NotificationPreferencesTab />,
+          },
+          {
+            id: "delete",
+            label: "Delete Account",
+            content: (
+              <DeleteAccountTab onClose={() => setSettingsOpen(false)} />
+            ),
+          },
+        ]}
+      />
 
       {isStrategyRoute && (
         <>

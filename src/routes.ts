@@ -40,8 +40,11 @@ export function mapApiRedirectToAppPath(redirectUrl?: string): string | null {
   if (path === "/onboarding" || path.startsWith("/onboarding/")) {
     return ONBOARDING_UPLOAD_ROUTE;
   }
-  if (path === DASHBOARD_ROUTE || path.startsWith(`${DASHBOARD_ROUTE}/`)) {
-    return DASHBOARD_ROUTE;
+  if (path === DASHBOARD_ROUTE) {
+    return null;
+  }
+  if (path.startsWith(`${DASHBOARD_ROUTE}/`)) {
+    return path;
   }
 
   if (path.startsWith("/")) {
