@@ -141,6 +141,8 @@ export function QuestionsView() {
   };
 
   const handleStep1Next = async () => {
+    if (isLoading || isBootstrapping) return;
+
     const result = step1Schema.safeParse({
       businessDescription: store.businessDescription,
     });
@@ -172,6 +174,8 @@ export function QuestionsView() {
   };
 
   const handleStep2Next = async () => {
+    if (isLoading || isBootstrapping) return;
+
     const result = step2Schema.safeParse({
       idealCustomer: {
         theyAre: store.theyAre,

@@ -347,19 +347,6 @@ export function UploadView() {
             };
           }),
         );
-
-        rows.forEach((r) => {
-          const up = rowToUpload.get(r.id);
-          if (!up) return;
-          if (up.status === "ready") {
-            addUploadedDocument({
-              id: up.uploadId,
-              name: r.file.name,
-              size: formatFileSize(r.file.size),
-              type: fileNameToDocType(r.file.name),
-            });
-          }
-        });
       } catch (error) {
         toast.error(
           error instanceof Error

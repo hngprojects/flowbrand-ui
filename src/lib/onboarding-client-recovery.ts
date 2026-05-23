@@ -1,4 +1,4 @@
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import type { AppRouter } from "@/lib/router-types";
 import { getPostAuthRedirect } from "@/actions/auth";
 import { listFunnels } from "@/actions/funnels";
 import { parseFunnelList } from "@/lib/funnel-api-types";
@@ -12,7 +12,7 @@ import { STRATEGY_ROUTE } from "@/routes";
 
 /** Send users with a finished session or existing funnel to the strategy page. */
 export async function redirectToStrategyHomeIfReady(
-  router: AppRouterInstance,
+  router: AppRouter,
 ): Promise<boolean> {
   if (isNewStrategyFlow()) {
     return false;
@@ -28,7 +28,7 @@ export async function redirectToStrategyHomeIfReady(
 }
 
 export async function redirectToExistingFunnelIfAny(
-  router: AppRouterInstance,
+  router: AppRouter,
   source: "wizard" | "document_upload" = "wizard",
 ): Promise<boolean> {
   if (isNewStrategyFlow()) {

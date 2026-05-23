@@ -108,7 +108,7 @@ function StrategyStageTasks({
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
-  onCompleteStage: () => void;
+  onCompleteStage: () => boolean;
 }) {
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -121,8 +121,9 @@ function StrategyStageTasks({
 
   const handleSubmit = () => {
     if (!allTasksComplete || submitted || isCurrentStageComplete) return;
-    onCompleteStage();
-    setSubmitted(true);
+    if (onCompleteStage()) {
+      setSubmitted(true);
+    }
   };
 
   return (

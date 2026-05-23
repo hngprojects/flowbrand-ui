@@ -243,10 +243,11 @@ export function useStrategyFunnel() {
     return completedStageIds.includes(activeStageId);
   }, [funnelId, activeStageId, completedStageIds]);
 
-  const completeCurrentStage = useCallback(() => {
-    if (!funnelId || !activeStageId) return;
-    markStageComplete(funnelId, activeStageId);
+  const completeCurrentStage = useCallback((): boolean => {
+    if (!funnelId || !activeStageId) return false;
+    if (!markStageComplete(funnelId, activeStageId)) return false;
     setStageProgressVersion((version) => version + 1);
+    return true;
   }, [funnelId, activeStageId]);
 
   const strategyPhases = useMemo(

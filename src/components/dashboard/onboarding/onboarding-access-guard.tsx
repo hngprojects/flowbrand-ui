@@ -22,14 +22,21 @@ export function OnboardingAccessGuard({
 
   const allowed =
     isNewStrategy ||
+    entryQuery.isError ||
     (entryQuery.isSuccess && entryQuery.data !== STRATEGY_ROUTE);
 
   useEffect(() => {
-    if (isNewStrategy || entryQuery.isPending) return;
+    if (isNewStrategy || entryQuery.isPending || entryQuery.isError) return;
     if (entryQuery.data === STRATEGY_ROUTE) {
       router.replace(STRATEGY_ROUTE);
     }
-  }, [isNewStrategy, entryQuery.isPending, entryQuery.data, router]);
+  }, [
+    isNewStrategy,
+    entryQuery.isPending,
+    entryQuery.isError,
+    entryQuery.data,
+    router,
+  ]);
 
   if (!allowed) {
     return (

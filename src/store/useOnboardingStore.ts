@@ -84,7 +84,7 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     })),
   hydrateFromApiSession: (input) =>
     set((state) => {
-      const step = input.step ?? state.step;
+      const step = Math.max(1, Math.min(input.step ?? state.step, 3));
       const businessDescription =
         input.businessDescription ?? state.businessDescription;
       const theyAre =

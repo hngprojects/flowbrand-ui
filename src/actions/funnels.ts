@@ -9,7 +9,9 @@ import { flowLog, flowLogApiResult } from "@/lib/flow-debug-log";
 
 /** Staging API: max 5_242_880 bytes per file, up to 3 files. */
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
-const MAX_UPLOAD_BYTES = MAX_FILE_BYTES * 3;
+/** Headroom for multipart boundaries and part headers (axios caps the full body). */
+const MULTIPART_OVERHEAD_BYTES = 512 * 1024;
+const MAX_UPLOAD_BYTES = MAX_FILE_BYTES * 3 + MULTIPART_OVERHEAD_BYTES;
 
 function funnelsUrl(path: string): string {
   const base = envConfig.BASEURL.replace(/\/$/, "");

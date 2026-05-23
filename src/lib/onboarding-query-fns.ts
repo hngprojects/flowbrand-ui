@@ -105,7 +105,7 @@ export async function saveOnboardingStepMutation(input: {
       step: input.step,
       status: res.status,
     });
-    throw new Error(res.error);
+    throw new Error(res.error || "Could not save your onboarding answer.");
   }
   const payload = payloadFromApiData(res.data);
   flowLog("onboarding", "saveOnboardingStepMutation → ok", {
@@ -124,7 +124,7 @@ export async function completeOnboardingMutation(
     flowLogError("onboarding", "completeOnboardingMutation", res.error, {
       status: res.status,
     });
-    throw new Error(res.error);
+    throw new Error(res.error || "Could not complete onboarding.");
   }
   flowLog("onboarding", "completeOnboardingMutation → ok", {
     status: res.status,
