@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 const containerVariants = {
   hidden: {},
@@ -43,6 +44,12 @@ const imageVariants = {
 };
 
 const Hero = () => {
+  const { data: session, status } = useSession();
+  const isAuthenticated =
+    status === "authenticated" &&
+    session?.invalid !== true &&
+    !!session?.user?.id;
+
   return (
     <section className="relative w-full overflow-hidden bg-primary-50 to-white">
       <div className="absolute w-full h-full z-0 pointer-events-none">
@@ -107,7 +114,7 @@ const Hero = () => {
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
           >
             <Link
-              href="/register"
+              href={isAuthenticated ? "/dashboard" : "/register"}
               className="relative bg-primary-500 hover:bg-primary-600 text-[16px] text-white font-[500] py-3 px-8 rounded-lg transition-colors z-10 hover:cursor-pointer inline-flex overflow-hidden"
             >
               <motion.span
@@ -116,7 +123,9 @@ const Hero = () => {
                 initial={{ x: "-100%" }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               />
-              <span className="relative z-10">Create a free account</span>
+              <span className="relative z-10">
+                {isAuthenticated ? "Go to Dashboard" : "Create a free account"}
+              </span>
             </Link>
           </motion.div>
         </motion.div>

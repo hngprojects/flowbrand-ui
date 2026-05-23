@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import LogoIcon from "@/components/icons/navbar/logo";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -16,6 +17,11 @@ const navLinks = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const isAuthenticated =
+    status === "authenticated" &&
+    session?.invalid !== true &&
+    !!session?.user?.id;
 
   return (
     <>
@@ -45,22 +51,36 @@ const Navbar = () => {
           </ul>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <Link
-              href="/login"
-              className="text-primary hover:text-primary flex h-[51px] items-center 
-              justify-center px-6 py-3 text-base font-medium transition-colors"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/register"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 
-              inline-flex h-[51px] items-center justify-center 
-              rounded-[10px] px-6 py-3 font-semibold transition-colors focus-visible:ring-2 
-              focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
-            >
-              Get started
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href="/dashboard"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 
+                inline-flex h-[51px] items-center justify-center 
+                rounded-[10px] px-6 py-3 font-semibold transition-colors focus-visible:ring-2 
+                focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-primary hover:text-primary flex h-[51px] items-center 
+                  justify-center px-6 py-3 text-base font-medium transition-colors"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 
+                  inline-flex h-[51px] items-center justify-center 
+                  rounded-[10px] px-6 py-3 font-semibold transition-colors focus-visible:ring-2 
+                  focus-visible:ring-amber-500 focus-visible:ring-inset focus-visible:outline-none"
+                >
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -99,20 +119,32 @@ const Navbar = () => {
           ))}
 
           <div className="flex flex-col gap-3 px-4 pt-2">
-            <Link
-              href="/login"
-              className="border-primary text-primary rounded-lg border py-2.5 text-center font-semibold"
-              onClick={() => setIsOpen(false)}
-            >
-              Log In
-            </Link>
-            <Link
-              href="/register"
-              className="bg-primary text-primary-foreground rounded-[10px] py-2.5 text-center font-semibold"
-              onClick={() => setIsOpen(false)}
-            >
-              Get started
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href="/dashboard"
+                className="bg-primary text-primary-foreground rounded-[10px] py-2.5 text-center font-semibold"
+                onClick={() => setIsOpen(false)}
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="border-primary text-primary rounded-lg border py-2.5 text-center font-semibold"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-primary text-primary-foreground rounded-[10px] py-2.5 text-center font-semibold"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
