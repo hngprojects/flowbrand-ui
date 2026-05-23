@@ -12,6 +12,7 @@ import { BadgeCheck, Check } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import ComingSoonModal from "@/components/modals/ComingSoonModal";
 
 type FeatureValue = boolean | string;
 
@@ -103,6 +104,8 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly",
   );
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-white dark:bg-black">
@@ -257,12 +260,19 @@ export default function PricingPage() {
                     ))}
                   </div>
                 </div>
+
                 {/* Button pinned to bottom so it aligns with Free card button */}
-                <Link href="/pricing/pro">
-                  <Button className="mt-4 rounded-md w-full border-2 cursor-pointer border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950">
-                    Get Full Access
-                  </Button>
-                </Link>
+                <Button
+                  onClick={() => setModalOpen(true)}
+                  className="mt-4 rounded-md w-full border-2 cursor-pointer border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950"
+                >
+                  Get Full Access
+                </Button>
+
+                <ComingSoonModal
+                  isOpen={modalOpen}
+                  onClose={() => setModalOpen(false)}
+                />
               </motion.div>
             </div>
           </div>
@@ -374,7 +384,7 @@ export default function PricingPage() {
                       +
                     </span>
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400">
+                  <AccordionContent className="text-sm text-gray-800 dark:text-gray-400">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>

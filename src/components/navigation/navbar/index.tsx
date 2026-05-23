@@ -21,7 +21,7 @@ const Navbar = () => {
     <>
       <nav className="bg-background border-border sticky top-0 z-50 border-b">
         <div className="layout-components-class flex h-[83px] items-center justify-between">
-          <Link href="/" className="cursor-pointer">
+          <Link href="/" className="cursor-pointer w-[20%]">
             <LogoIcon />
           </Link>
 
