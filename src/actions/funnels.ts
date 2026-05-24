@@ -12,19 +12,39 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_UPLOAD_BYTES = MAX_FILE_BYTES * 3;
 
 function funnelsUrl(path: string): string {
-  const base = envConfig.BASEURL.replace(/\/$/, "");
+  const base = envConfig.BASEURL?.trim().replace(/\/$/, "");
+  if (!base) {
+    throw new Error(
+      `BASE_URL environment variable is not set. Cannot call API endpoint. ` +
+        `Configure BASE_URL in .env.local (e.g., http://localhost:8000)`,
+    );
+  }
   const suffix = path.startsWith("/") ? path : `/${path}`;
   return `${base}/api/funnels${suffix}`;
 }
 
 async function getAccessToken(): Promise<string | null> {
-  const session = await auth();
-  const token = session?.access_token;
-  return session?.user?.id &&
-    session.invalid !== true &&
-    typeof token === "string"
-    ? token
-    : null;
+  try {
+    const session = await auth();
+    const token = session?.access_token;
+    const valid =
+      session?.user?.id &&
+      session.invalid !== true &&
+      typeof token === "string";
+    if (!valid) {
+      flowLog("funnel", "auth token missing or invalid", {
+        hasSession: !!session,
+        hasUserId: !!session?.user?.id,
+        isInvalid: session?.invalid,
+        hasToken: typeof token === "string",
+      });
+      return null;
+    }
+    return token;
+  } catch (err) {
+    flowLog("funnel", "auth session fetch failed", { error: String(err) });
+    return null;
+  }
 }
 
 export type FunnelActionResult<T = unknown> =
@@ -69,6 +89,14 @@ async function withFunnelLogging(
         error: formatAuthApiError(status, data, fallbackError),
         status,
         data,
+      };
+      flowLogApiResult("funnel", label, result, meta);
+      return result;
+    }
+    if (error instanceof Error && error.message.includes("BASE_URL")) {
+      const result: FunnelActionResult = {
+        ok: false,
+        error: error.message,
       };
       flowLogApiResult("funnel", label, result, meta);
       return result;
