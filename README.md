@@ -291,24 +291,6 @@ pnpm dev
 
 ---
 
-## Environment Variables
-
-Create a `.env.local` file in the project root. All variables below are required.
-
-```bash
-# Backend API base URL — must NOT have a trailing slash
-# Use the staging URL unless you are running the backend locally
-BASE_URL=https://api.staging.flowbrand.hng14.com
-# NextAuth configuration
-AUTH_SECRET=uKtBEmjEbtI5mQUe61r5rtr2Pg28st_JEbqwMOzGYwo
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# App base URL (used for OAuth callbacks)
-APP_URL=http://localhost:3000
-
-
-```
-
 ### Enabling debug logging
 
 To see every API request and response logged to the browser console:
