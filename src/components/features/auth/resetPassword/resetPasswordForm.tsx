@@ -15,7 +15,6 @@ import {
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { requestPasswordReset, resetPasswordWithOtp } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -40,6 +39,11 @@ import {
   ResetPasswordWithOtpFormSchema,
 } from "@/schema/auth.schema";
 import { cn } from "@/lib/utils";
+import {
+  requestPasswordReset,
+  resetPasswordWithOtp,
+  verifyResetOtp,
+} from "@/actions/auth";
 
 const passwordWrapperClass = (hasError: boolean) =>
   cn(
@@ -130,21 +134,45 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
     values: z.infer<typeof ResetPasswordWithOtpFormSchema>,
   ) => {
     try {
-      const result = await resetPasswordWithOtp({
+      // Step 1: verify OTP → get reset token
+      const verifyResult = await verifyResetOtp({
         email,
         otp_code: joinOtpFormDigits(values),
+      });
+
+      if (!verifyResult.ok) {
+        if (isInvalidResetOtpError(verifyResult.error)) {
+          toast.error("Invalid or expired reset code", {
+            description: verifyResult.error,
+          });
+          clearOtpFields();
+          queueOtpFocus(0);
+          return;
+        }
+        toast.error("Could not verify code", {
+          description: verifyResult.error,
+        });
+        return;
+      }
+
+      // Step 2: use reset token to set new password
+      const resetResult = await resetPasswordWithOtp({
+        reset_token: verifyResult.resetToken,
         password: values.password,
       });
 
-      if (!result.ok) {
-        if (isInvalidResetOtpError(result.error)) {
-          toast.error("Invalid code", { description: result.error });
+      if (!resetResult.ok) {
+        // Token expired between steps — send user back to re-enter OTP
+        if (isInvalidResetOtpError(resetResult.error)) {
+          toast.error("Reset session expired", {
+            description: "Please re-enter your code.",
+          });
           clearOtpFields();
           queueOtpFocus(0);
           return;
         }
         toast.error("Could not update password", {
-          description: result.error,
+          description: resetResult.error,
         });
         return;
       }
@@ -161,7 +189,6 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
       });
     }
   };
-
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
       <h2 className="text-[20px] lg:text-[40px] font-medium text-[#152D58]">
