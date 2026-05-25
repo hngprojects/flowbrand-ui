@@ -1,9 +1,6 @@
 import { flowLog } from "@/lib/flow-debug-log";
 
-export async function completeStage(
-  funnelId: string,
-  stageId: string,
-) {
+export async function completeStage(funnelId: string, stageId: string) {
   /**
    * TEMPORARY PLACEHOLDER
    *
@@ -15,7 +12,6 @@ export async function completeStage(
     funnelId,
     stageId,
   });
-
   return {
     success: true,
   };

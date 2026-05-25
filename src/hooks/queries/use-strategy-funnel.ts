@@ -244,11 +244,11 @@ export function useStrategyFunnel() {
     return completedStageIds.includes(activeStageId);
   }, [funnelId, activeStageId, completedStageIds]);
 
-  const completeCurrentStage = useCallback(async() => {
+  const completeCurrentStage = useCallback(async () => {
     if (!funnelId || !activeStageId) return;
-await completeStage(funnelId, activeStageId);
-
-markStageComplete(funnelId, activeStageId);    setStageProgressVersion((version) => version + 1);
+    await completeStage(funnelId, activeStageId);
+    markStageComplete(funnelId, activeStageId);
+    setStageProgressVersion((version) => version + 1);
   }, [funnelId, activeStageId]);
 
   const strategyPhases = useMemo(
