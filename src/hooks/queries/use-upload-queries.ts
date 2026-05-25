@@ -18,7 +18,14 @@ import { flowLog } from "@/lib/flow-debug-log";
 /** Per API guide: poll every ~2s while parsing. */
 const UPLOAD_POLL_MS = 2500;
 const UPLOAD_STAGGER_MS = 500;
-const MAX_UPLOAD_POLLS = 90;
+const MAX_UPLOAD_POLLS = 240; // 10 min max (240 polls × 2.5s = 600s)
+const STALL_TIMEOUT_MS = 300 * 1000; // 5 min of no progress change = stalled (allow slow backends)
+const STALL_CHECK_THRESHOLD = 10; // Must see 10 consecutive polls (25s) with same % to detect stall
+
+const uploadProgressTracking = new Map<
+  string,
+  { lastPercent: number; stableCount: number; firstSeenAt: number }
+>();
 
 async function fetchUploadProgressOnce(
   uploadId: string,
@@ -32,11 +39,45 @@ async function fetchUploadProgressOnce(
     if (!parsed) {
       throw new Error("Could not read processing status.");
     }
+
+    // Track progress changes to detect stalls
+    const tracking = uploadProgressTracking.get(uploadId) || {
+      lastPercent: -1,
+      stableCount: 0,
+      firstSeenAt: Date.now(),
+    };
+
+    if (parsed.percentComplete === tracking.lastPercent) {
+      tracking.stableCount++;
+    } else {
+      tracking.stableCount = 0;
+      tracking.lastPercent = parsed.percentComplete;
+    }
+
+    uploadProgressTracking.set(uploadId, tracking);
+
+    const elapsed = Date.now() - tracking.firstSeenAt;
+    const isStalled =
+      tracking.stableCount >= STALL_CHECK_THRESHOLD &&
+      elapsed > STALL_TIMEOUT_MS;
+
     flowLog("upload", "GET upload/progress", {
       uploadId,
       status: parsed.status,
       percentComplete: parsed.percentComplete,
+      stableFor: `${tracking.stableCount} polls`,
+      elapsed: `${Math.round(elapsed / 1000)}s`,
+      isStalled,
+      rawResponse: data,
     });
+
+    if (isStalled && parsed.status !== "failed") {
+      console.warn(
+        `[upload] Progress stalled at ${parsed.percentComplete}% for ${uploadId} after ${Math.round(elapsed / 1000)}s. Response:`,
+        data,
+      );
+    }
+
     return parsed;
   });
 }
@@ -73,8 +114,36 @@ export function useUploadProgressQueries(uploadIds: string[], enabled = true) {
         previousData,
       refetchInterval: (query: Query<ParsedUploadProgress, Error>) => {
         const status = query.state.data?.status;
-        if (status === "ready" || status === "failed") return false;
-        if (query.state.dataUpdateCount >= MAX_UPLOAD_POLLS) return false;
+        const tracking = uploadProgressTracking.get(uploadId);
+
+        // Stop polling if ready or failed
+        if (status === "ready" || status === "failed") {
+          uploadProgressTracking.delete(uploadId);
+          return false;
+        }
+
+        // Stop polling after max attempts
+        if (query.state.dataUpdateCount >= MAX_UPLOAD_POLLS) {
+          console.warn(
+            `[upload] Max polling attempts (${MAX_UPLOAD_POLLS}) reached for ${uploadId}. Last status: ${status} at ${query.state.data?.percentComplete}%`,
+          );
+          return false;
+        }
+
+        // Stop polling if stalled for too long
+        if (tracking) {
+          const elapsed = Date.now() - tracking.firstSeenAt;
+          if (
+            tracking.stableCount >= STALL_CHECK_THRESHOLD &&
+            elapsed > STALL_TIMEOUT_MS
+          ) {
+            console.error(
+              `[upload] Progress stalled for ${uploadId}. Stopping polling. Last: ${tracking.lastPercent}% status=${status}`,
+            );
+            return false;
+          }
+        }
+
         return UPLOAD_POLL_MS;
       },
       retry: 1,

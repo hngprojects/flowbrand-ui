@@ -9,6 +9,10 @@ export type FunnelUploadProgressStatus =
 export type ParsedUploadProgress = {
   status: FunnelUploadProgressStatus;
   percentComplete: number;
+  uploadedAt?: string;
+  failureReason?: string | null;
+  fileType?: string;
+  fileSizeBytes?: number;
 };
 
 export type FunnelUploadEntry = {
@@ -16,6 +20,9 @@ export type FunnelUploadEntry = {
   fileName: string;
   status: FunnelUploadProgressStatus;
   percentComplete: number;
+  fileType?: string;
+  fileSizeBytes?: number;
+  errorMessage?: string;
 };
 
 /** Prefer nested upload rows over API envelope wrappers (statusCode/message only). */
@@ -138,20 +145,49 @@ function pickBestProgress(
 
 /**
  * GET /upload/progress/{uploadId}
- * Staging returns a **flat** object at the root (no `data` wrapper).
+ * API returns nested structure: { success, statusCode, message, data: { uploadId, status, ... } }
+ * Fallback to root-level for backward compatibility with older staging responses.
  */
 export function parseUploadProgress(
   data: unknown,
 ): ParsedUploadProgress | null {
   const root = readRecord(data);
-  if (root) {
+  if (!root) return null;
+
+  // Check for nested data structure (current API)
+  if (root.data && typeof root.data === "object") {
+    const nested = root.data as Record<string, unknown>;
     const hasUploadId =
-      typeof root.uploadId === "string" || typeof root.upload_id === "string";
+      typeof nested.uploadId === "string" ||
+      typeof nested.upload_id === "string";
     if (hasUploadId) {
-      const direct = parseProgressFromRecord(root);
-      if (direct) return direct;
+      const percent = readPercent(nested);
+      const uploadedAt = nested.uploadedAt ?? nested.uploaded_at;
+      const failureReason = nested.failureReason ?? nested.failure_reason;
+      const fileType = nested.fileType ?? nested.file_type;
+      const fileSizeBytes = nested.fileSizeBytes ?? nested.file_size_bytes;
+
+      return {
+        status: normalizeUploadStatus(nested.status, percent),
+        percentComplete: Math.min(100, Math.max(0, percent)),
+        ...(typeof uploadedAt === "string" && { uploadedAt }),
+        ...((typeof failureReason === "string" || failureReason === null) && {
+          failureReason,
+        }),
+        ...(typeof fileType === "string" && { fileType }),
+        ...(typeof fileSizeBytes === "number" && { fileSizeBytes }),
+      };
     }
   }
+
+  // Fallback to root-level (older staging format)
+  const hasUploadId =
+    typeof root.uploadId === "string" || typeof root.upload_id === "string";
+  if (hasUploadId) {
+    const direct = parseProgressFromRecord(root);
+    if (direct) return direct;
+  }
+
   return pickBestProgress(data);
 }
 
@@ -164,12 +200,18 @@ function parseUploadEntry(raw: unknown): FunnelUploadEntry | null {
   if (typeof uploadId !== "string" || typeof fileName !== "string") return null;
 
   const percent = readPercent(record);
+  const fileType = record.fileType ?? record.file_type;
+  const fileSizeBytes = record.fileSizeBytes ?? record.file_size_bytes;
+  const errorMessage = record.errorMessage ?? record.error_message;
 
   return {
     uploadId,
     fileName,
     percentComplete: Math.min(100, Math.max(0, percent)),
     status: normalizeUploadStatus(record.status, percent),
+    ...(typeof fileType === "string" && { fileType }),
+    ...(typeof fileSizeBytes === "number" && { fileSizeBytes }),
+    ...(typeof errorMessage === "string" && { errorMessage }),
   };
 }
 
@@ -216,5 +258,12 @@ export function mergeUploadProgress(
   return {
     status,
     percentComplete: status === "ready" ? 100 : Math.min(100, percent),
+    ...(polled.uploadedAt && { uploadedAt: polled.uploadedAt }),
+    ...((typeof polled.failureReason === "string" ||
+      polled.failureReason === null) && {
+      failureReason: polled.failureReason,
+    }),
+    ...(polled.fileType && { fileType: polled.fileType }),
+    ...(polled.fileSizeBytes && { fileSizeBytes: polled.fileSizeBytes }),
   };
 }

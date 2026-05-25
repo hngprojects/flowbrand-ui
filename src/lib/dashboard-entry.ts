@@ -98,17 +98,30 @@ export async function resolveDashboardEntryPathWithToken(
   const funnelCount = funnelsListData
     ? parseFunnelList(funnelsListData).length
     : 0;
-  flowLog("entry", "resolveDashboardEntryPathWithToken → result", {
+
+  // Validate path to prevent 404s
+  if (!path || typeof path !== "string" || !path.startsWith("/")) {
+    flowLog("entry", "ERROR: invalid path returned", {
+      path,
+      type: typeof path,
+      apiRedirectUrl,
+    });
+    return ONBOARDING_UPLOAD_ROUTE;
+  }
+
+  const reason =
+    path === STRATEGY_ROUTE
+      ? "funnels_list_non_empty"
+      : funnelCount === 0 && me?.has_strategy
+        ? "has_strategy_but_no_funnels_upload"
+        : "no_funnels";
+
+  flowLog("entry", "resolveDashboardEntryPathWithToken result", {
     path,
     has_strategy: me?.has_strategy,
     funnelCount,
     usedHasStrategyFlag: false,
-    reason:
-      path === STRATEGY_ROUTE
-        ? "funnels_list_non_empty"
-        : funnelCount === 0 && me?.has_strategy
-          ? "has_strategy_but_no_funnels → upload"
-          : "no_funnels",
+    reason,
     apiRedirectUrl,
   });
   return path;
