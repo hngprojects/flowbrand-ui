@@ -38,7 +38,7 @@ export function useOnboardingSessionQuery(enabled = true) {
     enabled,
     staleTime: 0,
     refetchOnMount: true,
-    retry: (failureCount: any, error: unknown) => {
+    retry: (failureCount, error) => {
       if (error instanceof OnboardingAlreadyCompleteError) return false;
       return failureCount < 1;
     },
