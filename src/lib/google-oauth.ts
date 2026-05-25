@@ -1,5 +1,6 @@
 /** Where the API should redirect after Google OAuth (set FRONTEND_URL on the API). */
-export const GOOGLE_OAUTH_CALLBACK_PATH = "/api/oauth/google/callback";
+// export const GOOGLE_OAUTH_CALLBACK_PATH = "/api/oauth/google/callback";
+export const GOOGLE_OAUTH_CALLBACK_PATH = "/onboarding";
 
 /** Starts OAuth: `GET {BASE_URL}/auth/google` → Google → API callback → app callback URL. */
 export function googleOAuthStartUrl(apiBaseUrl: string): string {
