@@ -18,9 +18,9 @@ import { flowLog } from "@/lib/flow-debug-log";
 /** Per API guide: poll every ~2s while parsing. */
 const UPLOAD_POLL_MS = 2500;
 const UPLOAD_STAGGER_MS = 500;
-const MAX_UPLOAD_POLLS = 90;
-const STALL_TIMEOUT_MS = 45 * 1000; // 45s of no progress change = stalled
-const STALL_CHECK_THRESHOLD = 3; // Must see 3 polls with same % to detect stall
+const MAX_UPLOAD_POLLS = 240; // 10 min max (240 polls × 2.5s = 600s)
+const STALL_TIMEOUT_MS = 300 * 1000; // 5 min of no progress change = stalled (allow slow backends)
+const STALL_CHECK_THRESHOLD = 10; // Must see 10 consecutive polls (25s) with same % to detect stall
 
 const uploadProgressTracking = new Map<
   string,
