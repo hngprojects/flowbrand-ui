@@ -1,6 +1,17 @@
 import { Session, type DefaultSession } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
+// export interface CustomJWT extends JWT {
+//   id?: string;
+//   email?: string;
+//   picture?: string;
+//   avatar_url?: string;
+//   first_name?: string;
+//   last_name?: string;
+//   fullname?: string;
+//   access_token?: string;
+//   organisations?: Organisation[];
+// }
 export interface CustomJWT extends JWT {
   id?: string;
   email?: string;
@@ -9,7 +20,15 @@ export interface CustomJWT extends JWT {
   first_name?: string;
   last_name?: string;
   fullname?: string;
+
   access_token?: string;
+
+  /** unix timestamp in ms */
+  expires_at?: number;
+
+  /** auth refresh state */
+  error?: string;
+
   organisations?: Organisation[];
 }
 export interface CustomSession extends Session {
