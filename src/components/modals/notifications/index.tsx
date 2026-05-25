@@ -2,7 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { X, CheckCheck } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import BaseModal from "@/components/modals/BaseModal";
 import NotificationTabs, { type NotificationTab } from "./notification-tabs";
 import NotificationItem from "./notification-item";
@@ -95,6 +100,9 @@ export default function NotificationsModal({
             <DialogTitle className="text-foreground text-lg font-semibold">
               Notifications
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              This modal displays a system notification alert.
+            </DialogDescription>
             <button
               type="button"
               onClick={onClose}
