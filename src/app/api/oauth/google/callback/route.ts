@@ -17,8 +17,13 @@ export async function GET(request: Request) {
   const { code, accessToken, error, redirectUrl } =
     parseGoogleOAuthCallbackParams(requestUrl.searchParams);
 
+  // Always base post-OAuth redirects on envConfig.APP_URL. requestUrl.origin
+  // can resolve to localhost behind proxies / on serverless platforms, which
+  // would send users back to http://localhost:3000 in production.
+  const appOrigin = envConfig.APP_URL;
+
   if (error) {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(appOrigin));
   }
 
   let token = accessToken;
@@ -27,21 +32,21 @@ export async function GET(request: Request) {
   if (!token && code) {
     const exchanged = await exchangeGoogleOAuthCode(envConfig.BASEURL, code);
     if (!exchanged) {
-      return Response.redirect(loginErrorRedirect(requestUrl.origin));
+      return Response.redirect(loginErrorRedirect(appOrigin));
     }
     token = exchanged.access_token;
     apiRedirectUrl = exchanged.redirect_url ?? apiRedirectUrl;
   }
 
   if (!token) {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(appOrigin));
   }
 
   let me;
   try {
     me = await fetchAuthMe(envConfig.BASEURL, token);
   } catch {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(appOrigin));
   }
 
   const destination =
@@ -54,13 +59,13 @@ export async function GET(request: Request) {
     });
 
     if (isSignInFailure(signInResult)) {
-      return Response.redirect(loginErrorRedirect(requestUrl.origin));
+      return Response.redirect(loginErrorRedirect(appOrigin));
     }
   } catch {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(appOrigin));
   }
 
   return Response.redirect(
-    new URL(withGoogleSignInSuccessQuery(destination), requestUrl.origin),
+    new URL(withGoogleSignInSuccessQuery(destination), appOrigin),
   );
 }
