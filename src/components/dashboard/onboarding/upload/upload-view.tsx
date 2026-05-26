@@ -126,6 +126,9 @@ export function UploadView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
+  // const [processingWarning, setProcessingWarning] = useState<string | null>(
+  //   null,
+  // );
   const uploadMutation = useUploadDocumentsMutation();
   const startGeneration = useStartFunnelGenerationMutation();
   const isNewStrategy = useNewStrategyFlow();
@@ -171,6 +174,19 @@ export function UploadView() {
       };
     });
   }, [files, progressByUploadId]);
+
+  const processingWarning = useMemo(() => {
+    const stalled = displayFiles.find(
+      (file) =>
+        file.status === "parsing" && file.progress >= 50 && file.progress < 100,
+    );
+
+    if (!stalled) {
+      return null;
+    }
+
+    return "Document processing is taking longer than expected. The server may still be parsing your file.";
+  }, [displayFiles]);
 
   useEffect(() => {
     if (isNewStrategy) return;
@@ -452,6 +468,19 @@ export function UploadView() {
               {displayFiles.map((item) => (
                 <FileRow key={item.id} item={item} onRemove={removeFile} />
               ))}
+              {processingWarning && (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                  <p className="text-sm text-amber-700">{processingWarning}</p>
+
+                  <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="mt-3 text-sm font-medium text-amber-800 underline underline-offset-2"
+                  >
+                    Retry checking status
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
