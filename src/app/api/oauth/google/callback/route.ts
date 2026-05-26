@@ -61,6 +61,6 @@ export async function GET(request: Request) {
   }
 
   return Response.redirect(
-    new URL(withGoogleSignInSuccessQuery(destination), requestUrl.origin),
+    new URL(withGoogleSignInSuccessQuery(destination), envConfig.APP_URL),
   );
 }
