@@ -315,12 +315,16 @@ export function useStrategyFunnel() {
     if (generationFailed) {
       return STRATEGY_GENERATION_FAILED_MESSAGE;
     }
-    if (statusQuery.error) {
-      return STRATEGY_GENERATION_FAILED_MESSAGE;
+    if (
+      statusQuery.error instanceof Error &&
+      statusQuery.error.message.includes("Unauthenticated")
+    ) {
+      return "Your session expired. Please log in again.";
     }
-    // if (displayQuery.error) {
+    // if (statusQuery.error) {
     //   return STRATEGY_GENERATION_FAILED_MESSAGE;
     // }
+
     if (displayQuery.error) {
       const message =
         displayQuery.error instanceof Error ? displayQuery.error.message : "";
