@@ -381,3 +381,41 @@ export async function fetchAuthMe(
     return null;
   }
 }
+
+export async function refreshAccessToken(baseUrl: string): Promise<{
+  access_token: string;
+} | null> {
+  try {
+    const response = await axios.post(
+      authApiUrl(baseUrl, "/refresh-token"),
+      {},
+      {
+        withCredentials: true,
+      },
+    );
+
+    const body =
+      response.data &&
+      typeof response.data === "object" &&
+      "data" in response.data
+        ? (response.data.data as Record<string, unknown>)
+        : null;
+
+    const accessToken =
+      typeof body?.accessToken === "string"
+        ? body.accessToken
+        : typeof body?.access_token === "string"
+          ? body.access_token
+          : null;
+
+    if (!accessToken) {
+      return null;
+    }
+
+    return {
+      access_token: accessToken,
+    };
+  } catch {
+    return null;
+  }
+}
