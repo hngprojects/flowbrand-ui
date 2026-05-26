@@ -49,6 +49,11 @@ const ForgotPasswordOtpForm = ({ email }: Props) => {
   const otpValues = useWatch({ control: form.control });
   const isOtpComplete = OtpFormSchema.safeParse(otpValues).success;
 
+  // Inputs are blocked while EITHER verification or resend is in flight —
+  // otherwise the user could fire a new resend mid-verify (or vice versa)
+  // and produce racey/confusing failures.
+  const isBusy = isVerifying || isResending;
+
   const focusDigit = useCallback((index: number) => {
     inputRefs.current[index]?.focus();
   }, []);
@@ -59,6 +64,30 @@ const ForgotPasswordOtpForm = ({ email }: Props) => {
     }
     focusDigit(0);
   }, [form, focusDigit]);
+
+  /**
+   * Spread a run of digits across OTP cells starting at `startIndex`.
+   * Used by paste AND by onChange (browser/OS one-time-code autofill can dump
+   * the entire 6-digit code into a single cell — slice(-1) would silently
+   * throw 5 digits away).
+   */
+  const applyOtpDigits = useCallback(
+    (digits: string, startIndex: number) => {
+      const cleaned = digits.replace(/\D/g, "");
+      if (!cleaned) return 0;
+      const slice = cleaned.slice(0, OTP_FIELD_NAMES.length - startIndex);
+      const next = { ...form.getValues() };
+      slice.split("").forEach((ch, j) => {
+        next[OTP_FIELD_NAMES[startIndex + j]] = ch;
+      });
+      form.reset(next);
+      focusDigit(
+        Math.min(startIndex + slice.length, OTP_FIELD_NAMES.length - 1),
+      );
+      return slice.length;
+    },
+    [focusDigit, form],
+  );
 
   const onConfirm = () => {
     void form.handleSubmit(async (data) => {
@@ -98,7 +127,7 @@ const ForgotPasswordOtpForm = ({ email }: Props) => {
   };
 
   const handleResend = async () => {
-    if (isResending) return;
+    if (isBusy) return;
     setIsResending(true);
     try {
       // A new code invalidates any previously issued reset_token.
@@ -166,11 +195,19 @@ const ForgotPasswordOtpForm = ({ email }: Props) => {
                       inputMode="numeric"
                       autoComplete="one-time-code"
                       maxLength={1}
-                      disabled={isVerifying}
+                      disabled={isBusy}
                       onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, "").slice(-1);
-                        field.onChange(v);
-                        if (v && i < 5) focusDigit(i + 1);
+                        const cleaned = e.target.value.replace(/\D/g, "");
+                        if (cleaned.length <= 1) {
+                          // Normal single-digit keystroke path.
+                          field.onChange(cleaned);
+                          if (cleaned && i < OTP_FIELD_NAMES.length - 1) {
+                            focusDigit(i + 1);
+                          }
+                          return;
+                        }
+                        // Autofill: distribute across cells from here.
+                        applyOtpDigits(cleaned, i);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Backspace" && !field.value && i > 0) {
@@ -179,19 +216,7 @@ const ForgotPasswordOtpForm = ({ email }: Props) => {
                       }}
                       onPaste={(e) => {
                         e.preventDefault();
-                        const paste = e.clipboardData
-                          .getData("text")
-                          .replace(/\D/g, "")
-                          .slice(0, 6);
-                        if (!paste) return;
-                        const next = { ...form.getValues() };
-                        paste.split("").forEach((ch, j) => {
-                          if (i + j < 6) {
-                            next[OTP_FIELD_NAMES[i + j]] = ch;
-                          }
-                        });
-                        form.reset(next);
-                        focusDigit(Math.min(i + paste.length, 5));
+                        applyOtpDigits(e.clipboardData.getData("text"), i);
                       }}
                       className="h-14 w-full min-w-0 rounded-md p-0 text-center text-lg font-bold sm:h-[66px] sm:rounded-lg sm:text-xl"
                     />
@@ -209,7 +234,7 @@ const ForgotPasswordOtpForm = ({ email }: Props) => {
           <Button
             type="button"
             variant="link"
-            disabled={isVerifying || isResending}
+            disabled={isBusy}
             onClick={handleResend}
             className="text-primary hover:text-primary/90 h-auto p-0 font-bold disabled:opacity-40"
           >
@@ -219,7 +244,7 @@ const ForgotPasswordOtpForm = ({ email }: Props) => {
 
         <Button
           type="button"
-          disabled={!isOtpComplete || isVerifying}
+          disabled={!isOtpComplete || isBusy}
           variant={isOtpComplete ? "default" : "outline"}
           onClick={onConfirm}
           className={cn(

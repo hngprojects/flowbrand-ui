@@ -17,8 +17,10 @@ export default function ForgotPasswordVerifyPage() {
     () => null,
   );
 
+  // Use the same truthiness check as the render guard below so an empty
+  // string can't leave the user stuck on the loading view forever.
   useEffect(() => {
-    if (email === null) {
+    if (!email) {
       router.replace("/forgot-password");
     }
   }, [email, router]);

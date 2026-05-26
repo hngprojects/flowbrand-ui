@@ -284,9 +284,10 @@ export default function ResetPasswordPage() {
   );
 
   useEffect(() => {
-    // No reset token = user landed here without verifying OTP. Bounce them to
-    // the start of the flow.
-    if (resetToken === null) {
+    // No reset token = user landed here without verifying OTP. Use truthiness
+    // so an empty string is treated the same as null (matches the render
+    // guard below — otherwise an empty string would silently get stuck).
+    if (!resetToken) {
       router.replace("/forgot-password");
     }
   }, [resetToken, router]);
