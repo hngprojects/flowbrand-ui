@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     parseGoogleOAuthCallbackParams(requestUrl.searchParams);
 
   if (error) {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(envConfig.APP_URL));
   }
 
   let token = accessToken;
@@ -27,21 +27,21 @@ export async function GET(request: Request) {
   if (!token && code) {
     const exchanged = await exchangeGoogleOAuthCode(envConfig.BASEURL, code);
     if (!exchanged) {
-      return Response.redirect(loginErrorRedirect(requestUrl.origin));
+      return Response.redirect(loginErrorRedirect(envConfig.APP_URL));
     }
     token = exchanged.access_token;
     apiRedirectUrl = exchanged.redirect_url ?? apiRedirectUrl;
   }
 
   if (!token) {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(envConfig.APP_URL));
   }
 
   let me;
   try {
     me = await fetchAuthMe(envConfig.BASEURL, token);
   } catch {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(envConfig.APP_URL));
   }
 
   const destination =
@@ -54,10 +54,10 @@ export async function GET(request: Request) {
     });
 
     if (isSignInFailure(signInResult)) {
-      return Response.redirect(loginErrorRedirect(requestUrl.origin));
+      return Response.redirect(loginErrorRedirect(envConfig.APP_URL));
     }
   } catch {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+    return Response.redirect(loginErrorRedirect(envConfig.APP_URL));
   }
 
   return Response.redirect(
