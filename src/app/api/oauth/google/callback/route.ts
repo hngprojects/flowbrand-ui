@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
   // Always base post-OAuth redirects on envConfig.APP_URL. requestUrl.origin
   // can resolve to localhost behind proxies / on serverless platforms, which
-  // would send users back to http://localhost:3000 in production.
+  // would send users back to http://localhost:4000 in production.
   const appOrigin = envConfig.APP_URL;
 
   if (error) {
