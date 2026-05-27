@@ -1,28 +1,76 @@
 import {
   buildBusinessSummary,
   buildIdealCustomerSummary,
-  DEFAULT_TRAFFIC_CHANNEL,
-  DEFAULT_UPLOADED_DOCS,
   type DashboardMockSession,
   type MockUploadedDoc,
 } from "@/lib/dashboard-mock-data";
 
-const SESSION_KEY = "flowbrand-dashboard-mock-session";
+export type { DashboardMockSession, MockUploadedDoc };
 
-export function saveDashboardMockSession(session: DashboardMockSession): void {
-  if (typeof window === "undefined") return;
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+const SESSION_KEY = "flowbrand-dashboard-mock-session";
+const SESSION_CHANGE_EVENT = "flowbrand-dashboard-mock-session-change";
+
+let cachedRaw: string | null | undefined;
+let cachedSnapshot: DashboardMockSession | null = null;
+
+function invalidateSnapshotCache(): void {
+  cachedRaw = undefined;
 }
 
-export function loadDashboardMockSession(): DashboardMockSession | null {
+function notifySessionChange(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(SESSION_CHANGE_EVENT));
+}
+
+/** Stable snapshot for useSyncExternalStore (same reference while storage unchanged). */
+export function getDashboardMockSessionSnapshot(): DashboardMockSession | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as DashboardMockSession;
+    if (raw === cachedRaw) return cachedSnapshot;
+    cachedRaw = raw;
+    if (!raw) {
+      cachedSnapshot = null;
+      return null;
+    }
+    cachedSnapshot = JSON.parse(raw) as DashboardMockSession;
+    return cachedSnapshot;
   } catch {
+    cachedSnapshot = null;
+    cachedRaw = null;
     return null;
   }
+}
+
+export function subscribeDashboardMockSession(
+  onStoreChange: () => void,
+): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = () => onStoreChange();
+  window.addEventListener(SESSION_CHANGE_EVENT, handler);
+  return () => window.removeEventListener(SESSION_CHANGE_EVENT, handler);
+}
+
+export function saveDashboardMockSession(session: DashboardMockSession): void {
+  if (typeof window === "undefined") return;
+  const raw = JSON.stringify(session);
+  sessionStorage.setItem(SESSION_KEY, raw);
+  cachedRaw = raw;
+  cachedSnapshot = session;
+  notifySessionChange();
+}
+
+export function clearDashboardMockSession(): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(SESSION_KEY);
+  invalidateSnapshotCache();
+  cachedSnapshot = null;
+  cachedRaw = null;
+  notifySessionChange();
+}
+
+export function loadDashboardMockSession(): DashboardMockSession | null {
+  return getDashboardMockSessionSnapshot();
 }
 
 export function buildSessionFromOnboarding(input: {
@@ -34,11 +82,6 @@ export function buildSessionFromOnboarding(input: {
   trafficChannel: string;
   uploadedDocuments: MockUploadedDoc[];
 }): DashboardMockSession {
-  const docs =
-    input.uploadedDocuments.length > 0
-      ? input.uploadedDocuments
-      : DEFAULT_UPLOADED_DOCS;
-
   return {
     businessDescription: buildBusinessSummary(input.businessDescription),
     idealCustomerSummary: buildIdealCustomerSummary({
@@ -47,25 +90,8 @@ export function buildSessionFromOnboarding(input: {
       locatedIn: input.locatedIn,
       customInput: input.customCustomerInput,
     }),
-    trafficChannel: input.trafficChannel.trim() || DEFAULT_TRAFFIC_CHANNEL,
-    uploadedDocuments: docs,
+    trafficChannel: input.trafficChannel.trim(),
+    uploadedDocuments: input.uploadedDocuments,
     completedAt: new Date().toISOString(),
   };
-}
-
-export function getDashboardMockSessionOrDefaults(): DashboardMockSession {
-  return (
-    loadDashboardMockSession() ?? {
-      businessDescription: buildBusinessSummary(""),
-      idealCustomerSummary: buildIdealCustomerSummary({
-        theyAre: [],
-        whoWantTo: [],
-        locatedIn: [],
-        customInput: "",
-      }),
-      trafficChannel: DEFAULT_TRAFFIC_CHANNEL,
-      uploadedDocuments: DEFAULT_UPLOADED_DOCS,
-      completedAt: new Date().toISOString(),
-    }
-  );
 }

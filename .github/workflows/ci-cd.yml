@@ -115,10 +115,9 @@ jobs:
             find "${{ env.APP_PATH }}" -mindepth 1 \
               -maxdepth 1 \
               ! -name ".env" \
-              ! -name "node_modules" \
               -exec rm -rf {} +
 
-      - name: Copy project files
+      - name: Copy projects files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}

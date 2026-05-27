@@ -19,6 +19,7 @@ import {
   DUMMY_STRATEGY_PHASES,
   DEFAULT_UPLOADED_DOCS,
 } from "@/lib/dashboard-mock-data";
+import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
 import NotificationsModal from "@/components/modals/notifications";
@@ -26,13 +27,17 @@ import NotificationsModal from "@/components/modals/notifications";
 interface OnboardingNavbarProps {
   loading?: boolean;
   documents?: MockUploadedDoc[];
-  strategyPhases?: readonly { title: string; tasks: string }[];
+  strategyPhases?: readonly StrategyPhaseDisplay[];
+  strategySummary?: string;
+  onCreateNewStrategy?: () => void;
 }
 
 const OnboardingNavbar = ({
   loading = false,
-  documents = DEFAULT_UPLOADED_DOCS,
-  strategyPhases = DUMMY_STRATEGY_PHASES,
+  documents = [],
+  strategyPhases = [],
+  strategySummary,
+  onCreateNewStrategy,
 }: OnboardingNavbarProps) => {
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -180,6 +185,8 @@ const OnboardingNavbar = ({
                 loading={loading}
                 documents={documents}
                 strategyPhases={strategyPhases}
+                strategySummary={strategySummary}
+                onCreateNewStrategy={onCreateNewStrategy}
                 className="!static !top-auto !flex !h-auto !max-w-none !w-full !overflow-visible !border-0 px-0 py-0"
               />
             </div>

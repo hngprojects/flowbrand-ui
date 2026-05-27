@@ -83,7 +83,8 @@ export default function FunnelModal({
               type="button"
               onClick={onClose}
               aria-label="Close settings"
-              className="flex items-center gap-[7.08px] rounded-[25.47px] border-[0.35px] border-[#E4E4E4] px-[15px] py-[7.08px] text-sm text-[#030D1F] transition-colors pointer-events-auto hover:bg-gray-50 cursor-pointer"
+              className="flex items-center gap-[7.08px] rounded-[25.47px] border-[0.35px] border-[#E4E4E4] px-[15px] py-[7.08px] 
+              text-sm text-[#030D1F] transition-colors pointer-events-auto hover:bg-gray-50 cursor-pointer"
             >
               <svg
                 width="20"
@@ -111,14 +112,17 @@ export default function FunnelModal({
           </div>
 
           <TabsList
-            className="flex items-center w-full h-[38px] gap-[10px] mb-6 shrink-0 rounded-[12px] border border-[#E4E4E4] px-1 bg-transparent overflow-x-auto"
+            className="flex items-center w-full h-[38px] gap-[10px] mb-6 shrink-0 rounded-[12px] border border-[#E4E4E4] 
+            px-1 bg-transparent overflow-x-auto"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="h-full rounded-[10px] font-medium transition-all duration-200 whitespace-nowrap px-4 text-center text-[16px] leading-[150%] text-[#565D69] data-active:bg-[#326AD1] data-active:text-white cursor-pointer border-0 data-active:shadow-none hover:bg-transparent hover:text-[#565D69] data-active:hover:bg-[#326AD1] data-active:hover:text-white"
+                className="h-full rounded-[10px] font-medium transition-all duration-200 whitespace-nowrap px-4 text-center 
+                text-[16px] leading-[150%] text-[#565D69] data-active:bg-[#326AD1] data-active:text-white cursor-pointer border-0 
+                data-active:shadow-none hover:bg-transparent hover:text-[#565D69] data-active:hover:bg-[#326AD1] data-active:hover:text-white"
               >
                 {tab.label}
               </TabsTrigger>
