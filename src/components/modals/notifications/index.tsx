@@ -101,7 +101,7 @@ export default function NotificationsModal({
               Notifications
             </DialogTitle>
             <DialogDescription className="sr-only">
-              This modal displays a system notification alert.
+              This modal displays lists of notifications for the user.
             </DialogDescription>
             <button
               type="button"
