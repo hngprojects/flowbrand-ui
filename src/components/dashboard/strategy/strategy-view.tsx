@@ -110,7 +110,7 @@ function StrategyStageTasks({
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
-  onCompleteStage: () => void;
+  onCompleteStage: () => Promise<void>;
 }) {
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -121,9 +121,9 @@ function StrategyStageTasks({
       (task) => task.status === "complete" || checkedTasks.includes(task.id),
     );
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!allTasksComplete || submitted || isCurrentStageComplete) return;
-    onCompleteStage();
+    await onCompleteStage();
     setSubmitted(true);
   };
 

@@ -29,6 +29,7 @@ import {
 import { funnelHasDisplayContent } from "@/lib/funnel-api-types";
 import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
 import { flowLog } from "@/lib/flow-debug-log";
+import { completeStage } from "@/lib/complete-state";
 
 /** Poll every ~3s after the first 30s; faster early when jobs often finish. */
 const POLL_MS = 3000;
@@ -243,8 +244,9 @@ export function useStrategyFunnel() {
     return completedStageIds.includes(activeStageId);
   }, [funnelId, activeStageId, completedStageIds]);
 
-  const completeCurrentStage = useCallback(() => {
+  const completeCurrentStage = useCallback(async () => {
     if (!funnelId || !activeStageId) return;
+    await completeStage(funnelId, activeStageId);
     markStageComplete(funnelId, activeStageId);
     setStageProgressVersion((version) => version + 1);
   }, [funnelId, activeStageId]);
@@ -313,11 +315,32 @@ export function useStrategyFunnel() {
     if (generationFailed) {
       return STRATEGY_GENERATION_FAILED_MESSAGE;
     }
-    if (statusQuery.error) {
-      return STRATEGY_GENERATION_FAILED_MESSAGE;
+    if (
+      statusQuery.error instanceof Error &&
+      statusQuery.error.message.includes("Unauthenticated")
+    ) {
+      return "Your session expired. Please log in again.";
     }
+    // if (statusQuery.error) {
+    //   return STRATEGY_GENERATION_FAILED_MESSAGE;
+    // }
+
     if (displayQuery.error) {
-      return STRATEGY_GENERATION_FAILED_MESSAGE;
+      const message =
+        displayQuery.error instanceof Error ? displayQuery.error.message : "";
+
+      /**
+       * Ignore locked stage errors.
+       * Backend uses 403 while stages are progressively unlocked.
+       */
+      const isLockedStageError =
+        message.toLowerCase().includes("stage is locked") ||
+        message.toLowerCase().includes("complete all tasks") ||
+        message.toLowerCase().includes("unlock");
+
+      if (!isLockedStageError) {
+        return STRATEGY_GENERATION_FAILED_MESSAGE;
+      }
     }
     if (timedOut && displayQuery.isFetched && !hasRealContent) {
       return STRATEGY_GENERATION_FAILED_MESSAGE;
