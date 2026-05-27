@@ -9,7 +9,7 @@ export default function CreateSection() {
   return (
     <div className="section-class flex flex-col items-center gap-2 pb-12 text-center md:pb-20">
       <motion.h2
-        className="text-black-500 max-w-xs lg:max-w-3xl text-[32px] lg:text-[48px] font-[500] tracking-tight leading-tight"
+        className="text-black-500 max-w-xs lg:max-w-3xl text-4xl  lg:text-6xl font-[500] tracking-tight leading-tight"
         initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
@@ -18,7 +18,7 @@ export default function CreateSection() {
         Get a step-by-step marketing strategy in minutes
       </motion.h2>
       <motion.p
-        className="text-black-400 max-w-sm lg:max-w-lg text-[16px] leading-relaxed"
+        className="text-black-400 max-w-sm lg:max-w-lg text-base leading-relaxed"
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
@@ -40,7 +40,7 @@ export default function CreateSection() {
         >
           <Link
             href="/register"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-8 py-3.5 text-[16px] md:text-[20px] font-[500] shadow-md transition-all active:scale-95"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-8 py-3.5 text-base md:text-xl font-[500] shadow-md transition-all active:scale-95"
           >
             Create a free account
           </Link>

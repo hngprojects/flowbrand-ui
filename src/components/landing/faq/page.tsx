@@ -80,7 +80,7 @@ export default function FaqPage() {
                   placeholder="Search anything"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-12 rounded-full pr-4 pl-10 shadow-sm bg-white text-[#a2a2a]"
+                  className="h-12 rounded-full pr-4 pl-10 shadow-sm bg-white text-gray-mid"
                 />
               </motion.div>
             </div>
@@ -148,11 +148,11 @@ export default function FaqPage() {
                             {item.question}
                           </span>
                           <div className="ml-auto flex shrink-0 pt-0.5">
-                            <Plus className="h-5 w-5 text-[#1E3A8A] transition-transform duration-200 group-data-[state=open]:rotate-45 md:h-6 md:w-6" />
+                            <Plus className="h-5 w-5 text-brand transition-transform duration-200 group-data-[state=open]:rotate-45 md:h-6 md:w-6" />
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-6 pt-0 pb-6">
-                          <div className="space-y-4 rounded-2xl border-t border-gray-100 bg-[#FBFCFF] pt-4 text-sm leading-relaxed text-black-500 md:text-[15px]">
+                          <div className="space-y-4 rounded-2xl border-t border-gray-100 bg-primary-60 pt-4 text-sm leading-relaxed text-black-500 md:text-md-accent">
                             {item.answerParagraphs.map(
                               (paragraph: string, paragraphIndex: number) => (
                                 <p key={paragraphIndex}>{paragraph}</p>

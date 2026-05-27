@@ -115,7 +115,7 @@ function TestimonialRow({
       >
         {duplicatedItems.map((t, index) => (
           <Card key={`${t.name}-${index}`} className={testimonialCardClassName}>
-            <p className="w-full leading-snug text-black-500 text-[13px] md:text-[20px]">
+            <p className="w-full leading-snug text-black-500 text-sm-accent md:text-xl">
               “{t.quote}”
             </p>
             <div className="flex w-full items-center justify-center gap-2 sm:gap-2.5">
@@ -126,7 +126,7 @@ function TestimonialRow({
                 height={40}
                 className="size-8 shrink-0 rounded-full sm:size-10"
               />
-              <span className="text-[13px] md:text-[20px] font-[500] text-black-500">
+              <span className="text-sm-accent md:text-xl font-[500] text-black-500">
                 {t.name}
               </span>
             </div>
@@ -151,7 +151,7 @@ export default function Testimonials() {
         </motion.div>
 
         <motion.h2
-          className="mb-2 px-4 text-[24px] md:text-[32px] font-[500] max-w-xs md:max-w-none tracking-tight text-black-500"
+          className="mb-2 px-4 text-2xl md:text-4xl  font-[500] max-w-xs md:max-w-none tracking-tight text-black-500"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}

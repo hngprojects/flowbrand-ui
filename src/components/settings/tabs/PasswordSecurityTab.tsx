@@ -64,7 +64,7 @@ export default function PasswordSecurityTab() {
   return (
     <>
       <div className="flex flex-col gap-6">
-        <h3 className="text-[20px] font-medium text-[#565D69]">Password</h3>
+        <h3 className="text-xl font-medium text-black-300 ">Password</h3>
 
         <Form {...form}>
           <form
@@ -76,7 +76,7 @@ export default function PasswordSecurityTab() {
               name="oldPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-[#152D58]">
+                  <FormLabel className="text-base font-medium leading-[150%] text-brand-deep ">
                     Old Password
                   </FormLabel>
                   <FormControl>
@@ -117,7 +117,7 @@ export default function PasswordSecurityTab() {
               name="newPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-[#152D58]">
+                  <FormLabel className="text-base font-medium leading-[150%] text-brand-deep ">
                     New Password
                   </FormLabel>
                   <FormControl>
@@ -158,7 +158,7 @@ export default function PasswordSecurityTab() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-[#152D58]">
+                  <FormLabel className="text-base font-medium leading-[150%] text-brand-deep ">
                     Confirm Password
                   </FormLabel>
                   <FormControl>

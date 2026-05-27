@@ -13,13 +13,13 @@ const PrivacyPolicyView = () => {
   return (
     <>
       <motion.div
-        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]"
+        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-primary-50 pt-[15px] md:pt-[0px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <motion.h1
-          className="text-[20px] md:text-[40px]"
+          className="text-xl md:text-5xl "
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
@@ -27,7 +27,7 @@ const PrivacyPolicyView = () => {
           Privacy Policy
         </motion.h1>
         <motion.p
-          className="text-[14px] md:text-[20px] text-[#565D69]"
+          className="text-md  md:text-xl text-black-300 "
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -42,10 +42,10 @@ const PrivacyPolicyView = () => {
 
       <div className="flex flex-col section-class space-y-5">
         <motion.div {...fadeUp}>
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-base md:text-2xl font-[500] mb-[12px]">
             Your privacy matters to us
           </h2>
-          <p className="text-[14px] md:text-[16px]">
+          <p className="text-md  md:text-base">
             This Privacy Policy explains how Seil collects, uses, and protects
             the information you share when using the platform. It is written in
             plain language so you can clearly understand how your data is
@@ -65,10 +65,10 @@ const PrivacyPolicyView = () => {
             delay: 0.05,
           }}
         >
-          <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
+          <h2 className="font-[500] text-base md:text-2xl mb-[12px]">
             How we use your information
           </h2>
-          <p className="text-[14px] md:text-[16px]">
+          <p className="text-md  md:text-base">
             Your information is used to generate tailored marketing
             recommendations, maintain your account, and improve the overall Seil
             experience.
@@ -87,10 +87,10 @@ const PrivacyPolicyView = () => {
             delay: 0.1,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-base md:text-2xl font-[500] mb-[12px]">
             Data sharing
           </h2>
-          <p className="text-[14px] md:text-[16px]">
+          <p className="text-md  md:text-base">
             We do not sell your personal information. We only share data with
             trusted service providers that help us operate the platform, and
             only to the extent necessary to deliver our services.
@@ -109,10 +109,10 @@ const PrivacyPolicyView = () => {
             delay: 0.15,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-base md:text-2xl font-[500] mb-[12px]">
             Data security
           </h2>
-          <p className="text-[14px] md:text-[16px]">
+          <p className="text-md  md:text-base">
             We apply reasonable technical and organizational measures to protect
             your information from unauthorized access, loss, or misuse.
             <span className="block mt-[8px] md:mt-[16px]">
@@ -131,10 +131,10 @@ const PrivacyPolicyView = () => {
             delay: 0.2,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-base md:text-2xl font-[500] mb-[12px]">
             Your rights
           </h2>
-          <p className="text-[14px] md:text-[16px]">
+          <p className="text-md  md:text-base">
             You have the right to access, update, or request deletion of the
             personal information we hold about you. You can manage most details
             directly from your account settings.
@@ -153,10 +153,10 @@ const PrivacyPolicyView = () => {
             delay: 0.25,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-base md:text-2xl font-[500] mb-[12px]">
             Changes to the policy
           </h2>
-          <p className="text-[14px] md:text-[16px]">
+          <p className="text-md  md:text-base">
             We may update this Privacy Policy from time to time to reflect
             changes in the platform, our services, or applicable regulations.
             <span className="block mt-[8px] md:mt-[16px]">

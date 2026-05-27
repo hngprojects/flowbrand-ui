@@ -161,15 +161,15 @@ const RegistrationForm = () => {
 
   return (
     <div className="max-h-screen space-y-4 py-8 sm:space-y-5">
-      <div className="bg-primary/10 text-foreground inline-block rounded-full px-2.5 py-0.5 text-[10px] font-medium sm:px-3 sm:py-1 sm:text-xs">
+      <div className="bg-primary/10 text-foreground inline-block rounded-full px-2.5 py-0.5 text-2xs  font-medium sm:px-3 sm:py-1 sm:text-xs">
         No marketing experience needed
       </div>
 
       <div className="space-y-1.5 sm:space-y-2">
-        <h2 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+        <h2 className="text-xl font-medium text-brand-deep  sm:text-4xl">
           Start building your first marketing strategy
         </h2>
-        <p className="text-foreground/70 text-sm sm:text-[24px]">
+        <p className="text-foreground/70 text-sm sm:text-2xl">
           Create your free Seil account and launch your first campaign in under
           10 minutes.
         </p>
@@ -323,7 +323,7 @@ const RegistrationForm = () => {
                             return (
                               <li
                                 key={key}
-                                className="flex items-start gap-2.5 text-xs sm:text-[13px]"
+                                className="flex items-start gap-2.5 text-xs sm:text-sm-accent"
                               >
                                 <Check
                                   aria-hidden
@@ -431,7 +431,7 @@ const RegistrationForm = () => {
         </Link>
       </p>
 
-      <p className="text-foreground/50 px-4 pb-4 text-center text-[10px]">
+      <p className="text-foreground/50 px-4 pb-4 text-center text-2xs ">
         By signing up you agree to our{" "}
         <Link
           href="/terms-and-conditions"

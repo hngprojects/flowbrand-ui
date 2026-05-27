@@ -7,7 +7,7 @@ import CreateSection from "@/components/landing/home/Create";
 
 const AboutUs = () => {
   return (
-    <section className="w-full bg-[#FFFFFF]">
+    <section className="w-full bg-white">
       <Hero />
       <SocialProof />
       <WhyWeStarted />

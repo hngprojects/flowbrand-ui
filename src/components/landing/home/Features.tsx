@@ -18,7 +18,7 @@ const Features = () => {
         </motion.div>
 
         <motion.h2
-          className="text-[24px] md:text-[32px] font-semibold mb-12 text-foreground text-center tracking-tight"
+          className="text-2xl md:text-4xl  font-semibold mb-12 text-foreground text-center tracking-tight"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -53,13 +53,13 @@ const Features = () => {
               />
             </div>
             <div className="mt-auto">
-              <h3 className="text-white text-[20px] md:text-[24px] font-[500] mb-3">
+              <h3 className="text-white text-xl md:text-2xl font-[500] mb-3">
                 <span className="hidden md:block">Guided Setup</span>
                 <span className="md:hidden">
                   A plan made for your own business
                 </span>
               </h3>
-              <p className="text-gray-400 text-[16px] font-[400] leading-relaxed">
+              <p className="text-gray-400 text-base font-[400] leading-relaxed">
                 <span className="hidden md:block">
                   Build the best marketing strategy for your business with
                   clear, step by step support
@@ -92,10 +92,10 @@ const Features = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a]/90 via-[#1a1a1a]/30 to-transparent" />
             <div className="relative z-10 mt-auto p-8">
-              <h3 className="text-white text-[20px] md:text-[24px] font-[500] mb-3">
+              <h3 className="text-white text-xl md:text-2xl font-[500] mb-3">
                 Progress Tracking
               </h3>
-              <p className="text-gray-200 text-[16px] font-[400] leading-relaxed">
+              <p className="text-gray-200 text-base font-[400] leading-relaxed">
                 Track every stage of your marketing and see what to improve on
                 next, without guess work
               </p>
@@ -113,7 +113,7 @@ const Features = () => {
               delay: 0.3,
             }}
           >
-            <div className="bg-[#7ba4ed] rounded-[2rem] p-6 flex flex-col h-[405px] relative overflow-hidden shadow-sm w-full md:max-w-[calc(50%-12px)] lg:max-w-none">
+            <div className="bg-primary-350 rounded-[2rem] p-6 flex flex-col h-[405px] relative overflow-hidden shadow-sm w-full md:max-w-[calc(50%-12px)] lg:max-w-none">
               <div className="flex-1 relative w-full pt-4 px-0 bg-white/25 rounded-[1.5rem]">
                 <div className="absolute top-5 left-5">
                   <p className="text-white/90 text-md font-medium leading-tight">
@@ -150,7 +150,7 @@ const Features = () => {
                   </svg>
                 </div>
                 <div className="absolute top-[5rem] left-[8rem] w-full">
-                  <p className="text-white text-2xl md:text-[1.25rem] lg:text-[1.5rem] font-semibold leading-snug">
+                  <p className="text-white text-2xl md:text-[1.25rem] lg:text-2xl font-semibold leading-snug">
                     Real Marketing
                     <br />
                     Strategies
@@ -158,10 +158,10 @@ const Features = () => {
                 </div>
               </div>
               <div className="mt-20 px-2">
-                <h3 className="text-white text-[20px] md:text-[24px] font-[500] mb-3">
+                <h3 className="text-white text-xl md:text-2xl font-[500] mb-3">
                   Smarter Conversions
                 </h3>
-                <p className="text-white/85 text-[16px] font-[400] leading-relaxed">
+                <p className="text-white/85 text-base font-[400] leading-relaxed">
                   Convert leads into real customers with better inquiry and
                   booking flows.
                 </p>

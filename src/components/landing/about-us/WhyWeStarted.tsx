@@ -14,22 +14,22 @@ export default function WhyWeStarted() {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
         >
-          <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-[#E58F172B] px-3 py-1 text-[11px] font-semibold tracking-wide text-[#E58F17] uppercase">
-            <span className="inline-block h-3 w-3 rounded-full bg-[#E58F17]" />
+          <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-accent/17 px-3 py-1 text-xs font-semibold tracking-wide text-warning uppercase">
+            <span className="inline-block h-3 w-3 rounded-full bg-accent" />
             Our Story
           </span>
-          <h2 className="mb-5 text-[22px] font-bold tracking-tight text-[#0D1117] md:text-[26px]">
+          <h2 className="mb-5 text-xl-accent font-bold tracking-tight text-dark-muted  md:text-2xl-plus">
             Why we started
           </h2>
-          <p className="mb-3 text-[16px] lg:text-[20px] leading-relaxed text-black md:text-[18px]">
+          <p className="mb-3 text-base lg:text-xl leading-relaxed text-black md:text-lg ">
             We kept seeing the same story everywhere.
           </p>
-          <p className="mb-3 text-[16px] lg:text-[20px] leading-relaxed text-black md:text-[18px]">
+          <p className="mb-3 text-base lg:text-xl leading-relaxed text-black md:text-lg ">
             A business owner doing everything, running the operation, managing
             staff, chasing payments and still finding time to post on Instagram
             hoping something would click.
           </p>
-          <p className="text-[16px] lg:text-[20px] leading-relaxed text-black md:text-[18px]">
+          <p className="text-base lg:text-xl leading-relaxed text-black md:text-lg ">
             No strategy. No plan. Just effort and hope.
           </p>
         </motion.div>

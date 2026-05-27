@@ -81,7 +81,7 @@ function LogoItem({
       />
       <span
         className={cn(
-          "whitespace-nowrap text-center text-[18px] leading-none font-normal text-gray-800 sm:text-[22px]",
+          "whitespace-nowrap text-center text-lg  leading-none font-normal text-gray-800 sm:text-xl-accent",
           fontClass,
         )}
       >
@@ -97,7 +97,7 @@ export default function SocialProof() {
   return (
     <section className="w-full bg-primary-60 py-8 md:py-12 overflow-hidden">
       <div className="mx-auto flex flex-col items-center gap-5">
-        <p className="text-center flex gap-1 text-[12px] md:text-[20px] text-black-300 px-6 font-[500]">
+        <p className="text-center flex gap-1 text-sm  md:text-xl text-black-300 px-6 font-[500]">
           Used by small <span className="md:hidden">other</span> businesses like
           yours
           <span className="hidden md:block">

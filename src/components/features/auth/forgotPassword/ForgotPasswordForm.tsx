@@ -52,7 +52,7 @@ export function ForgotPasswordForm() {
       className="space-y-4 py-4 sm:space-y-5"
     >
       <div className="space-y-1.5">
-        <h2 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+        <h2 className="text-xl font-medium text-brand-deep  sm:text-4xl">
           Forgot your password?
         </h2>
         <p className="text-foreground/70 text-sm sm:text-base">
@@ -63,7 +63,7 @@ export function ForgotPasswordForm() {
       <div className="space-y-2">
         <label
           htmlFor="forgot-email"
-          className="block text-sm font-medium text-[#152D58]"
+          className="block text-sm font-medium text-brand-deep "
         >
           Email address
         </label>

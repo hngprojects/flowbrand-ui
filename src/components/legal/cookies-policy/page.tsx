@@ -6,7 +6,7 @@ const sections = [
   {
     title: "How do we use Cookies",
     content: (
-      <p className="text-[14px] md:text-[16px]">
+      <p className="text-md  md:text-base">
         This Cookie Policy explains how Seil uses cookies and similar
         technologies to recognize you when you visit our website. It explains
         what these technologies are and why we use them.
@@ -16,7 +16,7 @@ const sections = [
   {
     title: "What are cookies",
     content: (
-      <p className="text-[14px] md:text-[16px]">
+      <p className="text-md  md:text-base">
         Cookies are small text files stored on your device when you visit a
         website. They help websites remember your actions and preferences over
         time.
@@ -27,18 +27,18 @@ const sections = [
     title: "What are cookies",
     content: (
       <>
-        <h4 className="text-[14px] md:text-[16px]">We use cookies to:</h4>
+        <h4 className="text-md  md:text-base">We use cookies to:</h4>
         <ol className="list-decimal list-inside">
-          <li className="text-[14px] md:text-[16px] mt-[2px] md:mt-[10px]">
+          <li className="text-md  md:text-base mt-[2px] md:mt-[10px]">
             Keep the website functioning properly
           </li>
-          <li className="text-[14px] md:text-[16px] mt-[5px] md:mt-[8px]">
+          <li className="text-md  md:text-base mt-[5px] md:mt-[8px]">
             Understand how users interact with our product
           </li>
-          <li className="text-[14px] md:text-[16px] mt-[5px] md:mt-[8px]">
+          <li className="text-md  md:text-base mt-[5px] md:mt-[8px]">
             Improve performance and user experience
           </li>
-          <li className="text-[14px] md:text-[16px] mt-[5px] md:mt-[8px]">
+          <li className="text-md  md:text-base mt-[5px] md:mt-[8px]">
             Remember your preferences and settings
           </li>
         </ol>
@@ -49,24 +49,24 @@ const sections = [
     title: "Types of cookies we use",
     content: (
       <div>
-        <h3 className="mb-[12px] text-[14px] font-[500] md:text-[20px]">
+        <h3 className="mb-[12px] text-md  font-[500] md:text-xl">
           Essential Cookies
         </h3>
-        <p className="text-[14px] md:text-[16px]">
+        <p className="text-md  md:text-base">
           These are required for the website to work. They enable basic features
           like navigation and access to secure areas.
         </p>
-        <h3 className="mt-[14px] mb-[12px] text-[14px] font-[500] md:mt-[25px] md:text-[20px]">
+        <h3 className="mt-[14px] mb-[12px] text-md  font-[500] md:mt-[25px] md:text-xl">
           Performance Cookies
         </h3>
-        <p className="text-[14px] md:text-[16px]">
+        <p className="text-md  md:text-base">
           These help us understand how visitors use our website so we can
           improve functionality and user experience.
         </p>
-        <h3 className="mt-[14px] mb-[12px] text-[14px] font-[500] md:mt-[25px] md:text-[20px]">
+        <h3 className="mt-[14px] mb-[12px] text-md  font-[500] md:mt-[25px] md:text-xl">
           Functional Cookies
         </h3>
-        <p className="text-[14px] md:text-[16px]">
+        <p className="text-md  md:text-base">
           These remember your preferences, such as saved settings, to provide a
           more personalized experience.
         </p>
@@ -76,7 +76,7 @@ const sections = [
   {
     title: "Managing Cookies",
     content: (
-      <p className="text-[14px] md:text-[16px]">
+      <p className="text-md  md:text-base">
         You can control or disable cookies through your browser settings. Please
         note that disabling certain cookies may affect how the website
         functions.
@@ -86,7 +86,7 @@ const sections = [
   {
     title: "Updates on this policy",
     content: (
-      <p className="text-[14px] md:text-[16px]">
+      <p className="text-md  md:text-base">
         We may update this Cookie Policy from time to time to reflect changes in
         technology or legal requirements. Any updates will be posted on this
         page.
@@ -96,7 +96,7 @@ const sections = [
   {
     title: "Contact us",
     content: (
-      <p className="text-[14px] md:text-[16px]">
+      <p className="text-md  md:text-base">
         If you have any questions about our use of cookies, please contact us
         at: seil@gmail.com
       </p>
@@ -108,13 +108,13 @@ const CookiesPolicyView = () => {
   return (
     <>
       <motion.div
-        className="flex h-[114px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:h-[272px] md:pt-[0px]"
+        className="flex h-[114px] flex-col items-center justify-center bg-primary-50 pt-[15px] md:h-[272px] md:pt-[0px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <motion.h1
-          className="text-[20px] md:text-[40px]"
+          className="text-xl md:text-5xl "
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
@@ -122,7 +122,7 @@ const CookiesPolicyView = () => {
           Cookies Policy
         </motion.h1>
         <motion.p
-          className="text-[14px] text-[#565D69] md:text-[20px]"
+          className="text-md  text-black-300  md:text-xl"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -134,7 +134,7 @@ const CookiesPolicyView = () => {
           Effective date : 10-Apr-2026
         </motion.p>
         <motion.p
-          className="text-[14px] text-[#565D69] md:text-[20px]"
+          className="text-md  text-black-300  md:text-xl"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -160,7 +160,7 @@ const CookiesPolicyView = () => {
               delay: 0.05 * index,
             }}
           >
-            <h2 className="mb-[12px] text-[16px] font-[500] md:text-[24px]">
+            <h2 className="mb-[12px] text-base font-[500] md:text-2xl">
               {section.title}
             </h2>
             {section.content}

@@ -236,9 +236,9 @@ export default function PricingPage() {
                   <p className="mt-1 text-sm text-black-300 dark:text-gray-400">
                     For businesses ready to grow further and faster.
                   </p>
-                  <p className="mt-4 text-[24px] font-bold text-accent-700">
+                  <p className="mt-4 text-2xl font-bold text-accent-700">
                     {billingCycle === "monthly" ? "₦10,000" : "₦100,000"}
-                    <span className="text-[24px] font-normal text-accent-700">
+                    <span className="text-2xl font-normal text-accent-700">
                       {" "}
                       /{billingCycle === "monthly" ? "monthly" : "yearly"}
                     </span>

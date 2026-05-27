@@ -14,7 +14,7 @@ const AuthSplitLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
         </div>
 
         <div className="max-w-lg">
-          <h1 className="mb-4 text-2xl leading-tight font-bold text-[#152D58] md:text-[48px]">
+          <h1 className="mb-4 text-2xl leading-tight font-bold text-brand-deep  md:text-6xl">
             Marketing strategies, made human.
           </h1>
           <p className="text-foreground/70 mb-6 text-sm leading-relaxed xl:mb-8 xl:text-base">

@@ -7,7 +7,7 @@ const easeOut = [0.22, 1, 0.36, 1] as const;
 
 export default function Hero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#EBF0FB]">
+    <section className="relative w-full overflow-hidden bg-primary-45">
       <div className="absolute w-full h-full z-0 pointer-events-none hidden lg:block">
         <Image
           src="/images/smallCloud.png"
@@ -52,8 +52,8 @@ export default function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, ease: easeOut }}
       >
-        <h1 className="w-full text-[32px] lg:text-[60px] font-[500] leading-tight tracking-tight text-black">
-          We built <span className="text-[#E58F17]">Seil </span> because great
+        <h1 className="w-full text-4xl  lg:text-7xl font-[500] leading-tight tracking-tight text-black">
+          We built <span className="text-warning">Seil </span> because great
           marketing shouldn&apos;t require a marketing degree.
         </h1>
       </motion.div>

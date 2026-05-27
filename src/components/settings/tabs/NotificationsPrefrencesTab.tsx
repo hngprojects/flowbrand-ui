@@ -22,7 +22,7 @@ export default function NotificationPreferencesTab() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h3 className="text-[20px] font-medium text-[#565D69]">Notifications</h3>
+      <h3 className="text-xl font-medium text-black-300 ">Notifications</h3>
 
       <div className="flex flex-col  rounded-[12px] border border-gray-200">
         {notifications.map((item) => (
@@ -30,7 +30,7 @@ export default function NotificationPreferencesTab() {
             key={item.id}
             className="flex items-center justify-between px-5 py-4"
           >
-            <span className="text-base  text-[#1A1A1A]">{item.label}</span>
+            <span className="text-base  text-gray-deep">{item.label}</span>
             <button
               type="button"
               role="switch"

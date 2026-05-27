@@ -17,10 +17,10 @@ const Welcome = () => {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, ease: easeOut }}
           >
-            <span className="inline-block text-primary-600 font-bold mb-4 text-[18px] font-[500]">
+            <span className="inline-block text-primary-600 font-bold mb-4 text-lg  font-[500]">
               Welcome to Seil
             </span>
-            <h2 className="text-[24px] md:text-[48px] font-[500] text-foreground leading-tight">
+            <h2 className="text-2xl md:text-6xl font-[500] text-foreground leading-tight">
               We help you attract the right customers and convert them into
               paying buyers
             </h2>
@@ -33,7 +33,7 @@ const Welcome = () => {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, ease: easeOut, delay: 0.15 }}
           >
-            <p className="text-foreground/80 text-[16px] md:text-[20px] font-[400] leading-relaxed">
+            <p className="text-foreground/80 text-base md:text-xl font-[400] leading-relaxed">
               We built Seil because we kept seeing the same thing: brilliant
               business owners with no clear path to getting customers
               consistently. Not because they weren&apos;t capable, but because

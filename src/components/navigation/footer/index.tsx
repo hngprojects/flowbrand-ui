@@ -37,7 +37,7 @@ export default function Footer() {
           <div className="flex gap-[var(--spacing-default)] sm:gap-[64px]">
             {/* PRODUCT */}
             <div className="space-y-[var(--spacing-small)]">
-              <h3 className="text-[16px] lg:text-[24px] font-[600] text-gray-600">
+              <h3 className="text-base lg:text-2xl font-[600] text-gray-600">
                 Product
               </h3>
 
@@ -46,7 +46,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-[16px] font-[400] text-gray-600 transition-colors hover:text-primary-foreground "
+                      className="text-base font-[400] text-gray-600 transition-colors hover:text-primary-foreground "
                     >
                       {link.label}
                     </Link>
@@ -57,7 +57,7 @@ export default function Footer() {
 
             {/* LEGAL */}
             <div className="space-y-[var(--spacing-small)]">
-              <h3 className="text-[16px] lg:text-[24px] font-[600] text-gray-600">
+              <h3 className="text-base lg:text-2xl font-[600] text-gray-600">
                 Legal
               </h3>
 
@@ -66,7 +66,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-[16px] font-[400] text-gray-600 transition-colors hover:text-primary-foreground"
+                      className="text-base font-[400] text-gray-600 transition-colors hover:text-primary-foreground"
                     >
                       {link.label}
                     </Link>

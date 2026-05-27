@@ -64,9 +64,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h3 className="text-[20px] font-medium text-[#565D69]">My Profile</h3>
+      <h3 className="text-xl font-medium text-black-300 ">My Profile</h3>
 
-      <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-[#E4E4E4] p-[24px] w-full">
+      <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full">
         <div className="h-[122px] w-[122px] overflow-hidden rounded-full bg-gray-100">
           {avatar ? (
             <Image
@@ -103,8 +103,8 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
           <button
             type="button"
             onClick={handleDeleteAvatar}
-            className="h-[40px] whitespace-nowrap rounded-[8px] border border-[#F1BFBF] bg-[#FAEBEB] 
-            px-[24px] py-[8px] text-sm md:text-base  text-[#D13232] hover:opacity-90 transition-opacity"
+            className="h-[40px] whitespace-nowrap rounded-[8px] border border-red-100 bg-red-50 
+            px-[24px] py-[8px] text-sm md:text-base  text-error hover:opacity-90 transition-opacity"
           >
             Delete
           </button>
@@ -115,9 +115,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           id="profile-form"
-          className="flex flex-col gap-[21px] rounded-[12px] border-[0.5px] border-[#E4E4E4] p-[24px] w-full"
+          className="flex flex-col gap-[21px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full"
         >
-          <h4 className="text-[16px] font-medium leading-[150%] text-[#152D58]">
+          <h4 className="text-base font-medium leading-[150%] text-brand-deep ">
             Personal Information
           </h4>
 
@@ -126,7 +126,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[16px] font-medium leading-[150%] text-[#152D58]">
+                <FormLabel className="text-base font-medium leading-[150%] text-brand-deep ">
                   Full name
                 </FormLabel>
                 <FormControl>
@@ -134,9 +134,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
                     type="text"
                     disabled={isSubmitting}
                     {...field}
-                    className="w-full h-[44px] rounded-[8px] border border-[#326AD1] px-[16px] 
-                    py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] outline-none 
-                    focus:border-[#326AD1] transition-colors disabled:opacity-50"
+                    className="w-full h-[44px] rounded-[8px] border border-primary-500 px-[16px] 
+                    py-[12px] text-base font-medium leading-[150%] text-dark-deep outline-none 
+                    focus:border-primary-500 transition-colors disabled:opacity-50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -150,7 +150,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
               name="email"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-[#152D58]">
+                  <FormLabel className="text-base font-medium leading-[150%] text-brand-deep ">
                     Email address
                   </FormLabel>
                   <FormControl>
@@ -158,9 +158,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
                       type="email"
                       disabled={isSubmitting}
                       {...field}
-                      className="w-full h-[44px] rounded-[8px] border border-[#326AD1] px-[16px] 
-                      py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] outline-none 
-                      focus:border-[#326AD1] transition-colors disabled:opacity-50"
+                      className="w-full h-[44px] rounded-[8px] border border-primary-500 px-[16px] 
+                      py-[12px] text-base font-medium leading-[150%] text-dark-deep outline-none 
+                      focus:border-primary-500 transition-colors disabled:opacity-50"
                     />
                   </FormControl>
                   <FormMessage />
@@ -173,7 +173,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
               name="country"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-[#152D58]">
+                  <FormLabel className="text-base font-medium leading-[150%] text-brand-deep ">
                     Country
                   </FormLabel>
                   <FormControl>
@@ -181,9 +181,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
                       <select
                         disabled={isSubmitting}
                         {...field}
-                        className="w-full h-[44px] appearance-none rounded-[8px] border border-[#326AD1] 
-                        px-[16px] py-[12px] text-[16px] font-medium leading-[150%] text-[#030D1F] 
-                        outline-none focus:border-[#326AD1] transition-colors bg-white disabled:opacity-50"
+                        className="w-full h-[44px] appearance-none rounded-[8px] border border-primary-500 
+                        px-[16px] py-[12px] text-base font-medium leading-[150%] text-dark-deep 
+                        outline-none focus:border-primary-500 transition-colors bg-white disabled:opacity-50"
                       >
                         {COUNTRY_OPTIONS.map((c) => (
                           <option
@@ -221,8 +221,8 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <LogoutButton
             variant="menu"
-            className="rounded-[8px] border border-[#F1BFBF] bg-[#FAEBEB] px-10 py-3 text-sm 
-            md:text-base font-medium text-[#D13232] hover:opacity-90 w-auto text-center"
+            className="rounded-[8px] border border-red-100 bg-red-50 px-10 py-3 text-sm 
+            md:text-base font-medium text-error hover:opacity-90 w-auto text-center"
             onAfterLogout={onClose}
           />
           <button

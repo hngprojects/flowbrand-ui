@@ -74,15 +74,15 @@ function AuthField({
     <div className="space-y-2">
       <label
         htmlFor={id}
-        className="block text-sm leading-[150%] font-medium text-[#152D58] sm:text-base"
+        className="block text-sm leading-[150%] font-medium text-brand-deep  sm:text-base"
       >
         {label}
       </label>
 
       <div
         className={cn(
-          "flex h-11 items-center rounded-lg border border-[#CFCFCF] bg-white px-2.5 transition-colors focus-within:border-[#326AD1] sm:px-4",
-          error && "border-[#D13232] focus-within:border-[#D13232]",
+          "flex h-11 items-center rounded-lg border border-gray-550 bg-white px-2.5 transition-colors focus-within:border-primary-500 sm:px-4",
+          error && "border-red-500 focus-within:border-red-500",
         )}
       >
         <Input
@@ -92,7 +92,7 @@ function AuthField({
           placeholder={placeholder}
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
-          className="h-full w-full border-0 bg-transparent p-0 text-sm leading-[150%] text-[#030D1F] outline-none placeholder:text-[#A2A2A2] focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="h-full w-full border-0 bg-transparent p-0 text-sm leading-[150%] text-dark-deep outline-none placeholder:text-gray-mid focus-visible:ring-0 focus-visible:ring-offset-0"
           {...register}
           onChange={(event) => {
             register.onChange(event);
@@ -105,7 +105,7 @@ function AuthField({
             type="button"
             aria-label={showPassword ? "Hide password" : "Show password"}
             onClick={onTogglePassword}
-            className="ml-2 flex size-6 shrink-0 items-center justify-center text-[#CFCFCF]"
+            className="ml-2 flex size-6 shrink-0 items-center justify-center text-gray-input"
           >
             {showPassword ? (
               <Eye className="size-6" strokeWidth={1.8} />
@@ -119,7 +119,7 @@ function AuthField({
       {error ? (
         <p
           id={`${id}-error`}
-          className="text-sm leading-[20px] font-normal text-[#D13232] sm:text-xs sm:leading-[18px] sm:font-medium"
+          className="text-sm leading-[20px] font-normal text-error sm:text-xs sm:leading-[18px] sm:font-medium"
         >
           {error}
         </p>
@@ -254,10 +254,10 @@ export function LoginForm() {
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
       <div className="space-y-1.5 sm:space-y-2">
-        <h1 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+        <h1 className="text-xl font-medium text-brand-deep  sm:text-4xl">
           Welcome back
         </h1>
-        <p className="text-foreground/70 text-sm sm:text-[24px]">
+        <p className="text-foreground/70 text-sm sm:text-2xl">
           Log in to keep building your marketing strategy.
         </p>
       </div>
@@ -306,7 +306,7 @@ export function LoginForm() {
 
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-[#2E60BE]"
+              className="text-sm font-medium text-brand-accent"
             >
               Forgot password?
             </Link>
@@ -351,13 +351,13 @@ export function LoginForm() {
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="font-bold text-[#152D58] hover:underline"
+          className="font-bold text-brand-deep  hover:underline"
         >
           Create an account
         </Link>
       </p>
 
-      <p className="text-foreground/50 px-4 text-center text-[10px]">
+      <p className="text-foreground/50 px-4 text-center text-2xs ">
         By logging in, you agree to our{" "}
         <Link href="/terms-and-conditions" className="text-primary underline">
           Terms of Service

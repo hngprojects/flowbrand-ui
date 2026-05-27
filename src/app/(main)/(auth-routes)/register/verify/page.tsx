@@ -35,7 +35,9 @@ export default function RegisterVerifyPage() {
   if (status === "loading" || (email === null && isAuthenticated)) {
     return (
       <AuthSplitLayout>
-        <div className="py-12 text-center text-sm text-[#32476D]">Loading…</div>
+        <div className="py-12 text-center text-sm text-brand-muted">
+          Loading…
+        </div>
       </AuthSplitLayout>
     );
   }
@@ -43,7 +45,9 @@ export default function RegisterVerifyPage() {
   if (email === null) {
     return (
       <AuthSplitLayout>
-        <div className="py-12 text-center text-sm text-[#32476D]">Loading…</div>
+        <div className="py-12 text-center text-sm text-brand-muted">
+          Loading…
+        </div>
       </AuthSplitLayout>
     );
   }

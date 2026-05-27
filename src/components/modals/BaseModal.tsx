@@ -32,7 +32,7 @@ const BaseModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]"
-        overlayClassName="bg-[#030D1F]/80"
+        overlayClassName="bg-black-500/80"
       >
         <VisuallyHidden>
           <DialogTitle>{title ?? "Modal"}</DialogTitle>
@@ -57,13 +57,13 @@ const BaseModal = ({
             )}
 
             {title && (
-              <h2 className="text-black-500 text-[32px] font-medium leading-[120%]">
+              <h2 className="text-black-500 text-4xl  font-medium leading-[120%]">
                 {title}
               </h2>
             )}
 
             {subtitle && (
-              <p className=" text-sm md:text-base leading-relaxed md:font-bold font-medium text-[#565d69]">
+              <p className=" text-sm md:text-base leading-relaxed md:font-bold font-medium text-black-300 ">
                 {subtitle}
               </p>
             )}

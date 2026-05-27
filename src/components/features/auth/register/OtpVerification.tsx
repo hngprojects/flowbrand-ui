@@ -151,15 +151,15 @@ const OTPVerification = ({ email }: { email: string }) => {
 
   return (
     <div className="-mt-50 flex h-full flex-col justify-center space-y-5 sm:space-y-6 lg:-mt-0">
-      <div className="bg-primary/10 text-primary inline-block max-w-fit rounded-full px-2.5 py-0.5 text-[10px] font-medium sm:px-3 sm:py-1 sm:text-xs">
+      <div className="bg-primary/10 text-primary inline-block max-w-fit rounded-full px-2.5 py-0.5 text-2xs  font-medium sm:px-3 sm:py-1 sm:text-xs">
         OTP has been sent
       </div>
 
       <div className="space-y-1.5 sm:space-y-2">
-        <h2 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+        <h2 className="text-xl font-medium text-brand-deep  sm:text-4xl">
           Verify your email
         </h2>
-        <p className="text-foreground/70 text-sm sm:text-[15px]">
+        <p className="text-foreground/70 text-sm sm:text-md-accent">
           We sent a 6-digit code to{" "}
           <span className="border-border text-foreground border-b font-semibold">
             {email || "your email"}

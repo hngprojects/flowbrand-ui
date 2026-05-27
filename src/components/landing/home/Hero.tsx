@@ -79,17 +79,17 @@ const Hero = () => {
           variants={itemVariantsDown}
           className="inline-flex items-center rounded-lg border-[1.5px] border-accent p-[10px] mb-6 shadow-sm"
         >
-          <span className="bg-accent text-white text-[16px] font-[500] h-[28px] w-[78px] rounded-lg mr-3 flex items-center justify-center">
+          <span className="bg-accent text-white text-base font-[500] h-[28px] w-[78px] rounded-lg mr-3 flex items-center justify-center">
             Simply
           </span>
-          <span className="text-foreground/80 text-[14px] font-[400]">
+          <span className="text-foreground/80 text-md  font-[400]">
             Made for every kind of Business
           </span>
         </motion.div>
 
         <motion.h1
           variants={itemVariantsDown}
-          className="text-[32px] md:text-[60px] font-[500] text-foreground leading-tight mb-6 max-w-3xl tracking-tight"
+          className="text-4xl  md:text-7xl font-[500] text-foreground leading-tight mb-6 max-w-3xl tracking-tight"
         >
           Grow your business with a smarter{" "}
           <span className="text-accent">Marketing Strategy</span>
@@ -97,7 +97,7 @@ const Hero = () => {
 
         <motion.p
           variants={itemVariants}
-          className="text-[14px] md:text-[18px] font-[400] text-foreground/80 mb-5 max-w-2xl leading-relaxed"
+          className="text-md  md:text-lg  font-[400] text-foreground/80 mb-5 max-w-2xl leading-relaxed"
         >
           Manage your entire customer journey from first contact to repeat
           sales, without stress with everything you need in one place.
@@ -115,7 +115,7 @@ const Hero = () => {
           >
             <Link
               href={isAuthenticated ? "/dashboard" : "/register"}
-              className="relative bg-primary-500 hover:bg-primary-600 text-[16px] text-white font-[500] py-3 px-8 rounded-lg transition-colors z-10 hover:cursor-pointer inline-flex overflow-hidden"
+              className="relative bg-primary-500 hover:bg-primary-600 text-base text-white font-[500] py-3 px-8 rounded-lg transition-colors z-10 hover:cursor-pointer inline-flex overflow-hidden"
             >
               <motion.span
                 className="absolute inset-0 bg-amber-500 z-0"

@@ -21,7 +21,7 @@ export function MeshBackground({
       aria-hidden
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white via-[#FCFCFD] to-[#F3F4F6]" />
-      <PatternMesh className="absolute inset-0 h-full w-full text-[#E8EAED] opacity-80" />
+      <PatternMesh className="absolute inset-0 h-full w-full text-light opacity-80" />
     </div>
   );
 }
@@ -37,7 +37,7 @@ export function StrategyMainPanel({
   return (
     <div
       className={cn(
-        "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#FAFAFA]",
+        "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-gray-25",
         className,
       )}
     >

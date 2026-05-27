@@ -191,10 +191,10 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
   };
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
-      <h2 className="text-[20px] lg:text-[40px] font-medium text-[#152D58]">
+      <h2 className="text-xl lg:text-5xl  font-medium text-brand-deep ">
         Create a new password
       </h2>
-      <p className="text-foreground/70 text-[20px]">
+      <p className="text-foreground/70 text-xl">
         Enter the 6-digit code sent to{" "}
         <span className="text-foreground font-semibold">{email}</span> and Enter
         a new password to continue.
@@ -366,7 +366,7 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
                         return (
                           <li
                             key={key}
-                            className="flex items-start gap-2.5 text-xs sm:text-[13px]"
+                            className="flex items-start gap-2.5 text-xs sm:text-sm-accent"
                           >
                             <Check
                               aria-hidden

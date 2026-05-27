@@ -12,13 +12,13 @@ type LogoutButtonProps = {
 
 const menuVariantClass =
   "hover:bg-muted w-full px-4 py-2 text-left text-sm font-medium " +
-  "text-[#D13232] transition-colors disabled:opacity-50";
+  "text-error transition-colors disabled:opacity-50";
 
 const defaultVariantClass = cn(
   "hidden h-11 items-center justify-center lg:flex",
   "rounded-[41px] border border-gray-500 px-4",
   "text-foreground text-sm font-medium",
-  "hover:border-[#D13232] hover:text-[#D13232]",
+  "hover:border-red-500 hover:text-error",
   "disabled:opacity-50",
 );
 

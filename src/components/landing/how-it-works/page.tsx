@@ -31,7 +31,7 @@ const HowItWorks = () => {
       <div className="bg-primary-50 h-[300px] md:h-[400px] w-full relative flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="max-w-[721px] space-y-2 text-center z-10">
           <motion.h1
-            className="text-[28px] md:text-[40px] text-black-500 font-[500] leading-tight"
+            className="text-3xl md:text-5xl  text-black-500 font-[500] leading-tight"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: easeOut }}
@@ -40,7 +40,7 @@ const HowItWorks = () => {
           </motion.h1>
 
           <motion.p
-            className="text-[16px] md:text-[18px] text-black-300 max-w-[660px] mx-auto"
+            className="text-base md:text-lg  text-black-300 max-w-[660px] mx-auto"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: easeOut, delay: 0.15 }}
@@ -100,13 +100,13 @@ const HowItWorks = () => {
                   ))}
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-[14px] md:text-[18px] text-black-300 font-medium font-heading">
+                  <h2 className="text-md  md:text-lg  text-black-300 font-medium font-heading">
                     STEP {index + 1}
                   </h2>
-                  <h2 className="text-[22px] md:text-[32px] text-foreground font-medium leading-tight">
+                  <h2 className="text-xl-accent md:text-4xl  text-foreground font-medium leading-tight">
                     {step.title}
                   </h2>
-                  <p className="text-[16px] md:text-[18px] text-black-300 leading-relaxed">
+                  <p className="text-base md:text-lg  text-black-300 leading-relaxed">
                     {step.desc}
                   </p>
                 </div>

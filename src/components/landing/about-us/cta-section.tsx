@@ -9,7 +9,7 @@ const CtaSection = () => {
     <section className="w-full">
       <div className="section-class max-w-5xl flex flex-col justify-center md:gap-[1rem] mx-auto">
         <motion.h1
-          className="text-[2rem] md:text-[3rem] font-[500] leading-[110%] text-center"
+          className="text-4xl md:text-6xl font-[500] leading-[110%] text-center"
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -19,7 +19,7 @@ const CtaSection = () => {
         </motion.h1>
 
         <motion.p
-          className="text-[1rem] text-[var(--black-300)] leading-[150%] text-center mt-[0.69rem] mb-[1rem]"
+          className="text-base text-black-300 leading-[150%] text-center mt-[0.69rem] mb-[1rem]"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -52,8 +52,8 @@ const CtaSection = () => {
             <Link
               href="/signup"
               className={cn(
-                "bg-[var(--primary)] text-white relative inline-flex rounded-lg",
-                "px-[2rem] py-[0.69rem] text-[1rem] font-medium",
+                "bg-primary text-white relative inline-flex rounded-lg",
+                "px-[2rem] py-[0.69rem] text-base font-medium",
                 "focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2",
                 "transition-colors",
               )}
