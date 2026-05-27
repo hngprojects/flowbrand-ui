@@ -169,7 +169,7 @@ const RegistrationForm = () => {
         <h2 className="text-xl font-medium text-brand-deep  sm:text-4xl">
           Start building your first marketing strategy
         </h2>
-        <p className="text-foreground/70 text-sm sm:text-2xl">
+        <p className="text-foreground/70 text-sm sm:text-[16px]">
           Create your free Seil account and launch your first campaign in under
           10 minutes.
         </p>

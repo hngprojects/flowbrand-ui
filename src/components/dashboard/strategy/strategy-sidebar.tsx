@@ -32,7 +32,7 @@ function phaseStatusDot(status?: string) {
     return "bg-primary-500";
   }
   if (normalized === "active") {
-    return "bg-amber-500 ring-2 ring-[#F59E0B]/30";
+    return "bg-amber-500 ring-2 ring-amber-500/30";
   }
   return "bg-black-35";
 }

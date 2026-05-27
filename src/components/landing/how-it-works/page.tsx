@@ -100,7 +100,7 @@ const HowItWorks = () => {
                   ))}
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-md  md:text-lg  text-black-300 font-medium font-heading">
+                  <h2 className="text-base  md:text-lg  text-black-300 font-medium font-heading">
                     STEP {index + 1}
                   </h2>
                   <h2 className="text-xl-accent md:text-4xl  text-foreground font-medium leading-tight">

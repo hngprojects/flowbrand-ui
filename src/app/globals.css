@@ -185,10 +185,6 @@
 
   /* Text Color Variables */
   --color-text-primary: var(--text-primary); /* text-primary (#111827) */
-  --color-base: var(--text-base); /* text-base (#1F2937) */
-  --color-secondary: var(--text-secondary); /* text-secondary (#374151) */
-  --color-muted: var(--text-muted); /* text-muted (#6B7280) */
-  --color-disabled: var(--text-disabled); /* text-disabled (#9CA3AF) */
 
   --color-brand: var(--text-brand); /* text-brand (#1E3A8A) */
   --color-brand-soft: var(--text-brand-soft); /* text-brand-soft (#1C2B4A) */
@@ -199,9 +195,8 @@
   ); /* text-brand-accent (#2E60BE) */
 
   --color-gray-bold: var(--text-gray-bold); /* text-gray-bold (#D1D5DB) */
-  --color-gray-mid: var(--text-gray); /* text-gray (#A2A2A2) */
-  --color-gray-input: var(--text-gray-input); /* text-gray-input (#CFCFCF) */
   --color-gray-mid: var(--text-gray-mid); /* text-gray-mid (#A2A2A2) */
+  --color-gray-input: var(--text-gray-input); /* text-gray-input (#CFCFCF) */
 
   --color-light: var(--text-light); /* text-light (#E8EAED) */
   --color-dark-deep: var(--text-dark-deep); /* text-dark-deep (#030D1F) */
@@ -221,7 +216,6 @@
   --color-primary-500: var(--primary-500); /* text-primary-500 (#326AD1) */
   --color-gray-dark: var(--text-gray-dark); /* text-gray-dark (#344054) */
   --color-gray-hint: var(--text-gray-hint); /* text-gray-hint (#98A2B3) */
-  --color-gray-mid: var(--text-gray-mid); /* text-gray-mid (#A2A2A2) */
   --color-gray-deep: var(--text-gray-deep); /* text-gray-deep (#1A1A1A) */
 }
 

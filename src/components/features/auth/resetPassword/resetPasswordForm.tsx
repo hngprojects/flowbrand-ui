@@ -194,7 +194,7 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
       <h2 className="text-xl lg:text-5xl  font-medium text-brand-deep ">
         Create a new password
       </h2>
-      <p className="text-foreground/70 text-xl">
+      <p className="text-foreground/70 text-[16px]">
         Enter the 6-digit code sent to{" "}
         <span className="text-foreground font-semibold">{email}</span> and Enter
         a new password to continue.

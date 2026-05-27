@@ -81,7 +81,7 @@ function LogoItem({
       />
       <span
         className={cn(
-          "whitespace-nowrap text-center text-lg  leading-none font-normal text-gray-800 sm:text-xl-accent",
+          "whitespace-nowrap text-center text-lg  leading-none font-normal text-gray-800 sm:text-xl",
           fontClass,
         )}
       >

@@ -49,21 +49,21 @@ const sections = [
     title: "Types of cookies we use",
     content: (
       <div>
-        <h3 className="mb-[12px] text-md  font-[500] md:text-xl">
+        <h3 className="mb-[12px] text-md  font-medium md:text-xl">
           Essential Cookies
         </h3>
         <p className="text-md  md:text-base">
           These are required for the website to work. They enable basic features
           like navigation and access to secure areas.
         </p>
-        <h3 className="mt-[14px] mb-[12px] text-md  font-[500] md:mt-[25px] md:text-xl">
+        <h3 className="mt-[14px] mb-[12px] text-md  font-medium md:mt-[25px] md:text-xl">
           Performance Cookies
         </h3>
         <p className="text-md  md:text-base">
           These help us understand how visitors use our website so we can
           improve functionality and user experience.
         </p>
-        <h3 className="mt-[14px] mb-[12px] text-md  font-[500] md:mt-[25px] md:text-xl">
+        <h3 className="mt-[14px] mb-[12px] text-md  font-medium md:mt-[25px] md:text-xl">
           Functional Cookies
         </h3>
         <p className="text-md  md:text-base">
@@ -160,7 +160,7 @@ const CookiesPolicyView = () => {
               delay: 0.05 * index,
             }}
           >
-            <h2 className="mb-[12px] text-base font-[500] md:text-2xl">
+            <h2 className="mb-[12px] text-base font-medium md:text-2xl">
               {section.title}
             </h2>
             {section.content}

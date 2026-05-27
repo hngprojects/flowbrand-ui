@@ -70,7 +70,7 @@ export default function FaqSection() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-6 pt-0 pb-6">
-                    <div className="space-y-4 border-t border-gray-100 pt-4 text-sm leading-relaxed text-gray-800 md:text-md-accent">
+                    <div className="space-y-4 border-t border-gray-100 pt-4 text-sm leading-relaxed text-gray-800 md:text-md">
                       {item.answerParagraphs.map(
                         (paragraph: string, paragraphIndex: number) => (
                           <p key={paragraphIndex}>{paragraph}</p>

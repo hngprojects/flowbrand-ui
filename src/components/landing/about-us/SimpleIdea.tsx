@@ -32,8 +32,8 @@ export default function SimpleIdea() {
         >
           &ldquo;
         </span>
-        <div className="rounded-2xl border border-black-30 bg-background p-5">
-          <p className="text-center text-3xs lg:text-xl font-[400] leading-[1.9] text-black md:text-xl">
+        <div className="rounded-2xl border border-black-300 bg-background p-5">
+          <p className="text-center text-sm lg:text-xl font-normal leading-[1.9] text-black md:text-xl">
             what if we could ask someone a few questions about their business,
             and give them back a marketing strategy that actually fits, built in
             plain English, one step at a time?
