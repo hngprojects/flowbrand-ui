@@ -164,10 +164,12 @@ const authConfig: NextAuthConfig = {
       const customToken = token as CustomJWT;
 
       if (!customToken?.id) {
+        if (inDevEnvironment) {
         console.warn("[auth] Rejecting session: JWT missing backend user id", {
-          sub: customToken?.sub,
-          email: customToken?.email,
-        });
+        sub: customToken?.sub,
+        email: customToken?.email,
+      });
+    }
 
         return {
           expires: new Date(0).toISOString(),
