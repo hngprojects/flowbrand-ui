@@ -15,10 +15,6 @@ import NotificationPreferencesTab from "@/components/settings/tabs/Notifications
 import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
 import { mockNotifications } from "@/components/modals/notifications/mock-data";
-import {
-  DUMMY_STRATEGY_PHASES,
-  DEFAULT_UPLOADED_DOCS,
-} from "@/lib/dashboard-mock-data";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
