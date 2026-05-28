@@ -72,12 +72,13 @@ async function fetchUploadProgressOnce(
     });
 
     if (isStalled && parsed.status !== "failed") {
-      console.warn(
-        `[upload] Progress stalled at ${parsed.percentComplete}% for ${uploadId} after ${Math.round(elapsed / 1000)}s. Response:`,
-        data,
-      );
+      if (process.env.NODE_ENV === "development") {
+        console.warn(
+          `[upload] Progress stalled at ${parsed.percentComplete}% for ${uploadId} after ${Math.round(elapsed / 1000)}s. Response:`,
+          data,
+        );
+      }
     }
-
     return parsed;
   });
 }
@@ -124,9 +125,11 @@ export function useUploadProgressQueries(uploadIds: string[], enabled = true) {
 
         // Stop polling after max attempts
         if (query.state.dataUpdateCount >= MAX_UPLOAD_POLLS) {
-          console.warn(
-            `[upload] Max polling attempts (${MAX_UPLOAD_POLLS}) reached for ${uploadId}. Last status: ${status} at ${query.state.data?.percentComplete}%`,
-          );
+          if (process.env.NODE_ENV === "development") {
+            console.warn(
+              `[upload] Max polling attempts (${MAX_UPLOAD_POLLS}) reached for ${uploadId}. Last status: ${status} at ${query.state.data?.percentComplete}%`,
+            );
+          }
           return false;
         }
 
@@ -137,9 +140,11 @@ export function useUploadProgressQueries(uploadIds: string[], enabled = true) {
             tracking.stableCount >= STALL_CHECK_THRESHOLD &&
             elapsed > STALL_TIMEOUT_MS
           ) {
-            console.error(
-              `[upload] Progress stalled for ${uploadId}. Stopping polling. Last: ${tracking.lastPercent}% status=${status}`,
-            );
+            if (process.env.NODE_ENV === "development") {
+              console.error(
+                `[upload] Progress stalled for ${uploadId}. Stopping polling. Last: ${tracking.lastPercent}% status=${status}`,
+              );
+            }
             return false;
           }
         }

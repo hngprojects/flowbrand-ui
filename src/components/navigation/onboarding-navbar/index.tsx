@@ -14,9 +14,11 @@ import PasswordSecurityTab from "@/components/settings/tabs/PasswordSecurityTab"
 import NotificationPreferencesTab from "@/components/settings/tabs/NotificationsPrefrencesTab";
 import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
+import { mockNotifications } from "@/components/modals/notifications/mock-data";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
+import NotificationsModal from "@/components/modals/notifications";
 
 interface OnboardingNavbarProps {
   loading?: boolean;
@@ -37,6 +39,8 @@ const OnboardingNavbar = ({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const pathname = usePathname();
   const drawerOpen = drawerPath === pathname;
+  const [isNotification, setIsNotification] = useState(false);
+  const unreadCount = mockNotifications.filter((n) => !n.isRead).length;
 
   const isStrategyRoute = pathname === STRATEGY_ROUTE;
   const isDashboardFlow =
@@ -83,11 +87,18 @@ const OnboardingNavbar = ({
             <button
               type="button"
               aria-label="Notifications"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 md:h-11 md:w-11"
+              onClick={() => setIsNotification(true)}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 md:h-11 md:w-11"
             >
               <BellIcon />
+              {unreadCount > 0 && (
+                <span className="bg-error absolute -top-1 -right-1 h-2 w-2 rounded-full" />
+              )}
             </button>
-
+            <NotificationsModal
+              isOpen={isNotification}
+              onClose={() => setIsNotification(false)}
+            />
             <button
               type="button"
               aria-label="Profile settings"
