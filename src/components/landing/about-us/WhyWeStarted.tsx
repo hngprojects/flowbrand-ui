@@ -14,7 +14,7 @@ export default function WhyWeStarted() {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
         >
-          <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-[#E58F172B] px-3 py-1 text-[11px] font-semibold tracking-wide text-accent uppercase">
+          <span className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-accent-950 px-3 py-1 text-[11px] font-semibold tracking-wide text-accent uppercase">
             <span className="inline-block h-3 w-3 rounded-full bg-accent" />
             Our Story
           </span>

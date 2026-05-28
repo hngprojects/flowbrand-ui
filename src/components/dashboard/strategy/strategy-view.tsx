@@ -93,7 +93,7 @@ function TaskCheckbox({
       aria-label="Mark task complete"
       className={cn(
         "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-all",
-        checked ? "border-primary-500 bg-primary-500" : "border-[#D0D5DD] bg-white",
+        checked ? "border-primary-500 bg-primary-500" : "border-gray-650 bg-white",
       )}
     >
       {checked && <Check className="h-4 w-4 text-white" strokeWidth={3} />}

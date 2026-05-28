@@ -108,7 +108,7 @@ function FileRow({
       <button
         type="button"
         onClick={() => onRemove(item.id)}
-        className="mt-0.5 shrink-0 text-[#D0D5DD] transition-colors hover:text-neutral-500"
+        className="mt-0.5 shrink-0 text-gray-650 transition-colors hover:text-neutral-500"
         aria-label="Remove file"
       >
         <X size={16} />
@@ -435,7 +435,7 @@ export function UploadView() {
               }}
               className={cn(
                 "flex cursor-pointer flex-col items-center justify-center rounded-xl px-4 py-10 transition-colors md:py-12",
-                dragging ? "bg-primary-65" : "bg-white hover:bg-[#FAFBFC]",
+                dragging ? "bg-primary-65" : "bg-white hover:bg-gray-150",
               )}
             >
               <input

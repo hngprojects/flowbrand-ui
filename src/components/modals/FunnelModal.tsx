@@ -77,7 +77,7 @@ export default function FunnelModal({
           defaultValue={defaultTab ?? tabs[0]?.id}
           className="flex flex-col h-full gap-0"
         >
-          <div className="flex items-center justify-between mb-6 shrink-0 border-b-3 border-gray-500 pb-4 mx-[-32px] px-8">
+          <div className="flex items-center justify-between mb-6 shrink-0 border-b-[0.35px] border-gray-500 pb-4 mx-[-32px] px-8">
             <h2 className="text-[18px] font-medium text-foreground">{title}</h2>
             <button
               type="button"

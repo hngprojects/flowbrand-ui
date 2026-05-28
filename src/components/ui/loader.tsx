@@ -30,7 +30,7 @@ const Loader = ({ text, hint, className }: LoaderProps) => {
             cy="65"
             r="55"
             fill="none"
-            stroke="text-gray-400"
+            stroke="#E9E9E9"
             strokeWidth="8"
           />
         </svg>
