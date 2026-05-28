@@ -30,7 +30,7 @@ const Loader = ({ text, hint, className }: LoaderProps) => {
             cy="65"
             r="55"
             fill="none"
-            stroke="#E9E9E9"
+            stroke="text-gray-400"
             strokeWidth="8"
           />
         </svg>
@@ -50,7 +50,7 @@ const Loader = ({ text, hint, className }: LoaderProps) => {
             </p>
           ) : null}
           {hint ? (
-            <p className="text-sm font-normal leading-[150%] text-[#667085]">
+            <p className="text-sm font-normal leading-[150%] text-neutral-500">
               {hint}
             </p>
           ) : null}

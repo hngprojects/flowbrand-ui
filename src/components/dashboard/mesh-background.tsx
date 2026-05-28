@@ -20,8 +20,8 @@ export function MeshBackground({
       )}
       aria-hidden
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-[#FCFCFD] to-[#F3F4F6]" />
-      <PatternMesh className="absolute inset-0 h-full w-full text-[#E8EAED] opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-background-subtle to-background-muted" />
+      <PatternMesh className="absolute inset-0 h-full w-full text-primary-70 opacity-80" />
     </div>
   );
 }

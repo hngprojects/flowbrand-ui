@@ -113,7 +113,7 @@ const Features = () => {
               delay: 0.3,
             }}
           >
-            <div className="bg-[#7ba4ed] rounded-[2rem] p-6 flex flex-col h-[405px] relative overflow-hidden shadow-sm w-full md:max-w-[calc(50%-12px)] lg:max-w-none">
+            <div className="bg-primary-250 rounded-[2rem] p-6 flex flex-col h-[405px] relative overflow-hidden shadow-sm w-full md:max-w-[calc(50%-12px)] lg:max-w-none">
               <div className="flex-1 relative w-full pt-4 px-0 bg-white/25 rounded-[1.5rem]">
                 <div className="absolute top-5 left-5">
                   <p className="text-white/90 text-md font-medium leading-tight">

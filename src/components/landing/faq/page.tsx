@@ -44,19 +44,7 @@ export default function FaqPage() {
                   ease: [0.22, 1, 0.36, 1] as const,
                 }}
               >
-                <div
-                  style={{
-                    width: "67px",
-                    height: "64px",
-                    borderRadius: "300px",
-                    padding: "8px 18px",
-                    boxShadow: "0px 3.38px 3.38px 0px #00000040",
-                    backgroundColor: "rgba(50, 106, 209, 0.08)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
+                <div className="flex items-center justify-center w-[67px] h-[64px] rounded-[300px] px-[18px] py-[8px] shadow-[0px_3.38px_3.38px_0px_#00000040] bg-primary-500/8">
                   <MobileLogo />
                 </div>
                 <h1 className="text-foreground text-3xl font-bold md:text-4xl">
@@ -96,26 +84,10 @@ export default function FaqPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
               >
-                <p
-                  style={{
-                    color: "#030D1F",
-                    fontSize: "48px",
-                    fontWeight: 600,
-                    lineHeight: "123%",
-                    letterSpacing: "0%",
-                  }}
-                >
+                <p className="text-black-500 text-5xl font-semibold leading-[123%] tracking-normal">
                   No results found
                 </p>
-                <p
-                  className="max-w-md"
-                  style={{
-                    color: "#353D4C",
-                    fontSize: "16px",
-                    fontWeight: 400,
-                    lineHeight: "150%",
-                  }}
-                >
+                <p className="max-w-md text-black-400 text-base font-normal leading-[150%]">
                   We couldn&apos;t find any FAQs matching your search. Try a
                   different keyword, or browse all questions.
                 </p>
@@ -148,11 +120,11 @@ export default function FaqPage() {
                             {item.question}
                           </span>
                           <div className="ml-auto flex shrink-0 pt-0.5">
-                            <Plus className="h-5 w-5 text-[#1E3A8A] transition-transform duration-200 group-data-[state=open]:rotate-45 md:h-6 md:w-6" />
+                            <Plus className="h-5 w-5 text-primary-950 transition-transform duration-200 group-data-[state=open]:rotate-45 md:h-6 md:w-6" />
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-6 pt-0 pb-6">
-                          <div className="space-y-4 rounded-2xl border-t border-gray-100 bg-[#FBFCFF] pt-4 text-sm leading-relaxed text-black-500 md:text-[15px]">
+                          <div className="space-y-4 rounded-2xl border-t border-gray-100 bg-primary-60 pt-4 text-sm leading-relaxed text-black-500 md:text-[15px]">
                             {item.answerParagraphs.map(
                               (paragraph: string, paragraphIndex: number) => (
                                 <p key={paragraphIndex}>{paragraph}</p>

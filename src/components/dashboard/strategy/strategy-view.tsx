@@ -56,13 +56,13 @@ function StrategyActionPanel({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 overflow-y-auto px-4 py-8">
-      <p className="max-w-md text-center text-sm text-[#667085]">{message}</p>
+      <p className="max-w-md text-center text-sm text-neutral-500">{message}</p>
       <div className="flex flex-wrap justify-center gap-3">
         {onTryAgain ? (
           <button
             type="button"
             onClick={onTryAgain}
-            className="rounded-xl border border-[#EAECF0] bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-600 cursor-pointer"
+            className="rounded-xl border border-primary-80 bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-600 cursor-pointer"
           >
             Try again
           </button>
@@ -70,7 +70,7 @@ function StrategyActionPanel({
         <button
           type="button"
           onClick={onBackToOnboarding}
-          className="rounded-xl bg-[#326AD1] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2859B8]"
+          className="rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-625"
         >
           Back to onboarding
         </button>
@@ -93,7 +93,7 @@ function TaskCheckbox({
       aria-label="Mark task complete"
       className={cn(
         "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-all",
-        checked ? "border-[#326AD1] bg-[#326AD1]" : "border-[#D0D5DD] bg-white",
+        checked ? "border-primary-500 bg-primary-500" : "border-[#D0D5DD] bg-white",
       )}
     >
       {checked && <Check className="h-4 w-4 text-white" strokeWidth={3} />}
@@ -132,10 +132,10 @@ function StrategyStageTasks({
           tasks.map((task) => (
             <div
               key={task.id}
-              className="rounded-[16px] border border-[#EAECF0] bg-white p-5 shadow-[0px_1px_2px_rgba(16,24,40,0.05)] md:p-6"
+              className="rounded-[16px] border border-primary-80 bg-white p-5 shadow-[0px_1px_2px_rgba(16,24,40,0.05)] md:p-6"
             >
               <div className="flex items-start justify-between gap-4">
-                <h2 className="text-[17px] font-semibold text-[#101828]">
+                <h2 className="text-[17px] font-semibold text-neutral-900">
                   {task.title}
                 </h2>
                 <TaskCheckbox
@@ -154,11 +154,11 @@ function StrategyStageTasks({
                   }}
                 />
               </div>
-              <div className="mt-3 space-y-3 text-sm leading-relaxed text-[#667085]">
+              <div className="mt-3 space-y-3 text-sm leading-relaxed text-neutral-500">
                 <p>{task.description}</p>
                 {task.resources.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-[#667085]">
+                    <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
                       More Resources
                     </p>
                     <div className="mt-2 flex flex-col gap-2">
@@ -168,7 +168,7 @@ function StrategyStageTasks({
                           className="flex items-center gap-1.5"
                         >
                           <LinkIcon />
-                          <p className="text-sm text-[#326AD1]">
+                          <p className="text-sm text-primary-500">
                             {resource.label}
                           </p>
                         </div>
@@ -180,7 +180,7 @@ function StrategyStageTasks({
             </div>
           ))
         ) : (
-          <p className="rounded-[16px] border border-[#EAECF0] bg-white p-5 text-sm text-[#667085]">
+          <p className="rounded-[16px] border border-primary-80 bg-white p-5 text-sm text-neutral-500">
             No tasks for the current stage yet. Try refreshing in a moment.
           </p>
         )}
@@ -194,8 +194,8 @@ function StrategyStageTasks({
           className={cn(
             "rounded-[10px] px-10 py-3.5 text-sm font-semibold transition-colors",
             allTasksComplete && !submitted && !isCurrentStageComplete
-              ? "cursor-pointer bg-[#326AD1] text-white hover:bg-[#2859B8]"
-              : "cursor-not-allowed bg-[#D9DEE8] text-[#101828]",
+              ? "cursor-pointer bg-primary-500 text-white hover:bg-primary-625"
+              : "cursor-not-allowed bg-primary-150 text-neutral-900",
           )}
         >
           {submitted || isCurrentStageComplete ? "Stage Complete ✓" : "Submit"}
@@ -335,16 +335,16 @@ export function StrategyView() {
             <div className="flex flex-col gap-6 p-default md:py-6">
               {focus ? (
                 <div>
-                  <div className="mb-2 flex items-center justify-between text-sm font-medium text-[#667085]">
+                  <div className="mb-2 flex items-center justify-between text-sm font-medium text-neutral-500">
                     <p>This week&apos;s focus</p>
                     <p>{focus.progress}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="flex items-center gap-3 text-2xl font-semibold text-[#101828]">
+                    <p className="flex items-center gap-3 text-2xl font-semibold text-neutral-900">
                       <StrategyIcon />
                       {focus.phase}
                     </p>
-                    <p className="text-sm leading-relaxed text-[#667085] md:text-[15px]">
+                    <p className="text-sm leading-relaxed text-neutral-500 md:text-[15px]">
                       {focus.subtitle}
                     </p>
                   </div>
