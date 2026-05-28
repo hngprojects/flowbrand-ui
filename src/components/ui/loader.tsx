@@ -50,7 +50,7 @@ const Loader = ({ text, hint, className }: LoaderProps) => {
             </p>
           ) : null}
           {hint ? (
-            <p className="text-sm font-normal leading-[150%] text-[#667085]">
+            <p className="text-sm font-normal leading-[150%] text-neutral-500">
               {hint}
             </p>
           ) : null}

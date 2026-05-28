@@ -53,7 +53,7 @@ export default function Hero() {
         transition={{ duration: 0.9, ease: easeOut }}
       >
         <h1 className="w-full text-[32px] lg:text-[60px] font-[500] leading-tight tracking-tight text-black">
-          We built <span className="text-[#E58F17]">Seil </span> because great
+          We built <span className="text-accent-500">Seil </span> because great
           marketing shouldn&apos;t require a marketing degree.
         </h1>
       </motion.div>

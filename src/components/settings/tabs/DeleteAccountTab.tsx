@@ -29,19 +29,19 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
   return (
     <>
       <div className="flex flex-col gap-6">
-        <h3 className="text-[20px] font-medium text-[#565D69]">
+        <h3 className="text-[20px] font-medium text-black-300">
           Delete Account
         </h3>
 
-        <div className="flex items-center gap-3 rounded-[12px] border border-[#D13232]/30 bg-[#FEF2F2] px-4 py-3">
-          <AlertCircle size={18} className="mt-0.5 shrink-0 text-[#D13232]" />
-          <p className="text-base font-medium text-[#D13232]">
+        <div className="flex items-center gap-3 rounded-[12px] border border-red-500/30 bg-red-25 px-4 py-3">
+          <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
+          <p className="text-base font-medium text-red-500">
             Note that this action cannot be undone. Your data, funnels, and
             progress will be permanently deleted.
           </p>
         </div>
 
-        <h4 className="text-base font-medium text-[#152D58]">
+        <h4 className="text-base font-medium text-primary-900">
           What will happen:
         </h4>
         <div className="flex flex-col gap-4 rounded-[12px] border border-gray-200 px-4 py-6">
@@ -49,7 +49,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
             {consequences.map((item) => (
               <li
                 key={item}
-                className="flex items-start gap-2 text-sm text-[#152D58]"
+                className="flex items-start gap-2 text-sm text-primary-900"
               >
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
                 {item}
@@ -62,7 +62,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
           <button
             type="button"
             onClick={() => setConfirmOpen(true)}
-            className="rounded-[10px] bg-[#be2e2e] px-10 py-3 text-sm md:text-base font-medium text-white
+            className="rounded-[10px] bg-red-600 px-10 py-3 text-sm md:text-base font-medium text-white
             hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Delete Account
@@ -73,7 +73,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
       <BaseModal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <div className="flex flex-col items-center gap-6 text-center">
           <div
-            className="flex items-center justify-center rounded-full border border-[#D13232]/20 bg-[#FEF2F2]"
+            className="flex items-center justify-center rounded-full border border-red-500/20 bg-red-25"
             style={{
               width: "182px",
               height: "182px",
@@ -100,7 +100,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="DELETE"
-            className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 text-center text-sm text-foreground outline-none focus:border-[#D13232] transition-colors"
+            className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 text-center text-sm text-foreground outline-none focus:border-red-500 transition-colors"
           />
 
           <div className="flex w-full flex-col gap-3">
@@ -108,7 +108,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
               type="button"
               onClick={handleDelete}
               disabled={!isConfirmed}
-              className="h-12 w-full rounded-[10px] bg-[#D13232] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-12 w-full rounded-[10px] bg-red-500 px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Delete Account
             </button>

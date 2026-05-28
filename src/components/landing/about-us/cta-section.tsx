@@ -19,7 +19,7 @@ const CtaSection = () => {
         </motion.h1>
 
         <motion.p
-          className="text-[1rem] text-[var(--black-300)] leading-[150%] text-center mt-[0.69rem] mb-[1rem]"
+          className="text-[1rem] text-black-300 leading-[150%] text-center mt-[0.69rem] mb-[1rem]"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}

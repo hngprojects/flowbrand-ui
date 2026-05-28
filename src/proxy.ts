@@ -31,8 +31,12 @@ export const proxy = auth(async (request) => {
     pathname !== GOOGLE_OAUTH_CALLBACK_PATH &&
     hasGoogleOAuthExchangeParams(nextUrl.searchParams)
   ) {
+    // Use envConfig.APP_URL instead of nextUrl.origin so the Google OAuth
+    // callback always resolves to the public app URL. Behind proxies / on
+    // serverless platforms nextUrl.origin can resolve to localhost, which
+    // breaks the redirect in production.
     return NextResponse.redirect(
-      buildGoogleOAuthCallbackUrl(nextUrl.origin, nextUrl.searchParams),
+      buildGoogleOAuthCallbackUrl(envConfig.APP_URL, nextUrl.searchParams),
     );
   }
 

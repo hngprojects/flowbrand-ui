@@ -2,38 +2,33 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { resendOtp, verifyOtp } from "~/actions/auth";
+import { requestPasswordReset, verifyResetOtp } from "@/actions/auth";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
-  isResendOtpSuccess,
-  isVerifyOtpSuccess,
-} from "~/lib/auth-action-results";
-import { isSignInFailure, getLoginErrorMessage } from "@/lib/login-errors";
-import { Button } from "~/components/ui/button";
-import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { consumeRegisterVerifyCooldown } from "~/lib/register-verify-storage";
-import { OtpFormSchema } from "@/schema/auth.schema";
+  setForgotResetToken,
+  clearForgotResetToken,
+} from "@/lib/forgot-password-storage";
+import { isInvalidResetOtpError } from "@/lib/password-reset-errors";
+import {
+  joinOtpFormDigits,
+  OTP_FIELD_NAMES,
+  OtpFormSchema,
+} from "@/schema/auth.schema";
 import { cn } from "@/lib/utils";
 
-const OTP_FIELDS = ["d0", "d1", "d2", "d3", "d4", "d5"] as const;
+type Props = Readonly<{ email: string }>;
 
-const formatTimer = (seconds: number) => {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-};
-
-const OTPVerification = ({ email }: { email: string }) => {
-  const [secondsLeft, setSecondsLeft] = useState(() =>
-    consumeRegisterVerifyCooldown(),
-  );
+const ForgotPasswordOtpForm = ({ email }: Props) => {
+  const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -51,57 +46,78 @@ const OTPVerification = ({ email }: { email: string }) => {
     mode: "onChange",
   });
 
-  useEffect(() => {
-    if (secondsLeft <= 0) return;
-    const id = setInterval(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => clearInterval(id);
-  }, [secondsLeft]);
-
-  const applyCooldown = useCallback((seconds: number | undefined) => {
-    if (seconds != null && seconds > 0) {
-      setSecondsLeft(Math.ceil(seconds));
-    } else {
-      setSecondsLeft(0);
-    }
-  }, []);
-
   const otpValues = useWatch({ control: form.control });
   const isOtpComplete = OtpFormSchema.safeParse(otpValues).success;
+
+  // Inputs are blocked while EITHER verification or resend is in flight —
+  // otherwise the user could fire a new resend mid-verify (or vice versa)
+  // and produce racey/confusing failures.
+  const isBusy = isVerifying || isResending;
 
   const focusDigit = useCallback((index: number) => {
     inputRefs.current[index]?.focus();
   }, []);
 
+  const clearOtpFields = useCallback(() => {
+    for (const name of OTP_FIELD_NAMES) {
+      form.setValue(name, "");
+    }
+    focusDigit(0);
+  }, [form, focusDigit]);
+
+  /**
+   * Spread a run of digits across OTP cells starting at `startIndex`.
+   * Used by paste AND by onChange (browser/OS one-time-code autofill can dump
+   * the entire 6-digit code into a single cell — slice(-1) would silently
+   * throw 5 digits away).
+   */
+  const applyOtpDigits = useCallback(
+    (digits: string, startIndex: number) => {
+      const cleaned = digits.replace(/\D/g, "");
+      if (!cleaned) return 0;
+      const slice = cleaned.slice(0, OTP_FIELD_NAMES.length - startIndex);
+      const next = { ...form.getValues() };
+      slice.split("").forEach((ch, j) => {
+        next[OTP_FIELD_NAMES[startIndex + j]] = ch;
+      });
+      form.reset(next);
+      focusDigit(
+        Math.min(startIndex + slice.length, OTP_FIELD_NAMES.length - 1),
+      );
+      return slice.length;
+    },
+    [focusDigit, form],
+  );
+
   const onConfirm = () => {
     void form.handleSubmit(async (data) => {
-      const code = OTP_FIELDS.map((field) => data[field]).join("");
       setIsVerifying(true);
       try {
-        const result = await verifyOtp(email, code);
-        if (!isVerifyOtpSuccess(result)) {
-          toast.error("Verification failed", {
-            description: result.error,
-          });
+        const result = await verifyResetOtp({
+          email,
+          otp_code: joinOtpFormDigits(data),
+        });
+
+        if (!result.ok) {
+          if (isInvalidResetOtpError(result.error)) {
+            toast.error("Invalid or expired reset code", {
+              description: result.error,
+            });
+            clearOtpFields();
+            return;
+          }
+          toast.error("Could not verify code", { description: result.error });
           return;
         }
 
-        const signInResult = await signIn("access-token", {
-          accessToken: result.accessToken,
-          redirect: false,
+        // Persist the short-lived reset token; the next page will consume it.
+        setForgotResetToken(result.resetToken);
+        toast.success("Code verified", {
+          description: "Now create your new password.",
         });
-
-        if (isSignInFailure(signInResult)) {
-          toast.error("Verification complete", {
-            description: `${getLoginErrorMessage(signInResult)} Try signing in with your password.`,
-          });
-          return;
-        }
-
-        toast.success("Email verified", {
-          description: result.message ?? "Welcome to Seil.",
-        });
+        router.push("/reset-password");
       } catch {
-        toast.error("Verification failed", {
+        toast.error("Could not verify code", {
           description: "Network error. Please try again.",
         });
       } finally {
@@ -111,43 +127,31 @@ const OTPVerification = ({ email }: { email: string }) => {
   };
 
   const handleResend = async () => {
-    if (isResending) return;
-    if (!email) {
-      toast.error("Missing email", {
-        description: "Go back to registration and try again.",
-      });
-      return;
-    }
+    if (isBusy) return;
     setIsResending(true);
     try {
-      const result = await resendOtp(email);
-      if (
-        isResendOtpSuccess(result) &&
-        result.status >= 200 &&
-        result.status < 300
-      ) {
-        toast.success("Code sent", {
-          description: result.message,
-        });
-        applyCooldown(result.cooldownSeconds);
+      // A new code invalidates any previously issued reset_token.
+      clearForgotResetToken();
+      const result = await requestPasswordReset(email);
+      if (result.ok) {
+        toast.success("Code sent", { description: result.message });
+        clearOtpFields();
       } else {
-        applyCooldown(
-          !isResendOtpSuccess(result) ? result.cooldownSeconds : undefined,
-        );
-        toast.error("Could not resend", {
-          description: isResendOtpSuccess(result)
-            ? "Please try again later."
-            : result.error,
-        });
+        toast.error("Could not resend", { description: result.error });
       }
     } catch {
       toast.error("Could not resend", {
-        description: "Network error. Please try again later.",
+        description: "Network error. Please try again.",
       });
     } finally {
       setIsResending(false);
     }
   };
+
+  // Auto-focus the first input on mount.
+  useEffect(() => {
+    focusDigit(0);
+  }, [focusDigit]);
 
   return (
     <div className="-mt-50 flex h-full flex-col justify-center space-y-5 sm:space-y-6 lg:-mt-0">
@@ -156,8 +160,8 @@ const OTPVerification = ({ email }: { email: string }) => {
       </div>
 
       <div className="space-y-1.5 sm:space-y-2">
-        <h2 className="text-xl font-medium text-primary-900 sm:text-4xl">
-          Verify your email
+        <h2 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+          Verify your reset code
         </h2>
         <p className="text-foreground/70 text-sm sm:text-[15px]">
           We sent a 6-digit code to{" "}
@@ -168,8 +172,11 @@ const OTPVerification = ({ email }: { email: string }) => {
       </div>
 
       <Form {...form}>
-        <div className="grid w-full grid-cols-6 gap-2 sm:gap-3">
-          {OTP_FIELDS.map((name, i) => (
+        <div
+          className="grid w-full grid-cols-6 gap-2 sm:gap-3"
+          aria-label="6-digit reset code"
+        >
+          {OTP_FIELD_NAMES.map((name, i) => (
             <FormField
               key={name}
               control={form.control}
@@ -179,6 +186,7 @@ const OTPVerification = ({ email }: { email: string }) => {
                   <FormControl>
                     <Input
                       {...field}
+                      aria-label={`Reset code digit ${i + 1}`}
                       ref={(el) => {
                         field.ref(el);
                         inputRefs.current[i] = el;
@@ -187,11 +195,19 @@ const OTPVerification = ({ email }: { email: string }) => {
                       inputMode="numeric"
                       autoComplete="one-time-code"
                       maxLength={1}
-                      disabled={isVerifying}
+                      disabled={isBusy}
                       onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, "").slice(-1);
-                        field.onChange(v);
-                        if (v && i < 5) focusDigit(i + 1);
+                        const cleaned = e.target.value.replace(/\D/g, "");
+                        if (cleaned.length <= 1) {
+                          // Normal single-digit keystroke path.
+                          field.onChange(cleaned);
+                          if (cleaned && i < OTP_FIELD_NAMES.length - 1) {
+                            focusDigit(i + 1);
+                          }
+                          return;
+                        }
+                        // Autofill: distribute across cells from here.
+                        applyOtpDigits(cleaned, i);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Backspace" && !field.value && i > 0) {
@@ -200,19 +216,7 @@ const OTPVerification = ({ email }: { email: string }) => {
                       }}
                       onPaste={(e) => {
                         e.preventDefault();
-                        const paste = e.clipboardData
-                          .getData("text")
-                          .replace(/\D/g, "")
-                          .slice(0, 6);
-                        if (!paste) return;
-                        const next = { ...form.getValues() };
-                        paste.split("").forEach((ch, j) => {
-                          if (i + j < 6) {
-                            next[OTP_FIELDS[i + j]] = ch;
-                          }
-                        });
-                        form.reset(next);
-                        focusDigit(Math.min(i + paste.length, 5));
+                        applyOtpDigits(e.clipboardData.getData("text"), i);
                       }}
                       className="h-14 w-full min-w-0 rounded-md p-0 text-center text-lg font-bold sm:h-[66px] sm:rounded-lg sm:text-xl"
                     />
@@ -224,19 +228,13 @@ const OTPVerification = ({ email }: { email: string }) => {
         </div>
       </Form>
 
-      {secondsLeft > 0 ? (
-        <div className="text-foreground/60 text-right font-mono text-xs">
-          {formatTimer(secondsLeft)}
-        </div>
-      ) : null}
-
       <div className="space-y-3 sm:space-y-4">
         <p className="text-foreground/70 text-center text-xs sm:text-sm">
           Didn&apos;t get a code?{" "}
           <Button
             type="button"
             variant="link"
-            disabled={secondsLeft > 0 || isVerifying || isResending}
+            disabled={isBusy}
             onClick={handleResend}
             className="text-primary hover:text-primary/90 h-auto p-0 font-bold disabled:opacity-40"
           >
@@ -246,7 +244,7 @@ const OTPVerification = ({ email }: { email: string }) => {
 
         <Button
           type="button"
-          disabled={!isOtpComplete || isVerifying}
+          disabled={!isOtpComplete || isBusy}
           variant={isOtpComplete ? "default" : "outline"}
           onClick={onConfirm}
           className={cn(
@@ -255,7 +253,7 @@ const OTPVerification = ({ email }: { email: string }) => {
               "border-border bg-border/50 text-foreground/45 hover:border-border hover:!bg-border/55 hover:!text-foreground/45",
           )}
         >
-          Confirm
+          {isVerifying ? "Verifying..." : "Next"}
         </Button>
 
         <Link
@@ -270,5 +268,5 @@ const OTPVerification = ({ email }: { email: string }) => {
   );
 };
 
-export { OTPVerification as OtpVerification };
-export default OTPVerification;
+export { ForgotPasswordOtpForm };
+export default ForgotPasswordOtpForm;
