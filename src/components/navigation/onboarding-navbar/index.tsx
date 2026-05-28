@@ -57,12 +57,12 @@ const OnboardingNavbar = ({
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-[#EAECF0] bg-white/90 backdrop-blur-md px-4">
+      <nav className="sticky top-0 z-50 border-b border-primary-80 bg-white/90 backdrop-blur-md px-4">
         <div className="dashboard-layout-class flex h-[72px] items-center justify-between md:h-[83px]">
           <div className="flex items-center gap-2 md:gap-3">
             {showMenuButton && (
               <button
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#EAECF0] lg:hidden"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 lg:hidden"
                 onClick={() => {
                   if (isStrategyRoute) {
                     setDrawerPath(drawerOpen ? null : pathname);
@@ -71,9 +71,9 @@ const OnboardingNavbar = ({
                 aria-label={drawerOpen ? "Close menu" : "Open menu"}
               >
                 {drawerOpen ? (
-                  <X size={22} className="text-[#101828]" />
+                  <X size={22} className="text-neutral-900" />
                 ) : (
-                  <Menu size={22} className="text-[#101828]" />
+                  <Menu size={22} className="text-neutral-900" />
                 )}
               </button>
             )}
@@ -88,7 +88,7 @@ const OnboardingNavbar = ({
               type="button"
               aria-label="Notifications"
               onClick={() => setIsNotification(true)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border md:h-11 md:w-11"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 md:h-11 md:w-11"
             >
               <BellIcon />
               {unreadCount > 0 && (
@@ -103,10 +103,10 @@ const OnboardingNavbar = ({
               type="button"
               aria-label="Profile settings"
               onClick={() => setSettingsOpen(true)}
-              className="flex h-10 items-center gap-2 rounded-full border border-[#EAECF0] px-2.5 py-2 md:h-11 md:gap-[10px] md:px-3 md:py-[10px] lg:w-[103px]"
+              className="flex h-10 items-center gap-2 rounded-full border border-primary-80 px-2.5 py-2 md:h-11 md:gap-[10px] md:px-3 md:py-[10px] lg:w-[103px]"
             >
               <ProfileIcon />
-              <span className="hidden text-sm font-medium text-[#101828] lg:inline">
+              <span className="hidden text-sm font-medium text-neutral-900 lg:inline">
                 Profile
               </span>
             </button>
@@ -162,17 +162,17 @@ const OnboardingNavbar = ({
               drawerOpen ? "translate-x-0" : "-translate-x-full",
             )}
           >
-            <div className="flex items-center justify-between border-b border-[#EAECF0] px-4 py-4">
+            <div className="flex items-center justify-between border-b border-primary-80 px-4 py-4">
               <Link href="/dashboard" className="cursor-pointer">
                 <LogoIcon />
               </Link>
               <button
                 type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#EAECF0]"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-primary-80"
                 onClick={() => setDrawerPath(null)}
                 aria-label="Close sidebar"
               >
-                <X size={18} className="text-[#101828]" />
+                <X size={18} className="text-neutral-900" />
               </button>
             </div>
 

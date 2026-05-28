@@ -61,21 +61,23 @@ export default function StrategySidebar({
         <div className="space-y-2.5">
           {hasDocuments ? (
             <>
-              <h2 className="text-sm font-medium text-[#667085]">
+              <h2 className="text-sm font-medium text-neutral-500">
                 Documents uploaded
               </h2>
               {documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between rounded-[16px] border border-[#EAECF0] bg-white px-3 py-3 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
+                  className="flex items-center justify-between rounded-[16px] border border-primary-80 bg-white px-3 py-3 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
                 >
                   <div className="flex min-w-0 items-center gap-2.5">
                     {docIcon(doc.type)}
-                    <p className="truncate text-[15px] font-medium text-[#101828]">
+                    <p className="truncate text-[15px] font-medium text-neutral-900">
                       {truncateName(doc.name)}
                     </p>
                   </div>
-                  <p className="shrink-0 text-sm text-[#667085]">{doc.size}</p>
+                  <p className="shrink-0 text-sm text-neutral-500">
+                    {doc.size}
+                  </p>
                 </div>
               ))}
             </>
@@ -93,36 +95,36 @@ export default function StrategySidebar({
 
         {!loading && (
           <>
-            <p className="text-sm leading-6 text-[#667085]">
+            <p className="text-sm leading-6 text-neutral-500">
               {strategySummary ??
                 "We have created a tailored marketing strategy for your unique use case and problem."}
             </p>
 
             {hasPhases ? (
               <div>
-                <h2 className="mb-3 text-sm font-medium text-[#667085]">
+                <h2 className="mb-3 text-sm font-medium text-neutral-500">
                   Your Strategy
                 </h2>
-                <div className="space-y-1 rounded-[16px] border border-[#EAECF0] bg-white p-3 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]">
+                <div className="space-y-1 rounded-[16px] border border-primary-80 bg-white p-3 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]">
                   {strategyPhases.map((item, index) => (
                     <div
                       key={`${item.title}-${item.status ?? index}`}
                       className={cn(
                         "flex items-start justify-between py-3",
                         index < strategyPhases.length - 1 &&
-                          "border-b border-[#EAECF0]",
+                          "border-b border-primary-80",
                       )}
                     >
                       <div className="flex items-start gap-2.5">
                         <StrategyIcon />
                         <div>
                           <div className="flex items-center gap-1">
-                            <h3 className="text-[15px] font-medium text-[#101828]">
+                            <h3 className="text-[15px] font-medium text-neutral-900">
                               {item.title}
                             </h3>
-                            <CircleHelp className="h-4 w-4 text-[#98A2B3]" />
+                            <CircleHelp className="h-4 w-4 text-neutral-400" />
                           </div>
-                          <p className="mt-0.5 text-sm text-[#667085]">
+                          <p className="mt-0.5 text-sm text-neutral-500">
                             {item.tasks}
                           </p>
                         </div>
@@ -138,14 +140,14 @@ export default function StrategySidebar({
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-[#667085]">
+              <p className="text-sm text-neutral-500">
                 Stages will appear here once generation completes.
               </p>
             )}
 
             {onCreateNewStrategy ? (
               <>
-                <p className="text-sm leading-6 text-[#667085]">
+                <p className="text-sm leading-6 text-neutral-500">
                   If you need to create more strategies for specific use cases,
                   click on the button below.
                 </p>
@@ -153,18 +155,18 @@ export default function StrategySidebar({
                 <button
                   type="button"
                   onClick={onCreateNewStrategy}
-                  className="flex w-full items-center justify-between rounded-[20px] bg-[#D9DEE8] px-3.5 py-3.5 transition-colors hover:bg-[#CED5E2]"
+                  className="flex w-full items-center justify-between rounded-[20px] bg-primary-150 px-3.5 py-3.5 transition-colors hover:bg-primary-125"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-[#326AD1] shadow-sm">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-primary-500 shadow-sm">
                       <Plus className="h-6 w-6 text-white" strokeWidth={2.2} />
                     </div>
-                    <span className="text-left text-[15px] font-medium text-[#101828]">
+                    <span className="text-left text-[15px] font-medium text-neutral-900">
                       Create New Strategy
                     </span>
                   </div>
                   <ChevronRight
-                    className="h-5 w-5 shrink-0 text-[#101828]"
+                    className="h-5 w-5 shrink-0 text-neutral-900"
                     strokeWidth={2}
                   />
                 </button>

@@ -87,7 +87,7 @@ const Solution = () => {
           </motion.div>
 
           <motion.h2
-            className="mb-4 text-4xl font-medium tracking-tight text-[#0F172A] md:text-5xl"
+            className="mb-4 text-4xl font-medium tracking-tight text-black-475 md:text-5xl"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -150,7 +150,7 @@ const Solution = () => {
                   <span className="mb-4 block text-sm font-semibold tracking-wider text-gray-700 uppercase">
                     STEP {currentStep.number}
                   </span>
-                  <h3 className="mb-4 text-[24px] md:text-[32px] font-[500] text-[#0F172A]">
+                  <h3 className="mb-4 text-[24px] md:text-[32px] font-[500] text-black-475">
                     {currentStep.title}
                   </h3>
                   <p className="max-w-lg text-[14px] md:text-[18px] font-[400] leading-relaxed text-black-300">

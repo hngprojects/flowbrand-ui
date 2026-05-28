@@ -13,7 +13,7 @@ const TermsAndConditionsView = () => {
   return (
     <>
       <motion.div
-        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]"
+        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-primary-50 pt-[15px] md:pt-[0px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -27,7 +27,7 @@ const TermsAndConditionsView = () => {
           Terms and Conditions
         </motion.h1>
         <motion.p
-          className="text-[14px] md:text-[20px] text-[#565D69]"
+          className="text-[14px] md:text-[20px] text-black-300"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -42,7 +42,7 @@ const TermsAndConditionsView = () => {
 
       <div className="flex flex-col section-class space-y-5">
         <motion.div {...fadeUp}>
-          <h2 className="text-[16px] font-[500] mb-[12px]">
+          <h2 className="text-[16px] font-medium mb-[12px]">
             These Terms & Conditions explain how Seil works and what you can
             expect when using the platform. They are written in simple language
             to help you clearly understand your responsibilities and our role.
@@ -62,7 +62,7 @@ const TermsAndConditionsView = () => {
               delay: 0.05,
             }}
           >
-            <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+            <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
               1. Use of the Platform
             </h2>
             <p className="text-[14px] md:text-[16px]">
@@ -87,7 +87,7 @@ const TermsAndConditionsView = () => {
               delay: 0.1,
             }}
           >
-            <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
+            <h2 className="font-medium text-[16px] md:text-[24px] mb-[12px]">
               2. User Responsibilities
             </h2>
             <p className="text-[14px] md:text-[16px]">
@@ -112,7 +112,7 @@ const TermsAndConditionsView = () => {
               delay: 0.15,
             }}
           >
-            <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+            <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
               3. Generated Content
             </h2>
             <p className="text-[14px] md:text-[16px]">
@@ -135,7 +135,7 @@ const TermsAndConditionsView = () => {
               delay: 0.2,
             }}
           >
-            <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+            <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
               4. Account & Access
             </h2>
             <p className="text-[14px] md:text-[16px]">
@@ -158,7 +158,7 @@ const TermsAndConditionsView = () => {
               delay: 0.25,
             }}
           >
-            <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+            <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
               5. Limitation of Liability
             </h2>
             <p className="text-[14px] md:text-[16px]">
@@ -181,7 +181,7 @@ const TermsAndConditionsView = () => {
               delay: 0.3,
             }}
           >
-            <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+            <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
               6. Changes to the Terms
             </h2>
             <p className="text-[14px] md:text-[16px]">

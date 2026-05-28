@@ -62,11 +62,11 @@ export default function FunnelModal({
           md:h-auto
           md:rounded-[24px]
           md:border
-          md:border-[#E4E4E4]
+          md:border-gray-500
           min-w-[320px]
           md:min-w-120 
         "
-        overlayClassName="bg-[#030D1F]/80"
+        overlayClassName="bg-black-500/80"
       >
         <VisuallyHidden>
           <DialogTitle>{title}</DialogTitle>
@@ -77,14 +77,14 @@ export default function FunnelModal({
           defaultValue={defaultTab ?? tabs[0]?.id}
           className="flex flex-col h-full gap-0"
         >
-          <div className="flex items-center justify-between mb-6 shrink-0 border-b-3 border-[#E4E4E4] pb-4 mx-[-32px] px-8">
+          <div className="flex items-center justify-between mb-6 shrink-0 border-b-[0.35px] border-gray-500 pb-4 mx-[-32px] px-8">
             <h2 className="text-[18px] font-medium text-foreground">{title}</h2>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close settings"
-              className="flex items-center gap-[7.08px] rounded-[25.47px] border-[0.35px] border-[#E4E4E4] px-[15px] py-[7.08px] 
-              text-sm text-[#030D1F] transition-colors pointer-events-auto hover:bg-gray-50 cursor-pointer"
+              className="flex items-center gap-[7.08px] rounded-[25.47px] border-[0.35px] border-gray-500 px-[15px] py-[7.08px] 
+              text-sm text-black-500 transition-colors pointer-events-auto hover:bg-gray-50 cursor-pointer"
             >
               <svg
                 width="20"
@@ -112,7 +112,7 @@ export default function FunnelModal({
           </div>
 
           <TabsList
-            className="flex items-center w-full h-[38px] gap-[10px] mb-6 shrink-0 rounded-[12px] border border-[#E4E4E4] 
+            className="flex items-center w-full h-[38px] gap-[10px] mb-6 shrink-0 rounded-[12px] border border-gray-400
             px-1 bg-transparent overflow-x-auto"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
@@ -121,8 +121,8 @@ export default function FunnelModal({
                 key={tab.id}
                 value={tab.id}
                 className="h-full rounded-[10px] font-medium transition-all duration-200 whitespace-nowrap px-4 text-center 
-                text-[16px] leading-[150%] text-[#565D69] data-active:bg-[#326AD1] data-active:text-white cursor-pointer border-0 
-                data-active:shadow-none hover:bg-transparent hover:text-[#565D69] data-active:hover:bg-[#326AD1] data-active:hover:text-white"
+                text-[16px] leading-[150%] text-black-300 data-active:bg-primary-500 data-active:text-white cursor-pointer border-0 
+                data-active:shadow-none hover:bg-transparent hover:text-black-300 data-active:hover:bg-primary-500 data-active:hover:text-white"
               >
                 {tab.label}
               </TabsTrigger>

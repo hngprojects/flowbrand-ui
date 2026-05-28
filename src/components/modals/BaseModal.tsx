@@ -63,7 +63,7 @@ const BaseModal = ({
             )}
 
             {subtitle && (
-              <p className=" text-sm md:text-base leading-relaxed md:font-bold font-medium text-[#565d69]">
+              <p className=" text-sm md:text-base leading-relaxed md:font-bold font-medium text-black-300">
                 {subtitle}
               </p>
             )}

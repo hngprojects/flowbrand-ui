@@ -102,7 +102,7 @@ function ResetPasswordForm({ resetToken }: Readonly<{ resetToken: string }>) {
 
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
-      <h2 className="text-[20px] lg:text-[40px] font-medium text-[#152D58]">
+      <h2 className="text-[20px] lg:text-[40px] font-medium text-primary-900">
         Create a new password
       </h2>
       <p className="text-foreground/70 text-[20px]">

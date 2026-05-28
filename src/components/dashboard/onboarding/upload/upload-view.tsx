@@ -86,15 +86,15 @@ function FileRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
-          <p className="truncate text-sm font-semibold text-[#101828]">
+          <p className="truncate text-sm font-semibold text-neutral-900">
             {item.file.name}
           </p>
-          <span className="shrink-0 text-sm text-[#667085]">
+          <span className="shrink-0 text-sm text-neutral-500">
             {statusLabel(item)}
           </span>
         </div>
 
-        <div className="mt-2.5 h-[5px] w-full overflow-hidden rounded-full bg-[#FDEBD6]">
+        <div className="mt-2.5 h-[5px] w-full overflow-hidden rounded-full bg-accent-75">
           <div
             className="h-full rounded-full transition-all duration-300"
             style={{
@@ -108,7 +108,7 @@ function FileRow({
       <button
         type="button"
         onClick={() => onRemove(item.id)}
-        className="mt-0.5 shrink-0 text-[#D0D5DD] transition-colors hover:text-[#667085]"
+        className="mt-0.5 shrink-0 text-gray-650 transition-colors hover:text-neutral-500"
         aria-label="Remove file"
       >
         <X size={16} />
@@ -406,14 +406,14 @@ export function UploadView() {
   return (
     <main className="flex flex-1 flex-col">
       <div className="mx-auto flex w-full max-w-[640px] flex-col items-center px-4 py-10 md:py-14">
-        <h1 className="mb-2 text-center text-[26px] font-semibold leading-tight tracking-tight text-[#101828] md:text-[32px]">
+        <h1 className="mb-2 text-center text-[26px] font-semibold leading-tight tracking-tight text-neutral-900 md:text-[32px]">
           Start creating your marketing strategy
         </h1>
-        <p className="mb-8 max-w-md text-center text-sm text-[#667085] md:mb-10 md:text-[15px]">
+        <p className="mb-8 max-w-md text-center text-sm text-neutral-500 md:mb-10 md:text-[15px]">
           Create marketing strategy tailored to your business needs.
         </p>
 
-        <div className="w-full rounded-2xl border border-[#EAECF0] bg-white p-5 shadow-[0px_4px_24px_rgba(16,24,40,0.06)] md:p-8">
+        <div className="w-full rounded-2xl border border-primary-80 bg-white p-5 shadow-[0px_4px_24px_rgba(16,24,40,0.06)] md:p-8">
           <WideDashedBorder active={dragging}>
             <div
               role="button"
@@ -435,7 +435,7 @@ export function UploadView() {
               }}
               className={cn(
                 "flex cursor-pointer flex-col items-center justify-center rounded-xl px-4 py-10 transition-colors md:py-12",
-                dragging ? "bg-[#F0F5FD]" : "bg-white hover:bg-[#FAFBFC]",
+                dragging ? "bg-primary-65" : "bg-white hover:bg-gray-150",
               )}
             >
               <input
@@ -457,7 +457,7 @@ export function UploadView() {
                 className="mb-5 h-[72px] w-[72px] md:h-20 md:w-20"
                 priority
               />
-              <p className="text-center text-[15px] font-semibold text-[#101828] md:text-base">
+              <p className="text-center text-[15px] font-semibold text-neutral-900 md:text-base">
                 <span className="md:hidden">
                   Upload your business documents
                 </span>
@@ -465,7 +465,7 @@ export function UploadView() {
                   Upload your business identity documents
                 </span>
               </p>
-              <p className="mt-1.5 text-center text-xs text-[#98A2B3] md:text-[13px]">
+              <p className="mt-1.5 text-center text-xs text-neutral-400 md:text-[13px]">
                 Supports Doc, Docx, PDF, PPT, PPTX - Max 5.0MB
               </p>
             </div>
@@ -499,8 +499,8 @@ export function UploadView() {
             className={cn(
               "mt-6 h-[52px] w-full rounded-xl text-base font-semibold transition-colors",
               allDone && !isGenerating
-                ? "cursor-pointer bg-[#326AD1] text-white hover:bg-[#2859B8]"
-                : "cursor-not-allowed bg-[#E8EDF5] text-[#326AD1]",
+                ? "cursor-pointer bg-primary-500 text-white hover:bg-primary-625"
+                : "cursor-not-allowed bg-primary-85 text-primary-500",
             )}
           >
             {isGenerating ? "Starting strategy…" : "Create my strategy"}
@@ -509,10 +509,10 @@ export function UploadView() {
           <button
             type="button"
             onClick={goToQuestions}
-            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-0.5 text-sm text-[#667085] transition-colors hover:text-[#344054]"
+            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-0.5 text-sm text-neutral-500 transition-colors hover:text-neutral-700"
           >
             Don&apos;t know what to do? Click here
-            <ChevronRight size={16} className="text-[#98A2B3]" />
+            <ChevronRight size={16} className="text-neutral-400" />
           </button>
         </div>
 
@@ -520,8 +520,8 @@ export function UploadView() {
           type="button"
           onClick={goToQuestions}
           className={cn(
-            "mt-5 flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-[#EAECF0] bg-white px-5 py-5",
-            "shadow-[0px_4px_24px_rgba(16,24,40,0.06)] transition-colors hover:bg-[#FAFBFC]",
+            "mt-5 flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-primary-80 bg-white px-5 py-5",
+            "shadow-[0px_4px_24px_rgba(16,24,40,0.06)] transition-colors hover:bg-gray-150",
           )}
         >
           <Image
@@ -532,16 +532,16 @@ export function UploadView() {
             className="h-12 w-12 shrink-0"
           />
           <div className="min-w-0 flex-1 text-left">
-            <p className="text-[15px] font-semibold leading-snug text-[#101828]">
+            <p className="text-[15px] font-semibold leading-snug text-neutral-900">
               Don&apos;t have a document to upload? Create your strategy another
               way.
             </p>
-            <p className="mt-1 text-sm text-[#667085]">
+            <p className="mt-1 text-sm text-neutral-500">
               Create your marketing strategy without the need to upload a
               document.
             </p>
           </div>
-          <ChevronRight size={20} className="shrink-0 text-[#98A2B3]" />
+          <ChevronRight size={20} className="shrink-0 text-neutral-400" />
         </button>
       </div>
     </main>

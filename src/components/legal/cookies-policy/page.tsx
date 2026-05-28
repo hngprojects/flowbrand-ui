@@ -108,7 +108,7 @@ const CookiesPolicyView = () => {
   return (
     <>
       <motion.div
-        className="flex h-[114px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:h-[272px] md:pt-[0px]"
+        className="flex h-[114px] flex-col items-center justify-center bg-primary-50 pt-[15px] md:h-[272px] md:pt-[0px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -122,7 +122,7 @@ const CookiesPolicyView = () => {
           Cookies Policy
         </motion.h1>
         <motion.p
-          className="text-[14px] text-[#565D69] md:text-[20px]"
+          className="text-[14px] text-black-300 md:text-[20px]"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -134,7 +134,7 @@ const CookiesPolicyView = () => {
           Effective date : 10-Apr-2026
         </motion.p>
         <motion.p
-          className="text-[14px] text-[#565D69] md:text-[20px]"
+          className="text-[14px] text-black-300 md:text-[20px]"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{

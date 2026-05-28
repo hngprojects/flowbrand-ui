@@ -74,15 +74,15 @@ function AuthField({
     <div className="space-y-2">
       <label
         htmlFor={id}
-        className="block text-sm leading-[150%] font-medium text-[#152D58] sm:text-base"
+        className="block text-sm leading-[150%] font-medium text-primary-900 sm:text-base"
       >
         {label}
       </label>
 
       <div
         className={cn(
-          "flex h-11 items-center rounded-lg border border-[#CFCFCF] bg-white px-2.5 transition-colors focus-within:border-[#326AD1] sm:px-4",
-          error && "border-[#D13232] focus-within:border-[#D13232]",
+          "flex h-11 items-center rounded-lg border border-input bg-white px-2.5 transition-colors focus-within:border-primary sm:px-4",
+          error && "border-secondary focus-within:border-secondary",
         )}
       >
         <Input
@@ -119,7 +119,7 @@ function AuthField({
       {error ? (
         <p
           id={`${id}-error`}
-          className="text-sm leading-[20px] font-normal text-[#D13232] sm:text-xs sm:leading-[18px] sm:font-medium"
+          className="text-sm leading-[20px] font-normal text-secondary sm:text-xs sm:leading-[18px] sm:font-medium"
         >
           {error}
         </p>
@@ -254,7 +254,7 @@ export function LoginForm() {
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
       <div className="space-y-1.5 sm:space-y-2">
-        <h1 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+        <h1 className="text-xl font-medium text-primary-900 sm:text-4xl">
           Welcome back
         </h1>
         <p className="text-foreground/70 text-sm sm:text-[24px]">
@@ -306,7 +306,7 @@ export function LoginForm() {
 
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-[#2E60BE]"
+              className="text-sm font-medium text-primary-600"
             >
               Forgot password?
             </Link>
@@ -351,7 +351,7 @@ export function LoginForm() {
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="font-bold text-[#152D58] hover:underline"
+          className="font-bold text-primary-900 hover:underline"
         >
           Create an account
         </Link>
