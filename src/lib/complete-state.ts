@@ -10,10 +10,9 @@ export async function completeStage(funnelId: string, stageId: string) {
   if (process.env.NODE_ENV === "development") {
     console.warn(
       "[completeStage] STUB — no API call made. Waiting for backend endpoint.",
-      { funnelId, stageId }
+      { funnelId, stageId },
     );
   }
-
   flowLog("strategy", "completeStage → pending backend integration", {
     funnelId,
     stageId,
