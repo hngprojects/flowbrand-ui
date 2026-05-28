@@ -5,13 +5,7 @@ import { Check, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,23 +21,17 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   clearForgotResetStorage,
-  getForgotResetEmail,
+  getForgotResetToken,
   subscribeToForgotResetStorage,
 } from "@/lib/forgot-password-storage";
 import { isInvalidResetOtpError } from "@/lib/password-reset-errors";
 import {
   getPasswordChecks,
-  joinOtpFormDigits,
-  OTP_FIELD_NAMES,
   PASSWORD_RULE_ROWS,
-  ResetPasswordWithOtpFormSchema,
+  ResetPasswordSchema,
 } from "@/schema/auth.schema";
 import { cn } from "@/lib/utils";
-import {
-  requestPasswordReset,
-  resetPasswordWithOtp,
-  verifyResetOtp,
-} from "@/actions/auth";
+import { resetPasswordWithOtp } from "@/actions/auth";
 
 const passwordWrapperClass = (hasError: boolean) =>
   cn(
@@ -56,119 +44,41 @@ const passwordWrapperClass = (hasError: boolean) =>
 const passwordInputClass =
   "min-w-0 flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0";
 
-function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
+function ResetPasswordForm({ resetToken }: Readonly<{ resetToken: string }>) {
   const router = useRouter();
   const [showNewPasswordPlain, setShowNewPasswordPlain] = useState(false);
   const [showConfirmPasswordPlain, setShowConfirmPasswordPlain] =
     useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [otpFocusRequest, setOtpFocusRequest] = useState<{
-    id: number;
-    index: number;
-  } | null>(null);
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const form = useForm<z.infer<typeof ResetPasswordWithOtpFormSchema>>({
-    resolver: zodResolver(ResetPasswordWithOtpFormSchema),
+  const form = useForm<z.infer<typeof ResetPasswordSchema>>({
+    resolver: zodResolver(ResetPasswordSchema),
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
-      d0: "",
-      d1: "",
-      d2: "",
-      d3: "",
-      d4: "",
-      d5: "",
       password: "",
       confirmPassword: "",
     },
   });
 
-  const focusOtpDigit = useCallback((index: number) => {
-    otpInputRefs.current[index]?.focus();
-  }, []);
-
-  const queueOtpFocus = useCallback((index: number) => {
-    setOtpFocusRequest((prev) => ({
-      id: (prev?.id ?? 0) + 1,
-      index,
-    }));
-  }, []);
-
-  useEffect(() => {
-    if (!otpFocusRequest) return;
-    otpInputRefs.current[otpFocusRequest.index]?.focus();
-  }, [otpFocusRequest]);
-
-  const clearOtpFields = useCallback(() => {
-    for (const name of OTP_FIELD_NAMES) {
-      form.setValue(name, "");
-    }
-  }, [form]);
-
   const { isSubmitting } = form.formState;
 
-  const handleResend = async () => {
-    if (isResending) return;
-    setIsResending(true);
+  const onSubmit = async (values: z.infer<typeof ResetPasswordSchema>) => {
     try {
-      const result = await requestPasswordReset(email);
-      if (result.ok) {
-        toast.success("Code sent", { description: result.message });
-        clearOtpFields();
-        queueOtpFocus(0);
-      } else {
-        toast.error("Could not resend", { description: result.error });
-      }
-    } catch {
-      toast.error("Could not resend", {
-        description: "Network error. Please try again.",
-      });
-    } finally {
-      setIsResending(false);
-    }
-  };
-
-  const onSubmit = async (
-    values: z.infer<typeof ResetPasswordWithOtpFormSchema>,
-  ) => {
-    try {
-      // Step 1: verify OTP → get reset token
-      const verifyResult = await verifyResetOtp({
-        email,
-        otp_code: joinOtpFormDigits(values),
-      });
-
-      if (!verifyResult.ok) {
-        if (isInvalidResetOtpError(verifyResult.error)) {
-          toast.error("Invalid or expired reset code", {
-            description: verifyResult.error,
-          });
-          clearOtpFields();
-          queueOtpFocus(0);
-          return;
-        }
-        toast.error("Could not verify code", {
-          description: verifyResult.error,
-        });
-        return;
-      }
-
-      // Step 2: use reset token to set new password
       const resetResult = await resetPasswordWithOtp({
-        reset_token: verifyResult.resetToken,
+        reset_token: resetToken,
         password: values.password,
       });
 
       if (!resetResult.ok) {
-        // Token expired between steps — send user back to re-enter OTP
+        // Token expired — push user back to the OTP step.
         if (isInvalidResetOtpError(resetResult.error)) {
           toast.error("Reset session expired", {
             description: "Please re-enter your code.",
           });
-          clearOtpFields();
-          queueOtpFocus(0);
+          // Keep the email so they don't re-type it; clear only the stale token.
+          // The OTP page will issue a fresh one on resend.
+          router.replace("/forgot-password/verify");
           return;
         }
         toast.error("Could not update password", {
@@ -189,15 +99,14 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
       });
     }
   };
+
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
       <h2 className="text-[20px] lg:text-[40px] font-medium text-[#152D58]">
         Create a new password
       </h2>
       <p className="text-foreground/70 text-[20px]">
-        Enter the 6-digit code sent to{" "}
-        <span className="text-foreground font-semibold">{email}</span> and Enter
-        a new password to continue.
+        Enter a new password to continue.
       </p>
 
       <Form {...form}>
@@ -208,104 +117,6 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
           }}
           className="space-y-3 sm:space-y-4"
         >
-          <div className="space-y-2">
-            <label
-              id="reset-code-label"
-              className="text-foreground/80 text-xs font-semibold sm:text-sm"
-            >
-              Reset code
-            </label>
-            <div className="grid w-full grid-cols-6 gap-2 sm:gap-3">
-              {OTP_FIELD_NAMES.map((name, i) => (
-                <FormField
-                  key={name}
-                  control={form.control}
-                  name={name}
-                  render={({ field }) => (
-                    <FormItem className="w-full min-w-0 space-y-0">
-                      <FormControl>
-                        <Input
-                          {...field}
-                          aria-label={`Reset code digit ${i + 1}`}
-                          aria-describedby="reset-code-label"
-                          ref={(el) => {
-                            field.ref(el);
-                            otpInputRefs.current[i] = el;
-                          }}
-                          type="text"
-                          inputMode="numeric"
-                          autoComplete="one-time-code"
-                          maxLength={1}
-                          disabled={isSubmitting}
-                          onChange={(e) => {
-                            const v = e.target.value
-                              .replace(/\D/g, "")
-                              .slice(-1);
-                            field.onChange(v);
-                            if (v && i < 5) focusOtpDigit(i + 1);
-                          }}
-                          onKeyDown={(e) => {
-                            if (
-                              e.key === "Backspace" &&
-                              !field.value &&
-                              i > 0
-                            ) {
-                              focusOtpDigit(i - 1);
-                            }
-                          }}
-                          onPaste={(e) => {
-                            e.preventDefault();
-                            const paste = e.clipboardData
-                              .getData("text")
-                              .replace(/\D/g, "")
-                              .slice(0, 6);
-                            if (!paste) return;
-                            const next = { ...form.getValues() };
-                            paste.split("").forEach((ch, j) => {
-                              if (i + j < 6) {
-                                next[OTP_FIELD_NAMES[i + j]] = ch;
-                              }
-                            });
-                            form.reset(next);
-                            focusOtpDigit(Math.min(i + paste.length, 5));
-                          }}
-                          className={cn(
-                            "h-14 w-full min-w-0 rounded-md p-0 text-center text-lg font-bold sm:h-[66px] sm:rounded-lg sm:text-xl",
-                            (form.formState.errors.d0 ||
-                              form.formState.errors.d1 ||
-                              form.formState.errors.d2 ||
-                              form.formState.errors.d3 ||
-                              form.formState.errors.d4 ||
-                              form.formState.errors.d5) &&
-                              "border-destructive",
-                          )}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              ))}
-            </div>
-            {OTP_FIELD_NAMES.some((name) => form.formState.errors[name]) ? (
-              <p className="text-destructive text-xs">
-                {form.formState.errors.d0?.message ??
-                  "Enter the full 6-digit code."}
-              </p>
-            ) : null}
-            <p className="text-foreground/70 text-xs">
-              Didn&apos;t get a code?{" "}
-              <Button
-                type="button"
-                variant="link"
-                disabled={isResending || isSubmitting}
-                onClick={handleResend}
-                className="text-primary hover:text-primary/90 h-auto p-0 text-xs font-bold"
-              >
-                Resend
-              </Button>
-            </p>
-          </div>
-
           <FormField
             control={form.control}
             name="password"
@@ -466,21 +277,24 @@ function ResetPasswordForm({ email }: Readonly<{ email: string }>) {
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const email = useSyncExternalStore(
+  const resetToken = useSyncExternalStore(
     subscribeToForgotResetStorage,
-    getForgotResetEmail,
+    getForgotResetToken,
     () => null,
   );
 
   useEffect(() => {
-    if (email === null) {
+    // No reset token = user landed here without verifying OTP. Use truthiness
+    // so an empty string is treated the same as null (matches the render
+    // guard below — otherwise an empty string would silently get stuck).
+    if (!resetToken) {
       router.replace("/forgot-password");
     }
-  }, [email, router]);
+  }, [resetToken, router]);
 
-  if (!email) {
+  if (!resetToken) {
     return null;
   }
 
-  return <ResetPasswordForm email={email} />;
+  return <ResetPasswordForm resetToken={resetToken} />;
 }
