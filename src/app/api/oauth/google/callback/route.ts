@@ -7,8 +7,9 @@ import { isSignInFailure } from "@/lib/login-errors";
 import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import { mapApiRedirectToAppPath } from "@/routes";
 
-function loginErrorRedirect(origin: string) {
-  return new URL("/login?google_error=1", origin);
+function loginErrorRedirect() {
+  const errUrl = new URL("/login?google_error=1", envConfig.APP_URL);
+  return errUrl;
 }
 
 /** After API Google OAuth: exchange code (or legacy token), set session, redirect. */
@@ -17,13 +18,8 @@ export async function GET(request: Request) {
   const { code, accessToken, error, redirectUrl } =
     parseGoogleOAuthCallbackParams(requestUrl.searchParams);
 
-  // Always base post-OAuth redirects on envConfig.APP_URL. requestUrl.origin
-  // can resolve to localhost behind proxies / on serverless platforms, which
-  // would send users back to http://localhost:4000 in production.
-  const appOrigin = envConfig.APP_URL;
-
   if (error) {
-    return Response.redirect(loginErrorRedirect(appOrigin));
+    return Response.redirect(loginErrorRedirect());
   }
 
   let token = accessToken;
@@ -32,21 +28,21 @@ export async function GET(request: Request) {
   if (!token && code) {
     const exchanged = await exchangeGoogleOAuthCode(envConfig.BASEURL, code);
     if (!exchanged) {
-      return Response.redirect(loginErrorRedirect(appOrigin));
+      return Response.redirect(loginErrorRedirect());
     }
     token = exchanged.access_token;
     apiRedirectUrl = exchanged.redirect_url ?? apiRedirectUrl;
   }
 
   if (!token) {
-    return Response.redirect(loginErrorRedirect(appOrigin));
+    return Response.redirect(loginErrorRedirect());
   }
 
   let me;
   try {
     me = await fetchAuthMe(envConfig.BASEURL, token);
   } catch {
-    return Response.redirect(loginErrorRedirect(appOrigin));
+    return Response.redirect(loginErrorRedirect());
   }
 
   const destination =
@@ -59,13 +55,16 @@ export async function GET(request: Request) {
     });
 
     if (isSignInFailure(signInResult)) {
-      return Response.redirect(loginErrorRedirect(appOrigin));
+      return Response.redirect(loginErrorRedirect());
     }
   } catch {
-    return Response.redirect(loginErrorRedirect(appOrigin));
+    return Response.redirect(loginErrorRedirect());
   }
 
-  return Response.redirect(
-    new URL(withGoogleSignInSuccessQuery(destination), appOrigin),
+  const successUrl = new URL(
+    withGoogleSignInSuccessQuery(destination),
+    envConfig.APP_URL,
   );
+
+  return Response.redirect(successUrl);
 }
