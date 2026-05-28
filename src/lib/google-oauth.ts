@@ -11,6 +11,8 @@ export function googleOAuthCallbackUrl(appUrl: string): string {
 }
 
 export type GoogleOAuthCallbackParams = {
+  /** Single-use Redis exchange code from the API redirect. */
+  code?: string;
   accessToken?: string;
   redirectUrl?: string;
   error?: string;
@@ -19,6 +21,8 @@ export type GoogleOAuthCallbackParams = {
 export function parseGoogleOAuthCallbackParams(
   searchParams: URLSearchParams,
 ): GoogleOAuthCallbackParams {
+  const code = searchParams.get("code")?.trim() || undefined;
+
   const accessToken =
     searchParams.get("access_token") ??
     searchParams.get("accessToken") ??
@@ -38,6 +42,7 @@ export function parseGoogleOAuthCallbackParams(
       : undefined);
 
   return {
+    code,
     accessToken: accessToken?.trim() || undefined,
     redirectUrl: redirectUrl?.trim() || undefined,
     error: error?.trim() || undefined,
@@ -67,4 +72,33 @@ export function parseGoogleOAuthHashParams(
     accessToken: accessToken?.trim() || undefined,
     error: error?.trim() || undefined,
   };
+}
+
+/** True when the URL carries Google OAuth callback data (not OTP-style short codes). */
+export function hasGoogleOAuthExchangeParams(
+  searchParams: URLSearchParams,
+): boolean {
+  const { code, accessToken, error } =
+    parseGoogleOAuthCallbackParams(searchParams);
+
+  if (error || accessToken) {
+    return true;
+  }
+
+  if (!code) {
+    return false;
+  }
+
+  return code.length >= 32;
+}
+
+export function buildGoogleOAuthCallbackUrl(
+  origin: string,
+  searchParams: URLSearchParams,
+): URL {
+  const target = new URL(GOOGLE_OAUTH_CALLBACK_PATH, origin);
+  searchParams.forEach((value, key) => {
+    target.searchParams.set(key, value);
+  });
+  return target;
 }

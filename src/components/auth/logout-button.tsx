@@ -12,13 +12,13 @@ type LogoutButtonProps = {
 
 const menuVariantClass =
   "hover:bg-muted w-full px-4 py-2 text-left text-sm font-medium " +
-  "text-[#D13232] transition-colors disabled:opacity-50";
+  "text-red-500 transition-colors disabled:opacity-50";
 
 const defaultVariantClass = cn(
   "hidden h-11 items-center justify-center lg:flex",
   "rounded-[41px] border border-gray-500 px-4",
   "text-foreground text-sm font-medium",
-  "hover:border-[#D13232] hover:text-[#D13232]",
+  "hover:border-red-500 hover:text-red-500",
   "disabled:opacity-50",
 );
 
@@ -34,7 +34,7 @@ export function LogoutButton({
     setIsLoading(true);
     try {
       onAfterLogout?.();
-      sessionStorage.removeItem("flowbrand-funnel-preview-toast");
+      sessionStorage.removeItem("flowbrand-strategy-preview-toast");
       // Full redirect so middleware sees a cleared session (client router.push races the cookie).
       await signOut({ callbackUrl: "/login", redirect: true });
     } catch {

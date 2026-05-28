@@ -4,16 +4,19 @@ import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { credentialsAuth } from "@/lib/credentials-auth";
 import { envConfig } from "@/config/env.config";
-import { fetchAuthMe } from "@/lib/auth-api";
+// import { fetchAuthMe } from "@/lib/auth-api";
+import { fetchAuthMe, refreshAccessToken } from "@/lib/auth-api";
 import { inDevEnvironment } from "@/lib/utils";
+import { loginFailureCode } from "@/lib/login-errors";
 import { LoginCredentialsSchema } from "@/schema/auth.schema";
 import { CustomJWT } from "@/types/auth";
 
-const INVALID_CREDENTIAL_STATUSES = new Set([400, 401, 403, 422, 502]);
-
-/** Surfaces API copy in the Auth.js `code` query param for client signIn(redirect: false). */
-class InvalidLoginCredentials extends CredentialsSignin {
-  code = "invalid_email_or_password";
+/** Surfaces API failure as Auth.js `code` for client signIn(redirect: false). */
+class LoginFailure extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
 }
 
 function readAuthSecret(): string | undefined {
@@ -27,6 +30,7 @@ function readAuthSecret(): string | undefined {
 const AUTH_SECRET_FALLBACK =
   readAuthSecret() ??
   (process.env.NODE_ENV !== "production" ? "seil-dev-secret" : undefined);
+const ACCESS_TOKEN_LIFETIME_MS = 1000 * 60 * 14;
 
 const authConfig: NextAuthConfig = {
   providers: [
@@ -57,11 +61,9 @@ const authConfig: NextAuthConfig = {
             });
           }
 
-          if (INVALID_CREDENTIAL_STATUSES.has(statusCode)) {
-            throw new InvalidLoginCredentials();
-          }
-
-          throw new Error(response.message);
+          throw new LoginFailure(
+            loginFailureCode(statusCode, response.message),
+          );
         }
 
         if (!("data" in response) || !response.data?.id) {
@@ -111,20 +113,67 @@ const authConfig: NextAuthConfig = {
     strategy: "jwt",
   },
   debug: process.env.AUTH_DEBUG === "true",
+
   callbacks: {
     async jwt({ token, user }) {
+      const customToken = token as CustomJWT;
+
+      /**
+       * Initial login
+       */
+      if (user) {
+        const incomingUser = user as CustomJWT;
+
+        return {
+          ...customToken,
+          ...incomingUser,
+          access_token: incomingUser.access_token,
+          expires_at: Date.now() + ACCESS_TOKEN_LIFETIME_MS,
+          error: undefined,
+        } satisfies CustomJWT;
+      }
+
+      /**
+       * Existing token still valid
+       */
+      if (customToken.expires_at && Date.now() < customToken.expires_at) {
+        return customToken;
+      }
+
+      /**
+       * Refresh expired access token
+       */
+      const refreshed = await refreshAccessToken(envConfig.BASEURL);
+
+      if (!refreshed?.access_token) {
+        return {
+          ...customToken,
+          error: "RefreshAccessTokenError",
+        } satisfies CustomJWT;
+      }
+
       return {
-        ...token,
-        ...user,
-      } as CustomJWT;
+        ...customToken,
+        access_token: refreshed.access_token,
+        expires_at: Date.now() + ACCESS_TOKEN_LIFETIME_MS,
+        error: undefined,
+      } satisfies CustomJWT;
     },
+
     async session({ session, token }: { session: Session; token: JWT }) {
       const customToken = token as CustomJWT;
+
       if (!customToken?.id) {
-        console.warn("[auth] Rejecting session: JWT missing backend user id", {
-          sub: customToken?.sub,
-          email: customToken?.email,
-        });
+        if (inDevEnvironment) {
+          console.warn(
+            "[auth] Rejecting session: JWT missing backend user id",
+            {
+              sub: customToken?.sub,
+              email: customToken?.email,
+            },
+          );
+        }
+
         return {
           expires: new Date(0).toISOString(),
           invalid: true,
@@ -138,12 +187,50 @@ const authConfig: NextAuthConfig = {
         image: customToken.avatar_url || "",
         email: customToken.email as string,
       };
+
       session.access_token = customToken.access_token;
+
       session.userOrg = customToken.organisations;
+
+      session.invalid = customToken.error === "RefreshAccessTokenError";
 
       return session;
     },
   },
+
+  // callbacks: {
+  //   async jwt({ token, user }) {
+  //     return {
+  //       ...token,
+  //       ...user,
+  //     } as CustomJWT;
+  //   },
+  //   async session({ session, token }: { session: Session; token: JWT }) {
+  //     const customToken = token as CustomJWT;
+  //     if (!customToken?.id) {
+  //       console.warn("[auth] Rejecting session: JWT missing backend user id", {
+  //         sub: customToken?.sub,
+  //         email: customToken?.email,
+  //       });
+  //       return {
+  //         expires: new Date(0).toISOString(),
+  //         invalid: true,
+  //       } as Session;
+  //     }
+
+  //     session.user = {
+  //       id: customToken.id as string,
+  //       first_name: customToken.first_name ?? "",
+  //       last_name: customToken.last_name ?? "",
+  //       image: customToken.avatar_url || "",
+  //       email: customToken.email as string,
+  //     };
+  //     session.access_token = customToken.access_token;
+  //     session.userOrg = customToken.organisations;
+
+  //     return session;
+  //   },
+  // },
   pages: {
     signIn: "/login",
   },

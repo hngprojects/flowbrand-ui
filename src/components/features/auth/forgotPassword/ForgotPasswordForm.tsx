@@ -9,7 +9,10 @@ import { z } from "zod";
 import { requestPasswordReset } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { setForgotResetEmail } from "@/lib/forgot-password-storage";
+import {
+  clearForgotResetToken,
+  setForgotResetEmail,
+} from "@/lib/forgot-password-storage";
 import { cn } from "@/lib/utils";
 
 const forgotPasswordSchema = z.object({
@@ -27,15 +30,24 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = async (values: ForgotPasswordValues) => {
-    const result = await requestPasswordReset(values.email);
-    if (!result.ok) {
-      toast.error("Could not send reset code", { description: result.error });
-      return;
-    }
+    try {
+      const result = await requestPasswordReset(values.email);
+      if (!result.ok) {
+        toast.error("Could not send reset code", { description: result.error });
+        return;
+      }
 
-    setForgotResetEmail(values.email.trim());
-    toast.success(result.message);
-    router.push("/reset-password");
+      // Starting a fresh flow — drop any stale reset_token from a previous attempt.
+      clearForgotResetToken();
+      setForgotResetEmail(values.email.trim());
+      toast.success(result.message);
+      // Route to the OTP page (was: "/reset-password").
+      router.push("/forgot-password/verify");
+    } catch {
+      toast.error("Could not send reset code", {
+        description: "Network error. Please try again.",
+      });
+    }
   };
 
   const emailError = form.formState.errors.email?.message;
@@ -46,7 +58,7 @@ export function ForgotPasswordForm() {
       className="space-y-4 py-4 sm:space-y-5"
     >
       <div className="space-y-1.5">
-        <h2 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+        <h2 className="text-xl font-medium text-primary-900 sm:text-4xl">
           Forgot your password?
         </h2>
         <p className="text-foreground/70 text-sm sm:text-base">
@@ -57,7 +69,7 @@ export function ForgotPasswordForm() {
       <div className="space-y-2">
         <label
           htmlFor="forgot-email"
-          className="block text-sm font-medium text-[#152D58]"
+          className="block text-sm font-medium text-primary-900"
         >
           Email address
         </label>

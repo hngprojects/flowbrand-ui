@@ -2,7 +2,7 @@ export const DASHBOARD_ROUTE = "/dashboard";
 export const ONBOARDING_ROUTE = "/dashboard/onboarding";
 export const ONBOARDING_UPLOAD_ROUTE = "/dashboard/onboarding/upload";
 export const ONBOARDING_QUESTIONS_ROUTE = "/dashboard/onboarding/questions";
-export const FUNNEL_ROUTE = "/dashboard/funnel";
+export const STRATEGY_ROUTE = "/dashboard/strategy";
 
 /** Default when API does not specify a redirect (new users → upload). */
 export const DEFAULT_LOGIN_REDIRECT = ONBOARDING_UPLOAD_ROUTE;
@@ -30,16 +30,21 @@ export function mapApiRedirectToAppPath(redirectUrl?: string): string | null {
   if (
     path === "/funnel" ||
     path.startsWith("/funnel/") ||
+    path === "/strategy" ||
+    path.startsWith("/strategy/") ||
     path === "funnel_generation" ||
     path === "strategy_dashboard"
   ) {
-    return FUNNEL_ROUTE;
+    return STRATEGY_ROUTE;
   }
   if (path === "/onboarding" || path.startsWith("/onboarding/")) {
     return ONBOARDING_UPLOAD_ROUTE;
   }
-  if (path === DASHBOARD_ROUTE || path.startsWith(`${DASHBOARD_ROUTE}/`)) {
-    return DASHBOARD_ROUTE;
+  if (path === DASHBOARD_ROUTE) {
+    return null;
+  }
+  if (path.startsWith(`${DASHBOARD_ROUTE}/`)) {
+    return path;
   }
 
   if (path.startsWith("/")) {

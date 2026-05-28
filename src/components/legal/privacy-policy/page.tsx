@@ -13,7 +13,7 @@ const PrivacyPolicyView = () => {
   return (
     <>
       <motion.div
-        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-[#EBF0FA] pt-[15px] md:pt-[0px]"
+        className="flex h-[114px] md:h-[272px] flex-col items-center justify-center bg-primary-50 pt-[15px] md:pt-[0px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -27,7 +27,7 @@ const PrivacyPolicyView = () => {
           Privacy Policy
         </motion.h1>
         <motion.p
-          className="text-[14px] md:text-[20px] text-[#565D69]"
+          className="text-[14px] md:text-[20px] text-black-300"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -42,7 +42,7 @@ const PrivacyPolicyView = () => {
 
       <div className="flex flex-col section-class space-y-5">
         <motion.div {...fadeUp}>
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
             Your privacy matters to us
           </h2>
           <p className="text-[14px] md:text-[16px]">
@@ -65,7 +65,7 @@ const PrivacyPolicyView = () => {
             delay: 0.05,
           }}
         >
-          <h2 className="font-[500] text-[16px] md:text-[24px] mb-[12px]">
+          <h2 className="font-medium text-[16px] md:text-[24px] mb-[12px]">
             How we use your information
           </h2>
           <p className="text-[14px] md:text-[16px]">
@@ -87,7 +87,7 @@ const PrivacyPolicyView = () => {
             delay: 0.1,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
             Data sharing
           </h2>
           <p className="text-[14px] md:text-[16px]">
@@ -109,7 +109,7 @@ const PrivacyPolicyView = () => {
             delay: 0.15,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
             Data security
           </h2>
           <p className="text-[14px] md:text-[16px]">
@@ -131,7 +131,7 @@ const PrivacyPolicyView = () => {
             delay: 0.2,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
             Your rights
           </h2>
           <p className="text-[14px] md:text-[16px]">
@@ -153,7 +153,7 @@ const PrivacyPolicyView = () => {
             delay: 0.25,
           }}
         >
-          <h2 className="text-[16px] md:text-[24px] font-[500] mb-[12px]">
+          <h2 className="text-[16px] md:text-[24px] font-medium mb-[12px]">
             Changes to the policy
           </h2>
           <p className="text-[14px] md:text-[16px]">

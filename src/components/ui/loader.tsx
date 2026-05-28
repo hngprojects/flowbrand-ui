@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 
 interface LoaderProps {
   text?: string;
+  hint?: string;
   className?: string;
 }
 
-const Loader = ({ text, className }: LoaderProps) => {
+const Loader = ({ text, hint, className }: LoaderProps) => {
   return (
     <div
       className={cn(
@@ -41,10 +42,19 @@ const Loader = ({ text, className }: LoaderProps) => {
         </div>
       </div>
 
-      {text ? (
-        <p className="text-black-300 text-center text-base font-normal leading-[150%]">
-          {text}
-        </p>
+      {text || hint ? (
+        <div className="max-w-md space-y-2 text-center">
+          {text ? (
+            <p className="text-black-300 text-base font-normal leading-[150%]">
+              {text}
+            </p>
+          ) : null}
+          {hint ? (
+            <p className="text-sm font-normal leading-[150%] text-neutral-500">
+              {hint}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

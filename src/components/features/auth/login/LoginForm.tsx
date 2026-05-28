@@ -3,14 +3,36 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { signIn, useSession } from "next-auth/react";
-import { type ChangeEventHandler, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  getCsrfToken,
+  getProviders,
+  signIn,
+  useSession,
+} from "next-auth/react";
+import {
+  type ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import * as z from "zod";
 import { LoginSchema } from "@/schema/auth.schema";
 import { usePostAuthRedirect } from "@/hooks/use-post-auth-redirect";
-import { getLoginErrorMessage, isSignInFailure } from "@/lib/login-errors";
+import { resendOtp } from "@/actions/auth";
+import { isResendOtpSuccess } from "@/lib/auth-action-results";
+import {
+  EMAIL_VERIFICATION_REQUIRED_MESSAGE,
+  getLoginErrorMessage,
+  isSignInFailure,
+  isSignInVerificationRequired,
+} from "@/lib/login-errors";
+import {
+  setRegisterVerifyCooldown,
+  setRegisterVerifyEmail,
+} from "@/lib/register-verify-storage";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
@@ -52,15 +74,15 @@ function AuthField({
     <div className="space-y-2">
       <label
         htmlFor={id}
-        className="block text-sm leading-[150%] font-medium text-[#152D58] sm:text-base"
+        className="block text-sm leading-[150%] font-medium text-primary-900 sm:text-base"
       >
         {label}
       </label>
 
       <div
         className={cn(
-          "flex h-11 items-center rounded-lg border border-[#CFCFCF] bg-white px-2.5 transition-colors focus-within:border-[#326AD1] sm:px-4",
-          error && "border-[#D13232] focus-within:border-[#D13232]",
+          "flex h-11 items-center rounded-lg border border-input bg-white px-2.5 transition-colors focus-within:border-primary sm:px-4",
+          error && "border-secondary focus-within:border-secondary",
         )}
       >
         <Input
@@ -97,7 +119,7 @@ function AuthField({
       {error ? (
         <p
           id={`${id}-error`}
-          className="text-sm leading-[20px] font-normal text-[#D13232] sm:text-xs sm:leading-[18px] sm:font-medium"
+          className="text-sm leading-[20px] font-normal text-secondary sm:text-xs sm:leading-[18px] sm:font-medium"
         >
           {error}
         </p>
@@ -107,6 +129,7 @@ function AuthField({
 }
 
 export function LoginForm() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const isAuthenticated =
     status === "authenticated" &&
@@ -127,6 +150,11 @@ export function LoginForm() {
   usePostAuthRedirect();
 
   useEffect(() => {
+    void Promise.all([getCsrfToken(), getProviders()]);
+    router.prefetch("/register/verify");
+  }, [router]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (!params.has("google_error")) {
       return;
@@ -134,7 +162,13 @@ export function LoginForm() {
     toast.error("Google sign-in failed", {
       description: "Please try again or use email and password.",
     });
-    window.history.replaceState({}, "", "/login");
+    params.delete("google_error");
+    const nextQuery = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`,
+    );
   }, []);
 
   const isBusy = form.formState.isSubmitting || isAuthenticated;
@@ -144,10 +178,38 @@ export function LoginForm() {
       name: "rememberMe",
     }) ?? false;
 
-  const onSubmit = async (values: LoginValues) => {
-    form.clearErrors("password");
-    form.clearErrors("root");
+  const redirectToEmailVerification = useCallback(
+    (email: string) => {
+      const trimmed = email.trim();
+      if (!trimmed) return;
 
+      setRegisterVerifyEmail(trimmed);
+      router.replace("/register/verify");
+
+      void (async () => {
+        const otpResult = await resendOtp(trimmed);
+
+        if (isResendOtpSuccess(otpResult)) {
+          if (otpResult.cooldownSeconds) {
+            setRegisterVerifyCooldown(otpResult.cooldownSeconds);
+          }
+          toast.info("Verification code sent", {
+            description:
+              otpResult.message ??
+              "Check your email for a 6-digit code, then enter it below.",
+          });
+        } else if (
+          "cooldownSeconds" in otpResult &&
+          otpResult.cooldownSeconds
+        ) {
+          setRegisterVerifyCooldown(otpResult.cooldownSeconds);
+        }
+      })();
+    },
+    [router],
+  );
+
+  const onSubmit = async (values: LoginValues) => {
     try {
       const response = await signIn("credentials", {
         email: values.email,
@@ -157,11 +219,16 @@ export function LoginForm() {
       });
 
       if (isSignInFailure(response)) {
-        const message = getLoginErrorMessage(response);
-        toast.error("Could not sign in", { description: message });
-        form.setError("password", {
-          type: "server",
-          message,
+        if (isSignInVerificationRequired(response, response?.url)) {
+          toast.info("Verify your email", {
+            description: EMAIL_VERIFICATION_REQUIRED_MESSAGE,
+          });
+          redirectToEmailVerification(values.email);
+          return;
+        }
+
+        toast.error("Could not sign in", {
+          description: getLoginErrorMessage(response),
         });
         return;
       }
@@ -176,10 +243,6 @@ export function LoginForm() {
       toast.error("Could not sign in", {
         description: LOGIN_ERROR_MESSAGE,
       });
-      form.setError("root", {
-        type: "server",
-        message: LOGIN_ERROR_MESSAGE,
-      });
     }
   };
 
@@ -187,12 +250,11 @@ export function LoginForm() {
   const passwordRegistration = form.register("password");
   const emailError = form.formState.errors.email?.message;
   const passwordError = form.formState.errors.password?.message;
-  const rootError = form.formState.errors.root?.message;
 
   return (
     <div className="space-y-4 py-8 sm:space-y-5">
       <div className="space-y-1.5 sm:space-y-2">
-        <h1 className="text-xl font-medium text-[#152D58] sm:text-4xl">
+        <h1 className="text-xl font-medium text-primary-900 sm:text-4xl">
           Welcome back
         </h1>
         <p className="text-foreground/70 text-sm sm:text-[24px]">
@@ -211,11 +273,7 @@ export function LoginForm() {
           type="email"
           error={emailError}
           register={emailRegistration}
-          onChange={() => {
-            form.clearErrors("email");
-            form.clearErrors("password");
-            form.clearErrors("root");
-          }}
+          onChange={() => form.clearErrors("email")}
         />
 
         <div className="space-y-3">
@@ -229,10 +287,7 @@ export function LoginForm() {
             showPassword={showPassword}
             onTogglePassword={() => setShowPassword((current) => !current)}
             register={passwordRegistration}
-            onChange={() => {
-              form.clearErrors("password");
-              form.clearErrors("root");
-            }}
+            onChange={() => form.clearErrors("password")}
           />
 
           <div className="flex items-center justify-between gap-4">
@@ -251,21 +306,12 @@ export function LoginForm() {
 
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-[#2E60BE]"
+              className="text-sm font-medium text-primary-600"
             >
               Forgot password?
             </Link>
           </div>
         </div>
-
-        {rootError ? (
-          <p
-            role="alert"
-            className="text-sm leading-[20px] font-normal text-[#D13232] sm:text-xs sm:leading-[18px] sm:font-medium"
-          >
-            {rootError}
-          </p>
-        ) : null}
 
         <Button
           type="submit"
@@ -305,7 +351,7 @@ export function LoginForm() {
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="font-bold text-[#152D58] hover:underline"
+          className="font-bold text-primary-900 hover:underline"
         >
           Create an account
         </Link>

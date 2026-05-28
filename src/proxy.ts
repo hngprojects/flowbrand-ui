@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { fetchAuthMe } from "@/lib/auth-api";
+import {
+  buildGoogleOAuthCallbackUrl,
+  GOOGLE_OAUTH_CALLBACK_PATH,
+  hasGoogleOAuthExchangeParams,
+} from "@/lib/google-oauth";
 import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import { envConfig } from "@/config/env.config";
 import { authRoutes, ONBOARDING_UPLOAD_ROUTE, protectedRoutes } from "@/routes";
@@ -20,8 +25,22 @@ function isProtectedPath(pathname: string): boolean {
 
 export const proxy = auth(async (request) => {
   const { nextUrl } = request;
-  const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
   const pathname = nextUrl.pathname;
+
+  if (
+    pathname !== GOOGLE_OAUTH_CALLBACK_PATH &&
+    hasGoogleOAuthExchangeParams(nextUrl.searchParams)
+  ) {
+    // Use envConfig.APP_URL instead of nextUrl.origin so the Google OAuth
+    // callback always resolves to the public app URL. Behind proxies / on
+    // serverless platforms nextUrl.origin can resolve to localhost, which
+    // breaks the redirect in production.
+    return NextResponse.redirect(
+      buildGoogleOAuthCallbackUrl(envConfig.APP_URL, nextUrl.searchParams),
+    );
+  }
+
+  const isLoggedIn = !!request.auth?.user?.id && request.auth.invalid !== true;
 
   const isAuthRoute = authRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),

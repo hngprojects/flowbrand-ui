@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 
 export default function SimpleIdea() {
   return (
-    <section className="section-class flex flex-col items-center bg-[#FCFDFF] text-center">
+    <section className="section-class flex flex-col items-center bg-background text-center">
       <motion.h2
-        className="mb-10 text-[20px] font-[500] tracking-tight text-[#0D1117] lg:text-[32px]"
+        className="mb-10 text-[20px] font-[500] tracking-tight text-black-450 lg:text-[32px]"
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
@@ -28,11 +28,11 @@ export default function SimpleIdea() {
       >
         <span
           aria-hidden
-          className="absolute top-[-24px] left-0 font-serif text-[72px] leading-none font-bold text-[#1C2B4A] select-none md:text-[88px]"
+          className="absolute top-[-24px] left-0 font-serif text-[72px] leading-none font-bold text-primary-925 select-none md:text-[88px]"
         >
           &ldquo;
         </span>
-        <div className="rounded-2xl border border-[#E2E8F0] bg-[#FCFDFF] p-5">
+        <div className="rounded-2xl border border-primary-75 bg-background p-5">
           <p className="text-center text-[8px] lg:text-[20px] font-[400] leading-[1.9] text-black md:text-[20px]">
             what if we could ask someone a few questions about their business,
             and give them back a marketing strategy that actually fits, built in
@@ -41,7 +41,7 @@ export default function SimpleIdea() {
         </div>
         <span
           aria-hidden
-          className="absolute right-0 bottom-[-54px] font-serif text-[72px] leading-none font-bold text-[#1C2B4A] select-none md:bottom-[-62px] md:text-[88px]"
+          className="absolute right-0 bottom-[-54px] font-serif text-[72px] leading-none font-bold text-primary-925 select-none md:bottom-[-62px] md:text-[88px]"
         >
           &rdquo;
         </span>

@@ -1,39 +1,70 @@
-import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { envConfig } from "@/config/env.config";
-import { fetchAuthMe } from "@/lib/auth-api";
+import { exchangeGoogleOAuthCode, fetchAuthMe } from "@/lib/auth-api";
+import { withGoogleSignInSuccessQuery } from "@/lib/google-sign-in-toast";
 import { parseGoogleOAuthCallbackParams } from "@/lib/google-oauth";
+import { isSignInFailure } from "@/lib/login-errors";
 import { resolvePostAuthPath } from "@/lib/post-auth-redirect";
 import { mapApiRedirectToAppPath } from "@/routes";
 
-function loginErrorRedirect(origin: string) {
-  return new URL("/login?google_error=1", origin);
+function loginErrorRedirect() {
+  const errUrl = new URL("/login?google_error=1", envConfig.APP_URL);
+  return errUrl;
 }
 
-/** After API Google OAuth: set session cookie and redirect into the app. */
+/** After API Google OAuth: exchange code (or legacy token), set session, redirect. */
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  const { accessToken, error, redirectUrl } = parseGoogleOAuthCallbackParams(
-    requestUrl.searchParams,
-  );
+  const { code, accessToken, error, redirectUrl } =
+    parseGoogleOAuthCallbackParams(requestUrl.searchParams);
 
-  if (error || !accessToken) {
-    return Response.redirect(loginErrorRedirect(requestUrl.origin));
+  if (error) {
+    return Response.redirect(loginErrorRedirect());
   }
 
-  const me = await fetchAuthMe(envConfig.BASEURL, accessToken);
+  let token = accessToken;
+  let apiRedirectUrl = redirectUrl;
+
+  if (!token && code) {
+    const exchanged = await exchangeGoogleOAuthCode(envConfig.BASEURL, code);
+    if (!exchanged) {
+      return Response.redirect(loginErrorRedirect());
+    }
+    token = exchanged.access_token;
+    apiRedirectUrl = exchanged.redirect_url ?? apiRedirectUrl;
+  }
+
+  if (!token) {
+    return Response.redirect(loginErrorRedirect());
+  }
+
+  let me;
+  try {
+    me = await fetchAuthMe(envConfig.BASEURL, token);
+  } catch {
+    return Response.redirect(loginErrorRedirect());
+  }
+
   const destination =
-    mapApiRedirectToAppPath(redirectUrl) ?? resolvePostAuthPath(me);
+    mapApiRedirectToAppPath(apiRedirectUrl) ?? resolvePostAuthPath(me);
 
   try {
-    return await signIn("access-token", {
-      accessToken,
-      redirectTo: destination,
+    const signInResult = await signIn("access-token", {
+      accessToken: token,
+      redirect: false,
     });
-  } catch (err) {
-    if (err instanceof AuthError) {
-      return Response.redirect(loginErrorRedirect(requestUrl.origin));
+
+    if (isSignInFailure(signInResult)) {
+      return Response.redirect(loginErrorRedirect());
     }
-    throw err;
+  } catch {
+    return Response.redirect(loginErrorRedirect());
   }
+
+  const successUrl = new URL(
+    withGoogleSignInSuccessQuery(destination),
+    envConfig.APP_URL,
+  );
+
+  return Response.redirect(successUrl);
 }

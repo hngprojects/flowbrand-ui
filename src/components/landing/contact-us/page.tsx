@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -32,7 +31,6 @@ const defaultValues: ContactFormValues = {
 };
 
 const ContactUs = () => {
-  const [sentMessage, setSentMessage] = useState<string | null>(null);
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(ContactFormSchema),
     defaultValues,
@@ -41,11 +39,9 @@ const ContactUs = () => {
   const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: ContactFormValues) => {
-    setSentMessage(null);
     const result = await submitContact(values);
     if (result.ok) {
       toast.success(result.message);
-      setSentMessage(result.message);
       form.reset(defaultValues);
       return;
     }
@@ -56,11 +52,11 @@ const ContactUs = () => {
     <main>
       <div className="bg-primary-50 relative flex h-[291px] w-full flex-col items-center justify-center overflow-hidden md:h-[400px]">
         <div className="space-y-section max-w-[721px] px-4 text-center">
-          <h1 className="text-black-500 text-[25px] font-medium md:text-[40px]">
+          <h1 className="text-black-500 text-2xl font-medium md:text-4xl">
             We would love to work with you
           </h1>
 
-          <p className="text-black-300 md:text-[18px]">
+          <p className="text-black-300 md:text-lg">
             Have a question, need support, or just want to learn more about
             seil? <br /> Reach out, we&apos;d love to hear from you.
           </p>
@@ -90,10 +86,10 @@ const ContactUs = () => {
           </div>
 
           <div>
-            <h2 className="text-black-500 text-[14px] font-bold md:text-lg">
+            <h2 className="text-black-500 text-sm font-bold md:text-lg">
               Email us at
             </h2>
-            <p className="text-primary-800 text-[14px] md:text-[16px]">
+            <p className="text-primary-800 text-sm md:text-base">
               useseilhq@email.com
             </p>
           </div>
@@ -106,21 +102,13 @@ const ContactUs = () => {
             noValidate
           >
             <div className="mb-8 w-full">
-              <h2 className="text-[16px] font-medium md:text-[24px]">
+              <h2 className="text-base font-medium md:text-2xl">
                 Send us a message
               </h2>
-              <p className="text-black-300 text-[14px] md:text-[16px]">
+              <p className="text-black-300 text-sm md:text-base">
                 Fill this in and we&apos;ll get back to you within one business
                 day
               </p>
-              {sentMessage ? (
-                <p
-                  className="border-primary/30 bg-primary/5 text-primary-800 mt-4 rounded-lg border px-4 py-3 text-[14px] md:text-[15px]"
-                  role="status"
-                >
-                  {sentMessage}
-                </p>
-              ) : null}
             </div>
 
             <FormField

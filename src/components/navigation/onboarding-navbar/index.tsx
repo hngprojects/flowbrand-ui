@@ -6,142 +6,186 @@ import { Menu, X } from "lucide-react";
 import LogoIcon from "@/components/icons/navbar/logo";
 import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
-import { LogoutButton } from "@/components/auth/logout-button";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import FunnelSidebar from "@/components/dashboard/funnel/funnel-sidebar";
+import { useEffect, useState } from "react";
+import StrategySidebar from "@/components/dashboard/strategy/strategy-sidebar";
+import FunnelModal from "@/components/modals/FunnelModal";
+import MyProfileTab from "@/components/settings/tabs/MyProfileTab";
+import PasswordSecurityTab from "@/components/settings/tabs/PasswordSecurityTab";
+import NotificationPreferencesTab from "@/components/settings/tabs/NotificationsPrefrencesTab";
+import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
 import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
-import {
-  DUMMY_STRATEGY_PHASES,
-  DEFAULT_UPLOADED_DOCS,
-} from "@/lib/dashboard-mock-data";
-import { FUNNEL_ROUTE } from "@/routes";
+import { mockNotifications } from "@/components/modals/notifications/mock-data";
+import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
+import { STRATEGY_ROUTE } from "@/routes";
+import { cn } from "@/lib/utils";
+import NotificationsModal from "@/components/modals/notifications";
 
 interface OnboardingNavbarProps {
-  steps?: ReactNode;
   loading?: boolean;
   documents?: MockUploadedDoc[];
-  strategyPhases?: readonly { title: string; tasks: string }[];
+  strategyPhases?: readonly StrategyPhaseDisplay[];
+  strategySummary?: string;
+  onCreateNewStrategy?: () => void;
 }
 
 const OnboardingNavbar = ({
-  steps = null,
   loading = false,
-  documents = DEFAULT_UPLOADED_DOCS,
-  strategyPhases = DUMMY_STRATEGY_PHASES,
+  documents = [],
+  strategyPhases = [],
+  strategySummary,
+  onCreateNewStrategy,
 }: OnboardingNavbarProps) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
+  const [drawerPath, setDrawerPath] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const pathname = usePathname();
+  const drawerOpen = drawerPath === pathname;
+  const [isNotification, setIsNotification] = useState(false);
+  const unreadCount = mockNotifications.filter((n) => !n.isRead).length;
 
-  const isFunnelRoute = pathname === FUNNEL_ROUTE;
+  const isStrategyRoute = pathname === STRATEGY_ROUTE;
+  const isDashboardFlow =
+    pathname.startsWith("/dashboard/onboarding") || isStrategyRoute;
 
-  useEffect(() => {
-    if (!profileOpen) return;
-    const onPointerDown = (event: MouseEvent) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
-        setProfileOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
-  }, [profileOpen]);
+  const showMenuButton = isDashboardFlow;
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [drawerOpen, pathname]);
+  }, [drawerOpen]);
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
-        <div className="layout-components-class flex h-[83px] items-center justify-between">
-          <div className="flex items-center gap-3">
-            {isFunnelRoute && (
+      <nav className="sticky top-0 z-50 border-b border-primary-80 bg-white/90 backdrop-blur-md px-4">
+        <div className="dashboard-layout-class flex h-[72px] items-center justify-between md:h-[83px]">
+          <div className="flex items-center gap-2 md:gap-3">
+            {showMenuButton && (
               <button
-                className="z-50 flex h-11 w-11 items-center justify-center rounded-[41px] border-[0.5px] border-gray-500 p-[10px] lg:hidden"
-                onClick={() => setDrawerOpen(!drawerOpen)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 lg:hidden"
+                onClick={() => {
+                  if (isStrategyRoute) {
+                    setDrawerPath(drawerOpen ? null : pathname);
+                  }
+                }}
                 aria-label={drawerOpen ? "Close menu" : "Open menu"}
               >
                 {drawerOpen ? (
-                  <X size={24} className="text-foreground" />
+                  <X size={22} className="text-neutral-900" />
                 ) : (
-                  <Menu size={24} className="text-foreground" />
+                  <Menu size={22} className="text-neutral-900" />
                 )}
               </button>
             )}
 
-            <Link href="/" className="cursor-pointer">
+            <Link href="/dashboard" className="cursor-pointer">
               <LogoIcon />
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <button
               type="button"
               aria-label="Notifications"
-              className="border-gray-500 flex h-11 w-11 items-center justify-center rounded-[41px] border-[0.5px] p-[10px]"
+              onClick={() => setIsNotification(true)}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 md:h-11 md:w-11"
             >
               <BellIcon />
-            </button>
-            <div ref={profileRef} className="relative">
-              <button
-                type="button"
-                aria-label="Profile menu"
-                aria-expanded={profileOpen}
-                onClick={() => setProfileOpen((open) => !open)}
-                className="border-gray-500 flex h-11 items-center gap-[10px] rounded-[41px] border-[0.5px] px-3 py-[10px] lg:w-[103px]"
-              >
-                <ProfileIcon />
-                <span className="text-foreground hidden text-sm font-medium lg:inline">
-                  Profile
-                </span>
-              </button>
-              {profileOpen && (
-                <div className="border-border absolute top-[calc(100%+8px)] right-0 z-50 min-w-[160px] overflow-hidden rounded-xl border bg-white py-1 shadow-lg">
-                  <LogoutButton variant="menu" className="flex" />
-                </div>
+              {unreadCount > 0 && (
+                <span className="bg-error absolute -top-1 -right-1 h-2 w-2 rounded-full" />
               )}
-            </div>
+            </button>
+            <NotificationsModal
+              isOpen={isNotification}
+              onClose={() => setIsNotification(false)}
+            />
+            <button
+              type="button"
+              aria-label="Profile settings"
+              onClick={() => setSettingsOpen(true)}
+              className="flex h-10 items-center gap-2 rounded-full border border-primary-80 px-2.5 py-2 md:h-11 md:gap-[10px] md:px-3 md:py-[10px] lg:w-[103px]"
+            >
+              <ProfileIcon />
+              <span className="hidden text-sm font-medium text-neutral-900 lg:inline">
+                Profile
+              </span>
+            </button>
           </div>
         </div>
       </nav>
 
-      {isFunnelRoute && (
+      <FunnelModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        defaultTab="profile"
+        title="Settings"
+        tabs={[
+          {
+            id: "profile",
+            label: "My Profile",
+            content: <MyProfileTab onClose={() => setSettingsOpen(false)} />,
+          },
+          {
+            id: "password",
+            label: "Password & Security",
+            content: <PasswordSecurityTab />,
+          },
+          {
+            id: "notifications",
+            label: "Notification Preferences",
+            content: <NotificationPreferencesTab />,
+          },
+          {
+            id: "delete",
+            label: "Delete Account",
+            content: (
+              <DeleteAccountTab onClose={() => setSettingsOpen(false)} />
+            ),
+          },
+        ]}
+      />
+
+      {isStrategyRoute && (
         <>
           <div
-            onClick={() => setDrawerOpen(false)}
-            className={`fixed inset-0 z-40 transition-opacity duration-300 lg:hidden ${
-              drawerOpen ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
+            onClick={() => setDrawerPath(null)}
+            className={cn(
+              "fixed inset-0 z-40 transition-opacity duration-300 lg:hidden",
+              drawerOpen ? "opacity-100" : "pointer-events-none opacity-0",
+            )}
             style={{ backgroundColor: "rgba(3, 13, 31, 0.8)" }}
           />
 
           <div
-            className={`fixed top-0 left-0 z-50 h-full w-[90vw] transform overflow-auto bg-white transition-transform duration-300 ease-in-out lg:hidden ${
-              drawerOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+            className={cn(
+              "fixed top-0 left-0 z-50 h-full w-[min(90vw,360px)] overflow-auto bg-white transition-transform duration-300 ease-in-out lg:hidden",
+              drawerOpen ? "translate-x-0" : "-translate-x-full",
+            )}
           >
-            <button
-              className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200"
-              onClick={() => setDrawerOpen(false)}
-              aria-label="Close sidebar"
-            >
-              <X size={18} className="text-foreground" />
-            </button>
+            <div className="flex items-center justify-between border-b border-primary-80 px-4 py-4">
+              <Link href="/dashboard" className="cursor-pointer">
+                <LogoIcon />
+              </Link>
+              <button
+                type="button"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-primary-80"
+                onClick={() => setDrawerPath(null)}
+                aria-label="Close sidebar"
+              >
+                <X size={18} className="text-neutral-900" />
+              </button>
+            </div>
 
-            <FunnelSidebar
-              steps={steps}
-              loading={loading}
-              documents={documents}
-              strategyPhases={strategyPhases}
-              className="block! h-full! w-full! border-none"
-            />
+            <div className="overflow-y-auto p-4">
+              <StrategySidebar
+                loading={loading}
+                documents={documents}
+                strategyPhases={strategyPhases}
+                strategySummary={strategySummary}
+                onCreateNewStrategy={onCreateNewStrategy}
+                className="!static !top-auto !flex !h-auto !max-w-none !w-full !overflow-visible !border-0 px-0 py-0"
+              />
+            </div>
           </div>
         </>
       )}
