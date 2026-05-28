@@ -133,6 +133,14 @@ export function UploadView() {
   const startGeneration = useStartFunnelGenerationMutation();
   const isNewStrategy = useNewStrategyFlow();
   const entryQuery = useDashboardEntryPathQuery(!isNewStrategy);
+  const sessionQuery = useEnsureOnboardingSession();
+  useEffect(() => {
+    if (sessionQuery.isError) {
+      toast.error(
+        "Could not start your session. Please refresh and try again.",
+      );
+    }
+  }, [sessionQuery.isError]);
   useEnsureOnboardingSession();
 
   const activeUploadIds = useMemo(
