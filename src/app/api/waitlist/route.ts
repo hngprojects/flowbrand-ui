@@ -52,9 +52,9 @@ export async function POST(req: Request) {
       { status: backendRes.status },
     );
   } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-    console.error("Waitlist proxy error:", error);
-  }
+    if (process.env.NODE_ENV === "development") {
+      console.error("Waitlist proxy error:", error);
+    }
     return NextResponse.json(
       { success: false, message: "Network or server error" },
       { status: 500 },

@@ -35,8 +35,8 @@ const WaitlistModal = ({ isOpen, onClose }: WaitlistModalProps) => {
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       if (process.env.NODE_ENV === "development") {
-      console.error("Share failed:", error);
-   }
+        console.error("Share failed:", error);
+      }
       setShareStatus("error");
       setTimeout(() => setShareStatus("idle"), 2500);
     }
