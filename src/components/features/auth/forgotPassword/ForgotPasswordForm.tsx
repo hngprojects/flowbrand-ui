@@ -9,7 +9,10 @@ import { z } from "zod";
 import { requestPasswordReset } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { setForgotResetEmail } from "@/lib/forgot-password-storage";
+import {
+  clearForgotResetToken,
+  setForgotResetEmail,
+} from "@/lib/forgot-password-storage";
 import { cn } from "@/lib/utils";
 
 const forgotPasswordSchema = z.object({
@@ -34,9 +37,12 @@ export function ForgotPasswordForm() {
         return;
       }
 
+      // Starting a fresh flow — drop any stale reset_token from a previous attempt.
+      clearForgotResetToken();
       setForgotResetEmail(values.email.trim());
       toast.success(result.message);
-      router.push("/reset-password");
+      // Route to the OTP page (was: "/reset-password").
+      router.push("/forgot-password/verify");
     } catch {
       toast.error("Could not send reset code", {
         description: "Network error. Please try again.",
