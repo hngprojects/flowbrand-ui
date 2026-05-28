@@ -3,7 +3,3 @@ packages:
 allowBuilds:
   msw: true
   sharp: false
-  unrs-resolver: false
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
