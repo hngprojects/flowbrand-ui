@@ -75,6 +75,7 @@
   --color-accent-700: var(--accent-700);
   --color-accent-800: var(--accent-800);
   --color-accent-900: var(--accent-900);
+  --color-accent-950: var(--accent-950);
 
   /* Red Scale */
   --color-red-25: var(--red-25);
