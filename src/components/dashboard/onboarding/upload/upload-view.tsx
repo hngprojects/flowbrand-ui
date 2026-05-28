@@ -133,6 +133,14 @@ export function UploadView() {
   const startGeneration = useStartFunnelGenerationMutation();
   const isNewStrategy = useNewStrategyFlow();
   const entryQuery = useDashboardEntryPathQuery(!isNewStrategy);
+  const sessionQuery = useEnsureOnboardingSession();
+  useEffect(() => {
+    if (sessionQuery.isError) {
+      toast.error(
+        "Could not start your session. Please refresh and try again.",
+      );
+    }
+  }, [sessionQuery.isError]);
   useEnsureOnboardingSession();
 
   const activeUploadIds = useMemo(
@@ -178,14 +186,14 @@ export function UploadView() {
   const processingWarning = useMemo(() => {
     const stalled = displayFiles.find(
       (file) =>
-        file.status === "parsing" && file.progress >= 50 && file.progress < 100,
+        file.status === "parsing" && file.progress >= 20 && file.progress < 101,
     );
 
     if (!stalled) {
       return null;
     }
 
-    return "Document processing is taking longer than expected. The server may still be parsing your file.";
+    return "Document processing is taking longer than expected. The server may still be parsing your file. please refresh the page after a moment or two to see if it’s ready.";
   }, [displayFiles]);
 
   useEffect(() => {
