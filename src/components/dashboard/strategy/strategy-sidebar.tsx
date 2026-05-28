@@ -75,7 +75,9 @@ export default function StrategySidebar({
                       {truncateName(doc.name)}
                     </p>
                   </div>
-                  <p className="shrink-0 text-sm text-neutral-500">{doc.size}</p>
+                  <p className="shrink-0 text-sm text-neutral-500">
+                    {doc.size}
+                  </p>
                 </div>
               ))}
             </>
