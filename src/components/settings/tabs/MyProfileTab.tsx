@@ -92,7 +92,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
     try {
       await updateProfile.mutateAsync({
         fullName: values.fullName.trim(),
-        country: values.country, 
+        country: values.country,
       });
       toast.success("Profile updated successfully.");
     } catch (error) {
@@ -269,7 +269,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
             className="rounded-[10px] bg-primary px-10 py-3 text-sm md:text-base font-medium 
             text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting || updateProfile.isPending ? "Saving..." : "Save Changes"}
+            {isSubmitting || updateProfile.isPending
+              ? "Saving..."
+              : "Save Changes"}
           </button>
         </div>
       </Form>

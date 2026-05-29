@@ -47,7 +47,11 @@ export async function getUserProfile(): Promise<UserActionResult<UserProfile>> {
 
   const token = await getAccessToken();
   if (!token) {
-    return { ok: false, error: "Session expired. Please sign in again.", status: 401 };
+    return {
+      ok: false,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
   }
 
   try {
@@ -91,7 +95,11 @@ export async function updateUserProfile(
 
   const token = await getAccessToken();
   if (!token) {
-    return { ok: false, error: "Session expired. Please sign in again.", status: 401 };
+    return {
+      ok: false,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
   }
 
   try {
@@ -102,7 +110,11 @@ export async function updateUserProfile(
 
     const profile = res.data?.data as UserProfile;
     if (!profile?.id) {
-      return { ok: false, error: "Could not read updated profile.", status: 502 };
+      return {
+        ok: false,
+        error: "Could not read updated profile.",
+        status: 502,
+      };
     }
 
     const result = { ok: true as const, status: res.status, data: profile };
