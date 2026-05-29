@@ -1,6 +1,7 @@
 "use client";
 
 import StrategySidebar from "@/components/dashboard/strategy/strategy-sidebar";
+import StageNav from "@/components/dashboard/strategy/stage-nav";
 import { StrategyMainPanel } from "@/components/dashboard/mesh-background";
 import Loader from "@/components/ui/loader";
 import { useCallback, useMemo, useState } from "react";
@@ -18,6 +19,7 @@ import {
 } from "@/lib/funnel-display";
 import {
   NO_STRATEGY_AVAILABLE_MESSAGE,
+  STAGE_LOCKED_MESSAGE,
   STRATEGY_NOT_VIEWABLE_MESSAGE,
   useStrategyFunnel,
 } from "@/hooks/queries/use-strategy-funnel";
@@ -106,11 +108,15 @@ function TaskCheckbox({
 function StrategyStageTasks({
   tasks,
   isCurrentStageComplete,
+  isViewingActiveStage,
   onCompleteStage,
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
-  onCompleteStage: () => Promise<void>;
+  /** True when the user is viewing the frontier (the only stage they can submit). */
+  isViewingActiveStage: boolean;
+  /** Hook returns a sync function; allow both shapes so we can `await` it either way. */
+  onCompleteStage: () => void | Promise<void>;
 }) {
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -121,8 +127,14 @@ function StrategyStageTasks({
       (task) => task.status === "complete" || checkedTasks.includes(task.id),
     );
 
+  const submitDisabled =
+    !isViewingActiveStage ||
+    !allTasksComplete ||
+    submitted ||
+    isCurrentStageComplete;
+
   const handleSubmit = async () => {
-    if (!allTasksComplete || submitted || isCurrentStageComplete) return;
+    if (submitDisabled) return;
     await onCompleteStage();
     setSubmitted(true);
   };
@@ -147,7 +159,12 @@ function StrategyStageTasks({
                     isCurrentStageComplete
                   }
                   onClick={() => {
-                    if (submitted || isCurrentStageComplete) return;
+                    if (
+                      submitted ||
+                      isCurrentStageComplete ||
+                      !isViewingActiveStage
+                    )
+                      return;
                     setCheckedTasks((prev) =>
                       prev.includes(task.id)
                         ? prev.filter((id) => id !== task.id)
@@ -191,11 +208,11 @@ function StrategyStageTasks({
       <div className="flex justify-end pb-4">
         <button
           type="button"
-          disabled={!allTasksComplete || submitted || isCurrentStageComplete}
+          disabled={submitDisabled}
           onClick={handleSubmit}
           className={cn(
             "rounded-[10px] px-10 py-3.5 text-sm font-semibold transition-colors",
-            allTasksComplete && !submitted && !isCurrentStageComplete
+            !submitDisabled
               ? "cursor-pointer bg-primary-500 text-white hover:bg-primary-625"
               : "cursor-not-allowed bg-primary-150 text-neutral-900",
           )}
@@ -219,8 +236,9 @@ export function StrategyView() {
     displayReady,
     funnelId,
     funnel,
-    activeStageId,
+    viewingStageId,
     isCurrentStageComplete,
+    isViewingActiveStage,
     completeCurrentStage,
     strategyPhases,
     focus,
@@ -229,6 +247,12 @@ export function StrategyView() {
     abortActiveGeneration,
     generationAborted,
     hydratedFromStorage,
+    canGoPrevious,
+    canGoNext,
+    goToPreviousStage,
+    goToNextStage,
+    stagePosition,
+    totalStages,
   } = useStrategyFunnel();
 
   const documents = useMemo(() => {
@@ -338,8 +362,22 @@ export function StrategyView() {
               {focus ? (
                 <div>
                   <div className="mb-2 flex items-center justify-between text-sm font-medium text-neutral-500">
-                    <p>This week&apos;s focus</p>
-                    <p>{focus.progress}</p>
+                    <p>
+                      {isViewingActiveStage
+                        ? "This week’s focus"
+                        : isCurrentStageComplete
+                          ? "Reviewing completed stage"
+                          : "Stage"}
+                    </p>
+                    <StageNav
+                      position={stagePosition}
+                      total={totalStages}
+                      canGoPrevious={canGoPrevious}
+                      canGoNext={canGoNext}
+                      onPrevious={goToPreviousStage}
+                      onNext={goToNextStage}
+                      nextDisabledReason={STAGE_LOCKED_MESSAGE}
+                    />
                   </div>
                   <div className="space-y-2">
                     <p className="flex items-center gap-3 text-2xl font-semibold text-neutral-900">
@@ -354,9 +392,13 @@ export function StrategyView() {
               ) : null}
 
               <StrategyStageTasks
-                key={activeStageId ?? "none"}
+                // Reset local checkbox state whenever the user navigates to a
+                // different stage. Using viewingStageId (not activeStageId)
+                // ensures both arrow clicks and stage completion reset state.
+                key={viewingStageId ?? "none"}
                 tasks={tasks}
                 isCurrentStageComplete={isCurrentStageComplete}
+                isViewingActiveStage={isViewingActiveStage}
                 onCompleteStage={completeCurrentStage}
               />
             </div>

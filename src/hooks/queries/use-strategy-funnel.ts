@@ -29,7 +29,6 @@ import {
 import { funnelHasDisplayContent } from "@/lib/funnel-api-types";
 import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
 import { flowLog } from "@/lib/flow-debug-log";
-import { completeStage } from "@/lib/complete-state";
 
 /** Poll every ~3s after the first 30s; faster early when jobs often finish. */
 const POLL_MS = 3000;
@@ -49,6 +48,10 @@ export const NO_STRATEGY_AVAILABLE_MESSAGE =
 
 export const STRATEGY_NOT_VIEWABLE_MESSAGE =
   "We couldn't load your strategy. It may still be generating or is no longer available.";
+
+/** Shown as a tooltip on the forward arrow when the current stage isn't done. */
+export const STAGE_LOCKED_MESSAGE =
+  "Complete the tasks in this stage to unlock the next one.";
 
 function generationPollIntervalMs(
   pollStartedAt: number | null,
@@ -83,6 +86,13 @@ function readInitialStrategyState() {
   };
 }
 
+/**
+ * Records that the user has explicitly chosen to view a particular stage via
+ * the back/forward arrows. Tagged with the funnelId so it auto-invalidates
+ * if the user generates a new strategy.
+ */
+type ViewingOverride = { funnelId: string; stageId: string } | null;
+
 export function useStrategyFunnel() {
   const queryClient = useQueryClient();
   const initial = readInitialStrategyState();
@@ -97,6 +107,14 @@ export function useStrategyFunnel() {
     initial.hydratedFromStorage,
   );
   const [generationAborted, setGenerationAborted] = useState(false);
+
+  /**
+   * User-explicit selection from the back/forward arrows. We derive the
+   * actual viewing stage from this + activeStageId (see useMemo below) so we
+   * don't need useEffects to sync state, which would trip
+   * react-hooks/set-state-in-effect.
+   */
+  const [viewingOverride, setViewingOverride] = useState<ViewingOverride>(null);
 
   const completedStageIds = useMemo(() => {
     void stageProgressVersion;
@@ -235,33 +253,150 @@ export function useStrategyFunnel() {
     return () => window.clearInterval(id);
   }, [pollStartedAt, hasRealContent]);
 
+  /** All stages in their canonical order, for navigation. */
+  const sortedStages = useMemo(() => {
+    const stages = funnel?.stages ?? [];
+    return [...stages].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  }, [funnel?.stages]);
+
+  /** The frontier: first stage that isn't completed yet. */
   const activeStageId = useMemo(() => {
     return getFocusStage(funnel, completedStageIds)?.stageId ?? null;
   }, [funnel, completedStageIds]);
 
-  const isCurrentStageComplete = useMemo(() => {
-    if (!funnelId || !activeStageId) return false;
-    return completedStageIds.includes(activeStageId);
-  }, [funnelId, activeStageId, completedStageIds]);
+  /**
+   * The stage currently in view. Derived (not stored) so we don't need an
+   * effect to sync. Falls back to activeStageId when the user hasn't
+   * navigated yet, when the funnel has changed under us, or when the
+   * previously-viewed stage no longer exists.
+   */
+  const viewingStageId = useMemo(() => {
+    if (
+      viewingOverride &&
+      viewingOverride.funnelId === funnelId &&
+      sortedStages.some((s) => s.stageId === viewingOverride.stageId)
+    ) {
+      return viewingOverride.stageId;
+    }
+    return activeStageId;
+  }, [viewingOverride, funnelId, sortedStages, activeStageId]);
 
-  const completeCurrentStage = useCallback(async () => {
-    if (!funnelId || !activeStageId) return;
-    await completeStage(funnelId, activeStageId);
-    markStageComplete(funnelId, activeStageId);
-    setStageProgressVersion((version) => version + 1);
-  }, [funnelId, activeStageId]);
+  const viewingIndex = useMemo(() => {
+    if (!viewingStageId) return -1;
+    return sortedStages.findIndex((s) => s.stageId === viewingStageId);
+  }, [sortedStages, viewingStageId]);
+
+  const frontierIndex = useMemo(() => {
+    if (!activeStageId) return -1;
+    return sortedStages.findIndex((s) => s.stageId === activeStageId);
+  }, [sortedStages, activeStageId]);
+
+  const viewingStage = useMemo(() => {
+    if (viewingIndex < 0) return undefined;
+    return sortedStages[viewingIndex];
+  }, [sortedStages, viewingIndex]);
+
+  /** True if the stage currently in view has already been submitted. */
+  const isViewingStageComplete = useMemo(() => {
+    if (!viewingStageId) return false;
+    return completedStageIds.includes(viewingStageId);
+  }, [completedStageIds, viewingStageId]);
+
+  /** True if the user is currently looking at the frontier stage. */
+  const isViewingActiveStage = useMemo(() => {
+    return (
+      !!viewingStageId && !!activeStageId && viewingStageId === activeStageId
+    );
+  }, [viewingStageId, activeStageId]);
+
+  const canGoPrevious = viewingIndex > 0;
+
+  /**
+   * Forward is enabled when:
+   *  - there IS a next stage, AND
+   *  - the user has finished the one they're looking at.
+   * Stages beyond the frontier stay locked.
+   */
+  const canGoNext =
+    viewingIndex >= 0 &&
+    viewingIndex < sortedStages.length - 1 &&
+    isViewingStageComplete;
+
+  const goToPreviousStage = useCallback(() => {
+    if (!canGoPrevious || !funnelId) return;
+    const prev = sortedStages[viewingIndex - 1];
+    if (prev?.stageId) {
+      setViewingOverride({ funnelId, stageId: prev.stageId });
+    }
+  }, [canGoPrevious, funnelId, sortedStages, viewingIndex]);
+
+  const goToNextStage = useCallback(() => {
+    if (!canGoNext || !funnelId) return;
+    const next = sortedStages[viewingIndex + 1];
+    if (next?.stageId) {
+      setViewingOverride({ funnelId, stageId: next.stageId });
+    }
+  }, [canGoNext, funnelId, sortedStages, viewingIndex]);
+
+  const isCurrentStageComplete = isViewingStageComplete;
+
+  const completeCurrentStage = useCallback(() => {
+    if (!funnelId || !viewingStageId) return;
+    // Only the frontier can be completed. The arrow / submit flow shouldn't
+    // ever call this for a non-frontier stage, but guard so re-entering an
+    // older stage and clicking submit (if it ever surfaced) is a no-op.
+    if (viewingStageId !== activeStageId) return;
+    markStageComplete(funnelId, viewingStageId);
+    setStageProgressVersion((v) => v + 1);
+
+    // Auto-advance the user to the new frontier (the stage they just
+    // unlocked). Mirrors the previous behavior where the focus moved on
+    // completion.
+    const nextIdx = viewingIndex + 1;
+    if (nextIdx >= 0 && nextIdx < sortedStages.length) {
+      const next = sortedStages[nextIdx];
+      if (next?.stageId) {
+        setViewingOverride({ funnelId, stageId: next.stageId });
+      }
+    }
+  }, [funnelId, viewingStageId, activeStageId, viewingIndex, sortedStages]);
 
   const strategyPhases = useMemo(
     () => mapStagesToStrategyPhases(funnel?.stages, completedStageIds),
     [funnel, completedStageIds],
   );
-  const focus = useMemo(
-    () => mapFunnelToFocus(funnel, completedStageIds),
-    [funnel, completedStageIds],
-  );
+
+  /**
+   * The focus header shows whichever stage the user is viewing — not the
+   * unchanged "earliest incomplete" stage. Without this, the header text
+   * wouldn't update as the user clicked through the arrows.
+   */
+  const focus = useMemo(() => {
+    if (!viewingStage) {
+      // Fallback while loading: show the frontier the way the old code did.
+      return mapFunnelToFocus(funnel, completedStageIds);
+    }
+    const position =
+      viewingStage.position ?? (viewingIndex >= 0 ? viewingIndex + 1 : 1);
+    return {
+      phase: viewingStage.name,
+      progress: `${position} of ${sortedStages.length}`,
+      subtitle:
+        viewingStage.explanation ??
+        viewingStage.actionPrompt ??
+        "Complete the tasks below for this stage.",
+    };
+  }, [
+    viewingStage,
+    viewingIndex,
+    sortedStages.length,
+    funnel,
+    completedStageIds,
+  ]);
+
   const tasks = useMemo(
-    () => mapStageTasksToDisplay(getFocusStage(funnel, completedStageIds)),
-    [funnel, completedStageIds],
+    () => mapStageTasksToDisplay(viewingStage),
+    [viewingStage],
   );
 
   const loading = useMemo(() => {
@@ -301,7 +436,7 @@ export function useStrategyFunnel() {
   ]);
 
   const displayReady = Boolean(
-    hasRealContent && strategyPhases.length > 0 && focus,
+    hasRealContent && sortedStages.length > 0 && focus,
   );
 
   const error = useMemo(() => {
@@ -315,38 +450,11 @@ export function useStrategyFunnel() {
     if (generationFailed) {
       return STRATEGY_GENERATION_FAILED_MESSAGE;
     }
-    if (
-      statusQuery.error instanceof Error &&
-      statusQuery.error.message.includes("Unauthenticated")
-    ) {
-      return "Your session expired. Please log in again.";
-    }
-    if (
-      statusQuery.error &&
-      !(
-        statusQuery.error instanceof Error &&
-        statusQuery.error.message.includes("Unauthenticated")
-      )
-    ) {
+    if (statusQuery.error) {
       return STRATEGY_GENERATION_FAILED_MESSAGE;
     }
-
     if (displayQuery.error) {
-      const message =
-        displayQuery.error instanceof Error ? displayQuery.error.message : "";
-
-      /**
-       * Ignore locked stage errors.
-       * Backend uses 403 while stages are progressively unlocked.
-       */
-      const isLockedStageError =
-        message.toLowerCase().includes("stage is locked") ||
-        message.toLowerCase().includes("complete all tasks") ||
-        message.toLowerCase().includes("unlock");
-
-      if (!isLockedStageError) {
-        return STRATEGY_GENERATION_FAILED_MESSAGE;
-      }
+      return STRATEGY_GENERATION_FAILED_MESSAGE;
     }
     if (timedOut && displayQuery.isFetched && !hasRealContent) {
       return STRATEGY_GENERATION_FAILED_MESSAGE;
@@ -383,6 +491,8 @@ export function useStrategyFunnel() {
       timedOut,
       error: error ?? null,
       stageCount: funnel?.stages?.length ?? 0,
+      viewingStageId,
+      activeStageId,
     });
   }, [
     funnelId,
@@ -397,6 +507,8 @@ export function useStrategyFunnel() {
     timedOut,
     error,
     funnel?.stages?.length,
+    viewingStageId,
+    activeStageId,
   ]);
 
   const retry = useCallback(async () => {
@@ -431,6 +543,7 @@ export function useStrategyFunnel() {
     setFunnelId(null);
     setPollStartedAt(null);
     setResolvedId(true);
+    setViewingOverride(null);
     if (!id) return;
     void queryClient.cancelQueries({
       queryKey: queryKeys.funnels.generationStatus(id),
@@ -461,5 +574,16 @@ export function useStrategyFunnel() {
     abortActiveGeneration,
     generationAborted,
     hydratedFromStorage,
+    // --- stage navigation surface ---
+    viewingStageId,
+    isViewingActiveStage,
+    canGoPrevious,
+    canGoNext,
+    goToPreviousStage,
+    goToNextStage,
+    stagePosition: viewingIndex >= 0 ? viewingIndex + 1 : 0,
+    totalStages: sortedStages.length,
+    /** Re-exported so the frontier index is available for tooling/logging. */
+    frontierIndex,
   };
 }
