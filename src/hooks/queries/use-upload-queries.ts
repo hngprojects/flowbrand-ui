@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueries, type Query } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   uploadFunnelDocuments,
   getFunnelUploadProgress,
@@ -72,13 +73,12 @@ async function fetchUploadProgressOnce(
     });
 
     if (isStalled && parsed.status !== "failed") {
-      if (process.env.NODE_ENV === "development") {
-        console.warn(
-          `[upload] Progress stalled at ${parsed.percentComplete}% for ${uploadId} after ${Math.round(elapsed / 1000)}s. Response:`,
-          data,
-        );
-      }
+      console.warn(
+        `[upload] Progress stalled at ${parsed.percentComplete}% for ${uploadId} after ${Math.round(elapsed / 1000)}s. Response:`,
+        data,
+      );
     }
+
     return parsed;
   });
 }
@@ -101,6 +101,16 @@ export function useUploadDocumentsMutation() {
       return entries;
     },
     retry: false,
+    onError: (error) => {
+      if (process.env.NODE_ENV === "development") {
+        console.error("[upload] uploadDocuments failed", error);
+      }
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not upload your documents. Please try again.",
+      );
+    },
   });
 }
 
@@ -125,11 +135,9 @@ export function useUploadProgressQueries(uploadIds: string[], enabled = true) {
 
         // Stop polling after max attempts
         if (query.state.dataUpdateCount >= MAX_UPLOAD_POLLS) {
-          if (process.env.NODE_ENV === "development") {
-            console.warn(
-              `[upload] Max polling attempts (${MAX_UPLOAD_POLLS}) reached for ${uploadId}. Last status: ${status} at ${query.state.data?.percentComplete}%`,
-            );
-          }
+          console.warn(
+            `[upload] Max polling attempts (${MAX_UPLOAD_POLLS}) reached for ${uploadId}. Last status: ${status} at ${query.state.data?.percentComplete}%`,
+          );
           return false;
         }
 
@@ -140,11 +148,9 @@ export function useUploadProgressQueries(uploadIds: string[], enabled = true) {
             tracking.stableCount >= STALL_CHECK_THRESHOLD &&
             elapsed > STALL_TIMEOUT_MS
           ) {
-            if (process.env.NODE_ENV === "development") {
-              console.error(
-                `[upload] Progress stalled for ${uploadId}. Stopping polling. Last: ${tracking.lastPercent}% status=${status}`,
-              );
-            }
+            console.error(
+              `[upload] Progress stalled for ${uploadId}. Stopping polling. Last: ${tracking.lastPercent}% status=${status}`,
+            );
             return false;
           }
         }

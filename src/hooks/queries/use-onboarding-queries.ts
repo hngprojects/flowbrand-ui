@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { getPostAuthRedirect } from "@/actions/auth";
 import { queryKeys } from "@/lib/query-keys";
 import {
@@ -72,6 +73,14 @@ export function useSaveOnboardingStepMutation() {
     onSuccess: (data: OnboardingSessionPayload) => {
       queryClient.setQueryData(sessionQueryKey, data);
     },
+    onError: (error) => {
+      if (process.env.NODE_ENV === "development") {
+        console.error("[onboarding] saveOnboardingStep failed", error);
+      }
+      toast.error(
+        error instanceof Error ? error.message : "Could not save your answer.",
+      );
+    },
   });
 }
 
@@ -84,6 +93,20 @@ export function useCompleteOnboardingMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.onboarding.all() });
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.entryPath() });
       queryClient.invalidateQueries({ queryKey: queryKeys.funnels.all() });
+    },
+    onError: (error) => {
+      // "Already complete" isn't a failure from the user's perspective — the
+      // wizard treats it as a pass-through and we don't want to alarm them.
+      if (error instanceof OnboardingAlreadyCompleteError) return;
+
+      if (process.env.NODE_ENV === "development") {
+        console.error("[onboarding] completeOnboarding failed", error);
+      }
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not complete onboarding. Please try again.",
+      );
     },
   });
 }
