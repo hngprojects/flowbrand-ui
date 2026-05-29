@@ -72,9 +72,9 @@ export async function saveOnboardingStepMutation(input: {
   });
   const res = await saveOnboardingStep(input);
   if (!res.ok) {
-   if (res.status === 409) {
-  throw new OnboardingAlreadyCompleteError();
-}
+    if (res.status === 409) {
+      throw new OnboardingAlreadyCompleteError();
+    }
     flowLogError("onboarding", "saveOnboardingStepMutation", res.error, {
       step: input.step,
       status: res.status,

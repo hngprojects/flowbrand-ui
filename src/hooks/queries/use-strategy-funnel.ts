@@ -253,19 +253,21 @@ export function useStrategyFunnel() {
   // }, [funnelId, activeStageId]);
 
   const completeCurrentStage = useCallback(async () => {
-  if (!funnelId || !activeStageId) return;
+    if (!funnelId || !activeStageId) return;
 
-  const result = await completeStage(funnelId, activeStageId);
+    const result = await completeStage(funnelId, activeStageId);
 
-  if (!result.success) {
-    toast.error(result.error ?? "Could not complete this stage. Please try again.");
-    return;
-  }
+    if (!result.success) {
+      toast.error(
+        result.error ?? "Could not complete this stage. Please try again.",
+      );
+      return;
+    }
 
-  markStageComplete(funnelId, activeStageId);
-  setStageProgressVersion((version) => version + 1);
-  displayQuery.refetch();
-}, [funnelId, activeStageId, displayQuery]);
+    markStageComplete(funnelId, activeStageId);
+    setStageProgressVersion((version) => version + 1);
+    displayQuery.refetch();
+  }, [funnelId, activeStageId, displayQuery]);
 
   const strategyPhases = useMemo(
     () => mapStagesToStrategyPhases(funnel?.stages, completedStageIds),
