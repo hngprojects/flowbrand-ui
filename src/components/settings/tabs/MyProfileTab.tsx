@@ -121,7 +121,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-gray-400 text-2xl font-medium">
-              {(profile?.fullName ?? fullName)?.charAt(0).toUpperCase() ?? "?"}
+              {(profile?.fullName ?? fullName)?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
         </div>
