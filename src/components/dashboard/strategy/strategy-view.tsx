@@ -11,6 +11,7 @@ import { StrategyIcon } from "@/components/icons/strategy";
 import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
 import { beginNewStrategyFlow } from "@/lib/begin-new-strategy";
+import { queryKeys } from "@/lib/query-keys";
 import { useDashboardMockSession } from "@/hooks/use-dashboard-mock-session";
 import {
   funnelSidebarSummary,
@@ -104,7 +105,6 @@ function TaskCheckbox({
     </button>
   );
 }
-
 function StrategyStageTasks({
   funnelId,
   stageId,
@@ -118,32 +118,55 @@ function StrategyStageTasks({
   isCurrentStageComplete: boolean;
   onCompleteStage: () => Promise<void>;
 }) {
+  const queryClient = useQueryClient();
+
+  const [optimisticStatus, setOptimisticStatus] = useState<
+    Record<string, "complete" | "pending">
+  >({});
   const [pendingTasks, setPendingTasks] = useState<Set<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
 
+  const getTaskStatus = (task: FunnelTaskDisplay): "complete" | "pending" => {
+    if (task.id in optimisticStatus) return optimisticStatus[task.id];
+    return task.status === "complete" ? "complete" : "pending";
+  };
+
   const allTasksComplete =
-    tasks.length > 0 && tasks.every((task) => task.status === "complete");
+    tasks.length > 0 &&
+    tasks.every((task) => getTaskStatus(task) === "complete");
 
   const handleTaskToggle = async (task: FunnelTaskDisplay) => {
     if (submitted || isCurrentStageComplete) return;
     if (pendingTasks.has(task.id)) return;
 
-    const newStatus = task.status === "complete" ? "pending" : "complete";
+    const currentStatus = getTaskStatus(task);
+    const newStatus = currentStatus === "complete" ? "pending" : "complete";
 
+    setOptimisticStatus((prev) => ({ ...prev, [task.id]: newStatus }));
     setPendingTasks((prev) => new Set(prev).add(task.id));
-    try {
-      await updateTaskStatus(funnelId, stageId, task.id, newStatus);
-    } catch {
-      toast.error("Failed to update task. Please try again.");
-    } finally {
-      setPendingTasks((prev) => {
-        const next = new Set(prev);
-        next.delete(task.id);
-        return next;
+
+    const result = await updateTaskStatus(
+      funnelId,
+      stageId,
+      task.id,
+      newStatus,
+    );
+
+    if (!result.ok) {
+      setOptimisticStatus((prev) => ({ ...prev, [task.id]: currentStatus }));
+      toast.error(result.error ?? "Failed to update task. Please try again.");
+    } else {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.display(funnelId),
       });
     }
-  };
 
+    setPendingTasks((prev) => {
+      const next = new Set(prev);
+      next.delete(task.id);
+      return next;
+    });
+  };
   const handleSubmit = async () => {
     if (!allTasksComplete || submitted || isCurrentStageComplete) return;
     await onCompleteStage();
