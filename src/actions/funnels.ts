@@ -277,3 +277,81 @@ export async function listFunnels(page = 1): Promise<FunnelActionResult> {
     },
   );
 }
+
+export async function updateTaskStatus(
+  funnelId: string,
+  stageId: string,
+  taskId: string,
+  status: "complete" | "incomplete",
+): Promise<FunnelActionResult> {
+  return withFunnelLogging(
+    "PATCH /api/funnels/{funnelId}/stages/{stageId}/tasks/{taskId}",
+    { funnelId, stageId, taskId, status },
+    "Could not update task status.",
+    async (token) => {
+      const res = await axios.patch(
+        funnelsUrl(
+          `/${encodeURIComponent(funnelId)}/stages/${encodeURIComponent(stageId)}/tasks/${encodeURIComponent(taskId)}`,
+        ),
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 30000,
+          validateStatus: (status) => status === 200,
+        },
+      );
+      return { ok: true, status: res.status, data: res.data };
+    },
+  );
+}
+
+export async function completeStage(
+  funnelId: string,
+  stageId: string,
+): Promise<FunnelActionResult> {
+  return withFunnelLogging(
+    "PATCH /api/funnels/{funnelId}/stages/{stageId}/complete",
+    { funnelId, stageId },
+    "Could not complete stage.",
+    async (token) => {
+      const res = await axios.patch(
+        funnelsUrl(
+          `/${encodeURIComponent(funnelId)}/stages/${encodeURIComponent(stageId)}/complete`,
+        ),
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 30000,
+          validateStatus: (status) => status === 200,
+        },
+      );
+      return { ok: true, status: res.status, data: res.data };
+    },
+  );
+}
+
+export async function submitStageFeedback(
+  funnelId: string,
+  stageId: string,
+  feedback: string,
+): Promise<FunnelActionResult> {
+  return withFunnelLogging(
+    "POST /api/funnels/{funnelId}/stages/{stageId}/feedback",
+    { funnelId, stageId, feedbackLength: feedback.length },
+    "Could not submit feedback.",
+    async (token) => {
+      const res = await axios.post(
+        funnelsUrl(
+          `/${encodeURIComponent(funnelId)}/stages/${encodeURIComponent(stageId)}/feedback`,
+        ),
+        { feedback },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 30000,
+          validateStatus: (status) => status === 200,
+        },
+      );
+      return { ok: true, status: res.status, data: res.data };
+    },
+  );
+}
