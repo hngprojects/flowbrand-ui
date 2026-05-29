@@ -23,6 +23,8 @@ import {
 } from "@/hooks/queries/use-strategy-funnel";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { cn } from "@/lib/utils";
+import { updateTaskStatus } from "@/actions/funnels";
+import { toast } from "sonner";
 
 function StrategyGenerationLoading({
   message,
@@ -104,22 +106,43 @@ function TaskCheckbox({
 }
 
 function StrategyStageTasks({
+  funnelId,
+  stageId,
   tasks,
   isCurrentStageComplete,
   onCompleteStage,
 }: {
+  funnelId: string;
+  stageId: string;
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
   onCompleteStage: () => Promise<void>;
 }) {
-  const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
+  const [pendingTasks, setPendingTasks] = useState<Set<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
 
   const allTasksComplete =
-    tasks.length > 0 &&
-    tasks.every(
-      (task) => task.status === "complete" || checkedTasks.includes(task.id),
-    );
+    tasks.length > 0 && tasks.every((task) => task.status === "complete");
+
+  const handleTaskToggle = async (task: FunnelTaskDisplay) => {
+    if (submitted || isCurrentStageComplete) return;
+    if (pendingTasks.has(task.id)) return;
+
+    const newStatus = task.status === "complete" ? "pending" : "complete";
+
+    setPendingTasks((prev) => new Set(prev).add(task.id));
+    try {
+      await updateTaskStatus(funnelId, stageId, task.id, newStatus);
+    } catch {
+      toast.error("Failed to update task. Please try again.");
+    } finally {
+      setPendingTasks((prev) => {
+        const next = new Set(prev);
+        next.delete(task.id);
+        return next;
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     if (!allTasksComplete || submitted || isCurrentStageComplete) return;
@@ -141,19 +164,8 @@ function StrategyStageTasks({
                   {task.title}
                 </h2>
                 <TaskCheckbox
-                  checked={
-                    checkedTasks.includes(task.id) ||
-                    task.status === "complete" ||
-                    isCurrentStageComplete
-                  }
-                  onClick={() => {
-                    if (submitted || isCurrentStageComplete) return;
-                    setCheckedTasks((prev) =>
-                      prev.includes(task.id)
-                        ? prev.filter((id) => id !== task.id)
-                        : [...prev, task.id],
-                    );
-                  }}
+                  checked={task.status === "complete" || isCurrentStageComplete}
+                  onClick={() => handleTaskToggle(task)}
                 />
               </div>
               <div className="mt-3 space-y-3 text-sm leading-relaxed text-neutral-500">
@@ -355,6 +367,8 @@ export function StrategyView() {
 
               <StrategyStageTasks
                 key={activeStageId ?? "none"}
+                funnelId={funnelId ?? ""}
+                stageId={activeStageId ?? ""}
                 tasks={tasks}
                 isCurrentStageComplete={isCurrentStageComplete}
                 onCompleteStage={completeCurrentStage}

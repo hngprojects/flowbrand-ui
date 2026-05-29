@@ -282,7 +282,7 @@ export async function updateTaskStatus(
   funnelId: string,
   stageId: string,
   taskId: string,
-  status: "complete" | "incomplete",
+  status: "complete" | "pending",
 ): Promise<FunnelActionResult> {
   return withFunnelLogging(
     "PATCH /api/funnels/{funnelId}/stages/{stageId}/tasks/{taskId}",
