@@ -258,9 +258,6 @@ export function useStrategyFunnel() {
     const result = await completeStage(funnelId, activeStageId);
 
     if (result.success) {
-      toast.error(
-        result.error ?? "Failed to complete stage. Please try again.",
-      );
       markStageComplete(funnelId, activeStageId);
       setStageProgressVersion((version) => version + 1);
     } else {
