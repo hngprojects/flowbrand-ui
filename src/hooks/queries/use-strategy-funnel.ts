@@ -30,6 +30,7 @@ import { funnelHasDisplayContent } from "@/lib/funnel-api-types";
 import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
 import { flowLog } from "@/lib/flow-debug-log";
 import { completeStage } from "@/lib/complete-state";
+import { toast } from "sonner";
 
 /** Poll every ~3s after the first 30s; faster early when jobs often finish. */
 const POLL_MS = 3000;
@@ -244,12 +245,27 @@ export function useStrategyFunnel() {
     return completedStageIds.includes(activeStageId);
   }, [funnelId, activeStageId, completedStageIds]);
 
+  // const completeCurrentStage = useCallback(async () => {
+  //   if (!funnelId || !activeStageId) return;
+  //   await completeStage(funnelId, activeStageId);
+  //   markStageComplete(funnelId, activeStageId);
+  //   setStageProgressVersion((version) => version + 1);
+  // }, [funnelId, activeStageId]);
+
   const completeCurrentStage = useCallback(async () => {
-    if (!funnelId || !activeStageId) return;
-    await completeStage(funnelId, activeStageId);
-    markStageComplete(funnelId, activeStageId);
-    setStageProgressVersion((version) => version + 1);
-  }, [funnelId, activeStageId]);
+  if (!funnelId || !activeStageId) return;
+
+  const result = await completeStage(funnelId, activeStageId);
+
+  if (!result.success) {
+    toast.error(result.error ?? "Could not complete this stage. Please try again.");
+    return;
+  }
+
+  markStageComplete(funnelId, activeStageId);
+  setStageProgressVersion((version) => version + 1);
+  displayQuery.refetch();
+}, [funnelId, activeStageId, displayQuery]);
 
   const strategyPhases = useMemo(
     () => mapStagesToStrategyPhases(funnel?.stages, completedStageIds),

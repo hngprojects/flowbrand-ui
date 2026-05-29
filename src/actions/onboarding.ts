@@ -176,36 +176,36 @@ export async function completeOnboarding(
   }
 }
 
-export async function getOnboardingSession(): Promise<OnboardingActionResult> {
-  const token = await getAccessToken();
-  if (!token)
-    return {
-      ok: false,
-      error: "Session expired. Please sign in again.",
-      status: 401,
-    };
+// export async function getOnboardingSession(): Promise<OnboardingActionResult> {
+//   const token = await getAccessToken();
+//   if (!token)
+//     return {
+//       ok: false,
+//       error: "Session expired. Please sign in again.",
+//       status: 401,
+//     };
 
-  try {
-    const res = await axios.get(onboardingUrl("/session"), {
-      headers: { Authorization: `Bearer ${token}` },
-      timeout: 30000,
-    });
-    const result = { ok: true as const, status: res.status, data: res.data };
-    flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
-    return result;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const { status, data } = error.response;
-      const result = {
-        ok: false as const,
-        error: formatHttpApiError(status, data, "Could not load your session."),
-        status,
-      };
-      flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
-      return result;
-    }
-    const result = { ok: false as const, error: "Could not reach the server." };
-    flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
-    return result;
-  }
-}
+//   try {
+//     const res = await axios.get(onboardingUrl("/start"), {
+//       headers: { Authorization: `Bearer ${token}` },
+//       timeout: 30000,
+//     });
+//     const result = { ok: true as const, status: res.status, data: res.data };
+//     flowLogApiResult("onboarding", "GET /api/onboarding/start", result);
+//     return result;
+//   } catch (error) {
+//     if (axios.isAxiosError(error) && error.response) {
+//       const { status, data } = error.response;
+//       const result = {
+//         ok: false as const,
+//         error: formatHttpApiError(status, data, "Could not load your session."),
+//         status,
+//       };
+//       flowLogApiResult("onboarding", "GET /api/onboarding/start", result);
+//       return result;
+//     }
+//     const result = { ok: false as const, error: "Could not reach the server." };
+//     flowLogApiResult("onboarding", "GET /api/onboarding/start", result);
+//     return result;
+//   }
+// }

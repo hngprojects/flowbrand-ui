@@ -1,6 +1,5 @@
 import {
   completeOnboarding,
-  getOnboardingSession,
   saveOnboardingStep,
   startOnboarding,
 } from "@/actions/onboarding";
@@ -36,41 +35,20 @@ function payloadFromApiData(data: unknown): OnboardingSessionPayload {
  * Throws {@link OnboardingAlreadyCompleteError} when start returns 409.
  */
 export async function getOrCreateOnboardingSession(): Promise<OnboardingSessionPayload> {
-  flowLog("onboarding", "getOrCreateOnboardingSession → start");
-  const existing = await getOnboardingSession();
+  flowLog("onboarding", "getOrCreateOnboardingSession → POST /start");
 
-  if (existing.ok) {
-    const payload = payloadFromApiData(existing.data);
-    flowLog(
-      "onboarding",
-      "getOrCreateOnboardingSession → use existing session",
-      {
-        sessionId: payload.session.sessionId,
-        stepsCompleted: payload.session.stepsCompleted,
-        status: payload.session.status,
-      },
-    );
-    return payload;
-  }
-
-  flowLog("onboarding", "getOrCreateOnboardingSession → no session, starting");
   const started = await startOnboarding();
 
   if (started.status === 409) {
-    flowLog("onboarding", "getOrCreateOnboardingSession → start returned 409");
+    flowLog("onboarding", "getOrCreateOnboardingSession → already complete");
     throw new OnboardingAlreadyCompleteError();
   }
 
   if (started.ok) {
     const payload = payloadFromApiData(started.data);
-    flowLog(
-      "onboarding",
-      "getOrCreateOnboardingSession → started new session",
-      {
-        sessionId: payload.session.sessionId,
-        stepsCompleted: payload.session.stepsCompleted,
-      },
-    );
+    flowLog("onboarding", "getOrCreateOnboardingSession → session ready", {
+      sessionId: payload.session.sessionId,
+    });
     return payload;
   }
 
@@ -94,13 +72,9 @@ export async function saveOnboardingStepMutation(input: {
   });
   const res = await saveOnboardingStep(input);
   if (!res.ok) {
-    if (res.status === 409) {
-      const existing = await getOnboardingSession();
-      if (existing.ok) {
-        return payloadFromApiData(existing.data);
-      }
-      throw new OnboardingAlreadyCompleteError();
-    }
+   if (res.status === 409) {
+  throw new OnboardingAlreadyCompleteError();
+}
     flowLogError("onboarding", "saveOnboardingStepMutation", res.error, {
       step: input.step,
       status: res.status,
