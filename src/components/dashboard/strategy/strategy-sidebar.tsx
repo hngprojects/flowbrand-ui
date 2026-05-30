@@ -65,7 +65,6 @@ export default function StrategySidebar({
   return (
     <aside className={cn(STRATEGY_SIDEBAR_ASIDE_CLASS, className)}>
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-5">
-
         {/* Documents section */}
         <div className="space-y-2.5">
           {hasDocuments && (
@@ -166,9 +165,7 @@ export default function StrategySidebar({
                 : "View previous strategies"}
             </button>
 
-            {showHistory && (
-              <FunnelHistory currentFunnelId={currentFunnelId} />
-            )}
+            {showHistory && <FunnelHistory currentFunnelId={currentFunnelId} />}
 
             {/* Create new strategy button */}
             {onCreateNewStrategy && (
