@@ -34,7 +34,8 @@ export function useOnboardingSessionQuery(enabled = true) {
 
   return useQuery({
     queryKey: sessionQueryKey,
-    queryFn: getOrCreateOnboardingSession,
+    queryFn: () =>
+      getOrCreateOnboardingSession({ allowAlreadyComplete: isNewStrategy }),
     enabled,
     staleTime: 0,
     refetchOnMount: true,

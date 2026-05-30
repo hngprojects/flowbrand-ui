@@ -85,6 +85,11 @@ export function extractApiErrorMessages(data: unknown): string {
         const d = item as Record<string, unknown>;
         if (typeof d.message === "string" && d.message.trim()) {
           pieces.push(d.message.trim());
+        } else if (
+          typeof d.errorMessage === "string" &&
+          d.errorMessage.trim()
+        ) {
+          pieces.push(d.errorMessage.trim());
         }
       }
     }

@@ -8,6 +8,7 @@ import AuthSplitLayout from "@/components/features/auth/authSplitLayout";
 import { usePostAuthRedirect } from "@/hooks/use-post-auth-redirect";
 import {
   getRegisterVerifyEmail,
+  seedRegisterVerifyEmailFromUrl,
   subscribeToRegisterVerifyEmail,
 } from "@/lib/register-verify-storage";
 
@@ -24,15 +25,24 @@ export default function RegisterVerifyPage() {
   usePostAuthRedirect();
 
   useEffect(() => {
+    seedRegisterVerifyEmailFromUrl();
+  }, []);
+
+  useEffect(() => {
     if (status === "loading") {
       return;
     }
-    if (email === null && !isAuthenticated) {
+    if (isAuthenticated) {
+      return;
+    }
+
+    const resolvedEmail = getRegisterVerifyEmail();
+    if (!resolvedEmail) {
       router.replace("/register");
     }
   }, [email, isAuthenticated, status, router]);
 
-  if (status === "loading" || (email === null && isAuthenticated)) {
+  if (status === "loading" || (isAuthenticated && !email)) {
     return (
       <AuthSplitLayout>
         <div className="py-12 text-center text-sm text-[#32476D]">Loading…</div>
@@ -40,7 +50,7 @@ export default function RegisterVerifyPage() {
     );
   }
 
-  if (email === null) {
+  if (!email) {
     return (
       <AuthSplitLayout>
         <div className="py-12 text-center text-sm text-[#32476D]">Loading…</div>

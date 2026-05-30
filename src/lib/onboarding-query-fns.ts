@@ -4,6 +4,7 @@ import {
   startOnboarding,
 } from "@/actions/onboarding";
 import {
+  isOnboardingAlreadyCompleteResponse,
   isOnboardingSessionComplete,
   parseOnboardingSession,
   parseOnboardingSessionId,
@@ -14,6 +15,13 @@ import { flowLog, flowLogError } from "@/lib/flow-debug-log";
 export type OnboardingSessionPayload = {
   session: ParsedOnboardingSession;
   raw: unknown;
+  /** Set when POST /start reports onboarding is already finished (no active wizard). */
+  alreadyComplete?: boolean;
+};
+
+export type GetOnboardingSessionOptions = {
+  /** When true, already-complete users get a payload instead of an error (new-strategy flow). */
+  allowAlreadyComplete?: boolean;
 };
 
 export class OnboardingAlreadyCompleteError extends Error {
@@ -31,25 +39,62 @@ function payloadFromApiData(data: unknown): OnboardingSessionPayload {
 }
 
 /**
- * GET /api/onboarding/session when one exists; otherwise POST /api/onboarding/start.
- * Throws {@link OnboardingAlreadyCompleteError} when start returns 409.
+ * POST /api/onboarding/start — resume an active session, create a new one, or
+ * detect that onboarding is already complete.
+ * Throws {@link OnboardingAlreadyCompleteError} when the user has finished onboarding.
  */
-export async function getOrCreateOnboardingSession(): Promise<OnboardingSessionPayload> {
-  flowLog("onboarding", "getOrCreateOnboardingSession → POST /start");
+function alreadyCompletePayload(data: unknown): OnboardingSessionPayload {
+  return {
+    session: parseOnboardingSession(data),
+    raw: data,
+    alreadyComplete: true,
+  };
+}
 
+export async function getOrCreateOnboardingSession(
+  options: GetOnboardingSessionOptions = {},
+): Promise<OnboardingSessionPayload> {
+  flowLog("onboarding", "getOrCreateOnboardingSession → POST /start");
   const started = await startOnboarding();
 
-  if (started.status === 409) {
-    flowLog("onboarding", "getOrCreateOnboardingSession → already complete");
-    throw new OnboardingAlreadyCompleteError();
-  }
-
   if (started.ok) {
+    if (isOnboardingAlreadyCompleteResponse(started.data)) {
+      flowLog(
+        "onboarding",
+        "getOrCreateOnboardingSession → start returned already complete",
+      );
+      if (options.allowAlreadyComplete) {
+        return alreadyCompletePayload(started.data);
+      }
+      throw new OnboardingAlreadyCompleteError();
+    }
+
     const payload = payloadFromApiData(started.data);
+    if (!payload.session.sessionId) {
+      flowLogError(
+        "onboarding",
+        "getOrCreateOnboardingSession",
+        "Missing sessionId in start response",
+        { httpStatus: started.status, data: started.data },
+      );
+      throw new Error("Failed to start onboarding session.");
+    }
+
     flowLog("onboarding", "getOrCreateOnboardingSession → session ready", {
       sessionId: payload.session.sessionId,
+      stepsCompleted: payload.session.stepsCompleted,
+      status: payload.session.status,
+      httpStatus: started.status,
     });
     return payload;
+  }
+
+  if (started.status === 409) {
+    flowLog("onboarding", "getOrCreateOnboardingSession → start returned 409");
+    if (options.allowAlreadyComplete) {
+      return alreadyCompletePayload(null);
+    }
+    throw new OnboardingAlreadyCompleteError();
   }
 
   flowLogError("onboarding", "getOrCreateOnboardingSession", started.error);

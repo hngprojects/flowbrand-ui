@@ -142,7 +142,8 @@ const RegistrationForm = () => {
         return;
       }
 
-      setRegisterVerifyEmail(values.email);
+      const trimmedEmail = values.email.trim();
+      setRegisterVerifyEmail(trimmedEmail);
       const cooldownSeconds = readOtpCooldownSeconds(data.data);
       if (cooldownSeconds) {
         setRegisterVerifyCooldown(cooldownSeconds);
@@ -151,7 +152,9 @@ const RegistrationForm = () => {
       toast.success("Account created", {
         description: "Check your email for a 6-digit code.",
       });
-      router.push("/register/verify");
+      router.replace(
+        `/register/verify?email=${encodeURIComponent(trimmedEmail)}`,
+      );
     } catch {
       toast.error("An error occurred", {
         description: "Please try again.",
