@@ -5,6 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
+import { signOut } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -15,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import BaseModal from "@/components/modals/BaseModal";
 import UpdateIcon from "@/components/icons/modals/update";
+import { useChangePasswordMutation } from "@/hooks/mutations/use-password-mutations";
 
 const PasswordSecuritySchema = z
   .object({
@@ -33,6 +36,10 @@ const PasswordSecuritySchema = z
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
+  })
+  .refine((data) => data.newPassword !== data.oldPassword, {
+    message: "New password must be different from your current password.",
+    path: ["newPassword"],
   });
 
 type PasswordSecurityFormValues = z.infer<typeof PasswordSecuritySchema>;
@@ -42,6 +49,8 @@ export default function PasswordSecurityTab() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
+
+  const changePassword = useChangePasswordMutation();
 
   const form = useForm<PasswordSecurityFormValues>({
     resolver: zodResolver(PasswordSecuritySchema),
@@ -56,11 +65,30 @@ export default function PasswordSecurityTab() {
 
   const { isSubmitting } = form.formState;
 
-  const onSubmit = async () => {
-    setSuccessOpen(true);
-    form.reset();
+  const onSubmit = async (values: PasswordSecurityFormValues) => {
+    try {
+      await changePassword.mutateAsync({
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      });
+
+      setSuccessOpen(true);
+      form.reset();
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not change password. Please try again.",
+      );
+    }
   };
 
+  const handleSuccessClose = async () => {
+    setSuccessOpen(false);
+
+    await signOut({ callbackUrl: "/login", redirect: true });
+  };
   return (
     <>
       <div className="flex flex-col gap-6">
@@ -83,13 +111,8 @@ export default function PasswordSecurityTab() {
                     <div className="relative">
                       <input
                         type={showOld ? "text" : "password"}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || changePassword.isPending}
                         {...field}
-                        style={
-                          {
-                            WebkitTextSecurity: showOld ? "none" : "asterisk",
-                          } as React.CSSProperties
-                        }
                         className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
                       />
                       <button
@@ -111,7 +134,6 @@ export default function PasswordSecurityTab() {
               )}
             />
 
-            {/* New Password */}
             <FormField
               control={form.control}
               name="newPassword"
@@ -124,13 +146,8 @@ export default function PasswordSecurityTab() {
                     <div className="relative">
                       <input
                         type={showNew ? "text" : "password"}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || changePassword.isPending}
                         {...field}
-                        style={
-                          {
-                            WebkitTextSecurity: showNew ? "none" : "asterisk",
-                          } as React.CSSProperties
-                        }
                         className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
                       />
                       <button
@@ -152,7 +169,6 @@ export default function PasswordSecurityTab() {
               )}
             />
 
-            {/* Confirm Password */}
             <FormField
               control={form.control}
               name="confirmPassword"
@@ -165,15 +181,8 @@ export default function PasswordSecurityTab() {
                     <div className="relative">
                       <input
                         type={showConfirm ? "text" : "password"}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || changePassword.isPending}
                         {...field}
-                        style={
-                          {
-                            WebkitTextSecurity: showConfirm
-                              ? "none"
-                              : "asterisk",
-                          } as React.CSSProperties
-                        }
                         className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
                       />
                       <button
@@ -197,14 +206,15 @@ export default function PasswordSecurityTab() {
               )}
             />
 
-            {/* Submit */}
             <div className="flex justify-center md:justify-end pt-2">
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || changePassword.isPending}
                 className="rounded-[10px] bg-primary px-10 py-3 text-sm md:text-base font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "Updating..." : "Change Password"}
+                {isSubmitting || changePassword.isPending
+                  ? "Updating..."
+                  : "Change Password"}
               </button>
             </div>
           </form>
@@ -213,12 +223,12 @@ export default function PasswordSecurityTab() {
 
       <BaseModal
         isOpen={successOpen}
-        onClose={() => setSuccessOpen(false)}
+        onClose={handleSuccessClose}
         icon={<UpdateIcon />}
         title="Password updated"
-        subtitle="Your password was successfully updated!"
+        subtitle="Your password was successfully updated! You will be signed out of all devices."
         confirmText="Done"
-        onConfirm={() => setSuccessOpen(false)}
+        onConfirm={handleSuccessClose}
       />
     </>
   );
