@@ -172,7 +172,7 @@ export async function generateFunnel(
       const res = await axios.post(funnelsUrl("/generate"), body, {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 60000,
-        validateStatus: (status) => [200, 202, 409].includes(status),
+        validateStatus: (status) => [200, 201, 202, 409].includes(status),
       });
       return { ok: true, status: res.status, data: res.data };
     },
@@ -306,7 +306,7 @@ export async function updateTaskStatus(
   funnelId: string,
   stageId: string,
   taskId: string,
-  status: "complete" | "incomplete",
+  status: "complete" | "pending",
 ): Promise<FunnelActionResult> {
   return withFunnelLogging(
     "PATCH /api/funnels/{funnelId}/stages/{stageId}/tasks/{taskId}",

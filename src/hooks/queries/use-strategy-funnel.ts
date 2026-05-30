@@ -224,6 +224,15 @@ export function useStrategyFunnel() {
 
   const funnel = displayQuery.data ?? null;
 
+  const mergedCompletedStageIds = useMemo(() => {
+    const fromBackend =
+      funnel?.stages
+        ?.filter((s) => s.status === "complete" && s.stageId)
+        .map((s) => s.stageId as string) ?? [];
+    const fromLocal = completedStageIds;
+    return Array.from(new Set([...fromBackend, ...fromLocal]));
+  }, [funnel?.stages, completedStageIds]);
+
   const hasRealContent = useMemo(
     () => (funnel ? funnelHasDisplayContent(funnel) : false),
     [funnel],
@@ -237,20 +246,13 @@ export function useStrategyFunnel() {
   }, [pollStartedAt, hasRealContent]);
 
   const activeStageId = useMemo(() => {
-    return getFocusStage(funnel, completedStageIds)?.stageId ?? null;
-  }, [funnel, completedStageIds]);
+    return getFocusStage(funnel, mergedCompletedStageIds)?.stageId ?? null;
+  }, [funnel, mergedCompletedStageIds]);
 
   const isCurrentStageComplete = useMemo(() => {
     if (!funnelId || !activeStageId) return false;
-    return completedStageIds.includes(activeStageId);
+    return mergedCompletedStageIds.includes(activeStageId);
   }, [funnelId, activeStageId, completedStageIds]);
-
-  // const completeCurrentStage = useCallback(async () => {
-  //   if (!funnelId || !activeStageId) return;
-  //   await completeStage(funnelId, activeStageId);
-  //   markStageComplete(funnelId, activeStageId);
-  //   setStageProgressVersion((version) => version + 1);
-  // }, [funnelId, activeStageId]);
 
   const completeCurrentStage = useCallback(async () => {
     if (!funnelId || !activeStageId) return;
@@ -266,20 +268,31 @@ export function useStrategyFunnel() {
 
     markStageComplete(funnelId, activeStageId);
     setStageProgressVersion((version) => version + 1);
+
+    // If backend returned the unlocked stage, log it
+    if (result.data?.unlockedStage) {
+      flowLog("strategy", "completeCurrentStage → next stage unlocked", {
+        unlockedStageId: result.data.unlockedStage.stageId,
+        unlockedStageName: result.data.unlockedStage.name,
+      });
+    }
+
+    // Refetch to pull the newly unlocked stage content from backend
     displayQuery.refetch();
   }, [funnelId, activeStageId, displayQuery]);
 
   const strategyPhases = useMemo(
-    () => mapStagesToStrategyPhases(funnel?.stages, completedStageIds),
-    [funnel, completedStageIds],
+    () => mapStagesToStrategyPhases(funnel?.stages, mergedCompletedStageIds),
+    [funnel, mergedCompletedStageIds],
   );
   const focus = useMemo(
-    () => mapFunnelToFocus(funnel, completedStageIds),
-    [funnel, completedStageIds],
+    () => mapFunnelToFocus(funnel, mergedCompletedStageIds),
+    [funnel, mergedCompletedStageIds],
   );
   const tasks = useMemo(
-    () => mapStageTasksToDisplay(getFocusStage(funnel, completedStageIds)),
-    [funnel, completedStageIds],
+    () =>
+      mapStageTasksToDisplay(getFocusStage(funnel, mergedCompletedStageIds)),
+    [funnel, mergedCompletedStageIds],
   );
 
   const loading = useMemo(() => {

@@ -23,6 +23,8 @@ import {
 } from "@/hooks/queries/use-strategy-funnel";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { cn } from "@/lib/utils";
+import { useUpdateTaskStatusMutation } from "@/hooks/mutations/use-task-mutations";
+import { StageFeedback } from "@/components/dashboard/strategy/stage-feedback";
 
 function StrategyGenerationLoading({
   message,
@@ -107,11 +109,16 @@ function StrategyStageTasks({
   tasks,
   isCurrentStageComplete,
   onCompleteStage,
+  funnelId,
+  activeStageId,
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
   onCompleteStage: () => Promise<void>;
+  funnelId: string;
+  activeStageId: string;
 }) {
+  const updateTask = useUpdateTaskStatusMutation(funnelId);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
@@ -148,11 +155,20 @@ function StrategyStageTasks({
                   }
                   onClick={() => {
                     if (submitted || isCurrentStageComplete) return;
+                    const isChecked =
+                      checkedTasks.includes(task.id) ||
+                      task.status === "complete";
+                    const newStatus = isChecked ? "pending" : "complete";
                     setCheckedTasks((prev) =>
-                      prev.includes(task.id)
+                      isChecked
                         ? prev.filter((id) => id !== task.id)
                         : [...prev, task.id],
                     );
+                    updateTask.mutate({
+                      stageId: activeStageId,
+                      taskId: task.id,
+                      status: newStatus,
+                    });
                   }}
                 />
               </div>
@@ -352,13 +368,18 @@ export function StrategyView() {
                   </div>
                 </div>
               ) : null}
+              {/* // Inside StrategyView render, after <StrategyStageTasks />: */}
 
               <StrategyStageTasks
-                key={activeStageId ?? "none"}
                 tasks={tasks}
                 isCurrentStageComplete={isCurrentStageComplete}
                 onCompleteStage={completeCurrentStage}
+                funnelId={funnelId ?? ""}
+                activeStageId={activeStageId ?? ""}
               />
+              {isCurrentStageComplete && funnelId && activeStageId && (
+                <StageFeedback funnelId={funnelId} stageId={activeStageId} />
+              )}
             </div>
           </StrategyMainPanel>
         </div>

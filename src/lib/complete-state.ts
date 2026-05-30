@@ -1,37 +1,29 @@
-// import { flowLog } from "@/lib/flow-debug-log";
-
-// export async function completeStage(funnelId: string, stageId: string) {
-//   /**
-//    * TODO: Replace with real backend endpoint
-//    * POST /api/funnels/{funnelId}/stages/{stageId}/complete
-//    * Waiting on backend to confirm contract.
-//    */
-
-//   if (process.env.NODE_ENV === "development") {
-//     console.warn(
-//       "[completeStage] STUB — no API call made. Waiting for backend endpoint.",
-//       { funnelId, stageId },
-//     );
-//   }
-//   flowLog("strategy", "completeStage → pending backend integration", {
-//     funnelId,
-//     stageId,
-//   });
-
-//   return {
-//     success: true,
-//   };
-// }
-
 "use server";
 
 import { completeStage as completeStageAction } from "@/actions/funnels";
 import { flowLog } from "@/lib/flow-debug-log";
 
+export type CompletedStageData = {
+  completedStage: {
+    stageId: string;
+    position: number;
+    name: string;
+    status: string;
+    completedAt: string;
+  };
+  unlockedStage: {
+    stageId: string;
+    position: number;
+    name: string;
+    status: string;
+    unlockedAt: string;
+  } | null;
+};
+
 export async function completeStage(
   funnelId: string,
   stageId: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; data?: CompletedStageData }> {
   flowLog("strategy", "completeStage → calling backend", {
     funnelId,
     stageId,
@@ -47,6 +39,28 @@ export async function completeStage(
     return { success: false, error: result.error };
   }
 
-  flowLog("strategy", "completeStage → success", { funnelId, stageId });
-  return { success: true };
+  // Read completedStage and unlockedStage from the response
+  const raw = result.data as Record<string, unknown> | null;
+  const inner =
+    (raw?.data as Record<string, unknown>) ??
+    (raw as Record<string, unknown>) ??
+    {};
+
+  const completedStage = inner?.completedStage as
+    | CompletedStageData["completedStage"]
+    | undefined;
+  const unlockedStage =
+    (inner?.unlockedStage as CompletedStageData["unlockedStage"]) ?? null;
+
+  flowLog("strategy", "completeStage → success", {
+    funnelId,
+    stageId,
+    completedStage: completedStage?.stageId,
+    unlockedStage: unlockedStage?.stageId ?? "none (last stage)",
+  });
+
+  return {
+    success: true,
+    data: completedStage ? { completedStage, unlockedStage } : undefined,
+  };
 }
