@@ -23,6 +23,7 @@ import {
   useDashboardEntryPathQuery,
   useEnsureOnboardingSession,
 } from "@/hooks/queries/use-onboarding-queries";
+import { OnboardingAlreadyCompleteError } from "@/lib/onboarding-query-fns";
 import { useStartFunnelGenerationMutation } from "@/hooks/mutations/use-funnel-mutations";
 import { reserveIdempotencyKey } from "@/lib/funnel-generation-storage";
 import {
@@ -135,13 +136,21 @@ export function UploadView() {
   const entryQuery = useDashboardEntryPathQuery(!isNewStrategy);
   const sessionQuery = useEnsureOnboardingSession();
   useEffect(() => {
-    if (sessionQuery.isError) {
-      toast.error(
-        "Could not start your session. Please refresh and try again.",
-      );
+    if (!sessionQuery.isError || !sessionQuery.error) return;
+
+    if (sessionQuery.error instanceof OnboardingAlreadyCompleteError) {
+      if (!isNewStrategy) {
+        router.replace(STRATEGY_ROUTE);
+      }
+      return;
     }
-  }, [sessionQuery.isError]);
-  useEnsureOnboardingSession();
+
+    toast.error(
+      sessionQuery.error instanceof Error
+        ? sessionQuery.error.message
+        : "Could not start your session. Please refresh and try again.",
+    );
+  }, [sessionQuery.isError, sessionQuery.error, isNewStrategy, router]);
 
   const activeUploadIds = useMemo(
     () =>

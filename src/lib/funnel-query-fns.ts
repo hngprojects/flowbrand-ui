@@ -115,6 +115,7 @@ async function resolveFunnelIdAfterGenerate(
     funnelId,
     idempotencyKey: input.idempotencyKey,
     source: input.source,
+    startedAt: Date.now(),
   });
 
   return funnelId;

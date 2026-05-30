@@ -52,6 +52,20 @@ export function getRegisterVerifyEmail(): string | null {
   return sessionStorage.getItem(REGISTER_VERIFY_EMAIL_STORAGE_KEY);
 }
 
+/** Restore email from ?email= after register when sessionStorage is empty. */
+export function seedRegisterVerifyEmailFromUrl(): boolean {
+  if (typeof window === "undefined") return false;
+  if (getRegisterVerifyEmail()) return true;
+
+  const fromUrl = new URLSearchParams(window.location.search)
+    .get("email")
+    ?.trim();
+  if (!fromUrl) return false;
+
+  setRegisterVerifyEmail(fromUrl);
+  return true;
+}
+
 export function subscribeToRegisterVerifyEmail(onStoreChange: () => void) {
   window.addEventListener(REGISTER_VERIFY_EMAIL_CHANGED_EVENT, onStoreChange);
   window.addEventListener("storage", onStoreChange);

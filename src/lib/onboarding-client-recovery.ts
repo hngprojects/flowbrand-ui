@@ -1,7 +1,7 @@
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { getPostAuthRedirect } from "@/actions/auth";
 import { listFunnels } from "@/actions/funnels";
-import { parseFunnelList } from "@/lib/funnel-api-types";
+import { parseFunnelList, type FunnelDetailApi } from "@/lib/funnel-api-types";
 import { saveActiveFunnelGeneration } from "@/lib/funnel-generation-storage";
 import {
   isOnboardingSessionComplete,
@@ -9,6 +9,16 @@ import {
 } from "@/lib/onboarding-api";
 import { isNewStrategyFlow } from "@/lib/new-strategy";
 import { STRATEGY_ROUTE } from "@/routes";
+
+function pickRecoverableFunnel(
+  funnels: FunnelDetailApi[],
+): FunnelDetailApi | null {
+  return (
+    funnels.find((funnel) => funnel.status?.toLowerCase() === "active") ??
+    funnels.find((funnel) => funnel.status?.toLowerCase() !== "failed") ??
+    null
+  );
+}
 
 /** Send users with a finished session or existing funnel to the strategy page. */
 export async function redirectToStrategyHomeIfReady(
@@ -41,7 +51,7 @@ export async function redirectToExistingFunnelIfAny(
   }
 
   const funnels = parseFunnelList(list.data);
-  const funnelId = funnels[0]?.funnelId;
+  const funnelId = pickRecoverableFunnel(funnels)?.funnelId;
   if (!funnelId) {
     return false;
   }
@@ -50,6 +60,7 @@ export async function redirectToExistingFunnelIfAny(
     funnelId,
     idempotencyKey: crypto.randomUUID(),
     source,
+    startedAt: Date.now(),
   });
   router.replace(STRATEGY_ROUTE);
   return true;
