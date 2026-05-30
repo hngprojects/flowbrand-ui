@@ -27,6 +27,7 @@ import {
   markStageComplete,
 } from "@/lib/stage-progress-storage";
 import { funnelHasDisplayContent } from "@/lib/funnel-api-types";
+import type { FunnelDetailApi } from "@/lib/funnel-api-types";
 import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
 import { flowLog } from "@/lib/flow-debug-log";
 import { completeStage } from "@/lib/complete-state";
@@ -83,6 +84,20 @@ function readInitialStrategyState() {
   };
 }
 
+function readFunnelStartedAt(createdAt: string | undefined): number | null {
+  if (!createdAt) return null;
+  const timestamp = Date.parse(createdAt);
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+function pickDisplayFunnel(funnels: FunnelDetailApi[]): FunnelDetailApi | null {
+  return (
+    funnels.find((funnel) => funnel.status?.toLowerCase() === "active") ??
+    funnels.find((funnel) => funnel.status?.toLowerCase() !== "failed") ??
+    null
+  );
+}
+
 export function useStrategyFunnel() {
   const queryClient = useQueryClient();
   const initial = readInitialStrategyState();
@@ -119,7 +134,7 @@ export function useStrategyFunnel() {
       if (stored?.funnelId) {
         if (!isActive()) return null;
         setFunnelId(stored.funnelId);
-        setPollStartedAt(Date.now());
+        setPollStartedAt(stored.startedAt ?? Date.now());
         setGenerationAborted(false);
         setResolvedId(true);
         setHydratedFromStorage(true);
@@ -129,18 +144,22 @@ export function useStrategyFunnel() {
       try {
         const funnels = await fetchFunnelList(1);
         if (!isActive()) return null;
-        const latest = funnels[0]?.funnelId ?? null;
+        const displayFunnel = pickDisplayFunnel(funnels);
+        const latest = displayFunnel?.funnelId ?? null;
         if (latest) {
           flowLog("strategy", "resolve funnelId → latest from list", {
             funnelId: latest,
           });
+          const startedAt =
+            readFunnelStartedAt(displayFunnel?.createdAt) ?? Date.now();
           saveActiveFunnelGeneration({
             funnelId: latest,
             idempotencyKey: crypto.randomUUID(),
             source: "wizard",
+            startedAt,
           });
           setFunnelId(latest);
-          setPollStartedAt(Date.now());
+          setPollStartedAt(startedAt);
           setGenerationAborted(false);
         } else {
           flowLog("strategy", "resolve funnelId → list empty");
@@ -235,21 +254,30 @@ export function useStrategyFunnel() {
     return () => window.clearInterval(id);
   }, [pollStartedAt, hasRealContent]);
 
-  const activeStageId = useMemo(() => {
-    return getFocusStage(funnel, completedStageIds)?.stageId ?? null;
+  const activeStage = useMemo(() => {
+    return getFocusStage(funnel, completedStageIds);
   }, [funnel, completedStageIds]);
+
+  const activeStageId = activeStage?.stageId ?? null;
 
   const isCurrentStageComplete = useMemo(() => {
     if (!funnelId || !activeStageId) return false;
     return completedStageIds.includes(activeStageId);
   }, [funnelId, activeStageId, completedStageIds]);
 
-  const completeCurrentStage = useCallback(async () => {
-    if (!funnelId || !activeStageId) return;
-    await completeStage(funnelId, activeStageId);
-    markStageComplete(funnelId, activeStageId);
-    setStageProgressVersion((version) => version + 1);
-  }, [funnelId, activeStageId]);
+  const completeCurrentStage = useCallback(
+    async (taskIds: string[] = []) => {
+      if (!funnelId || !activeStageId) return;
+      await completeStage(funnelId, activeStageId, taskIds);
+      markStageComplete(funnelId, activeStageId);
+      setStageProgressVersion((version) => version + 1);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.funnels.all() });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.display(funnelId),
+      });
+    },
+    [funnelId, activeStageId, queryClient],
+  );
 
   const strategyPhases = useMemo(
     () => mapStagesToStrategyPhases(funnel?.stages, completedStageIds),
@@ -260,8 +288,8 @@ export function useStrategyFunnel() {
     [funnel, completedStageIds],
   );
   const tasks = useMemo(
-    () => mapStageTasksToDisplay(getFocusStage(funnel, completedStageIds)),
-    [funnel, completedStageIds],
+    () => mapStageTasksToDisplay(activeStage),
+    [activeStage],
   );
 
   const loading = useMemo(() => {

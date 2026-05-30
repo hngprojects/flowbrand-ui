@@ -26,6 +26,10 @@ interface OnboardingState {
   hydrateFromApiSession: (input: {
     businessDescription?: string;
     customerTags?: string[];
+    theyAre?: string[];
+    whoWantTo?: string[];
+    locatedIn?: string[];
+    customCustomerInput?: string;
     trafficChannel?: string;
     step?: number;
   }) => void;
@@ -87,8 +91,11 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
       const step = input.step ?? state.step;
       const businessDescription =
         input.businessDescription ?? state.businessDescription;
-      const theyAre =
-        input.customerTags !== undefined ? input.customerTags : state.theyAre;
+      const theyAre = input.theyAre ?? input.customerTags ?? state.theyAre;
+      const whoWantTo = input.whoWantTo ?? state.whoWantTo;
+      const locatedIn = input.locatedIn ?? state.locatedIn;
+      const customCustomerInput =
+        input.customCustomerInput ?? state.customCustomerInput;
       const trafficChannel = input.trafficChannel ?? state.trafficChannel;
 
       if (
@@ -96,7 +103,12 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
         businessDescription === state.businessDescription &&
         trafficChannel === state.trafficChannel &&
         theyAre.length === state.theyAre.length &&
-        theyAre.every((tag, index) => tag === state.theyAre[index])
+        theyAre.every((tag, index) => tag === state.theyAre[index]) &&
+        whoWantTo.length === state.whoWantTo.length &&
+        whoWantTo.every((tag, index) => tag === state.whoWantTo[index]) &&
+        locatedIn.length === state.locatedIn.length &&
+        locatedIn.every((tag, index) => tag === state.locatedIn[index]) &&
+        customCustomerInput === state.customCustomerInput
       ) {
         return state;
       }
@@ -106,6 +118,9 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
         step,
         businessDescription,
         theyAre,
+        whoWantTo,
+        locatedIn,
+        customCustomerInput,
         trafficChannel,
       };
     }),

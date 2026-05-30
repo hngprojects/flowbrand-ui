@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
+import { toast } from "sonner";
 import { StrategyIcon } from "@/components/icons/strategy";
 import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
@@ -110,7 +111,7 @@ function StrategyStageTasks({
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
-  onCompleteStage: () => Promise<void>;
+  onCompleteStage: (taskIds: string[]) => Promise<void>;
 }) {
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -123,8 +124,16 @@ function StrategyStageTasks({
 
   const handleSubmit = async () => {
     if (!allTasksComplete || submitted || isCurrentStageComplete) return;
-    await onCompleteStage();
-    setSubmitted(true);
+    try {
+      await onCompleteStage(checkedTasks);
+      setSubmitted(true);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not complete this stage.",
+      );
+    }
   };
 
   return (

@@ -40,30 +40,28 @@ export async function startOnboarding(): Promise<OnboardingActionResult> {
   }
 
   try {
-    const res = await axios.post(onboardingUrl("/start"), null, {
-      headers: { Authorization: `Bearer ${token}` },
-      timeout: 30000,
-      validateStatus: (status) => status === 200 || status === 201,
-    });
-    const result = { ok: true as const, status: res.status, data: res.data };
+    const res = await axios.post(
+      onboardingUrl("/start"),
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 30000,
+        validateStatus: (status) => status === 200 || status === 201,
+      },
+    );
+    const result = {
+      ok: true as const,
+      status: res.status,
+      data: res.data?.data ?? res.data,
+    };
     flowLogApiResult("onboarding", "POST /api/onboarding/start", result);
     return result;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      if (status === 409) {
-        const result = {
-          ok: false as const,
-          error: formatHttpApiError(
-            status,
-            data,
-            "Onboarding already complete.",
-          ),
-          status,
-        };
-        flowLogApiResult("onboarding", "POST /api/onboarding/start", result);
-        return result;
-      }
       const result = {
         ok: false as const,
         error: formatHttpApiError(status, data, "Could not start onboarding."),
@@ -105,7 +103,11 @@ export async function saveOnboardingStep(input: {
       headers: { Authorization: `Bearer ${token}` },
       timeout: 30000,
     });
-    const result = { ok: true as const, status: res.status, data: res.data };
+    const result = {
+      ok: true as const,
+      status: res.status,
+      data: res.data?.data ?? res.data,
+    };
     flowLogApiResult("onboarding", "POST /api/onboarding/step", result, {
       step: input.step,
     });
@@ -158,12 +160,18 @@ export async function completeOnboarding(
         validateStatus: (status) => status === 200 || status === 409,
       },
     );
-    return { ok: true, status: res.status, data: res.data?.data ?? res.data };
+    const result = {
+      ok: true as const,
+      status: res.status,
+      data: res.data?.data ?? res.data,
+    };
+    flowLogApiResult("onboarding", "POST /api/onboarding/complete", result);
+    return result;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      return {
-        ok: false,
+      const result = {
+        ok: false as const,
         error: formatHttpApiError(
           status,
           data,
@@ -171,41 +179,11 @@ export async function completeOnboarding(
         ),
         status,
       };
-    }
-    return { ok: false, error: "Could not reach the server." };
-  }
-}
-
-export async function getOnboardingSession(): Promise<OnboardingActionResult> {
-  const token = await getAccessToken();
-  if (!token)
-    return {
-      ok: false,
-      error: "Session expired. Please sign in again.",
-      status: 401,
-    };
-
-  try {
-    const res = await axios.get(onboardingUrl("/session"), {
-      headers: { Authorization: `Bearer ${token}` },
-      timeout: 30000,
-    });
-    const result = { ok: true as const, status: res.status, data: res.data };
-    flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
-    return result;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const { status, data } = error.response;
-      const result = {
-        ok: false as const,
-        error: formatHttpApiError(status, data, "Could not load your session."),
-        status,
-      };
-      flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
+      flowLogApiResult("onboarding", "POST /api/onboarding/complete", result);
       return result;
     }
     const result = { ok: false as const, error: "Could not reach the server." };
-    flowLogApiResult("onboarding", "GET /api/onboarding/session", result);
+    flowLogApiResult("onboarding", "POST /api/onboarding/complete", result);
     return result;
   }
 }
