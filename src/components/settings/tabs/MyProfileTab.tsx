@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { useProfileQuery } from "@/hooks/queries/use-profile-queries";
 import { useUpdateProfileMutation } from "@/hooks/mutations/use-profile-mutations";
+import { uploadUserAvatar } from "@/actions/user";
 
 const MyProfileSchema = z.object({
   fullName: z
@@ -76,13 +77,23 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
     }
   }, [profile, form]);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setAvatar(url);
-  };
 
+    const previewUrl = URL.createObjectURL(file);
+    setAvatar(previewUrl);
+
+    const result = await uploadUserAvatar(file);
+
+    if (!result.ok) {
+      toast.error(result.error ?? "Could not upload avatar. Please try again.");
+      setAvatar(profile?.avatarUrl ?? null);
+      return;
+    }
+    setAvatar(result.data.avatarUrl);
+    toast.success("Avatar updated successfully.");
+  };
   const handleDeleteAvatar = () => {
     setAvatar(null);
     if (fileInputRef.current) fileInputRef.current.value = "";

@@ -190,3 +190,65 @@ export async function changeUserPassword(
     return { ok: false, error: "Could not reach the server." };
   }
 }
+
+export async function uploadUserAvatar(
+  file: File,
+): Promise<UserActionResult<{ avatarUrl: string }>> {
+  flowLog("auth", "POST /api/users/me/avatar → request");
+
+  const token = await getAccessToken();
+  if (!token) {
+    return {
+      ok: false,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const res = await axios.post(userApiUrl("/me/avatar"), formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 30_000,
+    });
+    flowLog("auth", "POST /api/users/me/avatar → raw response", {
+      data: res.data,
+    });
+    const avatarUrl = res.data?.avatarUrl as string;
+    if (!avatarUrl) {
+      return { ok: false, error: "Could not read avatar URL.", status: 502 };
+    }
+
+    const result = {
+      ok: true as const,
+      status: res.status,
+      data: { avatarUrl },
+    };
+    console.log("avatar upload result:", JSON.stringify(result));
+    flowLogApiResult("auth", "POST /api/users/me/avatar", result);
+    return result;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      const result = {
+        ok: false as const,
+        error: formatAuthApiError(
+          status,
+          data,
+          status === 422
+            ? "Invalid image. Please upload a JPEG, PNG, or WebP under 2MB."
+            : "Could not upload avatar. Please try again.",
+        ),
+        status,
+      };
+      flowLogApiResult("auth", "POST /api/users/me/avatar", result);
+      return result;
+    }
+    return { ok: false, error: "Could not reach the server." };
+  }
+}
