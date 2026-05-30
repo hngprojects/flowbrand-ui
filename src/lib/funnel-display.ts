@@ -116,3 +116,64 @@ export function funnelSidebarSummary(funnel: FunnelDetailApi | null): string {
   }
   return "Your generated marketing strategy.";
 }
+
+export type FunnelListItemDisplay = {
+  funnelId: string;
+  label: string;
+  subtitle: string;
+  status?: string;
+};
+
+function formatFunnelCreatedAt(createdAt: string | undefined): string {
+  if (!createdAt) return "";
+  const date = new Date(createdAt);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function funnelCreationPathLabel(creationPath: string | undefined): string {
+  if (creationPath === "document_upload") return "From documents";
+  if (creationPath === "wizard") return "From questions";
+  return "Strategy";
+}
+
+export function mapFunnelToListItem(
+  funnel: FunnelDetailApi,
+): FunnelListItemDisplay {
+  const label = funnel.businessName?.trim() || "Untitled strategy";
+  const subtitleParts = [
+    funnelCreationPathLabel(funnel.creationPath),
+    formatFunnelCreatedAt(funnel.createdAt),
+  ].filter(Boolean);
+
+  return {
+    funnelId: funnel.funnelId,
+    label,
+    subtitle: subtitleParts.join(" · "),
+    status: funnel.status,
+  };
+}
+
+export function sortFunnelsByRecency(
+  funnels: FunnelDetailApi[],
+): FunnelDetailApi[] {
+  return [...funnels].sort((a, b) => {
+    const aTime = Date.parse(a.createdAt ?? "");
+    const bTime = Date.parse(b.createdAt ?? "");
+    const aValid = Number.isFinite(aTime) ? aTime : 0;
+    const bValid = Number.isFinite(bTime) ? bTime : 0;
+    return bValid - aValid;
+  });
+}
+
+export function mapFunnelsToListItems(
+  funnels: FunnelDetailApi[],
+): FunnelListItemDisplay[] {
+  return sortFunnelsByRecency(funnels).map((funnel) =>
+    mapFunnelToListItem(funnel),
+  );
+}

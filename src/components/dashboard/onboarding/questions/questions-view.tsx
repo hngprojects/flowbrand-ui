@@ -18,7 +18,6 @@ import {
   buildStep2Answer,
   buildStep3Answer,
   customerProfileFromAnswers,
-  customerTagsFromAnswers,
   isOnboardingSessionComplete,
   stepNumberFromSession,
 } from "@/lib/onboarding-api";
@@ -60,6 +59,10 @@ export function QuestionsView() {
     if (!sessionQuery.isSuccess || !sessionQuery.data) return;
 
     if (sessionQuery.data.alreadyComplete) {
+      if (isNewStrategy) {
+        useOnboardingStore.getState().reset();
+        return;
+      }
       if (!isNewStrategy) {
         void redirectToExistingFunnelIfAny(router, "wizard").then(
           (redirected) => {
@@ -84,16 +87,14 @@ export function QuestionsView() {
     const id = parseOnboardingSessionId(raw);
     if (id) setSessionId(id);
 
-    const tags = customerTagsFromAnswers(session.answers);
     const customerProfile = customerProfileFromAnswers(session.answers);
     hydrateFromApiSession({
-      businessDescription: session.answers.step_1?.business_description,
-      customerTags: tags.length > 0 ? tags : undefined,
-      theyAre: customerProfile.theyAre,
-      whoWantTo: customerProfile.whoWantTo,
-      locatedIn: customerProfile.locatedIn,
-      customCustomerInput: customerProfile.customCustomerInput,
-      trafficChannel: session.answers.step_3?.discovery_channel,
+      businessDescription: session.answers.step_1?.business_description ?? "",
+      theyAre: customerProfile.theyAre ?? [],
+      whoWantTo: customerProfile.whoWantTo ?? [],
+      locatedIn: customerProfile.locatedIn ?? [],
+      customCustomerInput: customerProfile.customCustomerInput ?? "",
+      trafficChannel: session.answers.step_3?.discovery_channel ?? "",
       step: stepNumberFromSession(session),
     });
   }, [

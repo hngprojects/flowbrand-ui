@@ -42,7 +42,7 @@ export function StrategyMainPanel({
       )}
     >
       <MeshBackground />
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-none">
         {children}
       </div>
     </div>

@@ -10,8 +10,10 @@ import {
 import {
   getFocusStage,
   mapFunnelToFocus,
+  mapFunnelsToListItems,
   mapStageTasksToDisplay,
   mapStagesToStrategyPhases,
+  type FunnelListItemDisplay,
 } from "@/lib/funnel-display";
 import { queryKeys } from "@/lib/query-keys";
 import {
@@ -118,6 +120,12 @@ export function useStrategyFunnel() {
     if (!funnelId) return [];
     return getCompletedStages(funnelId);
   }, [funnelId, stageProgressVersion]);
+
+  const funnelListQuery = useQuery({
+    queryKey: queryKeys.funnels.list(1),
+    queryFn: () => fetchFunnelList(1),
+    staleTime: 30_000,
+  });
 
   const resolveFunnelId = useCallback(
     async (isActive: () => boolean = () => true): Promise<string | null> => {
@@ -241,6 +249,18 @@ export function useStrategyFunnel() {
   });
 
   const funnel = displayQuery.data ?? null;
+
+  const funnelListItems = useMemo((): FunnelListItemDisplay[] => {
+    const items = mapFunnelsToListItems(funnelListQuery.data ?? []);
+    if (!funnelId) return items;
+    if (items.some((item) => item.funnelId === funnelId)) return items;
+
+    const active =
+      funnel ?? funnelListQuery.data?.find((f) => f.funnelId === funnelId);
+    if (!active) return items;
+
+    return mapFunnelsToListItems([active, ...(funnelListQuery.data ?? [])]);
+  }, [funnelListQuery.data, funnelId, funnel]);
 
   const hasRealContent = useMemo(
     () => (funnel ? funnelHasDisplayContent(funnel) : false),
@@ -472,6 +492,45 @@ export function useStrategyFunnel() {
     queryClient.removeQueries({ queryKey: queryKeys.funnels.display(id) });
   }, [funnelId, queryClient]);
 
+  const selectFunnel = useCallback(
+    (nextFunnelId: string) => {
+      if (!nextFunnelId || nextFunnelId === funnelId) return;
+
+      const selected =
+        funnelListQuery.data?.find((item) => item.funnelId === nextFunnelId) ??
+        null;
+      const startedAt = readFunnelStartedAt(selected?.createdAt) ?? Date.now();
+
+      clearStrategyAutoResolveSkipped();
+      setGenerationAborted(false);
+      setFunnelId(nextFunnelId);
+      setPollStartedAt(startedAt);
+      setResolvedId(true);
+      setStageProgressVersion((version) => version + 1);
+
+      saveActiveFunnelGeneration({
+        funnelId: nextFunnelId,
+        idempotencyKey: crypto.randomUUID(),
+        source:
+          selected?.creationPath === "document_upload"
+            ? "document_upload"
+            : "wizard",
+        startedAt,
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.generationStatus(nextFunnelId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.display(nextFunnelId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.list(1),
+      });
+    },
+    [funnelId, funnelListQuery.data, queryClient],
+  );
+
   return {
     loading,
     loadingMessage: STRATEGY_LOADING_MESSAGE,
@@ -489,5 +548,7 @@ export function useStrategyFunnel() {
     abortActiveGeneration,
     generationAborted,
     hydratedFromStorage,
+    funnels: funnelListItems,
+    selectFunnel,
   };
 }

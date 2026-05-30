@@ -8,6 +8,8 @@ import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_LOADING_MESSAGE } from "@/hooks/queries/use-strategy-funnel";
 import { StrategyIcon } from "@/components/icons/strategy";
+import { FunnelSwitcher } from "@/components/dashboard/strategy/funnel-switcher";
+import type { FunnelListItemDisplay } from "@/lib/funnel-display";
 
 const STRATEGY_SIDEBAR_ASIDE_CLASS =
   "sticky top-[72px] z-20 hidden h-[calc(100vh-72px)] w-full shrink-0 flex-col " +
@@ -42,6 +44,9 @@ export default function StrategySidebar({
   documents = [],
   strategyPhases = [],
   strategySummary,
+  funnels = [],
+  activeFunnelId = null,
+  onSelectFunnel,
   onCreateNewStrategy,
   className,
 }: {
@@ -49,6 +54,9 @@ export default function StrategySidebar({
   documents?: MockUploadedDoc[];
   strategyPhases?: readonly StrategyPhaseDisplay[];
   strategySummary?: string;
+  funnels?: readonly FunnelListItemDisplay[];
+  activeFunnelId?: string | null;
+  onSelectFunnel?: (funnelId: string) => void;
   onCreateNewStrategy?: () => void;
   className?: string;
 }) {
@@ -57,7 +65,15 @@ export default function StrategySidebar({
 
   return (
     <aside className={cn(STRATEGY_SIDEBAR_ASIDE_CLASS, className)}>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-5">
+      <div className="scrollbar-none flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 lg:gap-5 lg:px-4 lg:py-5">
+        {onSelectFunnel && funnels.length > 0 ? (
+          <FunnelSwitcher
+            funnels={funnels}
+            activeFunnelId={activeFunnelId}
+            onSelectFunnel={onSelectFunnel}
+          />
+        ) : null}
+
         <div className="space-y-2.5">
           {hasDocuments ? (
             <>

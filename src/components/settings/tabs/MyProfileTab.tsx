@@ -43,10 +43,18 @@ interface MyProfileTabProps {
 
 export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [avatar, setAvatar] = useState<string | null>(null);
+  /** Local override; undefined = use profile.avatarUrl from the server. */
+  const [avatarOverride, setAvatarOverride] = useState<
+    string | null | undefined
+  >(undefined);
 
   const { data: profile, isPending: isLoadingProfile } = useProfileQuery();
   const updateProfile = useUpdateProfileMutation();
+
+  const avatar =
+    avatarOverride !== undefined
+      ? avatarOverride
+      : (profile?.avatarUrl ?? null);
 
   const form = useForm<MyProfileFormValues>({
     resolver: zodResolver(MyProfileSchema),
@@ -62,19 +70,15 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   const fullName = useWatch({ control: form.control, name: "fullName" });
 
   useEffect(() => {
-    if (profile) {
-      const countryCode =
-        COUNTRY_OPTIONS.find((c) => c.label === profile.country)?.value ?? "";
+    if (!profile) return;
 
-      form.reset({
-        fullName: profile.fullName ?? "",
-        country: countryCode,
-      });
+    const countryCode =
+      COUNTRY_OPTIONS.find((c) => c.label === profile.country)?.value ?? "";
 
-      if (profile.avatarUrl) {
-        setAvatar(profile.avatarUrl);
-      }
-    }
+    form.reset({
+      fullName: profile.fullName ?? "",
+      country: countryCode,
+    });
   }, [profile, form]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,20 +86,20 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
     if (!file) return;
 
     const previewUrl = URL.createObjectURL(file);
-    setAvatar(previewUrl);
+    setAvatarOverride(previewUrl);
 
     const result = await uploadUserAvatar(file);
 
     if (!result.ok) {
       toast.error(result.error ?? "Could not upload avatar. Please try again.");
-      setAvatar(profile?.avatarUrl ?? null);
+      setAvatarOverride(undefined);
       return;
     }
-    setAvatar(result.data.avatarUrl);
+    setAvatarOverride(result.data.avatarUrl);
     toast.success("Avatar updated successfully.");
   };
   const handleDeleteAvatar = () => {
-    setAvatar(null);
+    setAvatarOverride(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 

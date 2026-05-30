@@ -143,10 +143,10 @@ function StrategyStageTasks({
           tasks.map((task) => (
             <div
               key={task.id}
-              className="rounded-[16px] border border-primary-80 bg-white p-5 shadow-[0px_1px_2px_rgba(16,24,40,0.05)] md:p-6"
+              className="rounded-[16px] border border-primary-80 bg-white p-4 shadow-[0px_1px_2px_rgba(16,24,40,0.05)] md:p-5 lg:p-6"
             >
-              <div className="flex items-start justify-between gap-4">
-                <h2 className="text-[17px] font-semibold text-neutral-900">
+              <div className="flex items-start justify-between gap-3 md:gap-4">
+                <h2 className="min-w-0 text-base font-semibold text-neutral-900 md:text-[17px]">
                   {task.title}
                 </h2>
                 <TaskCheckbox
@@ -197,13 +197,13 @@ function StrategyStageTasks({
         )}
       </div>
 
-      <div className="flex justify-end pb-4">
+      <div className="flex justify-end pb-2 md:pb-4">
         <button
           type="button"
           disabled={!allTasksComplete || submitted || isCurrentStageComplete}
           onClick={handleSubmit}
           className={cn(
-            "rounded-[10px] px-10 py-3.5 text-sm font-semibold transition-colors",
+            "rounded-[10px] px-6 py-3 text-sm font-semibold transition-colors md:px-10 md:py-3.5",
             allTasksComplete && !submitted && !isCurrentStageComplete
               ? "cursor-pointer bg-primary-500 text-white hover:bg-primary-625"
               : "cursor-not-allowed bg-primary-150 text-neutral-900",
@@ -238,6 +238,8 @@ export function StrategyView() {
     abortActiveGeneration,
     generationAborted,
     hydratedFromStorage,
+    funnels,
+    selectFunnel,
   } = useStrategyFunnel();
 
   const documents = useMemo(() => {
@@ -287,24 +289,30 @@ export function StrategyView() {
   ) : null;
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-white">
+    <div className="flex min-h-screen w-full flex-col bg-white md:h-[100dvh] md:overflow-hidden">
       <OnboardingNavbar
         loading={loading}
         documents={documents}
         strategyPhases={strategyPhases}
         strategySummary={loading ? undefined : strategySummary}
+        funnels={funnels}
+        activeFunnelId={funnelId}
+        onSelectFunnel={selectFunnel}
         onCreateNewStrategy={loading ? undefined : handleCreateNewStrategy}
       />
 
       {loading ? (
         <>
-          <div className="hidden w-full flex-1 lg:flex">
+          <div className="dashboard-layout-class hidden w-full flex-1 md:flex">
             <StrategySidebar
               loading
               documents={documents}
               strategyPhases={strategyPhases}
+              funnels={funnels}
+              activeFunnelId={funnelId}
+              onSelectFunnel={selectFunnel}
             />
-            <StrategyMainPanel className="min-h-[calc(100vh-83px)] w-full">
+            <StrategyMainPanel className="min-h-[calc(100vh-83px)] min-w-0 flex-1">
               <StrategyGenerationLoading
                 message={loadingMessage}
                 onCancel={handleCancelGeneration}
@@ -312,7 +320,7 @@ export function StrategyView() {
             </StrategyMainPanel>
           </div>
 
-          <StrategyMainPanel className="min-h-[calc(100vh-72px)] flex-1 lg:hidden">
+          <StrategyMainPanel className="min-h-[calc(100vh-72px)] flex-1 md:hidden">
             <StrategyGenerationLoading
               message={loadingMessage}
               onCancel={handleCancelGeneration}
@@ -320,40 +328,46 @@ export function StrategyView() {
           </StrategyMainPanel>
         </>
       ) : mainPanelContent ? (
-        <div className="dashboard-layout-class flex flex-1 flex-col lg:flex-row">
+        <div className="dashboard-layout-class flex min-h-0 flex-1 flex-col md:flex-row">
           <StrategySidebar
             loading={false}
             documents={documents}
             strategyPhases={strategyPhases}
             strategySummary={strategySummary}
+            funnels={funnels}
+            activeFunnelId={funnelId}
+            onSelectFunnel={selectFunnel}
             onCreateNewStrategy={handleCreateNewStrategy}
           />
-          <StrategyMainPanel className="min-h-0 min-w-0 flex-1 md:w-2/3">
+          <StrategyMainPanel className="min-h-0 min-w-0 flex-1">
             {mainPanelContent}
           </StrategyMainPanel>
         </div>
       ) : (
-        <div className="dashboard-layout-class flex flex-1 flex-col lg:flex-row">
+        <div className="dashboard-layout-class flex min-h-0 flex-1 flex-col md:flex-row">
           <StrategySidebar
             loading={false}
             documents={documents}
             strategyPhases={strategyPhases}
             strategySummary={strategySummary}
+            funnels={funnels}
+            activeFunnelId={funnelId}
+            onSelectFunnel={selectFunnel}
             onCreateNewStrategy={handleCreateNewStrategy}
           />
 
-          <StrategyMainPanel className="min-h-0 min-w-0 flex-1 md:w-2/3">
-            <div className="flex flex-col gap-6 p-default md:py-6">
+          <StrategyMainPanel className="min-h-0 min-w-0 flex-1">
+            <div className="flex flex-col gap-5 px-4 py-5 md:gap-6 md:px-5 md:py-6 lg:px-8">
               {focus ? (
                 <div>
-                  <div className="mb-2 flex items-center justify-between text-sm font-medium text-neutral-500">
+                  <div className="mb-2 flex items-center justify-between gap-3 text-sm font-medium text-neutral-500">
                     <p>This week&apos;s focus</p>
-                    <p>{focus.progress}</p>
+                    <p className="shrink-0">{focus.progress}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="flex items-center gap-3 text-2xl font-semibold text-neutral-900">
+                    <p className="flex items-center gap-2 text-xl font-semibold text-neutral-900 md:gap-3 md:text-2xl">
                       <StrategyIcon />
-                      {focus.phase}
+                      <span className="min-w-0">{focus.phase}</span>
                     </p>
                     <p className="text-sm leading-relaxed text-neutral-500 md:text-[15px]">
                       {focus.subtitle}
