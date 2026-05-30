@@ -4,6 +4,9 @@ import { useState } from "react";
 import { AlertCircle } from "lucide-react";
 import BaseModal from "@/components/modals/BaseModal";
 import ModalTrashIcon from "@/components/icons/modals/trash";
+import { deleteUserAccount } from "@/actions/user";
+import { toast } from "sonner";
+import { signOut } from "next-auth/react";
 
 interface DeleteAccountTabProps {
   onClose: () => void;
@@ -14,9 +17,20 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
   const [confirmText, setConfirmText] = useState("");
   const isConfirmed = confirmText === "DELETE";
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!isConfirmed) return;
-    onClose();
+
+    const result = await deleteUserAccount();
+
+    if (!result.ok) {
+      toast.error(
+        result.error ?? "Could not delete account. Please try again.",
+      );
+      return;
+    }
+
+    toast.success("Account deleted successfully.");
+    await signOut({ callbackUrl: "/" });
   };
 
   const consequences = [

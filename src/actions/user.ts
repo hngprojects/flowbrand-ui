@@ -252,3 +252,44 @@ export async function uploadUserAvatar(
     return { ok: false, error: "Could not reach the server." };
   }
 }
+
+export async function deleteUserAccount(): Promise<UserActionResult<null>> {
+  flowLog("auth", "DELETE /api/users/me → request");
+
+  const token = await getAccessToken();
+  if (!token) {
+    return {
+      ok: false,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
+  }
+
+  try {
+    const res = await axios.delete(userApiUrl("/me"), {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { confirmation: "DELETE" },
+      timeout: 30_000,
+    });
+
+    const result = { ok: true as const, status: res.status, data: null };
+    flowLogApiResult("auth", "DELETE /api/users/me", result);
+    return result;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      const result = {
+        ok: false as const,
+        error: formatAuthApiError(
+          status,
+          data,
+          "Could not delete account. Please try again.",
+        ),
+        status,
+      };
+      flowLogApiResult("auth", "DELETE /api/users/me", result);
+      return result;
+    }
+    return { ok: false, error: "Could not reach the server." };
+  }
+}
