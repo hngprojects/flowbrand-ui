@@ -7,7 +7,6 @@ import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import { toast } from "sonner";
 import { StrategyIcon } from "@/components/icons/strategy";
 import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
@@ -24,6 +23,8 @@ import {
 } from "@/hooks/queries/use-strategy-funnel";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { cn } from "@/lib/utils";
+import { useUpdateTaskStatusMutation } from "@/hooks/mutations/use-task-mutations";
+import { StageFeedback } from "@/components/dashboard/strategy/stage-feedback";
 
 function StrategyGenerationLoading({
   message,
@@ -108,11 +109,16 @@ function StrategyStageTasks({
   tasks,
   isCurrentStageComplete,
   onCompleteStage,
+  funnelId,
+  activeStageId,
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
-  onCompleteStage: (taskIds: string[]) => Promise<void>;
+  onCompleteStage: () => Promise<void>;
+  funnelId: string;
+  activeStageId: string;
 }) {
+  const updateTask = useUpdateTaskStatusMutation(funnelId);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
@@ -124,16 +130,8 @@ function StrategyStageTasks({
 
   const handleSubmit = async () => {
     if (!allTasksComplete || submitted || isCurrentStageComplete) return;
-    try {
-      await onCompleteStage(checkedTasks);
-      setSubmitted(true);
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Could not complete this stage.",
-      );
-    }
+    await onCompleteStage();
+    setSubmitted(true);
   };
 
   return (
@@ -157,11 +155,20 @@ function StrategyStageTasks({
                   }
                   onClick={() => {
                     if (submitted || isCurrentStageComplete) return;
+                    const isChecked =
+                      checkedTasks.includes(task.id) ||
+                      task.status === "complete";
+                    const newStatus = isChecked ? "pending" : "complete";
                     setCheckedTasks((prev) =>
-                      prev.includes(task.id)
+                      isChecked
                         ? prev.filter((id) => id !== task.id)
                         : [...prev, task.id],
                     );
+                    updateTask.mutate({
+                      stageId: activeStageId,
+                      taskId: task.id,
+                      status: newStatus,
+                    });
                   }}
                 />
               </div>
@@ -230,6 +237,7 @@ export function StrategyView() {
     funnel,
     activeStageId,
     isCurrentStageComplete,
+    lastCompletedStageId,
     completeCurrentStage,
     strategyPhases,
     focus,
@@ -361,13 +369,22 @@ export function StrategyView() {
                   </div>
                 </div>
               ) : null}
-
+              {/* // Inside StrategyView render, after <StrategyStageTasks />: */}
               <StrategyStageTasks
                 key={activeStageId ?? "none"}
                 tasks={tasks}
                 isCurrentStageComplete={isCurrentStageComplete}
                 onCompleteStage={completeCurrentStage}
+                funnelId={funnelId ?? ""}
+                activeStageId={activeStageId ?? ""}
               />
+              {lastCompletedStageId && funnelId && (
+                <StageFeedback
+                  key={lastCompletedStageId}
+                  funnelId={funnelId}
+                  stageId={lastCompletedStageId}
+                />
+              )}
             </div>
           </StrategyMainPanel>
         </div>
