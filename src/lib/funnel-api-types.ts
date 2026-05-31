@@ -32,6 +32,7 @@ export type FunnelDetailApi = {
   businessName?: string;
   creationPath?: string;
   status?: string;
+  createdAt?: string;
   stages?: FunnelStageApi[];
 };
 
@@ -239,6 +240,12 @@ function buildFunnelDetailFromRecord(
           ? node.creation_path
           : undefined,
     status: typeof node.status === "string" ? node.status : undefined,
+    createdAt:
+      typeof node.createdAt === "string"
+        ? node.createdAt
+        : typeof node.created_at === "string"
+          ? node.created_at
+          : undefined,
     stages,
   };
 }

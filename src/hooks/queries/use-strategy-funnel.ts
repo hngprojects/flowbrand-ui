@@ -98,7 +98,9 @@ export function useStrategyFunnel() {
     initial.hydratedFromStorage,
   );
   const [generationAborted, setGenerationAborted] = useState(false);
-
+  const [lastCompletedStageId, setLastCompletedStageId] = useState<
+    string | null
+  >(null);
   const completedStageIds = useMemo(() => {
     void stageProgressVersion;
     if (!funnelId) return [];
@@ -252,7 +254,7 @@ export function useStrategyFunnel() {
   const isCurrentStageComplete = useMemo(() => {
     if (!funnelId || !activeStageId) return false;
     return mergedCompletedStageIds.includes(activeStageId);
-  }, [funnelId, activeStageId, completedStageIds]);
+  }, [funnelId, activeStageId, mergedCompletedStageIds]); // ← correct
 
   const completeCurrentStage = useCallback(async () => {
     if (!funnelId || !activeStageId) return;
@@ -267,6 +269,7 @@ export function useStrategyFunnel() {
     }
 
     markStageComplete(funnelId, activeStageId);
+    setLastCompletedStageId(activeStageId);
     setStageProgressVersion((version) => version + 1);
 
     // If backend returned the unlocked stage, log it
@@ -484,6 +487,7 @@ export function useStrategyFunnel() {
     funnelId,
     activeStageId,
     isCurrentStageComplete,
+    lastCompletedStageId,
     completeCurrentStage,
     strategyPhases,
     focus,

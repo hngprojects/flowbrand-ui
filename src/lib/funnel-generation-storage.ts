@@ -8,6 +8,7 @@ export type StoredFunnelGeneration = {
   funnelId: string;
   idempotencyKey: string;
   source: FunnelSource;
+  startedAt?: number;
 };
 
 export type PendingGenerationAttempt = {
@@ -51,7 +52,14 @@ export function loadActiveFunnelGeneration(): StoredFunnelGeneration | null {
       typeof parsed.idempotencyKey === "string" &&
       (parsed.source === "wizard" || parsed.source === "document_upload")
     ) {
-      return parsed;
+      return {
+        ...parsed,
+        startedAt:
+          typeof parsed.startedAt === "number" &&
+          Number.isFinite(parsed.startedAt)
+            ? parsed.startedAt
+            : undefined,
+      };
     }
     return null;
   } catch {

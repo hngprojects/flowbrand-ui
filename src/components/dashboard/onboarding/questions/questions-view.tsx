@@ -17,6 +17,7 @@ import {
   buildStep1Answer,
   buildStep2Answer,
   buildStep3Answer,
+  customerProfileFromAnswers,
   customerTagsFromAnswers,
   isOnboardingSessionComplete,
   stepNumberFromSession,
@@ -58,6 +59,17 @@ export function QuestionsView() {
   useEffect(() => {
     if (!sessionQuery.isSuccess || !sessionQuery.data) return;
 
+    if (sessionQuery.data.alreadyComplete) {
+      if (!isNewStrategy) {
+        void redirectToExistingFunnelIfAny(router, "wizard").then(
+          (redirected) => {
+            if (!redirected) router.replace(STRATEGY_ROUTE);
+          },
+        );
+      }
+      return;
+    }
+
     const { session, raw } = sessionQuery.data;
 
     if (!isNewStrategy && isOnboardingSessionComplete(session)) {
@@ -73,9 +85,14 @@ export function QuestionsView() {
     if (id) setSessionId(id);
 
     const tags = customerTagsFromAnswers(session.answers);
+    const customerProfile = customerProfileFromAnswers(session.answers);
     hydrateFromApiSession({
       businessDescription: session.answers.step_1?.business_description,
       customerTags: tags.length > 0 ? tags : undefined,
+      theyAre: customerProfile.theyAre,
+      whoWantTo: customerProfile.whoWantTo,
+      locatedIn: customerProfile.locatedIn,
+      customCustomerInput: customerProfile.customCustomerInput,
       trafficChannel: session.answers.step_3?.discovery_channel,
       step: stepNumberFromSession(session),
     });
@@ -89,6 +106,7 @@ export function QuestionsView() {
   ]);
 
   const onboardingAlreadyComplete =
+    sessionQuery.data?.alreadyComplete === true ||
     sessionQuery.error instanceof OnboardingAlreadyCompleteError;
 
   useEffect(() => {

@@ -237,6 +237,7 @@ export function StrategyView() {
     funnel,
     activeStageId,
     isCurrentStageComplete,
+    lastCompletedStageId,
     completeCurrentStage,
     strategyPhases,
     focus,
@@ -369,16 +370,20 @@ export function StrategyView() {
                 </div>
               ) : null}
               {/* // Inside StrategyView render, after <StrategyStageTasks />: */}
-
               <StrategyStageTasks
+                key={activeStageId ?? "none"}
                 tasks={tasks}
                 isCurrentStageComplete={isCurrentStageComplete}
                 onCompleteStage={completeCurrentStage}
                 funnelId={funnelId ?? ""}
                 activeStageId={activeStageId ?? ""}
               />
-              {isCurrentStageComplete && funnelId && activeStageId && (
-                <StageFeedback funnelId={funnelId} stageId={activeStageId} />
+              {lastCompletedStageId && funnelId && (
+                <StageFeedback
+                  key={lastCompletedStageId}
+                  funnelId={funnelId}
+                  stageId={lastCompletedStageId}
+                />
               )}
             </div>
           </StrategyMainPanel>

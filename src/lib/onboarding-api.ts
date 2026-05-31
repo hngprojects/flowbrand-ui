@@ -1,10 +1,21 @@
 /** Helpers for /api/onboarding per staging OpenAPI. */
 
-import { collectApiRecords } from "@/lib/api-envelope";
+import {
+  collectApiRecords,
+  readApiMessage,
+  readRecord,
+} from "@/lib/api-envelope";
 
 export type OnboardingSessionAnswers = {
   step_1?: { business_description?: string };
-  step_2?: { customer_tags?: { type?: string[] } };
+  step_2?: {
+    customer_tags?: {
+      type?: string[];
+      wants?: string[];
+      location?: string[];
+    };
+    additional_notes?: string;
+  };
   step_3?: { discovery_channel?: string };
 };
 
@@ -15,10 +26,29 @@ export type ParsedOnboardingSession = {
   answers: OnboardingSessionAnswers;
 };
 
+function readSessionIdFromRecord(
+  record: Record<string, unknown>,
+): string | null {
+  const direct = record.session_id ?? record.sessionId ?? record.id;
+  if (typeof direct === "string" && direct.trim()) {
+    return direct.trim();
+  }
+
+  const nested = readRecord(record.session);
+  if (nested) {
+    const nestedId = nested.session_id ?? nested.sessionId ?? nested.id;
+    if (typeof nestedId === "string" && nestedId.trim()) {
+      return nestedId.trim();
+    }
+  }
+
+  return null;
+}
+
 export function parseOnboardingSessionId(data: unknown): string | null {
   for (const record of collectApiRecords(data)) {
-    const id = record.session_id ?? record.sessionId;
-    if (typeof id === "string" && id.trim()) return id.trim();
+    const id = readSessionIdFromRecord(record);
+    if (id) return id;
   }
   return null;
 }
@@ -30,10 +60,7 @@ function parseAnswers(raw: unknown): OnboardingSessionAnswers {
 
 export function parseOnboardingSession(data: unknown): ParsedOnboardingSession {
   for (const record of collectApiRecords(data)) {
-    const sessionId =
-      (typeof record.session_id === "string" && record.session_id) ||
-      (typeof record.sessionId === "string" && record.sessionId) ||
-      null;
+    const sessionId = readSessionIdFromRecord(record);
 
     const stepsCompleted =
       typeof record.steps_completed === "number"
@@ -93,6 +120,43 @@ export function isOnboardingConflictStatus(status?: number): boolean {
   return status === 409;
 }
 
+export function parseOnboardingRedirectTarget(data: unknown): string | null {
+  for (const record of collectApiRecords(data)) {
+    const redirect = readRecord(record.redirect);
+    const to = redirect?.to;
+    if (typeof to === "string" && to.trim()) {
+      return to.trim();
+    }
+  }
+  return null;
+}
+
+/** True when POST /onboarding/start or /onboarding/complete indicates onboarding is done. */
+export function isOnboardingAlreadyCompleteResponse(data: unknown): boolean {
+  const session = parseOnboardingSession(data);
+  const status = session.status?.toLowerCase().trim();
+
+  // Active wizard session — resume even when the message mentions redirect elsewhere.
+  if (session.sessionId && status === "in_progress") {
+    return false;
+  }
+
+  if (status && COMPLETED_SESSION_STATUSES.has(status)) {
+    return true;
+  }
+
+  const message = readApiMessage(data)?.toLowerCase() ?? "";
+  if (message.includes("already complete")) {
+    return true;
+  }
+
+  if (parseOnboardingRedirectTarget(data) && !session.sessionId) {
+    return true;
+  }
+
+  return false;
+}
+
 export function buildStep1Answer(businessDescription: string) {
   return { business_description: businessDescription.trim() };
 }
@@ -103,15 +167,27 @@ export function buildStep2Answer(input: {
   locatedIn: string[];
   customCustomerInput: string;
 }) {
-  const type = [
-    ...input.theyAre,
-    ...input.whoWantTo,
-    ...input.locatedIn,
-    ...(input.customCustomerInput.trim()
-      ? [input.customCustomerInput.trim()]
-      : []),
-  ];
-  return { customer_tags: { type } };
+  const answer: {
+    customer_tags: {
+      type: string[];
+      wants: string[];
+      location: string[];
+    };
+    additional_notes?: string;
+  } = {
+    customer_tags: {
+      type: input.theyAre,
+      wants: input.whoWantTo,
+      location: input.locatedIn,
+    },
+  };
+
+  const notes = input.customCustomerInput.trim();
+  if (notes) {
+    answer.additional_notes = notes;
+  }
+
+  return answer;
 }
 
 export function buildStep3Answer(trafficChannel: string) {
@@ -121,5 +197,23 @@ export function buildStep3Answer(trafficChannel: string) {
 export function customerTagsFromAnswers(
   answers: OnboardingSessionAnswers,
 ): string[] {
-  return answers.step_2?.customer_tags?.type ?? [];
+  const tags = answers.step_2?.customer_tags;
+  return [
+    ...(tags?.type ?? []),
+    ...(tags?.wants ?? []),
+    ...(tags?.location ?? []),
+    ...(answers.step_2?.additional_notes
+      ? [answers.step_2.additional_notes]
+      : []),
+  ];
+}
+
+export function customerProfileFromAnswers(answers: OnboardingSessionAnswers) {
+  const tags = answers.step_2?.customer_tags;
+  return {
+    theyAre: tags?.type,
+    whoWantTo: tags?.wants,
+    locatedIn: tags?.location,
+    customCustomerInput: answers.step_2?.additional_notes,
+  };
 }
