@@ -5,6 +5,10 @@ import { auth } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { formatAuthApiError } from "@/lib/auth-api";
 import { flowLog, flowLogApiResult } from "@/lib/flow-debug-log";
+import type {
+  NotificationPreferences,
+  UpdateNotificationPreferencesInput,
+} from "@/schema/notification.schema";
 
 export type UserProfile = {
   id: string;
@@ -289,6 +293,101 @@ export async function deleteUserAccount(): Promise<UserActionResult<null>> {
       };
       flowLogApiResult("auth", "DELETE /api/users/me", result);
       return result;
+    }
+    return { ok: false, error: "Could not reach the server." };
+  }
+}
+
+export async function getNotificationPreferences(): Promise<
+  UserActionResult<NotificationPreferences>
+> {
+  flowLog("auth", "GET /api/users/me/notification-preferences → request");
+
+  const token = await getAccessToken();
+  if (!token) {
+    return {
+      ok: false,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
+  }
+
+  try {
+    const res = await axios.get(userApiUrl("/me/notification-preferences"), {
+      headers: { Authorization: `Bearer ${token}` },
+      timeout: 30_000,
+    });
+
+    const data = res.data?.data as NotificationPreferences;
+    const result = { ok: true as const, status: res.status, data };
+    flowLogApiResult(
+      "auth",
+      "GET /api/users/me/notification-preferences",
+      result,
+    );
+    return result;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      return {
+        ok: false,
+        error: formatAuthApiError(
+          status,
+          data,
+          "Could not load notification preferences.",
+        ),
+        status,
+      };
+    }
+    return { ok: false, error: "Could not reach the server." };
+  }
+}
+
+export async function updateNotificationPreferences(
+  input: UpdateNotificationPreferencesInput,
+): Promise<UserActionResult<null>> {
+  flowLog("auth", "PATCH /api/users/me/notification-preferences → request", {
+    input,
+  });
+
+  const token = await getAccessToken();
+  if (!token) {
+    return {
+      ok: false,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
+  }
+
+  try {
+    const res = await axios.patch(
+      userApiUrl("/me/notification-preferences"),
+      input,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30_000,
+      },
+    );
+
+    const result = { ok: true as const, status: res.status, data: null };
+    flowLogApiResult(
+      "auth",
+      "PATCH /api/users/me/notification-preferences",
+      result,
+    );
+    return result;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      return {
+        ok: false,
+        error: formatAuthApiError(
+          status,
+          data,
+          "Could not update notification preferences.",
+        ),
+        status,
+      };
     }
     return { ok: false, error: "Could not reach the server." };
   }
