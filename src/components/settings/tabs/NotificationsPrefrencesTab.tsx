@@ -63,6 +63,7 @@ export default function NotificationPreferencesTab() {
     const load = async () => {
       const result = await getNotificationPreferences();
       if (!result.ok) {
+        toast.error(result.error ?? "Could not load notification preferences.");
         setIsLoading(false);
         return;
       }
@@ -121,7 +122,7 @@ export default function NotificationPreferencesTab() {
               role="switch"
               aria-checked={item.enabled}
               aria-label={item.label}
-              disabled={isLoading || savingId === item.id}
+              disabled={isLoading || savingId !== null}
               onClick={() => toggle(item.id)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2

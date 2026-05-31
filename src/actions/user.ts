@@ -319,6 +319,13 @@ export async function getNotificationPreferences(): Promise<
     });
 
     const data = res.data?.data as NotificationPreferences;
+    if (!data?.id) {
+      return {
+        ok: false,
+        error: "Could not read notification preferences.",
+        status: 502,
+      };
+    }
     const result = { ok: true as const, status: res.status, data };
     flowLogApiResult(
       "auth",
