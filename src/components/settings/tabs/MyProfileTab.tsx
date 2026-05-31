@@ -47,14 +47,19 @@ interface MyProfileTabProps {
 
 export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [manualAvatar, setManualAvatar] = useState<string | null>(null);
+  const [manualAvatar, setManualAvatar] = useState<string | null | "deleted">(
+    null,
+  );
 
   const { data: profile, isPending: isLoadingProfile } = useProfileQuery();
   const updateProfile = useUpdateProfileMutation();
   const queryClient = useQueryClient();
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-  const avatar = manualAvatar ?? profile?.avatarUrl ?? null;
+  const avatar =
+    manualAvatar === "deleted"
+      ? null
+      : (manualAvatar ?? profile?.avatarUrl ?? null);
 
   const form = useForm<MyProfileFormValues>({
     resolver: zodResolver(MyProfileSchema),
@@ -107,11 +112,12 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
       toast.success("Avatar updated successfully.");
     } finally {
       setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
   const handleDeleteAvatar = () => {
-    setManualAvatar(null);
+    setManualAvatar("deleted");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
