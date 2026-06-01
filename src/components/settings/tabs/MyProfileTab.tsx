@@ -16,7 +16,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useProfileQuery } from "@/hooks/queries/use-profile-queries";
+import {
+  useProfileQuery,
+  profileQueryKey,
+} from "@/hooks/queries/use-profile-queries";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUpdateProfileMutation } from "@/hooks/mutations/use-profile-mutations";
 import { uploadUserAvatar } from "@/actions/user";
 
@@ -43,18 +47,19 @@ interface MyProfileTabProps {
 
 export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  /** Local override; undefined = use profile.avatarUrl from the server. */
-  const [avatarOverride, setAvatarOverride] = useState<
-    string | null | undefined
-  >(undefined);
+  const [manualAvatar, setManualAvatar] = useState<string | null | "deleted">(
+    null,
+  );
 
   const { data: profile, isPending: isLoadingProfile } = useProfileQuery();
   const updateProfile = useUpdateProfileMutation();
+  const queryClient = useQueryClient();
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const avatar =
-    avatarOverride !== undefined
-      ? avatarOverride
-      : (profile?.avatarUrl ?? null);
+    manualAvatar === "deleted"
+      ? null
+      : (manualAvatar ?? profile?.avatarUrl ?? null);
 
   const form = useForm<MyProfileFormValues>({
     resolver: zodResolver(MyProfileSchema),
@@ -70,36 +75,49 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   const fullName = useWatch({ control: form.control, name: "fullName" });
 
   useEffect(() => {
-    if (!profile) return;
+    if (profile) {
+      const countryCode =
+        COUNTRY_OPTIONS.find((c) => c.label === profile.country)?.value ?? "";
 
-    const countryCode =
-      COUNTRY_OPTIONS.find((c) => c.label === profile.country)?.value ?? "";
-
-    form.reset({
-      fullName: profile.fullName ?? "",
-      country: countryCode,
-    });
+      form.reset({
+        fullName: profile.fullName ?? "",
+        country: countryCode,
+      });
+    }
   }, [profile, form]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || isUploadingAvatar) return;
 
     const previewUrl = URL.createObjectURL(file);
-    setAvatarOverride(previewUrl);
+    setManualAvatar(previewUrl);
+    setIsUploadingAvatar(true);
 
-    const result = await uploadUserAvatar(file);
+    try {
+      const result = await uploadUserAvatar(file);
 
-    if (!result.ok) {
-      toast.error(result.error ?? "Could not upload avatar. Please try again.");
-      setAvatarOverride(undefined);
-      return;
+      if (!result.ok) {
+        toast.error(
+          result.error ?? "Could not upload avatar. Please try again.",
+        );
+        setManualAvatar(null);
+        URL.revokeObjectURL(previewUrl);
+        return;
+      }
+
+      setManualAvatar(result.data.avatarUrl);
+      URL.revokeObjectURL(previewUrl);
+      queryClient.invalidateQueries({ queryKey: profileQueryKey });
+      toast.success("Avatar updated successfully.");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-    setAvatarOverride(result.data.avatarUrl);
-    toast.success("Avatar updated successfully.");
   };
+
   const handleDeleteAvatar = () => {
-    setAvatarOverride(null);
+    setManualAvatar("deleted");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -151,17 +169,19 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
           />
           <button
             type="button"
+            disabled={isUploadingAvatar}
             onClick={() => fileInputRef.current?.click()}
             className="h-[40px] whitespace-nowrap rounded-[8px] border border-gray-300 px-[24px] 
-            py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors"
+            py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Upload new picture
           </button>
           <button
             type="button"
+            disabled={isUploadingAvatar}
             onClick={handleDeleteAvatar}
             className="h-[40px] whitespace-nowrap rounded-[8px] border border-red-100 bg-red-50
-            px-[24px] py-[8px] text-sm md:text-base text-red-500 hover:opacity-90 transition-opacity"
+            px-[24px] py-[8px] text-sm md:text-base text-red-500 hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             Delete
           </button>
