@@ -16,7 +16,7 @@ import {
   funnelSidebarSummary,
   type FunnelTaskDisplay,
 } from "@/lib/funnel-display";
-import { resolveFunnelDocuments } from "@/lib/funnel-documents-storage";
+import { loadFunnelDocuments } from "@/lib/funnel-documents-storage";
 import {
   NO_STRATEGY_AVAILABLE_MESSAGE,
   STRATEGY_NOT_VIEWABLE_MESSAGE,
@@ -280,8 +280,7 @@ export function StrategyView() {
   } = useStrategyFunnel();
 
   const documents = useMemo(
-    () =>
-      funnelId ? resolveFunnelDocuments(funnelId, funnel?.creationPath) : [],
+    () => (funnelId ? loadFunnelDocuments(funnelId) : []),
     [funnelId, funnel?.creationPath],
   );
 

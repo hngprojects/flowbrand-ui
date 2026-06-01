@@ -1,4 +1,3 @@
-import { loadDashboardMockSession } from "@/lib/dashboard-mock-session";
 import type { UploadedDocDisplay } from "@/lib/funnel-display";
 
 const STORAGE_KEY = "flowbrand_funnel_documents_v1";
@@ -36,28 +35,6 @@ export function saveFunnelDocuments(
 export function loadFunnelDocuments(funnelId: string): UploadedDocDisplay[] {
   if (!funnelId) return [];
   return readMap()[funnelId] ?? [];
-}
-
-/** Load stored docs; one-time migrate from legacy session storage for document-upload funnels. */
-export function resolveFunnelDocuments(
-  funnelId: string,
-  creationPath?: string,
-): UploadedDocDisplay[] {
-  const stored = loadFunnelDocuments(funnelId);
-  if (stored.length > 0) return stored;
-  if (creationPath !== "document_upload") return [];
-
-  const legacy = loadDashboardMockSession();
-  if (!legacy?.uploadedDocuments?.length) return [];
-
-  const documents = legacy.uploadedDocuments.map((doc) => ({
-    id: doc.id,
-    name: doc.name,
-    size: doc.size,
-    type: doc.type,
-  }));
-  saveFunnelDocuments(funnelId, documents);
-  return documents;
 }
 
 export function clearFunnelDocuments(funnelId: string): void {

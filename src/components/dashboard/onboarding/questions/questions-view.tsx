@@ -6,10 +6,6 @@ import { toast } from "sonner";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { onboardingSchema } from "@/schema/onboarding";
 import { Button } from "@/components/ui/button";
-import {
-  buildSessionFromOnboarding,
-  saveDashboardMockSession,
-} from "@/lib/dashboard-mock-session";
 import { STRATEGY_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 import { clearNewStrategyFlow } from "@/lib/new-strategy";
 import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
@@ -285,18 +281,6 @@ export function QuestionsView() {
         source: "wizard",
         idempotencyKey: reserveIdempotencyKey("wizard"),
       });
-
-      saveDashboardMockSession(
-        buildSessionFromOnboarding({
-          businessDescription: store.businessDescription,
-          theyAre: store.theyAre,
-          whoWantTo: store.whoWantTo,
-          locatedIn: store.locatedIn,
-          customCustomerInput: store.customCustomerInput,
-          trafficChannel: store.trafficChannel,
-          uploadedDocuments: store.uploadedDocuments,
-        }),
-      );
 
       clearNewStrategyFlow();
       toast.success("Building your marketing strategy…");
