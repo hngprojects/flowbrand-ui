@@ -7,7 +7,9 @@ import axios from "axios";
 async function getToken(): Promise<string | null> {
   const session = await auth();
   const token = session?.access_token;
-  return session?.user?.id && session.invalid !== true && typeof token === "string"
+  return session?.user?.id &&
+    session.invalid !== true &&
+    typeof token === "string"
     ? token
     : null;
 }
