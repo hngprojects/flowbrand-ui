@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Plus, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
