@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, CircleHelp, Plus } from "lucide-react";
+import { ChevronRight, ChevronDown, CircleHelp, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
@@ -158,15 +158,18 @@ export default function StrategySidebar({
             <button
               type="button"
               onClick={() => setShowHistory((v) => !v)}
-              className="w-full text-left text-sm text-primary-500 underline-offset-2 hover:underline"
+              className="flex w-full items-center justify-between rounded-[14px] border border-primary-80 bg-white px-4 py-3 text-sm font-medium text-neutral-900 hover:bg-gray-50 transition-colors"
             >
-              {showHistory
-                ? "Hide previous strategies"
-                : "View previous strategies"}
+              <span>Previous Strategies</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-neutral-500 transition-transform duration-200",
+                  showHistory ? "rotate-180" : "rotate-0",
+                )}
+              />
             </button>
 
             {showHistory && <FunnelHistory currentFunnelId={currentFunnelId} />}
-
             {/* Create new strategy button */}
             {onCreateNewStrategy && (
               <>

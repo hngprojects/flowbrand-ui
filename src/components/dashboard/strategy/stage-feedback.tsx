@@ -6,6 +6,8 @@ import { submitStageFeedback } from "@/actions/funnels";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+type FeedbackStep = "prompt" | "form" | "done";
+
 export function StageFeedback({
   funnelId,
   stageId,
@@ -13,29 +15,58 @@ export function StageFeedback({
   funnelId: string;
   stageId: string;
 }) {
+  const [step, setStep] = useState<FeedbackStep>("prompt");
   const [comment, setComment] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
   const feedback = useMutation({
     retry: false,
     mutationFn: () => submitStageFeedback(funnelId, stageId, comment),
     onSuccess: () => {
-      setSubmitted(true);
+      setStep("done");
       toast.success("Feedback submitted. Thank you!");
     },
     onError: (error: Error) => {
       if (error.message?.includes("409")) {
-        setSubmitted(true);
+        setStep("done");
         return;
       }
       toast.error("Could not submit feedback. Please try again.");
     },
   });
 
-  if (submitted) {
+  if (step === "done") {
     return (
       <div className="rounded-[16px] border border-primary-80 bg-white p-5 text-sm text-neutral-500">
         Thank you for your feedback on this stage.
+      </div>
+    );
+  }
+
+  if (step === "prompt") {
+    return (
+      <div className="rounded-[16px] border border-primary-80 bg-white p-5">
+        <p className="text-sm font-semibold text-neutral-900">
+          Great work completing this stage! 🎉
+        </p>
+        <p className="mt-1 text-sm text-neutral-500">
+          Would you like to leave feedback on how this stage went?
+        </p>
+        <div className="mt-4 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setStep("form")}
+            className="rounded-[10px] bg-primary-500 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-625 transition-colors"
+          >
+            Leave Feedback
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep("done")}
+            className="text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
+          >
+            Skip for now
+          </button>
+        </div>
       </div>
     );
   }
@@ -52,7 +83,14 @@ export function StageFeedback({
         rows={3}
         className="w-full resize-none rounded-lg border border-gray-200 p-3 text-sm text-neutral-700 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none"
       />
-      <div className="mt-3 flex justify-end">
+      <div className="mt-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setStep("done")}
+          className="text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
+        >
+          Skip
+        </button>
         <button
           type="button"
           disabled={!comment.trim() || feedback.isPending}
