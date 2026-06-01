@@ -25,6 +25,8 @@ export async function GET(request: Request) {
   let token = accessToken;
   let apiRedirectUrl = redirectUrl;
 
+  let refreshCookieHeaders: string[] = [];
+
   if (!token && code) {
     const exchanged = await exchangeGoogleOAuthCode(envConfig.BASEURL, code);
     if (!exchanged) {
@@ -32,6 +34,7 @@ export async function GET(request: Request) {
     }
     token = exchanged.access_token;
     apiRedirectUrl = exchanged.redirect_url ?? apiRedirectUrl;
+    refreshCookieHeaders = exchanged.setCookieHeaders;
   }
 
   if (!token) {
@@ -66,5 +69,9 @@ export async function GET(request: Request) {
     envConfig.APP_URL,
   );
 
-  return Response.redirect(successUrl);
+  const response = Response.redirect(successUrl);
+  for (const header of refreshCookieHeaders) {
+    response.headers.append("Set-Cookie", header);
+  }
+  return response;
 }

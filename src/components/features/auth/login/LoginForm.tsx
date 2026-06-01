@@ -211,15 +211,31 @@ export function LoginForm() {
 
   const onSubmit = async (values: LoginValues) => {
     try {
-      const response = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        rememberMe: values.rememberMe ?? false,
-        redirect: false,
+      const loginRes = await fetch("/api/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+          rememberMe: values.rememberMe ?? false,
+        }),
       });
 
-      if (isSignInFailure(response)) {
-        if (isSignInVerificationRequired(response, response?.url)) {
+      const loginBody = (await loginRes.json().catch(() => ({}))) as {
+        access_token?: string;
+        message?: string;
+        code?: string;
+      };
+
+      if (!loginRes.ok) {
+        const failure = {
+          ok: false as const,
+          error: "CredentialsSignin",
+          code: loginBody.code,
+        };
+
+        if (isSignInVerificationRequired(failure)) {
           toast.info("Verify your email", {
             description: EMAIL_VERIFICATION_REQUIRED_MESSAGE,
           });
@@ -227,6 +243,27 @@ export function LoginForm() {
           return;
         }
 
+        toast.error("Could not sign in", {
+          description:
+            loginBody.message?.trim() || getLoginErrorMessage(failure),
+        });
+        return;
+      }
+
+      const accessToken = loginBody.access_token?.trim();
+      if (!accessToken) {
+        toast.error("Could not sign in", {
+          description: "Login succeeded but no access token was returned.",
+        });
+        return;
+      }
+
+      const response = await signIn("access-token", {
+        accessToken,
+        redirect: false,
+      });
+
+      if (isSignInFailure(response)) {
         toast.error("Could not sign in", {
           description: getLoginErrorMessage(response),
         });
