@@ -16,7 +16,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useProfileQuery } from "@/hooks/queries/use-profile-queries";
+import {
+  useProfileQuery,
+  profileQueryKey,
+} from "@/hooks/queries/use-profile-queries";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUpdateProfileMutation } from "@/hooks/mutations/use-profile-mutations";
 import { uploadUserAvatar } from "@/actions/user";
 
@@ -43,10 +47,19 @@ interface MyProfileTabProps {
 
 export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [manualAvatar, setManualAvatar] = useState<string | null | "deleted">(
+    null,
+  );
 
   const { data: profile, isPending: isLoadingProfile } = useProfileQuery();
   const updateProfile = useUpdateProfileMutation();
+  const queryClient = useQueryClient();
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const avatar =
+    manualAvatar === "deleted"
+      ? null
+      : (manualAvatar ?? profile?.avatarUrl ?? null);
 
   const form = useForm<MyProfileFormValues>({
     resolver: zodResolver(MyProfileSchema),
@@ -70,32 +83,41 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
         fullName: profile.fullName ?? "",
         country: countryCode,
       });
-
-      if (profile.avatarUrl) {
-        setAvatar(profile.avatarUrl);
-      }
     }
   }, [profile, form]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || isUploadingAvatar) return;
 
     const previewUrl = URL.createObjectURL(file);
-    setAvatar(previewUrl);
+    setManualAvatar(previewUrl);
+    setIsUploadingAvatar(true);
 
-    const result = await uploadUserAvatar(file);
+    try {
+      const result = await uploadUserAvatar(file);
 
-    if (!result.ok) {
-      toast.error(result.error ?? "Could not upload avatar. Please try again.");
-      setAvatar(profile?.avatarUrl ?? null);
-      return;
+      if (!result.ok) {
+        toast.error(
+          result.error ?? "Could not upload avatar. Please try again.",
+        );
+        setManualAvatar(null);
+        URL.revokeObjectURL(previewUrl);
+        return;
+      }
+
+      setManualAvatar(result.data.avatarUrl);
+      URL.revokeObjectURL(previewUrl);
+      queryClient.invalidateQueries({ queryKey: profileQueryKey });
+      toast.success("Avatar updated successfully.");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-    setAvatar(result.data.avatarUrl);
-    toast.success("Avatar updated successfully.");
   };
+
   const handleDeleteAvatar = () => {
-    setAvatar(null);
+    setManualAvatar("deleted");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -147,17 +169,19 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
           />
           <button
             type="button"
+            disabled={isUploadingAvatar}
             onClick={() => fileInputRef.current?.click()}
             className="h-[40px] whitespace-nowrap rounded-[8px] border border-gray-300 px-[24px] 
-            py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors"
+            py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Upload new picture
           </button>
           <button
             type="button"
+            disabled={isUploadingAvatar}
             onClick={handleDeleteAvatar}
             className="h-[40px] whitespace-nowrap rounded-[8px] border border-red-100 bg-red-50
-            px-[24px] py-[8px] text-sm md:text-base text-red-500 hover:opacity-90 transition-opacity"
+            px-[24px] py-[8px] text-sm md:text-base text-red-500 hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             Delete
           </button>

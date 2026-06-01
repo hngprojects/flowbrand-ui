@@ -1,5 +1,4 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { clearDashboardMockSession } from "@/lib/dashboard-mock-session";
 import {
   clearActiveFunnelGeneration,
   clearPendingGeneration,
@@ -16,7 +15,6 @@ import { useOnboardingStore } from "@/store/useOnboardingStore";
 export function beginNewStrategyFlow(queryClient?: QueryClient): string {
   if (typeof window !== "undefined") {
     useOnboardingStore.getState().reset();
-    clearDashboardMockSession();
     clearActiveFunnelGeneration();
     clearPendingGeneration();
     markStrategyAutoResolveSkipped();
