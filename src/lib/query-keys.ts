@@ -18,4 +18,10 @@ export const queryKeys = {
   uploads: {
     progress: (uploadId: string) => ["uploads", "progress", uploadId] as const,
   },
+  notifications: {
+    all: () => ["notifications"] as const,
+    list: (filter: "all" | "unread" | "read" = "all", page = 1) =>
+      ["notifications", "list", filter, page] as const,
+    unreadCount: () => ["notifications", "unread-count"] as const,
+  },
 } as const;
