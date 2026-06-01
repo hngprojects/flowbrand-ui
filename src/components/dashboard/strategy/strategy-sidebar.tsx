@@ -1,39 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, CircleHelp, Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DocsImg } from "@/components/icons/docs-img";
 import { InlineSpinner } from "@/components/icons/loader/inline-spinner";
 import { FunnelHistory } from "@/components/dashboard/strategy/funnel-history";
-import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_LOADING_MESSAGE } from "@/hooks/queries/use-strategy-funnel";
 import { StrategyIcon } from "@/components/icons/strategy";
+import { FunnelSwitcher } from "@/components/dashboard/strategy/funnel-switcher";
+import { StageHelpPopover } from "@/components/dashboard/strategy/stage-help-popover";
+import type {
+  FunnelListItemDisplay,
+  UploadedDocDisplay,
+} from "@/lib/funnel-display";
 
 const STRATEGY_SIDEBAR_ASIDE_CLASS =
   "sticky top-[72px] z-20 hidden h-[calc(100vh-72px)] w-full shrink-0 flex-col " +
   "overflow-hidden border-r border-[#EAECF0] bg-white md:top-[83px] " +
   "md:flex md:h-[calc(100vh-83px)] md:w-1/3 md:max-w-[380px]";
 
-function docIcon(type: MockUploadedDoc["type"]) {
+function docIcon(type: UploadedDocDisplay["type"]) {
   if (type === "PDF") return <PdfImg className="h-10 w-10 shrink-0" />;
   if (type === "PPT" || type === "PPTX")
     return <PptImg className="h-10 w-10 shrink-0" />;
   return <DocsImg className="h-10 w-10 shrink-0" />;
 }
 
-function truncateName(name: string, max = 18) {
-  if (name.length <= max) return name;
-  return `${name.slice(0, max - 3)}...`;
-}
-
 function phaseStatusDot(status?: string) {
   const normalized = status?.toLowerCase();
   if (normalized === "complete" || normalized === "completed") {
-    return "bg-[#326AD1]";
+    return "bg-[#22C55E]";
   }
   if (normalized === "active") {
     return "bg-[#F59E0B] ring-2 ring-[#F59E0B]/30";
@@ -46,14 +46,20 @@ export default function StrategySidebar({
   documents = [],
   strategyPhases = [],
   strategySummary,
+  funnels = [],
+  activeFunnelId = null,
+  onSelectFunnel,
   onCreateNewStrategy,
   className,
   currentFunnelId,
 }: {
   loading: boolean;
-  documents?: MockUploadedDoc[];
+  documents?: UploadedDocDisplay[];
   strategyPhases?: readonly StrategyPhaseDisplay[];
   strategySummary?: string;
+  funnels?: readonly FunnelListItemDisplay[];
+  activeFunnelId?: string | null;
+  onSelectFunnel?: (funnelId: string) => void;
   onCreateNewStrategy?: () => void;
   className?: string;
   currentFunnelId?: string | null;
@@ -64,30 +70,32 @@ export default function StrategySidebar({
 
   return (
     <aside className={cn(STRATEGY_SIDEBAR_ASIDE_CLASS, className)}>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-5">
-        {/* Documents section */}
+      <div className="scrollbar-none flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 lg:gap-5 lg:px-4 lg:py-5">
+        {onSelectFunnel && funnels.length > 0 ? (
+          <FunnelSwitcher
+            funnels={funnels}
+            activeFunnelId={activeFunnelId}
+            onSelectFunnel={onSelectFunnel}
+          />
+        ) : null}
+
         <div className="space-y-2.5">
           {hasDocuments && (
             <>
               <h2 className="text-sm font-medium text-neutral-500">
                 Documents uploaded
               </h2>
-              {documents.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex items-center justify-between rounded-[16px] border border-primary-80 bg-white px-3 py-3 shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex flex-wrap gap-2.5">
+                {documents.map((doc) => (
+                  <div
+                    key={doc.id}
+                    title={doc.name}
+                    className="flex h-16 w-16 items-center justify-center rounded-[14px] border border-primary-80 bg-white shadow-[0px_1px_2px_rgba(16,24,40,0.05)]"
+                  >
                     {docIcon(doc.type)}
-                    <p className="truncate text-[15px] font-medium text-neutral-900">
-                      {truncateName(doc.name)}
-                    </p>
                   </div>
-                  <p className="shrink-0 text-sm text-neutral-500">
-                    {doc.size}
-                  </p>
-                </div>
-              ))}
+                ))}
+              </div>
             </>
           )}
 
@@ -101,7 +109,6 @@ export default function StrategySidebar({
           )}
         </div>
 
-        {/* Strategy content — only when not loading */}
         {!loading && (
           <>
             <p className="text-sm leading-6 text-neutral-500">
@@ -131,7 +138,12 @@ export default function StrategySidebar({
                             <h3 className="text-[15px] font-medium text-neutral-900">
                               {item.title}
                             </h3>
-                            <CircleHelp className="h-4 w-4 text-neutral-400" />
+                            {item.explanation ? (
+                              <StageHelpPopover
+                                title={item.title}
+                                explanation={item.explanation}
+                              />
+                            ) : null}
                           </div>
                           <p className="mt-0.5 text-sm text-neutral-500">
                             {item.tasks}
@@ -154,7 +166,6 @@ export default function StrategySidebar({
               </p>
             )}
 
-            {/* Previous strategies toggle */}
             <button
               type="button"
               onClick={() => setShowHistory((v) => !v)}
@@ -167,7 +178,6 @@ export default function StrategySidebar({
 
             {showHistory && <FunnelHistory currentFunnelId={currentFunnelId} />}
 
-            {/* Create new strategy button */}
             {onCreateNewStrategy && (
               <>
                 <p className="text-sm leading-6 text-neutral-500">

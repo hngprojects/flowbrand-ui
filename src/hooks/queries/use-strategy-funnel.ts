@@ -10,8 +10,10 @@ import {
 import {
   getFocusStage,
   mapFunnelToFocus,
+  mapFunnelsToListItems,
   mapStageTasksToDisplay,
   mapStagesToStrategyPhases,
+  type FunnelListItemDisplay,
 } from "@/lib/funnel-display";
 import { queryKeys } from "@/lib/query-keys";
 import {
@@ -27,6 +29,7 @@ import {
   markStageComplete,
 } from "@/lib/stage-progress-storage";
 import { funnelHasDisplayContent } from "@/lib/funnel-api-types";
+import type { FunnelDetailApi } from "@/lib/funnel-api-types";
 import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
 import { flowLog } from "@/lib/flow-debug-log";
 import { completeStage } from "@/lib/complete-state";
@@ -84,6 +87,20 @@ function readInitialStrategyState() {
   };
 }
 
+function readFunnelStartedAt(createdAt: string | undefined): number | null {
+  if (!createdAt) return null;
+  const timestamp = Date.parse(createdAt);
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+function pickDisplayFunnel(funnels: FunnelDetailApi[]): FunnelDetailApi | null {
+  return (
+    funnels.find((funnel) => funnel.status?.toLowerCase() === "active") ??
+    funnels.find((funnel) => funnel.status?.toLowerCase() !== "failed") ??
+    null
+  );
+}
+
 export function useStrategyFunnel() {
   const queryClient = useQueryClient();
   const initial = readInitialStrategyState();
@@ -101,11 +118,18 @@ export function useStrategyFunnel() {
   const [lastCompletedStageId, setLastCompletedStageId] = useState<
     string | null
   >(null);
+
   const completedStageIds = useMemo(() => {
     void stageProgressVersion;
     if (!funnelId) return [];
     return getCompletedStages(funnelId);
   }, [funnelId, stageProgressVersion]);
+
+  const funnelListQuery = useQuery({
+    queryKey: queryKeys.funnels.list(1),
+    queryFn: () => fetchFunnelList(1),
+    staleTime: 30_000,
+  });
 
   const resolveFunnelId = useCallback(
     async (isActive: () => boolean = () => true): Promise<string | null> => {
@@ -122,7 +146,8 @@ export function useStrategyFunnel() {
       if (stored?.funnelId) {
         if (!isActive()) return null;
         setFunnelId(stored.funnelId);
-        setPollStartedAt(Date.now());
+        // Use startedAt from storage for accurate poll window calculation
+        setPollStartedAt(stored.startedAt ?? Date.now());
         setGenerationAborted(false);
         setResolvedId(true);
         setHydratedFromStorage(true);
@@ -132,18 +157,24 @@ export function useStrategyFunnel() {
       try {
         const funnels = await fetchFunnelList(1);
         if (!isActive()) return null;
-        const latest = funnels[0]?.funnelId ?? null;
+        // Use pickDisplayFunnel to prefer active funnels over failed ones
+        const displayFunnel = pickDisplayFunnel(funnels);
+        const latest = displayFunnel?.funnelId ?? null;
         if (latest) {
           flowLog("strategy", "resolve funnelId → latest from list", {
             funnelId: latest,
           });
+          // Use actual createdAt for accurate poll window calculation
+          const startedAt =
+            readFunnelStartedAt(displayFunnel?.createdAt) ?? Date.now();
           saveActiveFunnelGeneration({
             funnelId: latest,
             idempotencyKey: crypto.randomUUID(),
             source: "wizard",
+            startedAt,
           });
           setFunnelId(latest);
-          setPollStartedAt(Date.now());
+          setPollStartedAt(startedAt);
           setGenerationAborted(false);
         } else {
           flowLog("strategy", "resolve funnelId → list empty");
@@ -226,6 +257,18 @@ export function useStrategyFunnel() {
 
   const funnel = displayQuery.data ?? null;
 
+  const funnelListItems = useMemo((): FunnelListItemDisplay[] => {
+    const items = mapFunnelsToListItems(funnelListQuery.data ?? []);
+    if (!funnelId) return items;
+    if (items.some((item) => item.funnelId === funnelId)) return items;
+
+    const active =
+      funnel ?? funnelListQuery.data?.find((f) => f.funnelId === funnelId);
+    if (!active) return items;
+
+    return mapFunnelsToListItems([active, ...(funnelListQuery.data ?? [])]);
+  }, [funnelListQuery.data, funnelId, funnel]);
+
   const mergedCompletedStageIds = useMemo(() => {
     const fromBackend =
       funnel?.stages
@@ -254,7 +297,7 @@ export function useStrategyFunnel() {
   const isCurrentStageComplete = useMemo(() => {
     if (!funnelId || !activeStageId) return false;
     return mergedCompletedStageIds.includes(activeStageId);
-  }, [funnelId, activeStageId, mergedCompletedStageIds]); // ← correct
+  }, [funnelId, activeStageId, mergedCompletedStageIds]);
 
   const completeCurrentStage = useCallback(async () => {
     if (!funnelId || !activeStageId) return;
@@ -272,7 +315,6 @@ export function useStrategyFunnel() {
     setLastCompletedStageId(activeStageId);
     setStageProgressVersion((version) => version + 1);
 
-    // If backend returned the unlocked stage, log it
     if (result.data?.unlockedStage) {
       flowLog("strategy", "completeCurrentStage → next stage unlocked", {
         unlockedStageId: result.data.unlockedStage.stageId,
@@ -478,6 +520,45 @@ export function useStrategyFunnel() {
     queryClient.removeQueries({ queryKey: queryKeys.funnels.display(id) });
   }, [funnelId, queryClient]);
 
+  const selectFunnel = useCallback(
+    (nextFunnelId: string) => {
+      if (!nextFunnelId || nextFunnelId === funnelId) return;
+
+      const selected =
+        funnelListQuery.data?.find((item) => item.funnelId === nextFunnelId) ??
+        null;
+      const startedAt = readFunnelStartedAt(selected?.createdAt) ?? Date.now();
+
+      clearStrategyAutoResolveSkipped();
+      setGenerationAborted(false);
+      setFunnelId(nextFunnelId);
+      setPollStartedAt(startedAt);
+      setResolvedId(true);
+      setStageProgressVersion((version) => version + 1);
+
+      saveActiveFunnelGeneration({
+        funnelId: nextFunnelId,
+        idempotencyKey: crypto.randomUUID(),
+        source:
+          selected?.creationPath === "document_upload"
+            ? "document_upload"
+            : "wizard",
+        startedAt,
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.generationStatus(nextFunnelId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.display(nextFunnelId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.funnels.list(1),
+      });
+    },
+    [funnelId, funnelListQuery.data, queryClient],
+  );
+
   return {
     loading,
     loadingMessage: STRATEGY_LOADING_MESSAGE,
@@ -496,5 +577,7 @@ export function useStrategyFunnel() {
     abortActiveGeneration,
     generationAborted,
     hydratedFromStorage,
+    funnels: funnelListItems,
+    selectFunnel,
   };
 }

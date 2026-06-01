@@ -7,24 +7,26 @@ import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
+import { toast } from "sonner";
 import { StrategyIcon } from "@/components/icons/strategy";
 import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
 import { beginNewStrategyFlow } from "@/lib/begin-new-strategy";
-import { useDashboardMockSession } from "@/hooks/use-dashboard-mock-session";
 import {
   funnelSidebarSummary,
   type FunnelTaskDisplay,
 } from "@/lib/funnel-display";
+import { loadFunnelDocuments } from "@/lib/funnel-documents-storage";
 import {
   NO_STRATEGY_AVAILABLE_MESSAGE,
   STRATEGY_NOT_VIEWABLE_MESSAGE,
   useStrategyFunnel,
 } from "@/hooks/queries/use-strategy-funnel";
-import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { cn } from "@/lib/utils";
+import { ClampableText } from "@/components/ui/clampable-text";
 import { useUpdateTaskStatusMutation } from "@/hooks/mutations/use-task-mutations";
 import { StageFeedback } from "@/components/dashboard/strategy/stage-feedback";
+import { submitStageFeedback } from "@/actions/funnels";
 
 function StrategyGenerationLoading({
   message,
@@ -120,6 +122,8 @@ function StrategyStageTasks({
 }) {
   const updateTask = useUpdateTaskStatusMutation(funnelId);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const allTasksComplete =
@@ -128,10 +132,31 @@ function StrategyStageTasks({
       (task) => task.status === "complete" || checkedTasks.includes(task.id),
     );
 
+  const isDone = submitted || isCurrentStageComplete;
+  const canSubmit =
+    allTasksComplete && comment.trim().length > 15 && !submitting && !isDone;
+
   const handleSubmit = async () => {
-    if (!allTasksComplete || submitted || isCurrentStageComplete) return;
-    await onCompleteStage();
-    setSubmitted(true);
+    if (!canSubmit) return;
+    setSubmitting(true);
+    try {
+      const trimmed = comment.trim();
+      if (trimmed) {
+        const res = await submitStageFeedback(funnelId, activeStageId, trimmed);
+        if (!res.ok && res.status !== 409) {
+          toast.error(
+            res.error ?? "Could not submit feedback. Please try again.",
+          );
+          return;
+        }
+      }
+      await onCompleteStage();
+      setSubmitted(true);
+    } catch {
+      toast.error("Could not submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -141,10 +166,10 @@ function StrategyStageTasks({
           tasks.map((task) => (
             <div
               key={task.id}
-              className="rounded-[16px] border border-primary-80 bg-white p-5 shadow-[0px_1px_2px_rgba(16,24,40,0.05)] md:p-6"
+              className="rounded-[16px] border border-primary-80 bg-white p-4 shadow-[0px_1px_2px_rgba(16,24,40,0.05)] md:p-5 lg:p-6"
             >
-              <div className="flex items-start justify-between gap-4">
-                <h2 className="text-[17px] font-semibold text-neutral-900">
+              <div className="flex items-start justify-between gap-3 md:gap-4">
+                <h2 className="min-w-0 text-base font-semibold text-neutral-900 md:text-[17px]">
                   {task.title}
                 </h2>
                 <TaskCheckbox
@@ -173,7 +198,12 @@ function StrategyStageTasks({
                 />
               </div>
               <div className="mt-3 space-y-3 text-sm leading-relaxed text-neutral-500">
-                <p>{task.description}</p>
+                <ClampableText
+                  lines={5}
+                  className="text-sm leading-relaxed text-neutral-500"
+                >
+                  {task.description}
+                </ClampableText>
                 {task.resources.length > 0 && (
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
@@ -204,19 +234,21 @@ function StrategyStageTasks({
         )}
       </div>
 
-      <div className="flex justify-end pb-4">
+      <StageFeedback value={comment} onChange={setComment} disabled={isDone} />
+
+      <div className="flex justify-end pb-2 md:pb-4">
         <button
           type="button"
-          disabled={!allTasksComplete || submitted || isCurrentStageComplete}
+          disabled={!canSubmit}
           onClick={handleSubmit}
           className={cn(
-            "rounded-[10px] px-10 py-3.5 text-sm font-semibold transition-colors",
-            allTasksComplete && !submitted && !isCurrentStageComplete
+            "rounded-[10px] px-6 py-3 text-sm font-semibold transition-colors md:px-10 md:py-3.5",
+            canSubmit
               ? "cursor-pointer bg-primary-500 text-white hover:bg-primary-625"
               : "cursor-not-allowed bg-primary-150 text-neutral-900",
           )}
         >
-          {submitted || isCurrentStageComplete ? "Stage Complete ✓" : "Submit"}
+          {isDone ? "Stage Complete ✓" : submitting ? "Submitting…" : "Submit"}
         </button>
       </div>
     </>
@@ -226,8 +258,6 @@ function StrategyStageTasks({
 export function StrategyView() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const uploadedFromStore = useOnboardingStore((s) => s.uploadedDocuments);
-  const session = useDashboardMockSession();
   const {
     loading,
     loadingMessage,
@@ -237,7 +267,6 @@ export function StrategyView() {
     funnel,
     activeStageId,
     isCurrentStageComplete,
-    lastCompletedStageId,
     completeCurrentStage,
     strategyPhases,
     focus,
@@ -246,13 +275,14 @@ export function StrategyView() {
     abortActiveGeneration,
     generationAborted,
     hydratedFromStorage,
+    funnels,
+    selectFunnel,
   } = useStrategyFunnel();
 
-  const documents = useMemo(() => {
-    const fromSession = session?.uploadedDocuments ?? [];
-    if (fromSession.length > 0) return fromSession;
-    return uploadedFromStore;
-  }, [session, uploadedFromStore]);
+  const documents = useMemo(
+    () => (funnelId ? loadFunnelDocuments(funnelId) : []),
+    [funnelId],
+  );
 
   const strategySummary = funnelSidebarSummary(funnel);
 
@@ -295,24 +325,31 @@ export function StrategyView() {
   ) : null;
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-white">
+    <div className="flex min-h-screen w-full flex-col bg-white md:h-[100dvh] md:overflow-hidden">
       <OnboardingNavbar
         loading={loading}
         documents={documents}
         strategyPhases={strategyPhases}
         strategySummary={loading ? undefined : strategySummary}
+        funnels={funnels}
+        activeFunnelId={funnelId}
+        onSelectFunnel={selectFunnel}
         onCreateNewStrategy={loading ? undefined : handleCreateNewStrategy}
       />
 
       {loading ? (
         <>
-          <div className="hidden w-full flex-1 lg:flex">
+          <div className="dashboard-layout-class hidden w-full flex-1 md:flex">
             <StrategySidebar
               loading
               documents={documents}
               strategyPhases={strategyPhases}
+              funnels={funnels}
+              activeFunnelId={funnelId}
+              currentFunnelId={funnelId}
+              onSelectFunnel={selectFunnel}
             />
-            <StrategyMainPanel className="min-h-[calc(100vh-83px)] w-full">
+            <StrategyMainPanel className="min-h-[calc(100vh-83px)] min-w-0 flex-1">
               <StrategyGenerationLoading
                 message={loadingMessage}
                 onCancel={handleCancelGeneration}
@@ -320,7 +357,7 @@ export function StrategyView() {
             </StrategyMainPanel>
           </div>
 
-          <StrategyMainPanel className="min-h-[calc(100vh-72px)] flex-1 lg:hidden">
+          <StrategyMainPanel className="min-h-[calc(100vh-72px)] flex-1 md:hidden">
             <StrategyGenerationLoading
               message={loadingMessage}
               onCancel={handleCancelGeneration}
@@ -328,48 +365,60 @@ export function StrategyView() {
           </StrategyMainPanel>
         </>
       ) : mainPanelContent ? (
-        <div className="dashboard-layout-class flex flex-1 flex-col lg:flex-row">
+        <div className="dashboard-layout-class flex min-h-0 flex-1 flex-col md:flex-row">
           <StrategySidebar
             loading={false}
             documents={documents}
             strategyPhases={strategyPhases}
             strategySummary={strategySummary}
+            funnels={funnels}
+            activeFunnelId={funnelId}
+            currentFunnelId={funnelId}
+            onSelectFunnel={selectFunnel}
             onCreateNewStrategy={handleCreateNewStrategy}
           />
-          <StrategyMainPanel className="min-h-0 min-w-0 flex-1 md:w-2/3">
+          <StrategyMainPanel className="min-h-0 min-w-0 flex-1">
             {mainPanelContent}
           </StrategyMainPanel>
         </div>
       ) : (
-        <div className="dashboard-layout-class flex flex-1 flex-col lg:flex-row">
+        <div className="dashboard-layout-class flex min-h-0 flex-1 flex-col md:flex-row">
           <StrategySidebar
             loading={false}
             documents={documents}
             strategyPhases={strategyPhases}
             strategySummary={strategySummary}
+            funnels={funnels}
+            activeFunnelId={funnelId}
+            currentFunnelId={funnelId}
+            onSelectFunnel={selectFunnel}
             onCreateNewStrategy={handleCreateNewStrategy}
           />
 
-          <StrategyMainPanel className="min-h-0 min-w-0 flex-1 md:w-2/3">
-            <div className="flex flex-col gap-6 p-default md:py-6">
+          <StrategyMainPanel className="min-h-0 min-w-0 flex-1">
+            <div className="flex flex-col gap-5 px-4 py-5 md:gap-6 md:px-5 md:py-6 lg:px-8">
               {focus ? (
                 <div>
-                  <div className="mb-2 flex items-center justify-between text-sm font-medium text-neutral-500">
+                  <div className="mb-2 flex items-center justify-between gap-3 text-sm font-medium text-neutral-500">
                     <p>This week&apos;s focus</p>
-                    <p>{focus.progress}</p>
+                    <p className="shrink-0">{focus.progress}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="flex items-center gap-3 text-2xl font-semibold text-neutral-900">
+                    <p className="flex items-center gap-2 text-xl font-semibold text-neutral-900 md:gap-3 md:text-2xl">
                       <StrategyIcon />
-                      {focus.phase}
+                      <span className="min-w-0">{focus.phase}</span>
                     </p>
-                    <p className="text-sm leading-relaxed text-neutral-500 md:text-[15px]">
+                    <ClampableText
+                      key={focus.subtitle}
+                      lines={3}
+                      className="text-sm leading-relaxed text-neutral-500 md:text-[15px]"
+                    >
                       {focus.subtitle}
-                    </p>
+                    </ClampableText>
                   </div>
                 </div>
               ) : null}
-              {/* // Inside StrategyView render, after <StrategyStageTasks />: */}
+
               <StrategyStageTasks
                 key={activeStageId ?? "none"}
                 tasks={tasks}
@@ -378,13 +427,6 @@ export function StrategyView() {
                 funnelId={funnelId ?? ""}
                 activeStageId={activeStageId ?? ""}
               />
-              {lastCompletedStageId && funnelId && (
-                <StageFeedback
-                  key={lastCompletedStageId}
-                  funnelId={funnelId}
-                  stageId={lastCompletedStageId}
-                />
-              )}
             </div>
           </StrategyMainPanel>
         </div>

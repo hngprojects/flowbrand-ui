@@ -30,6 +30,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
     }
 
     toast.success("Account deleted successfully.");
+    onClose();
     await signOut({ callbackUrl: "/" });
   };
 

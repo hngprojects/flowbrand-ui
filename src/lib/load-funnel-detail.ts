@@ -13,7 +13,6 @@ import {
   parseFunnelStagesList,
 } from "@/lib/funnel-api-types";
 import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
-import { getFocusStage } from "@/lib/funnel-display";
 import { flowLog } from "@/lib/flow-debug-log";
 
 export type FetchFunnelOptions = {

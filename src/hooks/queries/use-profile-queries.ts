@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getUserProfile } from "@/actions/user";
 
 export const profileQueryKey = ["user", "profile"] as const;

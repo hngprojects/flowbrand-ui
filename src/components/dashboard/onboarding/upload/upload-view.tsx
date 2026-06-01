@@ -10,10 +10,8 @@ import { DocsImg } from "@/components/icons/docs-img";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { fileNameToDocType, formatFileSize } from "@/lib/dashboard-mock-data";
-import {
-  buildSessionFromOnboarding,
-  saveDashboardMockSession,
-} from "@/lib/dashboard-mock-session";
+import { saveFunnelDocuments } from "@/lib/funnel-documents-storage";
+import type { UploadedDocDisplay } from "@/lib/funnel-display";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { STRATEGY_ROUTE, ONBOARDING_QUESTIONS_ROUTE } from "@/routes";
 import { clearNewStrategyFlow, NEW_STRATEGY_QUERY } from "@/lib/new-strategy";
@@ -244,23 +242,20 @@ export function UploadView() {
     }
 
     try {
-      await startGeneration.mutateAsync({
+      const funnelId = await startGeneration.mutateAsync({
         source: "document_upload",
         idempotencyKey: reserveIdempotencyKey("document_upload"),
         uploadIds,
       });
 
-      saveDashboardMockSession(
-        buildSessionFromOnboarding({
-          businessDescription: state.businessDescription,
-          theyAre: state.theyAre,
-          whoWantTo: state.whoWantTo,
-          locatedIn: state.locatedIn,
-          customCustomerInput: state.customCustomerInput,
-          trafficChannel: state.trafficChannel,
-          uploadedDocuments: state.uploadedDocuments,
-        }),
-      );
+      const docs: UploadedDocDisplay[] = state.uploadedDocuments.map((doc) => ({
+        id: doc.id,
+        name: doc.name,
+        size: doc.size,
+        type: doc.type,
+      }));
+      saveFunnelDocuments(funnelId, docs);
+
       clearNewStrategyFlow();
       toast.success("Documents uploaded. Building your strategy…");
       router.push(STRATEGY_ROUTE);
