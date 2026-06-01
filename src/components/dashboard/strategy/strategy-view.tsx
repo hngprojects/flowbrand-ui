@@ -12,18 +12,21 @@ import { StrategyIcon } from "@/components/icons/strategy";
 import { LinkIcon } from "@/components/icons/link";
 import OnboardingNavbar from "@/components/navigation/onboarding-navbar";
 import { beginNewStrategyFlow } from "@/lib/begin-new-strategy";
-import { useDashboardMockSession } from "@/hooks/use-dashboard-mock-session";
 import {
   funnelSidebarSummary,
   type FunnelTaskDisplay,
 } from "@/lib/funnel-display";
+import { resolveFunnelDocuments } from "@/lib/funnel-documents-storage";
 import {
   NO_STRATEGY_AVAILABLE_MESSAGE,
   STRATEGY_NOT_VIEWABLE_MESSAGE,
   useStrategyFunnel,
 } from "@/hooks/queries/use-strategy-funnel";
-import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { cn } from "@/lib/utils";
+import { ClampableText } from "@/components/ui/clampable-text";
+import { useUpdateTaskStatusMutation } from "@/hooks/mutations/use-task-mutations";
+import { StageFeedback } from "@/components/dashboard/strategy/stage-feedback";
+import { submitStageFeedback } from "@/actions/funnels";
 
 function StrategyGenerationLoading({
   message,
@@ -108,12 +111,19 @@ function StrategyStageTasks({
   tasks,
   isCurrentStageComplete,
   onCompleteStage,
+  funnelId,
+  activeStageId,
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
-  onCompleteStage: (taskIds: string[]) => Promise<void>;
+  onCompleteStage: () => Promise<void>;
+  funnelId: string;
+  activeStageId: string;
 }) {
+  const updateTask = useUpdateTaskStatusMutation(funnelId);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const allTasksComplete =
@@ -122,17 +132,30 @@ function StrategyStageTasks({
       (task) => task.status === "complete" || checkedTasks.includes(task.id),
     );
 
+  const isDone = submitted || isCurrentStageComplete;
+  const canSubmit =
+    allTasksComplete && comment.trim().length > 15 && !submitting && !isDone;
+
   const handleSubmit = async () => {
-    if (!allTasksComplete || submitted || isCurrentStageComplete) return;
+    if (!canSubmit) return;
+    setSubmitting(true);
     try {
-      await onCompleteStage(checkedTasks);
+      const trimmed = comment.trim();
+      if (trimmed) {
+        const res = await submitStageFeedback(funnelId, activeStageId, trimmed);
+        if (!res.ok && res.status !== 409) {
+          toast.error(
+            res.error ?? "Could not submit feedback. Please try again.",
+          );
+          return;
+        }
+      }
+      await onCompleteStage();
       setSubmitted(true);
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Could not complete this stage.",
-      );
+    } catch {
+      toast.error("Could not submit. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -157,16 +180,30 @@ function StrategyStageTasks({
                   }
                   onClick={() => {
                     if (submitted || isCurrentStageComplete) return;
+                    const isChecked =
+                      checkedTasks.includes(task.id) ||
+                      task.status === "complete";
+                    const newStatus = isChecked ? "pending" : "complete";
                     setCheckedTasks((prev) =>
-                      prev.includes(task.id)
+                      isChecked
                         ? prev.filter((id) => id !== task.id)
                         : [...prev, task.id],
                     );
+                    updateTask.mutate({
+                      stageId: activeStageId,
+                      taskId: task.id,
+                      status: newStatus,
+                    });
                   }}
                 />
               </div>
               <div className="mt-3 space-y-3 text-sm leading-relaxed text-neutral-500">
-                <p>{task.description}</p>
+                <ClampableText
+                  lines={5}
+                  className="text-sm leading-relaxed text-neutral-500"
+                >
+                  {task.description}
+                </ClampableText>
                 {task.resources.length > 0 && (
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
@@ -197,19 +234,21 @@ function StrategyStageTasks({
         )}
       </div>
 
+      <StageFeedback value={comment} onChange={setComment} disabled={isDone} />
+
       <div className="flex justify-end pb-2 md:pb-4">
         <button
           type="button"
-          disabled={!allTasksComplete || submitted || isCurrentStageComplete}
+          disabled={!canSubmit}
           onClick={handleSubmit}
           className={cn(
             "rounded-[10px] px-6 py-3 text-sm font-semibold transition-colors md:px-10 md:py-3.5",
-            allTasksComplete && !submitted && !isCurrentStageComplete
+            canSubmit
               ? "cursor-pointer bg-primary-500 text-white hover:bg-primary-625"
               : "cursor-not-allowed bg-primary-150 text-neutral-900",
           )}
         >
-          {submitted || isCurrentStageComplete ? "Stage Complete ✓" : "Submit"}
+          {isDone ? "Stage Complete ✓" : submitting ? "Submitting…" : "Submit"}
         </button>
       </div>
     </>
@@ -219,8 +258,6 @@ function StrategyStageTasks({
 export function StrategyView() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const uploadedFromStore = useOnboardingStore((s) => s.uploadedDocuments);
-  const session = useDashboardMockSession();
   const {
     loading,
     loadingMessage,
@@ -242,11 +279,11 @@ export function StrategyView() {
     selectFunnel,
   } = useStrategyFunnel();
 
-  const documents = useMemo(() => {
-    const fromSession = session?.uploadedDocuments ?? [];
-    if (fromSession.length > 0) return fromSession;
-    return uploadedFromStore;
-  }, [session, uploadedFromStore]);
+  const documents = useMemo(
+    () =>
+      funnelId ? resolveFunnelDocuments(funnelId, funnel?.creationPath) : [],
+    [funnelId, funnel?.creationPath],
+  );
 
   const strategySummary = funnelSidebarSummary(funnel);
 
@@ -369,9 +406,13 @@ export function StrategyView() {
                       <StrategyIcon />
                       <span className="min-w-0">{focus.phase}</span>
                     </p>
-                    <p className="text-sm leading-relaxed text-neutral-500 md:text-[15px]">
+                    <ClampableText
+                      key={focus.subtitle}
+                      lines={3}
+                      className="text-sm leading-relaxed text-neutral-500 md:text-[15px]"
+                    >
                       {focus.subtitle}
-                    </p>
+                    </ClampableText>
                   </div>
                 </div>
               ) : null}
@@ -381,6 +422,8 @@ export function StrategyView() {
                 tasks={tasks}
                 isCurrentStageComplete={isCurrentStageComplete}
                 onCompleteStage={completeCurrentStage}
+                funnelId={funnelId ?? ""}
+                activeStageId={activeStageId ?? ""}
               />
             </div>
           </StrategyMainPanel>

@@ -33,6 +33,7 @@ import type { FunnelDetailApi } from "@/lib/funnel-api-types";
 import { STRATEGY_GENERATION_FAILED_MESSAGE } from "@/lib/funnel-generation-errors";
 import { flowLog } from "@/lib/flow-debug-log";
 import { completeStage } from "@/lib/complete-state";
+import { toast } from "sonner";
 
 /** Poll every ~3s after the first 30s; faster early when jobs often finish. */
 const POLL_MS = 3000;
@@ -114,6 +115,9 @@ export function useStrategyFunnel() {
     initial.hydratedFromStorage,
   );
   const [generationAborted, setGenerationAborted] = useState(false);
+  const [lastCompletedStageId, setLastCompletedStageId] = useState<
+    string | null
+  >(null);
 
   const completedStageIds = useMemo(() => {
     void stageProgressVersion;
@@ -142,6 +146,7 @@ export function useStrategyFunnel() {
       if (stored?.funnelId) {
         if (!isActive()) return null;
         setFunnelId(stored.funnelId);
+        // Use startedAt from storage for accurate poll window calculation
         setPollStartedAt(stored.startedAt ?? Date.now());
         setGenerationAborted(false);
         setResolvedId(true);
@@ -152,12 +157,14 @@ export function useStrategyFunnel() {
       try {
         const funnels = await fetchFunnelList(1);
         if (!isActive()) return null;
+        // Use pickDisplayFunnel to prefer active funnels over failed ones
         const displayFunnel = pickDisplayFunnel(funnels);
         const latest = displayFunnel?.funnelId ?? null;
         if (latest) {
           flowLog("strategy", "resolve funnelId → latest from list", {
             funnelId: latest,
           });
+          // Use actual createdAt for accurate poll window calculation
           const startedAt =
             readFunnelStartedAt(displayFunnel?.createdAt) ?? Date.now();
           saveActiveFunnelGeneration({
@@ -262,6 +269,15 @@ export function useStrategyFunnel() {
     return mapFunnelsToListItems([active, ...(funnelListQuery.data ?? [])]);
   }, [funnelListQuery.data, funnelId, funnel]);
 
+  const mergedCompletedStageIds = useMemo(() => {
+    const fromBackend =
+      funnel?.stages
+        ?.filter((s) => s.status === "complete" && s.stageId)
+        .map((s) => s.stageId as string) ?? [];
+    const fromLocal = completedStageIds;
+    return Array.from(new Set([...fromBackend, ...fromLocal]));
+  }, [funnel?.stages, completedStageIds]);
+
   const hasRealContent = useMemo(
     () => (funnel ? funnelHasDisplayContent(funnel) : false),
     [funnel],
@@ -274,42 +290,54 @@ export function useStrategyFunnel() {
     return () => window.clearInterval(id);
   }, [pollStartedAt, hasRealContent]);
 
-  const activeStage = useMemo(() => {
-    return getFocusStage(funnel, completedStageIds);
-  }, [funnel, completedStageIds]);
-
-  const activeStageId = activeStage?.stageId ?? null;
+  const activeStageId = useMemo(() => {
+    return getFocusStage(funnel, mergedCompletedStageIds)?.stageId ?? null;
+  }, [funnel, mergedCompletedStageIds]);
 
   const isCurrentStageComplete = useMemo(() => {
     if (!funnelId || !activeStageId) return false;
-    return completedStageIds.includes(activeStageId);
-  }, [funnelId, activeStageId, completedStageIds]);
+    return mergedCompletedStageIds.includes(activeStageId);
+  }, [funnelId, activeStageId, mergedCompletedStageIds]);
 
-  const completeCurrentStage = useCallback(
-    async (taskIds: string[] = []) => {
-      if (!funnelId || !activeStageId) return;
-      await completeStage(funnelId, activeStageId, taskIds);
-      markStageComplete(funnelId, activeStageId);
-      setStageProgressVersion((version) => version + 1);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.funnels.all() });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.funnels.display(funnelId),
+  const completeCurrentStage = useCallback(async () => {
+    if (!funnelId || !activeStageId) return;
+
+    const result = await completeStage(funnelId, activeStageId);
+
+    if (!result.success) {
+      toast.error(
+        result.error ?? "Could not complete this stage. Please try again.",
+      );
+      return;
+    }
+
+    markStageComplete(funnelId, activeStageId);
+    setLastCompletedStageId(activeStageId);
+    setStageProgressVersion((version) => version + 1);
+
+    if (result.data?.unlockedStage) {
+      flowLog("strategy", "completeCurrentStage → next stage unlocked", {
+        unlockedStageId: result.data.unlockedStage.stageId,
+        unlockedStageName: result.data.unlockedStage.name,
       });
-    },
-    [funnelId, activeStageId, queryClient],
-  );
+    }
+
+    // Refetch to pull the newly unlocked stage content from backend
+    displayQuery.refetch();
+  }, [funnelId, activeStageId, displayQuery]);
 
   const strategyPhases = useMemo(
-    () => mapStagesToStrategyPhases(funnel?.stages, completedStageIds),
-    [funnel, completedStageIds],
+    () => mapStagesToStrategyPhases(funnel?.stages, mergedCompletedStageIds),
+    [funnel, mergedCompletedStageIds],
   );
   const focus = useMemo(
-    () => mapFunnelToFocus(funnel, completedStageIds),
-    [funnel, completedStageIds],
+    () => mapFunnelToFocus(funnel, mergedCompletedStageIds),
+    [funnel, mergedCompletedStageIds],
   );
   const tasks = useMemo(
-    () => mapStageTasksToDisplay(activeStage),
-    [activeStage],
+    () =>
+      mapStageTasksToDisplay(getFocusStage(funnel, mergedCompletedStageIds)),
+    [funnel, mergedCompletedStageIds],
   );
 
   const loading = useMemo(() => {
@@ -540,6 +568,7 @@ export function useStrategyFunnel() {
     funnelId,
     activeStageId,
     isCurrentStageComplete,
+    lastCompletedStageId,
     completeCurrentStage,
     strategyPhases,
     focus,

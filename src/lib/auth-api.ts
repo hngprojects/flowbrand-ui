@@ -1,4 +1,8 @@
-import axios from "axios";
+import axios, {
+  type AxiosResponseHeaders,
+  type RawAxiosResponseHeaders,
+} from "axios";
+import { cookies } from "next/headers";
 import type { User } from "@/types/auth";
 import { extractApiErrorMessages } from "@/lib/api-errors";
 import { collectApiRecords } from "@/lib/api-envelope";
@@ -346,6 +350,14 @@ export function parseMeEnvelope(body: unknown): AuthMeProfile | null {
   };
 }
 
+function readSetCookieHeaders(
+  headers: RawAxiosResponseHeaders | AxiosResponseHeaders,
+): string[] {
+  const raw = headers["set-cookie"];
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+}
+
 /** Exchange short-lived Google OAuth code for access token (refresh token via Set-Cookie). */
 export async function exchangeGoogleOAuthCode(
   baseUrl: string,
@@ -354,6 +366,7 @@ export async function exchangeGoogleOAuthCode(
   user: User;
   access_token: string;
   redirect_url?: string;
+  setCookieHeaders: string[];
 } | null> {
   try {
     const response = await axios.post(
@@ -361,9 +374,57 @@ export async function exchangeGoogleOAuthCode(
       { code },
       { withCredentials: true },
     );
-    return parseLoginEnvelope(response.data);
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed) return null;
+    return {
+      ...parsed,
+      setCookieHeaders: readSetCookieHeaders(response.headers),
+    };
   } catch {
     return null;
+  }
+}
+
+/** Browser login proxy — forwards backend Set-Cookie (refresh token) to the client. */
+export async function loginWithCookieForward(
+  baseUrl: string,
+  body: { email: string; password: string },
+): Promise<
+  | {
+      ok: true;
+      access_token: string;
+      user: User;
+      setCookieHeaders: string[];
+    }
+  | { ok: false; status: number; message: string }
+> {
+  try {
+    const response = await axios.post(authApiUrl(baseUrl, "/login"), body, {
+      withCredentials: true,
+    });
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed) {
+      return {
+        ok: false,
+        status: 502,
+        message:
+          "Login succeeded but the server response was invalid. Contact support.",
+      };
+    }
+    return {
+      ok: true,
+      access_token: parsed.access_token,
+      user: parsed.user,
+      setCookieHeaders: readSetCookieHeaders(response.headers),
+    };
+  } catch (error) {
+    const status =
+      axios.isAxiosError(error) && error.response ? error.response.status : 500;
+    const message =
+      axios.isAxiosError(error) && error.response
+        ? messageFromApiBody(error.response.data, "Could not sign in.")
+        : "Could not reach the server.";
+    return { ok: false, status, message };
   }
 }
 
@@ -386,11 +447,18 @@ export async function refreshAccessToken(baseUrl: string): Promise<{
   access_token: string;
 } | null> {
   try {
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore
+      .getAll()
+      .map((entry) => `${entry.name}=${entry.value}`)
+      .join("; ");
+
     const response = await axios.post(
       authApiUrl(baseUrl, "/refresh-token"),
       {},
       {
         withCredentials: true,
+        headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
       },
     );
 

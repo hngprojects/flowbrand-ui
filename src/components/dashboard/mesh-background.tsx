@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 
 type MeshBackgroundProps = {
   className?: string;
-  /** Full viewport width (onboarding). Default false = fills parent only (strategy main panel). */
   fullViewport?: boolean;
 };
 
@@ -21,7 +20,7 @@ export function MeshBackground({
       aria-hidden
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white via-background-subtle to-background-muted" />
-      <PatternMesh className="absolute inset-0 h-full w-full text-primary-70 opacity-80" />
+      <PatternMesh className="absolute inset-0 h-full w-full text-primary-70 opacity-30" />
     </div>
   );
 }

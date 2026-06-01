@@ -13,11 +13,11 @@ import MyProfileTab from "@/components/settings/tabs/MyProfileTab";
 import PasswordSecurityTab from "@/components/settings/tabs/PasswordSecurityTab";
 import NotificationPreferencesTab from "@/components/settings/tabs/NotificationsPrefrencesTab";
 import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
-import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
 import { mockNotifications } from "@/components/modals/notifications/mock-data";
 import type {
   FunnelListItemDisplay,
   StrategyPhaseDisplay,
+  UploadedDocDisplay,
 } from "@/lib/funnel-display";
 import { STRATEGY_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ import NotificationsModal from "@/components/modals/notifications";
 
 interface OnboardingNavbarProps {
   loading?: boolean;
-  documents?: MockUploadedDoc[];
+  documents?: UploadedDocDisplay[];
   strategyPhases?: readonly StrategyPhaseDisplay[];
   strategySummary?: string;
   funnels?: readonly FunnelListItemDisplay[];

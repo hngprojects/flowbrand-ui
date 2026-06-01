@@ -12,6 +12,7 @@ export type StrategyPhaseDisplay = {
   title: string;
   tasks: string;
   status?: string;
+  explanation?: string;
 };
 
 export type FunnelFocusDisplay = {
@@ -39,6 +40,7 @@ export function mapStagesToStrategyPhases(
       stage.stageId && completedStageIds.includes(stage.stageId)
         ? "complete"
         : stage.status,
+    explanation: stage.explanation ?? stage.actionPrompt ?? undefined,
   }));
 }
 
@@ -109,6 +111,13 @@ export function getFocusStage(
   if (!funnel?.stages?.length) return undefined;
   return pickFocusStage(funnel.stages, completedStageIds);
 }
+
+export type UploadedDocDisplay = {
+  id: string;
+  name: string;
+  size: string;
+  type: "DOC" | "DOCX" | "PDF" | "PPT" | "PPTX";
+};
 
 export function funnelSidebarSummary(funnel: FunnelDetailApi | null): string {
   if (funnel?.businessName?.trim()) {

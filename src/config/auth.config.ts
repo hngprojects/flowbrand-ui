@@ -30,6 +30,7 @@ function readAuthSecret(): string | undefined {
 const AUTH_SECRET_FALLBACK =
   readAuthSecret() ??
   (process.env.NODE_ENV !== "production" ? "seil-dev-secret" : undefined);
+/** Backend access tokens are ~15m; refresh slightly before expiry. */
 const ACCESS_TOKEN_LIFETIME_MS = 1000 * 60 * 14;
 
 const authConfig: NextAuthConfig = {

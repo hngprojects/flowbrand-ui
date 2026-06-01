@@ -60,9 +60,6 @@ export function FunnelSwitcher({
 
   return (
     <div ref={rootRef} className="relative">
-      <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-        Strategy
-      </span>
       <button
         type="button"
         disabled={!canSwitch}
@@ -73,25 +70,18 @@ export function FunnelSwitcher({
           if (canSwitch) setOpen((value) => !value);
         }}
         className={cn(
-          "flex w-full items-center justify-between gap-2 rounded-[12px] border border-primary-80 bg-white px-3 py-2.5 text-left shadow-[0px_1px_2px_rgba(16,24,40,0.05)]",
+          "flex w-full items-center justify-between gap-2 rounded-[14px] border border-primary-80 bg-white px-4 py-3.5 text-left shadow-[0px_1px_2px_rgba(16,24,40,0.05)]",
           canSwitch && "cursor-pointer hover:bg-neutral-50",
           !canSwitch && "cursor-default",
         )}
       >
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium text-neutral-900">
-            {active.label}
-          </span>
-          {active.subtitle ? (
-            <span className="mt-0.5 block truncate text-xs text-neutral-500">
-              {active.subtitle}
-            </span>
-          ) : null}
+        <span className="block min-w-0 flex-1 truncate text-[15px] font-medium text-neutral-900">
+          {active.label}
         </span>
         {canSwitch ? (
           <ChevronDown
             className={cn(
-              "h-4 w-4 shrink-0 text-neutral-500 transition-transform",
+              "h-5 w-5 shrink-0 text-neutral-500 transition-transform",
               open && "rotate-180",
             )}
           />

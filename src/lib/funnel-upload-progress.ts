@@ -240,11 +240,16 @@ export function mergeUploadProgress(
     };
   }
 
-  const percent = Math.max(
-    baseline.percentComplete,
-    polled.percentComplete,
-    polled.status === "parsing" ? 5 : 0,
-  );
+  // const percent = Math.max(
+  //   baseline.percentComplete,
+  //   polled.percentComplete,
+  //   polled.status === "parsing" ? 5 : 0,
+  // );
+
+  const percent =
+    polled.percentComplete > 0
+      ? polled.percentComplete
+      : Math.max(baseline.percentComplete, polled.status === "parsing" ? 5 : 0);
 
   let status = polled.status;
   if (baseline.status === "ready" || polled.status === "ready") {
