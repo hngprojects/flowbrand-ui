@@ -1,9 +1,13 @@
+"use client";
+
+import { useState } from "react";
 import { ChevronRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DocsImg } from "@/components/icons/docs-img";
 import { InlineSpinner } from "@/components/icons/loader/inline-spinner";
+import { FunnelHistory } from "@/components/dashboard/strategy/funnel-history";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_LOADING_MESSAGE } from "@/hooks/queries/use-strategy-funnel";
 import { StrategyIcon } from "@/components/icons/strategy";
@@ -47,6 +51,7 @@ export default function StrategySidebar({
   onSelectFunnel,
   onCreateNewStrategy,
   className,
+  currentFunnelId,
 }: {
   loading: boolean;
   documents?: UploadedDocDisplay[];
@@ -57,7 +62,9 @@ export default function StrategySidebar({
   onSelectFunnel?: (funnelId: string) => void;
   onCreateNewStrategy?: () => void;
   className?: string;
+  currentFunnelId?: string | null;
 }) {
+  const [showHistory, setShowHistory] = useState(false);
   const hasPhases = strategyPhases.length > 0;
   const hasDocuments = documents.length > 0;
 
@@ -73,7 +80,7 @@ export default function StrategySidebar({
         ) : null}
 
         <div className="space-y-2.5">
-          {hasDocuments ? (
+          {hasDocuments && (
             <>
               <h2 className="text-sm font-medium text-neutral-500">
                 Documents uploaded
@@ -90,7 +97,7 @@ export default function StrategySidebar({
                 ))}
               </div>
             </>
-          ) : null}
+          )}
 
           {loading && (
             <div className="flex items-center gap-2 pt-0.5">
@@ -159,13 +166,24 @@ export default function StrategySidebar({
               </p>
             )}
 
-            {onCreateNewStrategy ? (
+            <button
+              type="button"
+              onClick={() => setShowHistory((v) => !v)}
+              className="w-full text-left text-sm text-primary-500 underline-offset-2 hover:underline"
+            >
+              {showHistory
+                ? "Hide previous strategies"
+                : "View previous strategies"}
+            </button>
+
+            {showHistory && <FunnelHistory currentFunnelId={currentFunnelId} />}
+
+            {onCreateNewStrategy && (
               <>
                 <p className="text-sm leading-6 text-neutral-500">
                   If you need to create more strategies for specific use cases,
                   click on the button below.
                 </p>
-
                 <button
                   type="button"
                   onClick={onCreateNewStrategy}
@@ -185,7 +203,7 @@ export default function StrategySidebar({
                   />
                 </button>
               </>
-            ) : null}
+            )}
           </>
         )}
       </div>
