@@ -281,7 +281,7 @@ export function StrategyView() {
 
   const documents = useMemo(
     () => (funnelId ? loadFunnelDocuments(funnelId) : []),
-    [funnelId, funnel?.creationPath],
+    [funnelId],
   );
 
   const strategySummary = funnelSidebarSummary(funnel);
