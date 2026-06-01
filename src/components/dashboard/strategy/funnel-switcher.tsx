@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { Check, ChevronDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { FunnelListItemDisplay } from "@/lib/funnel-display";
@@ -10,7 +16,8 @@ import { renameFunnel, deleteFunnel } from "@/actions/funnel-management";
 function statusLabel(status: string | undefined): string | null {
   const normalized = status?.toLowerCase();
   if (normalized === "active") return "Active";
-  if (normalized === "generating" || normalized === "pending") return "Generating";
+  if (normalized === "generating" || normalized === "pending")
+    return "Generating";
   if (normalized === "failed") return "Failed";
   return null;
 }
@@ -37,8 +44,8 @@ export function FunnelSwitcher({
   const rootRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
-
-  const active = funnels.find((item) => item.funnelId === activeFunnelId) ?? funnels[0];
+  const active =
+    funnels.find((item) => item.funnelId === activeFunnelId) ?? funnels[0];
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -165,7 +172,6 @@ export function FunnelSwitcher({
             return (
               <li key={item.funnelId} role="option" aria-selected={isActive}>
                 <div className="relative flex w-full items-start gap-1 rounded-[8px] px-2.5 py-2 transition-colors hover:bg-neutral-50">
-
                   {/* Funnel select button */}
                   <button
                     type="button"
@@ -184,7 +190,8 @@ export function FunnelSwitcher({
                         value={renameValue}
                         onChange={(e) => setRenameValue(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") void handleRenameSubmit(item.funnelId);
+                          if (e.key === "Enter")
+                            void handleRenameSubmit(item.funnelId);
                           if (e.key === "Escape") setRenamingId(null);
                         }}
                         onBlur={() => void handleRenameSubmit(item.funnelId)}
@@ -213,7 +220,10 @@ export function FunnelSwitcher({
                   {/* Right side — check + three-dot */}
                   <div className="flex shrink-0 items-center gap-1 pt-0.5">
                     {isActive && !isRenaming ? (
-                      <Check className="h-3.5 w-3.5 text-primary-500" strokeWidth={2.5} />
+                      <Check
+                        className="h-3.5 w-3.5 text-primary-500"
+                        strokeWidth={2.5}
+                      />
                     ) : null}
 
                     {/* Three-dot menu button */}
