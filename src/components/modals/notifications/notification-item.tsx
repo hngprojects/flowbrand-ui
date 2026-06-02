@@ -7,39 +7,25 @@ type NotificationItemProps = {
   notification: Notification;
   onMarkRead?: (id: string) => void;
   onDelete?: (id: string) => void;
+  /** Disable the per-row buttons while a mutation is in flight. */
+  pending?: boolean;
 };
 
 export default function NotificationItem({
   notification,
   onMarkRead,
   onDelete,
+  pending = false,
 }: NotificationItemProps) {
-  const time = formatNotificationTime(notification.createdAt);
-  const isUnread = !notification.isRead;
-
-  const handleRowActivate = () => {
-    if (isUnread) onMarkRead?.(notification.id);
-  };
+  const time = formatNotificationTime(notification.created_at);
 
   return (
     <div
-      role={isUnread ? "button" : undefined}
-      tabIndex={isUnread ? 0 : undefined}
-      onClick={isUnread ? handleRowActivate : undefined}
-      onKeyDown={(e) => {
-        if (isUnread && (e.key === "Enter" || e.key === " ")) {
-          e.preventDefault();
-          handleRowActivate();
-        }
-      }}
-      className={`flex gap-4 border-b border-border px-4 py-3 last:border-b-0 sm:gap-3 ${
-        isUnread ? "bg-primary/5 cursor-pointer" : "bg-transparent"
+      className={`flex gap-3 border-b border-border px-4 py-3 last:border-b-0 ${
+        notification.is_read ? "bg-transparent" : "bg-primary/5"
       }`}
     >
-      <NotificationIcon
-        type={notification.iconType}
-        color={notification.iconColor}
-      />
+      <NotificationIcon type={notification.type} />
 
       {/* Middle: title + body (+ time on mobile) */}
       <div className="min-w-0 flex-1">
@@ -62,7 +48,7 @@ export default function NotificationItem({
           <span className="text-muted-foreground hidden text-xs sm:block">
             {time}
           </span>
-          {isUnread && (
+          {!notification.is_read && (
             <span
               role="status"
               aria-label="Unread notification"
@@ -71,16 +57,13 @@ export default function NotificationItem({
           )}
         </div>
 
-        <div className="flex items-center gap-2 sm:mt-2">
-          {/* Mark-as-read button — desktop only; on mobile, tapping the row marks read */}
-          {isUnread && (
+        <div className="mt-2 flex items-center gap-2">
+          {!notification.is_read && (
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMarkRead?.(notification.id);
-              }}
-              className="text-primary hover:bg-primary/10 hidden rounded-full p-1 transition-colors sm:inline-flex"
+              onClick={() => onMarkRead?.(notification.id)}
+              disabled={pending}
+              className="text-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50 rounded-full p-1 transition-colors"
               aria-label="Mark as read"
             >
               <CheckCircle2 className="h-4 w-4" />
@@ -88,11 +71,9 @@ export default function NotificationItem({
           )}
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.(notification.id);
-            }}
-            className="text-muted-foreground hover:text-error hover:bg-error/10 rounded-full p-1 transition-colors"
+            onClick={() => onDelete?.(notification.id)}
+            disabled={pending}
+            className="text-muted-foreground hover:text-error hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50 rounded-full p-1 transition-colors"
             aria-label="Delete notification"
           >
             <Trash2 className="h-4 w-4 text-primary" />
