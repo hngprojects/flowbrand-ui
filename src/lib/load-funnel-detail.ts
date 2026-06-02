@@ -20,47 +20,6 @@ export type FetchFunnelOptions = {
   allowPartial?: boolean;
 };
 
-// async function mergeStageTasks(
-//   funnelId: string,
-//   detail: FunnelDetailApi,
-// ): Promise<FunnelDetailApi> {
-//   let stages = [...(detail.stages ?? [])];
-//   if (stages.length === 0) return detail;
-
-//   const needsTasks = stages.some((s) => (s.tasks?.length ?? 0) === 0);
-//   if (!needsTasks) return detail;
-
-//   const ordered = [getFocusStage({ ...detail, stages }), ...stages].filter(
-//     (s): s is NonNullable<typeof s> => Boolean(s?.stageId),
-//   );
-
-//   const seen = new Set<string>();
-//   for (const target of ordered) {
-//     const stageId = target.stageId;
-//     if (!stageId || seen.has(stageId)) continue;
-//     seen.add(stageId);
-
-//     const existing = stages.find((s) => s.stageId === stageId);
-//     if ((existing?.tasks?.length ?? 0) > 0) continue;
-
-//     const stageRes = await getFunnelStage(funnelId, stageId);
-//     if (!stageRes.ok) continue;
-
-//     const full = parseFunnelStage(stageRes.data);
-//     if (!full) continue;
-
-//     stages = stages.map((stage) =>
-//       stage.stageId === full.stageId ? { ...stage, ...full } : stage,
-//     );
-
-//     if (stages.some((s) => (s.tasks?.length ?? 0) > 0)) {
-//       break;
-//     }
-//   }
-
-//   return { ...detail, stages };
-// }
-
 async function mergeStageTasks(
   funnelId: string,
   detail: FunnelDetailApi,
