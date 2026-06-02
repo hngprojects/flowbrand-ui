@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { Check, ChevronDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { FunnelListItemDisplay } from "@/lib/funnel-display";
@@ -12,7 +18,8 @@ import { RenameStrategyModal } from "@/components/modals/RenameStrategyModal";
 function statusLabel(status: string | undefined): string | null {
   const normalized = status?.toLowerCase();
   if (normalized === "active") return "Active";
-  if (normalized === "generating" || normalized === "pending") return "Generating";
+  if (normalized === "generating" || normalized === "pending")
+    return "Generating";
   if (normalized === "failed") return "Failed";
   return null;
 }
@@ -34,14 +41,18 @@ export function FunnelSwitcher({
 }) {
   const [open, setOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
+  const [renameTarget, setRenameTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [isRenamePending, setIsRenamePending] = useState(false);
   const [isDeletePending, setIsDeletePending] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
 
-  const active = funnels.find((item) => item.funnelId === activeFunnelId) ?? funnels[0];
+  const active =
+    funnels.find((item) => item.funnelId === activeFunnelId) ?? funnels[0];
 
   useEffect(() => {
     if (!open) return;
