@@ -13,7 +13,6 @@ import MyProfileTab from "@/components/settings/tabs/MyProfileTab";
 import PasswordSecurityTab from "@/components/settings/tabs/PasswordSecurityTab";
 import NotificationPreferencesTab from "@/components/settings/tabs/NotificationsPrefrencesTab";
 import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
-import { mockNotifications } from "@/components/modals/notifications/mock-data";
 import type {
   FunnelListItemDisplay,
   StrategyPhaseDisplay,
