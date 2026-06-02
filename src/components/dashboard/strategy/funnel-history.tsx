@@ -95,7 +95,7 @@ export function FunnelHistory({
                   {funnel.businessName ?? "Unnamed Strategy"}
                 </p>
                 <p className="text-xs text-neutral-400 capitalize">
-                  {funnel.creationPath?.replace("_", " ") ?? ""}
+                  {funnel.creationPath?.replace(/_/g, " ") ?? ""}
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-2">

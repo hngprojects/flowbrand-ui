@@ -208,7 +208,7 @@ export function FunnelSwitcher({
                     ) : null}
                     <button
                       type="button"
-                      aria-label="Strategy actions"
+                      aria-label={`Actions for ${item.label}`}
                       aria-haspopup="menu"
                       aria-expanded={isMenuOpen}
                       onClick={(e) => {
