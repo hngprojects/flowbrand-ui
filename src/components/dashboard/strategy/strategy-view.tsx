@@ -27,6 +27,7 @@ import { ClampableText } from "@/components/ui/clampable-text";
 import { useUpdateTaskStatusMutation } from "@/hooks/mutations/use-task-mutations";
 import { StageFeedback } from "@/components/dashboard/strategy/stage-feedback";
 import { submitStageFeedback } from "@/actions/funnels";
+import { FeedbackSubmitModal } from "@/components/modals/FeedbackSubmitModal";
 
 function StrategyGenerationLoading({
   message,
@@ -116,7 +117,7 @@ function StrategyStageTasks({
 }: {
   tasks: FunnelTaskDisplay[];
   isCurrentStageComplete: boolean;
-  onCompleteStage: () => Promise<void>;
+  onCompleteStage: () => Promise<boolean>;
   funnelId: string;
   activeStageId: string;
 }) {
@@ -125,6 +126,7 @@ function StrategyStageTasks({
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const allTasksComplete =
     tasks.length > 0 &&
@@ -136,22 +138,26 @@ function StrategyStageTasks({
   const canSubmit =
     allTasksComplete && comment.trim().length > 15 && !submitting && !isDone;
 
-  const handleSubmit = async () => {
+  const handleSubmitConfirmed = async () => {
     if (!canSubmit) return;
     setSubmitting(true);
     try {
-      const trimmed = comment.trim();
-      if (trimmed) {
-        const res = await submitStageFeedback(funnelId, activeStageId, trimmed);
-        if (!res.ok && res.status !== 409) {
-          toast.error(
-            res.error ?? "Could not submit feedback. Please try again.",
-          );
-          return;
-        }
+      const stageCompleted = await onCompleteStage();
+      if (!stageCompleted) {
+        return;
       }
-      await onCompleteStage();
+
+      const trimmed = comment.trim();
+      const res = await submitStageFeedback(funnelId, activeStageId, trimmed);
+      if (!res.ok && res.status !== 409) {
+        toast.error(
+          res.error ?? "Could not submit feedback. Please try again.",
+        );
+        return;
+      }
+
       setSubmitted(true);
+      setShowConfirmModal(false);
     } catch {
       toast.error("Could not submit. Please try again.");
     } finally {
@@ -240,7 +246,7 @@ function StrategyStageTasks({
         <button
           type="button"
           disabled={!canSubmit}
-          onClick={handleSubmit}
+          onClick={() => setShowConfirmModal(true)}
           className={cn(
             "rounded-[10px] px-6 py-3 text-sm font-semibold transition-colors md:px-10 md:py-3.5",
             canSubmit
@@ -251,6 +257,12 @@ function StrategyStageTasks({
           {isDone ? "Stage Complete ✓" : submitting ? "Submitting…" : "Submit"}
         </button>
       </div>
+      <FeedbackSubmitModal
+        open={showConfirmModal}
+        submitting={submitting}
+        onOpenChange={setShowConfirmModal}
+        onConfirm={handleSubmitConfirmed}
+      />
     </>
   );
 }
