@@ -2,7 +2,12 @@
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { FeedbackSubmitIcon } from "@/components/ui/icons/feedback-submit-icon";
 
 export function FeedbackSubmitModal({
@@ -17,12 +22,25 @@ export function FeedbackSubmitModal({
   onConfirm: () => Promise<void>;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (submitting && !nextOpen) return;
+        onOpenChange(nextOpen);
+      }}
+    >
       <DialogContent
         showCloseButton={false}
-        className="w-[85%] rounded-[24px] border border-primary-80 bg-white 
-        p-5 sm:max-w-[480px] sm:p-7"
+        className="w-[85%] rounded-[24px] border border-primary-80 bg-white p-5 sm:max-w-[480px] sm:p-7"
         overlayClassName="bg-[#030D1F]/80"
+        onEscapeKeyDown={(event) => {
+          if (!submitting) return;
+          event.preventDefault();
+        }}
+        onPointerDownOutside={(event) => {
+          if (!submitting) return;
+          event.preventDefault();
+        }}
       >
         <VisuallyHidden>
           <DialogTitle>Submit feedback confirmation</DialogTitle>
@@ -30,8 +48,7 @@ export function FeedbackSubmitModal({
 
         <div className="flex flex-col items-center text-center">
           <div
-            className="mb-4 flex h-[140px] w-[140px] items-center justify-center 
-            rounded-full border border-[#BFD1F1] bg-[#EBF0FA]"
+            className="mb-4 flex h-[140px] w-[140px] items-center justify-center rounded-full border border-[#BFD1F1] bg-[#EBF0FA]"
             style={{
               boxShadow:
                 "0 0 0 7px rgba(50,106,209,0.3), 0 0 5.5px rgba(50,106,209,1)",
@@ -45,10 +62,10 @@ export function FeedbackSubmitModal({
           <h3 className="text-[34px] font-medium leading-[1.1] text-neutral-900">
             Submit feedback
           </h3>
-          <p className="mt-2 max-w-[365px] text-sm font-[700] leading-5 text-neutral-500">
+          <DialogDescription className="mt-2 max-w-[365px] text-sm font-bold leading-5 text-neutral-500">
             Are you sure you want to submit your feedback to the marketing
             strategy you just completed?
-          </p>
+          </DialogDescription>
 
           <div className="mt-5 w-full space-y-2">
             <button
@@ -68,9 +85,9 @@ export function FeedbackSubmitModal({
               type="button"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
-              className="h-12 w-full cursor-pointer rounded-[10px] border border-primary 
-              bg-white text-sm font-medium text-primary-500 transition-colors hover:bg-gray-50 
-              disabled:cursor-not-allowed disabled:opacity-70"
+              className="h-12 w-full cursor-pointer rounded-[10px] border border-primary bg-white text-sm
+               font-medium text-primary-500 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed 
+               disabled:opacity-70"
             >
               Cancel
             </button>
