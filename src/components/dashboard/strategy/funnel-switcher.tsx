@@ -1,23 +1,18 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import {
-  Check,
-  ChevronDown,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { Check, ChevronDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { FunnelListItemDisplay } from "@/lib/funnel-display";
 import { renameFunnel, deleteFunnel } from "@/actions/funnel-management";
+import { DeleteStrategyModal } from "@/components/modals/DeleteStrategyModal";
+import { RenameStrategyModal } from "@/components/modals/RenameStrategyModal";
 
 function statusLabel(status: string | undefined): string | null {
   const normalized = status?.toLowerCase();
   if (normalized === "active") return "Active";
-  if (normalized === "generating" || normalized === "pending")
-    return "Generating";
+  if (normalized === "generating" || normalized === "pending") return "Generating";
   if (normalized === "failed") return "Failed";
   return null;
 }
@@ -39,29 +34,27 @@ export function FunnelSwitcher({
 }) {
   const [open, setOpen] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+  const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [isRenamePending, setIsRenamePending] = useState(false);
+  const [isDeletePending, setIsDeletePending] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const renameInputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
-  const active =
-    funnels.find((item) => item.funnelId === activeFunnelId) ?? funnels[0];
 
-  // Close dropdown on outside click
+  const active = funnels.find((item) => item.funnelId === activeFunnelId) ?? funnels[0];
+
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (e: MouseEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) {
         setOpen(false);
         setMenuOpenId(null);
-        setRenamingId(null);
       }
     };
     const onEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
         setMenuOpenId(null);
-        setRenamingId(null);
       }
     };
     document.addEventListener("mousedown", onPointerDown);
@@ -72,53 +65,47 @@ export function FunnelSwitcher({
     };
   }, [open]);
 
-  // Focus rename input when it appears
-  useEffect(() => {
-    if (renamingId) {
-      setTimeout(() => renameInputRef.current?.focus(), 50);
-    }
-  }, [renamingId]);
-
-  if (!active) return null;
-
-  const canSwitch = funnels.length > 1 && !disabled;
-
   const handleRenameStart = (item: FunnelListItemDisplay) => {
-    setRenamingId(item.funnelId);
-    setRenameValue(item.label);
+    setRenameTarget({ id: item.funnelId, name: item.label });
     setMenuOpenId(null);
   };
 
-  const handleRenameSubmit = async (funnelId: string) => {
-    const trimmed = renameValue.trim();
-    if (!trimmed) {
-      setRenamingId(null);
-      return;
-    }
-    const result = await renameFunnel(funnelId, trimmed);
+  const handleRenameSubmit = async (name: string) => {
+    if (!renameTarget) return;
+    setIsRenamePending(true);
+    const result = await renameFunnel(renameTarget.id, name);
+    setIsRenamePending(false);
     if (result.ok) {
-      onFunnelRenamed?.(funnelId, trimmed);
+      onFunnelRenamed?.(renameTarget.id, name);
       toast.success("Strategy renamed.");
     } else {
       toast.error(result.error ?? "Could not rename strategy.");
     }
-    setRenamingId(null);
+    setRenameTarget(null);
   };
 
-  const handleDelete = async (funnelId: string) => {
+  const handleDeleteClick = (funnelId: string) => {
+    setDeleteTarget(funnelId);
     setMenuOpenId(null);
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this strategy? This cannot be undone.",
-    );
-    if (!confirmed) return;
-    const result = await deleteFunnel(funnelId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeletePending(true);
+    const result = await deleteFunnel(deleteTarget);
+    setIsDeletePending(false);
     if (result.ok) {
-      onFunnelDeleted?.(funnelId);
+      onFunnelDeleted?.(deleteTarget);
       toast.success("Strategy deleted.");
     } else {
       toast.error(result.error ?? "Could not delete strategy.");
     }
+    setDeleteTarget(null);
   };
+
+  if (!active) return null;
+
+  const canSwitch = funnels.length > 1 && !disabled;
 
   return (
     <div ref={rootRef} className="relative">
@@ -133,7 +120,6 @@ export function FunnelSwitcher({
           if (canSwitch) {
             setOpen((v) => !v);
             setMenuOpenId(null);
-            setRenamingId(null);
           }
         }}
         className={cn(
@@ -166,79 +152,59 @@ export function FunnelSwitcher({
           {funnels.map((item) => {
             const isActive = item.funnelId === activeFunnelId;
             const badge = statusLabel(item.status);
-            const isRenaming = renamingId === item.funnelId;
             const isMenuOpen = menuOpenId === item.funnelId;
 
             return (
               <li key={item.funnelId} role="option" aria-selected={isActive}>
-                <div className="relative flex w-full items-start gap-1 rounded-[8px] px-2.5 py-2 transition-colors hover:bg-neutral-50">
-                  {/* Funnel select button */}
+                <div
+                  className={cn(
+                    "relative flex w-full items-start gap-1 rounded-[8px] px-2.5 py-2 transition-colors",
+                    isActive ? "bg-primary-50" : "hover:bg-neutral-50",
+                  )}
+                >
+                  {/* Select button */}
                   <button
                     type="button"
                     onClick={() => {
-                      if (!isRenaming) {
-                        onSelectFunnel(item.funnelId);
-                        setOpen(false);
-                        setMenuOpenId(null);
-                      }
+                      onSelectFunnel(item.funnelId);
+                      setOpen(false);
+                      setMenuOpenId(null);
                     }}
                     className="min-w-0 flex-1 text-left"
                   >
-                    {isRenaming ? (
-                      <input
-                        ref={renameInputRef}
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter")
-                            void handleRenameSubmit(item.funnelId);
-                          if (e.key === "Escape") setRenamingId(null);
-                        }}
-                        onBlur={() => void handleRenameSubmit(item.funnelId)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full rounded border border-primary-500 px-2 py-0.5 text-sm font-medium text-neutral-900 focus:outline-none"
-                      />
-                    ) : (
-                      <>
-                        <span className="block truncate text-sm font-medium text-neutral-900">
-                          {item.label}
-                        </span>
-                        {item.subtitle ? (
-                          <span className="mt-0.5 block truncate text-xs text-neutral-500">
-                            {item.subtitle}
-                          </span>
-                        ) : null}
-                        {badge ? (
-                          <span className="mt-0.5 block text-[11px] font-medium text-neutral-400">
-                            {badge}
-                          </span>
-                        ) : null}
-                      </>
-                    )}
+                    <span className="block truncate text-sm font-medium text-neutral-900">
+                      {item.label}
+                    </span>
+                    {item.subtitle ? (
+                      <span className="mt-0.5 block truncate text-xs text-neutral-500">
+                        {item.subtitle}
+                      </span>
+                    ) : null}
+                    {badge ? (
+                      <span className="mt-0.5 block text-[11px] font-medium text-neutral-400">
+                        {badge}
+                      </span>
+                    ) : null}
                   </button>
 
-                  {/* Right side — check + three-dot */}
+                  {/* Right — check + three-dot */}
                   <div className="flex shrink-0 items-center gap-1 pt-0.5">
-                    {isActive && !isRenaming ? (
+                    {isActive ? (
                       <Check
                         className="h-3.5 w-3.5 text-primary-500"
                         strokeWidth={2.5}
                       />
                     ) : null}
-
-                    {/* Three-dot menu button */}
-                    {!isRenaming ? (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setMenuOpenId(isMenuOpen ? null : item.funnelId);
-                        }}
-                        className="rounded-[6px] p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
-                    ) : null}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpenId(isMenuOpen ? null : item.funnelId);
+                      }}
+                      className="rounded-[6px] p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
                   </div>
 
                   {/* Action popover */}
@@ -259,7 +225,7 @@ export function FunnelSwitcher({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          void handleDelete(item.funnelId);
+                          handleDeleteClick(item.funnelId);
                         }}
                         className="flex w-full items-center gap-2 rounded-[7px] px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
@@ -274,6 +240,21 @@ export function FunnelSwitcher({
           })}
         </ul>
       ) : null}
+
+      <RenameStrategyModal
+        isOpen={Boolean(renameTarget)}
+        onClose={() => setRenameTarget(null)}
+        onConfirm={(name) => void handleRenameSubmit(name)}
+        currentName={renameTarget?.name ?? ""}
+        isPending={isRenamePending}
+      />
+
+      <DeleteStrategyModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDeleteConfirm()}
+        isPending={isDeletePending}
+      />
     </div>
   );
 }
