@@ -134,13 +134,42 @@ export default function NotificationsModal({
       >
         <DialogContent
           showCloseButton={false}
-          className={cn(
-            "fixed top-0 right-0 left-auto h-screen w-full max-w-none",
-            "translate-x-0 translate-y-0 rounded-none",
-            "lg:top-3 lg:right-4 lg:w-1/2 lg:max-w-[720px] lg:rounded-lg",
-          )}
+          className="
+        gap-0
+          fixed
+          inset-0
+          z-50
+          flex
+          flex-col
+          rounded-none
+          w-screen
+          h-screen
+          max-w-none
+          bg-white
+          border-0
+          shadow-2xl
+          p-4
+          overflow-hidden
+          translate-x-0
+          translate-y-0
+          left-0
+          top-0
+          md:left-auto
+          md:right-5
+          md:top-5
+          md:bottom-5
+          md:w-[50vw]
+          md:max-w-[50vw]
+          md:h-auto
+          md:rounded-[24px]
+          md:border
+          md:border-gray-500
+          min-w-[320px]
+          md:min-w-120 
+        "
+          overlayClassName="bg-black-500/80"
         >
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border px-1 py-1">
             <DialogTitle className="text-foreground text-lg font-semibold">
               Notifications
             </DialogTitle>
@@ -157,7 +186,7 @@ export default function NotificationsModal({
             </button>
           </div>
 
-          <div className="flex flex-col gap-3 px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 px-2 py-1 sm:flex-row sm:items-center sm:justify-between mb-6 mt-2">
             <NotificationTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -171,7 +200,7 @@ export default function NotificationsModal({
               disabled={unreadCount === 0 || markAllReadMutation.isPending}
               className={cn(
                 "text-primary border-primary hover:bg-primary/5",
-                "flex items-center gap-1.5 rounded-lg border px-3 py-1.5",
+                "flex items-center gap-1.5 rounded-sm border px-3 py-2",
                 "text-sm font-medium transition-colors self-start sm:self-auto",
                 "disabled:cursor-not-allowed disabled:opacity-50",
               )}

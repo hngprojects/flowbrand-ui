@@ -41,8 +41,8 @@ export default function NotificationItem({
         </span>
       </div>
 
-      {/* Right column: dot + time on top, actions on bottom */}
-      <div className="flex flex-shrink-0 flex-col items-end justify-between">
+      {/* Right column: tight on mobile (dot + trash close together), spread on desktop */}
+      <div className="flex flex-shrink-0 flex-col items-end gap-2 sm:justify-between sm:gap-0">
         <div className="flex items-center gap-2">
           {/* Desktop-only time: shows on the right */}
           <span className="text-muted-foreground hidden text-xs sm:block">
@@ -76,7 +76,7 @@ export default function NotificationItem({
             className="text-muted-foreground hover:text-error hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50 rounded-full p-1 transition-colors"
             aria-label="Delete notification"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4 text-primary" />
           </button>
         </div>
       </div>
