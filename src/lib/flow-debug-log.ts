@@ -6,7 +6,8 @@ export type FlowDebugArea =
   | "onboarding"
   | "funnel"
   | "strategy"
-  | "upload";
+  | "upload"
+  | "notifications";
 
 /** Enable with FLOWBRAND_DEBUG=1 or sessionStorage flowbrand_debug=1 in the browser. */
 export function isFlowDebugEnabled(): boolean {
