@@ -110,7 +110,10 @@ export function FunnelHistory({
             </button>
 
             {isExpanded && hasStages && (
-              <div className="border-t border-primary-80 px-4 py-3 flex flex-col gap-2">
+              <div
+                id={`funnel-${funnel.funnelId}`}
+                className="border-t border-primary-80 px-4 py-3 flex flex-col gap-2"
+              >
                 {funnel.stages?.map((stage) => (
                   <div
                     key={stage.stageId}
