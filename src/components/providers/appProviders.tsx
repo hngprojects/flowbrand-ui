@@ -7,7 +7,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
+    <SessionProvider refetchOnWindowFocus refetchInterval={12 * 60}>
       <QueryProvider>
         <GoogleSignInToast />
         {children}

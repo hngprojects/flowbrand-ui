@@ -13,8 +13,12 @@ import MyProfileTab from "@/components/settings/tabs/MyProfileTab";
 import PasswordSecurityTab from "@/components/settings/tabs/PasswordSecurityTab";
 import NotificationPreferencesTab from "@/components/settings/tabs/NotificationsPrefrencesTab";
 import DeleteAccountTab from "@/components/settings/tabs/DeleteAccountTab";
-import type { MockUploadedDoc } from "@/lib/dashboard-mock-data";
-import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
+import { mockNotifications } from "@/components/modals/notifications/mock-data";
+import type {
+  FunnelListItemDisplay,
+  StrategyPhaseDisplay,
+  UploadedDocDisplay,
+} from "@/lib/funnel-display";
 import { STRATEGY_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
 import NotificationsModal from "@/components/modals/notifications";
@@ -22,9 +26,12 @@ import { useNotificationUnreadCountQuery } from "@/hooks/queries/use-notificatio
 
 interface OnboardingNavbarProps {
   loading?: boolean;
-  documents?: MockUploadedDoc[];
+  documents?: UploadedDocDisplay[];
   strategyPhases?: readonly StrategyPhaseDisplay[];
   strategySummary?: string;
+  funnels?: readonly FunnelListItemDisplay[];
+  activeFunnelId?: string | null;
+  onSelectFunnel?: (funnelId: string) => void;
   onCreateNewStrategy?: () => void;
 }
 
@@ -33,6 +40,9 @@ const OnboardingNavbar = ({
   documents = [],
   strategyPhases = [],
   strategySummary,
+  funnels = [],
+  activeFunnelId = null,
+  onSelectFunnel,
   onCreateNewStrategy,
 }: OnboardingNavbarProps) => {
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
@@ -63,7 +73,7 @@ const OnboardingNavbar = ({
           <div className="flex items-center gap-2 md:gap-3">
             {showMenuButton && (
               <button
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 lg:hidden"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-80 md:hidden"
                 onClick={() => {
                   if (isStrategyRoute) {
                     setDrawerPath(drawerOpen ? null : pathname);
@@ -151,7 +161,7 @@ const OnboardingNavbar = ({
           <div
             onClick={() => setDrawerPath(null)}
             className={cn(
-              "fixed inset-0 z-40 transition-opacity duration-300 lg:hidden",
+              "fixed inset-0 z-40 transition-opacity duration-300 md:hidden",
               drawerOpen ? "opacity-100" : "pointer-events-none opacity-0",
             )}
             style={{ backgroundColor: "rgba(3, 13, 31, 0.8)" }}
@@ -159,7 +169,7 @@ const OnboardingNavbar = ({
 
           <div
             className={cn(
-              "fixed top-0 left-0 z-50 h-full w-[min(90vw,360px)] overflow-auto bg-white transition-transform duration-300 ease-in-out lg:hidden",
+              "fixed top-0 left-0 z-50 h-full w-[min(90vw,360px)] overflow-auto bg-white transition-transform duration-300 ease-in-out md:hidden",
               drawerOpen ? "translate-x-0" : "-translate-x-full",
             )}
           >
@@ -177,12 +187,15 @@ const OnboardingNavbar = ({
               </button>
             </div>
 
-            <div className="overflow-y-auto p-4">
+            <div className="scrollbar-none overflow-y-auto p-4">
               <StrategySidebar
                 loading={loading}
                 documents={documents}
                 strategyPhases={strategyPhases}
                 strategySummary={strategySummary}
+                funnels={funnels}
+                activeFunnelId={activeFunnelId}
+                onSelectFunnel={onSelectFunnel}
                 onCreateNewStrategy={onCreateNewStrategy}
                 className="!static !top-auto !flex !h-auto !max-w-none !w-full !overflow-visible !border-0 px-0 py-0"
               />
