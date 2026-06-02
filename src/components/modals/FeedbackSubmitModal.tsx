@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
 import {
@@ -21,11 +22,24 @@ export function FeedbackSubmitModal({
   onOpenChange: (open: boolean) => void;
   onConfirm: () => Promise<void>;
 }) {
+  const [confirming, setConfirming] = useState(false);
+  const busy = submitting || confirming;
+
+  const handleConfirm = async () => {
+    if (busy) return;
+    setConfirming(true);
+    try {
+      await onConfirm();
+    } finally {
+      setConfirming(false);
+    }
+  };
+
   return (
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (submitting && !nextOpen) return;
+        if (busy && !nextOpen) return;
         onOpenChange(nextOpen);
       }}
     >
@@ -34,11 +48,11 @@ export function FeedbackSubmitModal({
         className="w-[85%] rounded-[24px] border border-primary-80 bg-white p-5 sm:max-w-[480px] sm:p-7"
         overlayClassName="bg-[#030D1F]/80"
         onEscapeKeyDown={(event) => {
-          if (!submitting) return;
+          if (!busy) return;
           event.preventDefault();
         }}
         onPointerDownOutside={(event) => {
-          if (!submitting) return;
+          if (!busy) return;
           event.preventDefault();
         }}
       >
@@ -70,24 +84,24 @@ export function FeedbackSubmitModal({
           <div className="mt-5 w-full space-y-2">
             <button
               type="button"
-              onClick={() => void onConfirm()}
-              disabled={submitting}
+              onClick={() => void handleConfirm()}
+              disabled={busy}
               className={cn(
-                "h-12 w-full rounded-[10px] text-sm font-semibold transition-colors cursor-pointer",
-                submitting
+                "h-12 w-full cursor-pointer rounded-[10px] text-sm font-semibold transition-colors",
+                busy
                   ? "cursor-not-allowed bg-primary-150 text-neutral-900"
                   : "bg-primary text-white hover:bg-primary-500",
               )}
             >
-              {submitting ? "Submitting..." : "Submit"}
+              {busy ? "Submitting..." : "Submit"}
             </button>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              disabled={submitting}
-              className="h-12 w-full cursor-pointer rounded-[10px] border border-primary bg-white text-sm
-               font-medium text-primary-500 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed 
-               disabled:opacity-70"
+              disabled={busy}
+              className="h-12 w-full cursor-pointer rounded-[10px] border border-primary bg-white 
+              text-sm font-medium text-primary-500 transition-colors 
+              hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
             >
               Cancel
             </button>
