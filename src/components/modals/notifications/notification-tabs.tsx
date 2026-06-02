@@ -28,10 +28,10 @@ export default function NotificationTabs({
           role="tab"
           aria-selected={activeTab === tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-lg px-4 py-2 text-sm w-24 font-medium transition-colors ${
             activeTab === tab.id
               ? "bg-primary text-primary-foreground"
-              : "bg-transparent text-foreground hover:bg-muted-foreground/10"
+              : "bg-transparent text-foreground/50 hover:bg-muted-foreground/10"
           }`}
         >
           {tab.label}
