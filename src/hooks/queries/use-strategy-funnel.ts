@@ -300,7 +300,7 @@ export function useStrategyFunnel() {
   }, [funnelId, activeStageId, mergedCompletedStageIds]);
 
   const completeCurrentStage = useCallback(async () => {
-    if (!funnelId || !activeStageId) return;
+    if (!funnelId || !activeStageId) return false;
 
     const result = await completeStage(funnelId, activeStageId);
 
@@ -308,7 +308,7 @@ export function useStrategyFunnel() {
       toast.error(
         result.error ?? "Could not complete this stage. Please try again.",
       );
-      return;
+      return false;
     }
 
     markStageComplete(funnelId, activeStageId);
@@ -324,6 +324,7 @@ export function useStrategyFunnel() {
 
     // Refetch to pull the newly unlocked stage content from backend
     displayQuery.refetch();
+    return true;
   }, [funnelId, activeStageId, displayQuery]);
 
   const strategyPhases = useMemo(
