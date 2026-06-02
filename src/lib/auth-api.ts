@@ -349,7 +349,7 @@ export function parseMeEnvelope(body: unknown): AuthMeProfile | null {
   };
 }
 
-function readSetCookieHeaders(
+export function readSetCookieHeaders(
   headers: RawAxiosResponseHeaders | AxiosResponseHeaders,
 ): string[] {
   const raw = headers["set-cookie"];
