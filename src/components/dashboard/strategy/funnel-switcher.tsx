@@ -208,6 +208,9 @@ export function FunnelSwitcher({
                     ) : null}
                     <button
                       type="button"
+                      aria-label="Strategy actions"
+                      aria-haspopup="menu"
+                      aria-expanded={isMenuOpen}
                       onClick={(e) => {
                         e.stopPropagation();
                         setMenuOpenId(isMenuOpen ? null : item.funnelId);

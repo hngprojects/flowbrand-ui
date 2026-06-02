@@ -38,8 +38,16 @@ function statusBadge(status?: string) {
 }
 
 function stageStatusDot(status?: string) {
-  if (status === "complete") return "bg-[#326AD1]";
-  if (status === "active") return "bg-[#F59E0B]";
+  const normalized = status?.toLowerCase();
+
+  if (normalized === "complete" || normalized === "completed") {
+    return "bg-[#326AD1]";
+  }
+
+  if (normalized === "active") {
+    return "bg-[#F59E0B]";
+  }
+
   return "bg-[#D0D5DD]";
 }
 
@@ -77,10 +85,9 @@ export function FunnelHistory({
             className="rounded-[12px] border border-primary-80 bg-white overflow-hidden"
           >
             <button
-              type="button"
-              onClick={() =>
-                setExpandedId(isExpanded ? null : (funnel.funnelId ?? null))
-              }
+              aria-expanded={isExpanded}
+              aria-controls={`funnel-${funnel.funnelId}`}
+              onClick={() => setExpandedId(isExpanded ? null : funnel.funnelId)}
               className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
             >
               <div className="min-w-0">

@@ -34,9 +34,13 @@ export async function renameFunnel(
       { headers: { Authorization: `Bearer ${token}` }, timeout: 30000 },
     );
     return { ok: true };
-  } catch {
-    // Stub — returns ok until backend confirms endpoint
-    return { ok: true };
+  } catch (error) {
+    console.error("Rename funnel failed:", error);
+
+    return {
+      ok: false,
+      error: "Failed to rename funnel",
+    };
   }
 }
 
@@ -53,8 +57,12 @@ export async function deleteFunnel(
       timeout: 30000,
     });
     return { ok: true };
-  } catch {
-    // Stub — returns ok until backend confirms endpoint
-    return { ok: true };
+  } catch (error) {
+    console.error("Delete funnel failed:", error);
+
+    return {
+      ok: false,
+      error: "Failed to delete funnel",
+    };
   }
 }
