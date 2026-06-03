@@ -64,7 +64,7 @@ export function UpgradeToProModal({
           <PaymentModalClose onClose={onClose} />
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
+        <div className="scrollbar-none flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
           <h2 className="text-center font-[500] text-[20px] md:text-[24px] leading-[120%] text-black-500">
             You have seen what Seil can do, now let&apos;s go further
           </h2>
