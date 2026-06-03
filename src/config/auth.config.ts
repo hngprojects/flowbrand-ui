@@ -33,6 +33,8 @@ const AUTH_SECRET_FALLBACK =
   (process.env.NODE_ENV !== "production" ? "seil-dev-secret" : undefined);
 /** Backend access tokens are ~15m; refresh slightly before expiry. */
 const ACCESS_TOKEN_LIFETIME_MS = 1000 * 60 * 14;
+/** Refresh early so API calls are not rejected while the JWT still looks valid. */
+const ACCESS_TOKEN_REFRESH_BUFFER_MS = 60_000;
 
 const authConfig: NextAuthConfig = {
   providers: [
@@ -136,9 +138,12 @@ const authConfig: NextAuthConfig = {
       }
 
       /**
-       * Existing token still valid
+       * Existing token still valid (refresh a minute before client-side expiry).
        */
-      if (customToken.expires_at && Date.now() < customToken.expires_at) {
+      if (
+        customToken.expires_at &&
+        Date.now() < customToken.expires_at - ACCESS_TOKEN_REFRESH_BUFFER_MS
+      ) {
         return customToken;
       }
 

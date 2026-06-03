@@ -6,12 +6,7 @@ import {
   buildBackendAuthCookieHeader,
   logoutWithCookieForward,
 } from "@/lib/auth-api";
-
-function applySetCookieHeaders(response: NextResponse, headers: string[]) {
-  for (const header of headers) {
-    response.headers.append("Set-Cookie", header);
-  }
-}
+import { appendAuthSetCookieHeaders } from "@/lib/auth-cookies";
 
 /** Proxies backend logout so the refresh-token httpOnly cookie is revoked/cleared. */
 export async function POST() {
@@ -25,6 +20,6 @@ export async function POST() {
   });
 
   const response = NextResponse.json({ ok: result.ok });
-  applySetCookieHeaders(response, result.setCookieHeaders);
+  appendAuthSetCookieHeaders(response, result.setCookieHeaders);
   return response;
 }

@@ -1,11 +1,23 @@
 import axios from "axios";
 import { cookies } from "next/headers";
-import { authApiUrl, readSetCookieHeaders } from "@/lib/auth-api";
+import {
+  authApiUrl,
+  buildBackendAuthCookieHeader,
+  readSetCookieHeaders,
+} from "@/lib/auth-api";
+import { isLocalHttpApp } from "@/lib/auth-cookies";
 import { inDevEnvironment } from "@/lib/utils";
 
 const REFRESH_TOKEN_TIMEOUT_MS = 15_000;
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
+
+function localHttpCookieOptions(
+  options: Parameters<CookieStore["set"]>[2],
+): Parameters<CookieStore["set"]>[2] {
+  if (!isLocalHttpApp()) return options;
+  return { ...options, secure: false, sameSite: "lax" };
+}
 
 /** Apply backend Set-Cookie headers to the current response (refresh-token rotation). */
 function applyRotatedRefreshCookies(
@@ -68,7 +80,7 @@ function applyRotatedRefreshCookies(
       }
     }
 
-    cookieStore.set(name, value, options);
+    cookieStore.set(name, value, localHttpCookieOptions(options));
   }
 }
 
@@ -78,10 +90,11 @@ export async function refreshAccessToken(baseUrl: string): Promise<{
 } | null> {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((entry) => `${entry.name}=${entry.value}`)
-      .join("; ");
+    const allCookies = cookieStore.getAll();
+    const authCookies = buildBackendAuthCookieHeader(allCookies);
+    const cookieHeader =
+      authCookies ||
+      allCookies.map((entry) => `${entry.name}=${entry.value}`).join("; ");
 
     const response = await axios.post(
       authApiUrl(baseUrl, "/refresh-token"),

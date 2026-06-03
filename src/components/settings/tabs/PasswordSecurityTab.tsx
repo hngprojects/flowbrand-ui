@@ -18,6 +18,10 @@ import {
 import BaseModal from "@/components/modals/BaseModal";
 import UpdateIcon from "@/components/icons/modals/update";
 import { useChangePasswordMutation } from "@/hooks/mutations/use-password-mutations";
+import {
+  SettingsTabFooter,
+  SettingsTabLayout,
+} from "@/components/settings/settings-tab-layout";
 
 const PasswordSecuritySchema = z
   .object({
@@ -91,135 +95,145 @@ export default function PasswordSecurityTab() {
   };
   return (
     <>
-      <div className="flex flex-col gap-6">
-        <h3 className="text-[20px] font-medium text-black-300">Password</h3>
+      <SettingsTabLayout
+        footer={
+          <SettingsTabFooter>
+            <button
+              type="submit"
+              disabled={isSubmitting || changePassword.isPending}
+              form="password-form"
+              className="w-full rounded-[10px] bg-primary px-10 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+            >
+              {isSubmitting || changePassword.isPending
+                ? "Updating..."
+                : "Change Password"}
+            </button>
+          </SettingsTabFooter>
+        }
+      >
+        <div className="flex flex-col gap-6 pb-4">
+          <h3 className="text-[20px] font-medium text-black-300">Password</h3>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-5 rounded-[12px] border border-gray-200 p-6"
-          >
-            <FormField
-              control={form.control}
-              name="oldPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
-                    Old Password
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <input
-                        type={showOld ? "text" : "password"}
-                        disabled={isSubmitting || changePassword.isPending}
-                        {...field}
-                        className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowOld((v) => !v)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
-                        aria-label={showOld ? "Hide password" : "Show password"}
-                      >
-                        {showOld ? (
-                          <Eye size={20} color="#A2A2A2" />
-                        ) : (
-                          <EyeOff size={20} color="#A2A2A2" />
-                        )}
-                      </button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <Form {...form}>
+            <form
+              id="password-form"
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col gap-5 rounded-[12px] border border-gray-200 p-6"
+            >
+              <FormField
+                control={form.control}
+                name="oldPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
+                      Old Password
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <input
+                          type={showOld ? "text" : "password"}
+                          disabled={isSubmitting || changePassword.isPending}
+                          {...field}
+                          className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowOld((v) => !v)}
+                          className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                          aria-label={
+                            showOld ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showOld ? (
+                            <Eye size={20} color="#A2A2A2" />
+                          ) : (
+                            <EyeOff size={20} color="#A2A2A2" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="newPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
-                    New Password
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <input
-                        type={showNew ? "text" : "password"}
-                        disabled={isSubmitting || changePassword.isPending}
-                        {...field}
-                        className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowNew((v) => !v)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
-                        aria-label={showNew ? "Hide password" : "Show password"}
-                      >
-                        {showNew ? (
-                          <Eye size={20} color="#A2A2A2" />
-                        ) : (
-                          <EyeOff size={20} color="#A2A2A2" />
-                        )}
-                      </button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
+                      New Password
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <input
+                          type={showNew ? "text" : "password"}
+                          disabled={isSubmitting || changePassword.isPending}
+                          {...field}
+                          className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNew((v) => !v)}
+                          className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                          aria-label={
+                            showNew ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showNew ? (
+                            <Eye size={20} color="#A2A2A2" />
+                          ) : (
+                            <EyeOff size={20} color="#A2A2A2" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
-                    Confirm Password
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <input
-                        type={showConfirm ? "text" : "password"}
-                        disabled={isSubmitting || changePassword.isPending}
-                        {...field}
-                        className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirm((v) => !v)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
-                        aria-label={
-                          showConfirm ? "Hide password" : "Show password"
-                        }
-                      >
-                        {showConfirm ? (
-                          <Eye size={20} color="#A2A2A2" />
-                        ) : (
-                          <EyeOff size={20} color="#A2A2A2" />
-                        )}
-                      </button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-center md:justify-end pt-2">
-              <button
-                type="submit"
-                disabled={isSubmitting || changePassword.isPending}
-                className="rounded-[10px] bg-primary px-10 py-3 text-sm md:text-base font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting || changePassword.isPending
-                  ? "Updating..."
-                  : "Change Password"}
-              </button>
-            </div>
-          </form>
-        </Form>
-      </div>
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
+                      Confirm Password
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <input
+                          type={showConfirm ? "text" : "password"}
+                          disabled={isSubmitting || changePassword.isPending}
+                          {...field}
+                          className="w-full rounded-[8px] border border-gray-300 px-3 py-2.5 pr-10 text-sm text-foreground outline-none focus:border-primary transition-colors disabled:opacity-50"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirm((v) => !v)}
+                          className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+                          aria-label={
+                            showConfirm ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showConfirm ? (
+                            <Eye size={20} color="#A2A2A2" />
+                          ) : (
+                            <EyeOff size={20} color="#A2A2A2" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
+        </div>
+      </SettingsTabLayout>
 
       <BaseModal
         isOpen={successOpen}

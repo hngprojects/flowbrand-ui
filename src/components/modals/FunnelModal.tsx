@@ -46,7 +46,7 @@ export default function FunnelModal({
         <Tabs
           key={isOpen ? "open" : "closed"}
           defaultValue={defaultTab ?? tabs[0]?.id}
-          className="flex flex-col h-full gap-0"
+          className="flex min-w-0 flex-col h-full gap-0"
         >
           <div className="flex items-center justify-between mb-6 shrink-0 border-b-[0.35px] border-gray-500 pb-4 mx-[-32px] px-8">
             <h2 className="text-[18px] font-medium text-foreground">{title}</h2>
@@ -82,30 +82,33 @@ export default function FunnelModal({
             </button>
           </div>
 
-          <TabsList
-            className="flex items-center w-full h-[38px] gap-[10px] mb-6 shrink-0 rounded-[12px] border border-gray-400
-            px-1 bg-transparent overflow-x-auto"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
+          <div className="mb-6 shrink-0 overflow-x-auto scrollbar-none touch-pan-x [-webkit-overflow-scrolling:touch] max-lg:-mx-8 lg:overflow-x-visible">
+            <TabsList
+              className="flex h-auto w-max min-w-full flex-nowrap items-center justify-between gap-1.5 rounded-lg border border-gray-400 bg-transparent p-1
+               px-8 max-md:rounded-none max-md:border-x-0 md:w-full md:max-w-full md:overflow-x-auto md:rounded-lg md:border md:px-1"
+            >
+              {tabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="after:hidden h-[44px] min-h-[44px] shrink-0 grow-0 basis-auto 
+                  rounded-lg border-0 px-3 text-center text-[16px] font-medium leading-[150%]
+                   whitespace-nowrap text-black-300 transition-all duration-200 hover:bg-transparent hover:text-black-300
+                   data-active:bg-primary-500 data-active:text-white data-active:shadow-none data-active:hover:bg-primary-500 data-active:hover:text-white sm:px-4"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             {tabs.map((tab) => (
-              <TabsTrigger
+              <TabsContent
                 key={tab.id}
                 value={tab.id}
-                className="h-full rounded-[10px] font-medium transition-all duration-200 whitespace-nowrap px-4 text-center 
-                text-[16px] leading-[150%] text-black-300 data-active:bg-primary-500 data-active:text-white cursor-pointer border-0 
-                data-active:shadow-none hover:bg-transparent hover:text-black-300 data-active:hover:bg-primary-500 data-active:hover:text-white"
+                className="mt-0 flex h-full min-h-0 flex-col outline-none data-[state=inactive]:hidden"
               >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <div
-            className="flex-1 overflow-y-auto min-h-0"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {tabs.map((tab) => (
-              <TabsContent key={tab.id} value={tab.id}>
                 {tab.content}
               </TabsContent>
             ))}
