@@ -22,6 +22,7 @@ import { STRATEGY_ROUTE } from "@/routes";
 import { cn } from "@/lib/utils";
 import NotificationsModal from "@/components/modals/notifications";
 import { useNotificationUnreadCountQuery } from "@/hooks/queries/use-notification-queries";
+import { usePaymentFlow } from "@/components/modals/payment/payment-flow-provider";
 
 interface OnboardingNavbarProps {
   loading?: boolean;
@@ -51,6 +52,7 @@ const OnboardingNavbar = ({
   const [isNotification, setIsNotification] = useState(false);
   const unreadCountQuery = useNotificationUnreadCountQuery();
   const unreadCount = unreadCountQuery.data?.count ?? 0;
+  const { openUpgrade } = usePaymentFlow();
 
   const isStrategyRoute = pathname === STRATEGY_ROUTE;
   const isDashboardFlow =
@@ -91,6 +93,16 @@ const OnboardingNavbar = ({
             <Link href="/dashboard" className="cursor-pointer">
               <LogoIcon />
             </Link>
+            <button
+              type="button"
+              onClick={openUpgrade}
+              className="ml-1 rounded-full border border-primary-80
+               px-2.5 py-1 text-[10px] font-semibold uppercase 
+               tracking-wide text-primary-500 transition-colors 
+               hover:bg-primary-50 sm:ml-2 sm:px-3 sm:py-1.5 sm:text-xs"
+            >
+              Upgrade to Pro
+            </button>
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
