@@ -27,7 +27,8 @@ export function RenameStrategyModal({
   useEffect(() => {
     if (isOpen) {
       setValue(currentName);
-      setTimeout(() => inputRef.current?.focus(), 80);
+      const id = window.setTimeout(() => inputRef.current?.focus(), 80);
+      return () => window.clearTimeout(id);
     }
   }, [isOpen, currentName]);
 
@@ -38,7 +39,13 @@ export function RenameStrategyModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(next) => {
+        if (isPending && !next) return;
+        if (!next) onClose();
+      }}
+    >
       <DialogContent
         className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]"
         overlayClassName="bg-[#030D1F]/80"
