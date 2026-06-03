@@ -47,24 +47,21 @@ export function UpgradeToProModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className={cn(
-          "fixed inset-0 z-50 flex h-screen w-screen max-w-none flex-col overflow-hidden border-0 bg-white p-8 shadow-2xl translate-x-0 translate-y-0 left-0 top-0",
-          "md:left-auto md:right-5 md:top-5 md:bottom-5 md:h-auto md:w-[50vw] md:max-w-[50vw] md:rounded-[24px] md:border md:border-gray-500 min-w-[320px] md:min-w-120",
-        )}
-        overlayClassName="bg-black-500/80"
+        className="scrollbar-none max-h-[92vh] w-[calc(100%-1.5rem)] overflow-y-auto rounded-[24px] border border-primary-80 bg-white p-5 sm:max-w-[720px] sm:p-7 md:max-w-[860px] md:p-8"
+        overlayClassName="bg-[#030D1F]/80"
       >
         <VisuallyHidden>
           <DialogTitle>Upgrade to Pro</DialogTitle>
         </VisuallyHidden>
 
-        <div className="mx-[-32px] mb-6 flex shrink-0 items-center justify-between gap-4 border-b-[0.35px] border-gray-500 px-8 pb-4">
+        <div className="-mx-5 mb-6 flex items-center justify-between gap-4 border-b-[0.35px] border-gray-500 px-5 pb-4 sm:-mx-7 sm:px-7 md:-mx-8 md:px-8">
           <p className="text-[14px] font-[500] tracking-wide text-primary-800">
             UPGRADE TO PRO
           </p>
           <PaymentModalClose onClose={onClose} />
         </div>
 
-        <div className="scrollbar-none flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
+        <div className="flex flex-col gap-6">
           <h2 className="text-center font-[500] text-[20px] md:text-[24px] leading-[120%] text-black-500">
             You have seen what Seil can do, now let&apos;s go further
           </h2>
