@@ -8,6 +8,25 @@ import { collectApiRecords } from "@/lib/api-envelope";
 
 export const AUTH_API_PREFIX = "/api/auth";
 
+/** Backend logout / refresh-token calls should not forward unrelated app cookies. */
+const BACKEND_AUTH_COOKIE_NAMES = new Set(["refresh_token", "refreshToken"]);
+
+export function isBackendAuthCookieName(name: string): boolean {
+  if (BACKEND_AUTH_COOKIE_NAMES.has(name)) return true;
+  return /refresh[-_]?token/i.test(name);
+}
+
+export function buildBackendAuthCookieHeader(
+  entries: ReadonlyArray<{ name: string; value: string }>,
+): string {
+  return entries
+    .filter((entry) => isBackendAuthCookieName(entry.name))
+    .map((entry) => `${entry.name}=${entry.value}`)
+    .join("; ");
+}
+
+const LOGOUT_TIMEOUT_MS = 15_000;
+
 export function authApiUrl(baseUrl: string, path: string): string {
   const base = baseUrl.replace(/\/$/, "");
   const suffix = path.startsWith("/") ? path : `/${path}`;
@@ -450,6 +469,7 @@ export async function logoutWithCookieForward(
         withCredentials: true,
         headers: Object.keys(headers).length > 0 ? headers : undefined,
         validateStatus: () => true,
+        timeout: LOGOUT_TIMEOUT_MS,
       },
     );
 

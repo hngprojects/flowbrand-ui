@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { envConfig } from "@/config/env.config";
-import { logoutWithCookieForward } from "@/lib/auth-api";
+import {
+  buildBackendAuthCookieHeader,
+  logoutWithCookieForward,
+} from "@/lib/auth-api";
 
 function applySetCookieHeaders(response: NextResponse, headers: string[]) {
   for (const header of headers) {
@@ -14,10 +17,7 @@ function applySetCookieHeaders(response: NextResponse, headers: string[]) {
 export async function POST() {
   const session = await auth();
   const cookieStore = await cookies();
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((entry) => `${entry.name}=${entry.value}`)
-    .join("; ");
+  const cookieHeader = buildBackendAuthCookieHeader(cookieStore.getAll());
 
   const result = await logoutWithCookieForward(envConfig.BASEURL, {
     accessToken: session?.access_token,

@@ -72,14 +72,14 @@ export function ThingsYouCanLearnModal({
                 </h3>
                 {section.paragraphs.map((paragraph) => (
                   <p
-                    className="font-[400] text-16px text-black-300"
+                    className="font-[400] text-[16px] text-black-300"
                     key={paragraph}
                   >
                     {paragraph}
                   </p>
                 ))}
                 {section.quotesIntro ? (
-                  <p className="font-[400] text-16px text-black-300">
+                  <p className="font-[400] text-[16px] text-black-300">
                     {section.quotesIntro}
                   </p>
                 ) : null}
@@ -88,7 +88,7 @@ export function ThingsYouCanLearnModal({
                     {section.quotes.map((quote) => (
                       <li
                         key={quote}
-                        className="font-[400] text-16px text-black-300"
+                        className="font-[400] text-[16px] text-black-300"
                       >
                         &ldquo;{quote}&rdquo;
                       </li>
@@ -100,7 +100,7 @@ export function ThingsYouCanLearnModal({
                     {section.bullets.map((item) => (
                       <li
                         key={item}
-                        className="font-[400] text-16px text-black-300"
+                        className="font-[400] text-[16px] text-black-300"
                       >
                         {item}
                       </li>
@@ -110,7 +110,7 @@ export function ThingsYouCanLearnModal({
                 {section.closingParagraphs?.map((paragraph) => (
                   <p
                     key={paragraph}
-                    className="font-[400] text-16px text-black-300"
+                    className="font-[400] text-[16px] text-black-300"
                   >
                     {paragraph}
                   </p>

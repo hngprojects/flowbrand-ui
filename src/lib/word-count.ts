@@ -16,7 +16,9 @@ export function truncateToMaxWords(text: string, maxWords: number): string {
 
   for (const token of tokens) {
     if (/^\s+$/.test(token)) {
-      result += token;
+      if (words < maxWords) {
+        result += token;
+      }
       continue;
     }
     if (words >= maxWords) break;

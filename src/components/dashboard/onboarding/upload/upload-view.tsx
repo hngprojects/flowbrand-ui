@@ -204,7 +204,7 @@ export function UploadView() {
 
     return (
       "Document processing is taking longer than expected. " +
-      "The server may still be parsing your file. please refresh the page after a moment or two to see if it’s ready."
+      "The server may still be parsing your file. Please refresh the page after a moment or two to see if it’s ready."
     );
   }, [displayFiles]);
 

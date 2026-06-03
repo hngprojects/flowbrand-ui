@@ -1,5 +1,7 @@
 import { signOut } from "next-auth/react";
 
+const CLIENT_LOGOUT_TIMEOUT_MS = 15_000;
+
 export type ClientLogoutOptions = {
   callbackUrl?: string;
   redirect?: boolean;
@@ -15,6 +17,7 @@ export async function performClientLogout(
     await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
+      signal: AbortSignal.timeout(CLIENT_LOGOUT_TIMEOUT_MS),
     });
   } catch {
     // Still clear the local Auth.js session.
