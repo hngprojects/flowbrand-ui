@@ -358,7 +358,6 @@ export function StrategyView() {
               strategyPhases={strategyPhases}
               funnels={funnels}
               activeFunnelId={funnelId}
-              currentFunnelId={funnelId}
               onSelectFunnel={selectFunnel}
             />
             <StrategyMainPanel className="min-h-[calc(100vh-83px)] min-w-0 flex-1">
@@ -385,7 +384,6 @@ export function StrategyView() {
             strategySummary={strategySummary}
             funnels={funnels}
             activeFunnelId={funnelId}
-            currentFunnelId={funnelId}
             onSelectFunnel={selectFunnel}
             onCreateNewStrategy={handleCreateNewStrategy}
           />
@@ -402,7 +400,6 @@ export function StrategyView() {
             strategySummary={strategySummary}
             funnels={funnels}
             activeFunnelId={funnelId}
-            currentFunnelId={funnelId}
             onSelectFunnel={selectFunnel}
             onCreateNewStrategy={handleCreateNewStrategy}
           />

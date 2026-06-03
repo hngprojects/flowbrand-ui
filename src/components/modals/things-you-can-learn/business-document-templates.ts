@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { DocsImg } from "@/components/icons/docs-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 
 export type BusinessDocumentTemplate = {
@@ -12,17 +11,31 @@ export type BusinessDocumentTemplate = {
 
 export const BUSINESS_DOCUMENT_TEMPLATES: BusinessDocumentTemplate[] = [
   {
-    id: "glowlab-docx",
-    href: "/files/GlowLab_Skincare_Business_Document_2026.docx",
-    filename: "GlowLab_Skincare_Business_Document_2026.docx",
-    label: "DOCX",
-    icon: DocsImg,
+    id: "seil-agrifood",
+    href: "/files/Seil_AgriFood_Templates.pdf",
+    filename: "Seil_AgriFood_Templates.pdf",
+    label: "AgriFood",
+    icon: PdfImg,
   },
   {
-    id: "hoopgear-pdf",
-    href: "/files/HoopGearPro_Business_Document_2026.pdf",
-    filename: "HoopGearPro_Business_Document_2026.pdf",
-    label: "PDF",
+    id: "seil-fintech",
+    href: "/files/Seil_Fintech_Template.pdf",
+    filename: "Seil_Fintech_Template.pdf",
+    label: "Fintech",
+    icon: PdfImg,
+  },
+  {
+    id: "seil-health-wellness",
+    href: "/files/Seil_Health_and_Wellness_Template.pdf",
+    filename: "Seil_Health_and_Wellness_Template.pdf",
+    label: "Health & Wellness",
+    icon: PdfImg,
+  },
+  {
+    id: "seil-retail-fashion",
+    href: "/files/Seil_Retail_and_Fashion_Template.pdf",
+    filename: "Seil_Retail_and_Fashion_Template.pdf",
+    label: "Retail & Fashion",
     icon: PdfImg,
   },
 ];
