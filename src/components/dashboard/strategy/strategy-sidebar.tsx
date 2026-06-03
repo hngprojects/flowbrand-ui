@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Plus, ChevronDown } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DocsImg } from "@/components/icons/docs-img";
 import { InlineSpinner } from "@/components/icons/loader/inline-spinner";
-import { FunnelHistory } from "@/components/dashboard/strategy/funnel-history";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_LOADING_MESSAGE } from "@/hooks/queries/use-strategy-funnel";
 import { StrategyIcon } from "@/components/icons/strategy";
@@ -115,7 +114,6 @@ export default function StrategySidebar({
               {strategySummary ??
                 "We have created a tailored marketing strategy for your unique use case and problem."}
             </p>
-
             {hasPhases ? (
               <div>
                 <h2 className="mb-3 text-sm font-medium text-neutral-500">
@@ -165,22 +163,6 @@ export default function StrategySidebar({
                 Stages will appear here once generation completes.
               </p>
             )}
-
-            <button
-              type="button"
-              onClick={() => setShowHistory((v) => !v)}
-              className="flex w-full items-center justify-between rounded-[14px] border border-primary-80 bg-white px-4 py-3 text-sm font-medium text-neutral-900 hover:bg-gray-50 transition-colors"
-            >
-              <span>Previous Strategies</span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 text-neutral-500 transition-transform duration-200",
-                  showHistory ? "rotate-180" : "rotate-0",
-                )}
-              />
-            </button>
-
-            {showHistory && <FunnelHistory currentFunnelId={currentFunnelId} />}
             {onCreateNewStrategy && (
               <>
                 <p className="text-sm leading-6 text-neutral-500">

@@ -48,7 +48,7 @@ for file in $STAGED; do
     *src/components/icons.tsx|*src/components/icons/*|*src/components/ui/*|*src/constants/*|\
     pre-commit|*/pre-commit|.husky/*|\
     *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.bmp|*.avif|\
-    *.woff|*.woff2|*.ttf|*.eot|*.pdf|*.zip|*.wasm|\
+    *.woff|*.woff2|*.ttf|*.eot|*.pdf|*.docx|*.zip|*.wasm|\
     *.min.js|*.min.css|*.map|*.lockb|*.svg|*.md)
       continue
       ;;

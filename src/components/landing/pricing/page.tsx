@@ -12,6 +12,7 @@ import { BadgeCheck, Check } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { usePaymentFlow } from "@/components/modals/payment/payment-flow-provider";
 
 type FeatureValue = boolean | string;
 
@@ -100,6 +101,7 @@ function FeatureCell({ value }: { value: FeatureValue }) {
 }
 
 export default function PricingPage() {
+  const { openUpgrade } = usePaymentFlow();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly",
   );
@@ -258,11 +260,13 @@ export default function PricingPage() {
                   </div>
                 </div>
                 {/* Button pinned to bottom so it aligns with Free card button */}
-                <Link href="/pricing/pro">
-                  <Button className="mt-4 rounded-md w-full border-2 cursor-pointer border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950">
-                    Get Full Access
-                  </Button>
-                </Link>
+                <Button
+                  type="button"
+                  onClick={openUpgrade}
+                  className="mt-4 rounded-md w-full border-2 cursor-pointer border-accent-500 bg-transparent text-accent-500 hover:bg-orange-50 dark:hover:bg-orange-950"
+                >
+                  Get Full Access
+                </Button>
               </motion.div>
             </div>
           </div>

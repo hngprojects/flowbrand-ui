@@ -90,7 +90,7 @@ export function FeedbackSubmitModal({
                 "h-12 w-full cursor-pointer rounded-[10px] text-sm font-semibold transition-colors",
                 busy
                   ? "cursor-not-allowed bg-primary-150 text-neutral-900"
-                  : "bg-primary text-white hover:bg-primary-500",
+                  : "cursor-pointer bg-primary text-white hover:bg-primary-500",
               )}
             >
               {busy ? "Submitting..." : "Submit"}

@@ -144,10 +144,17 @@ function formatFunnelCreatedAt(createdAt: string | undefined): string {
   });
 }
 
-function funnelCreationPathLabel(creationPath: string | undefined): string {
+/** Human-readable creation path; replaces all underscores for unknown values. */
+export function formatCreationPathLabel(creationPath?: string): string {
+  if (!creationPath) return "";
   if (creationPath === "document_upload") return "From documents";
   if (creationPath === "wizard") return "From questions";
-  return "Strategy";
+  return creationPath.replace(/_/g, " ");
+}
+
+function funnelCreationPathLabel(creationPath: string | undefined): string {
+  const label = formatCreationPathLabel(creationPath);
+  return label || "Strategy";
 }
 
 export function mapFunnelToListItem(
