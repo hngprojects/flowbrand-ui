@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,13 @@ export function RenameStrategyModal({
   isPending = false,
 }: RenameStrategyModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(next) => {
+        if (isPending && !next) return;
+        if (!next) onClose();
+      }}
+    >
       <DialogContent
         className="w-[85%] rounded-[32px] border-[0.5px] bg-white p-10 md:w-[483px]"
         overlayClassName="bg-[#030D1F]/80"
@@ -65,7 +71,9 @@ function RenameStrategyModalForm({
 
   const handleSubmit = () => {
     const trimmed = value.trim();
+
     if (!trimmed || isPending) return;
+
     onConfirm(trimmed);
   };
 
@@ -87,6 +95,7 @@ function RenameStrategyModalForm({
         >
           Strategy Name
         </label>
+
         <input
           ref={inputRef}
           id="strategy-name"
@@ -110,16 +119,22 @@ function RenameStrategyModalForm({
           className={cn(
             "h-12 w-full rounded-[10px] px-6 py-3 text-base font-semibold transition-opacity",
             value.trim() && !isPending
-              ? "bg-primary text-primary-foreground hover:opacity-90 cursor-pointer"
+              ? "cursor-pointer bg-primary text-primary-foreground hover:opacity-90"
               : "cursor-not-allowed bg-primary-150 text-neutral-400",
           )}
         >
           {isPending ? "Saving..." : "Save changes"}
         </button>
+
         <button
           type="button"
+          disabled={isPending}
           onClick={onClose}
-          className="border-primary text-primary h-12 w-full rounded-[10px] border px-6 py-3 text-base font-semibold transition-opacity hover:opacity-90"
+          className={cn(
+            "h-12 w-full rounded-[10px] border border-primary px-6 py-3",
+            "text-base font-semibold text-primary transition-opacity",
+            "hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70",
+          )}
         >
           Cancel
         </button>
