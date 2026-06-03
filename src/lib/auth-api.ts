@@ -427,6 +427,42 @@ export async function loginWithCookieForward(
   }
 }
 
+/** Browser logout proxy — revokes refresh token and forwards Set-Cookie clears. */
+export async function logoutWithCookieForward(
+  baseUrl: string,
+  options: { accessToken?: string | null; cookieHeader?: string },
+): Promise<{ ok: boolean; setCookieHeaders: string[]; status: number }> {
+  const headers: Record<string, string> = {};
+  const token = options.accessToken?.trim();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const cookieHeader = options.cookieHeader?.trim();
+  if (cookieHeader) {
+    headers.Cookie = cookieHeader;
+  }
+
+  try {
+    const response = await axios.post(
+      authApiUrl(baseUrl, "/logout"),
+      {},
+      {
+        withCredentials: true,
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
+        validateStatus: () => true,
+      },
+    );
+
+    return {
+      ok: response.status >= 200 && response.status < 300,
+      setCookieHeaders: readSetCookieHeaders(response.headers),
+      status: response.status,
+    };
+  } catch {
+    return { ok: false, setCookieHeaders: [], status: 500 };
+  }
+}
+
 export async function fetchAuthMe(
   baseUrl: string,
   accessToken: string,

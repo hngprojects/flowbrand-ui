@@ -6,7 +6,7 @@ import BaseModal from "@/components/modals/BaseModal";
 import ModalTrashIcon from "@/components/icons/modals/trash";
 import { deleteUserAccount } from "@/actions/user";
 import { toast } from "sonner";
-import { signOut } from "next-auth/react";
+import { performClientLogout } from "@/lib/client-logout";
 
 interface DeleteAccountTabProps {
   onClose: () => void;
@@ -31,7 +31,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
 
     toast.success("Account deleted successfully.");
     onClose();
-    await signOut({ callbackUrl: "/" });
+    await performClientLogout({ callbackUrl: "/", redirect: true });
   };
 
   const consequences = [

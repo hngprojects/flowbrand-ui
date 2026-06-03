@@ -295,7 +295,6 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
             variant="menu"
             className="rounded-[8px] border border-red-100 bg-red-50 px-10 py-3 text-sm 
             md:text-base font-medium text-red-500 hover:opacity-90 w-auto text-center"
-            onAfterLogout={onClose}
           />
           <button
             type="submit"

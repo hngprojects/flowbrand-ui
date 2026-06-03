@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { signOut } from "next-auth/react";
+import { performClientLogout } from "@/lib/client-logout";
 import {
   Form,
   FormControl,
@@ -87,7 +87,7 @@ export default function PasswordSecurityTab() {
   const handleSuccessClose = async () => {
     setSuccessOpen(false);
 
-    await signOut({ callbackUrl: "/login", redirect: true });
+    await performClientLogout({ callbackUrl: "/login", redirect: true });
   };
   return (
     <>
