@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
@@ -50,7 +49,6 @@ export default function StrategySidebar({
   onSelectFunnel,
   onCreateNewStrategy,
   className,
-  currentFunnelId,
 }: {
   loading: boolean;
   documents?: UploadedDocDisplay[];
@@ -61,9 +59,7 @@ export default function StrategySidebar({
   onSelectFunnel?: (funnelId: string) => void;
   onCreateNewStrategy?: () => void;
   className?: string;
-  currentFunnelId?: string | null;
 }) {
-  const [showHistory, setShowHistory] = useState(false);
   const hasPhases = strategyPhases.length > 0;
   const hasDocuments = documents.length > 0;
 

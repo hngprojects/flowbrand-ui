@@ -23,6 +23,10 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useUpdateProfileMutation } from "@/hooks/mutations/use-profile-mutations";
 import { uploadUserAvatar } from "@/actions/user";
+import {
+  SettingsTabFooter,
+  SettingsTabLayout,
+} from "@/components/settings/settings-tab-layout";
 
 const MyProfileSchema = z.object({
   fullName: z
@@ -138,178 +142,180 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <h3 className="text-[20px] font-medium text-black-300">My Profile</h3>
-
-      <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full">
-        <div className="h-[122px] w-[122px] overflow-hidden rounded-full bg-gray-100">
-          {avatar ? (
-            <Image
-              src={avatar}
-              alt="Profile"
-              width={122}
-              height={122}
-              unoptimized
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-gray-400 text-2xl font-medium">
-              {(profile?.fullName ?? fullName)?.charAt(0).toUpperCase() || "?"}
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleUpload}
-          />
-          <button
-            type="button"
-            disabled={isUploadingAvatar}
-            onClick={() => fileInputRef.current?.click()}
-            className="h-[40px] whitespace-nowrap rounded-[8px] border border-gray-300 px-[24px] 
-            py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
-            Upload new picture
-          </button>
-          <button
-            type="button"
-            disabled={isUploadingAvatar}
-            onClick={handleDeleteAvatar}
-            className="h-[40px] whitespace-nowrap rounded-[8px] border border-red-100 bg-red-50
-            px-[24px] py-[8px] text-sm md:text-base text-red-500 hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          id="profile-form"
-          className="flex flex-col gap-[21px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full"
-        >
-          <h4 className="text-[16px] font-medium leading-[150%] text-primary-900">
-            Personal Information
-          </h4>
-
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
-                  Full name
-                </FormLabel>
-                <FormControl>
-                  <input
-                    type="text"
-                    disabled={isSubmitting || isLoadingProfile}
-                    {...field}
-                    className="w-full h-[44px] rounded-[8px] border border-primary-500 px-[16px] 
-                    py-[12px] text-[16px] font-medium leading-[150%] text-black-500 outline-none 
-                    focus:border-primary-500 transition-colors disabled:opacity-50"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex flex-col gap-4 md:flex-row">
-            <div className="flex-1 flex flex-col gap-2">
-              <label className="text-[16px] font-medium leading-[150%] text-primary-900">
-                Email address
-              </label>
-              <input
-                type="email"
-                disabled
-                value={profile?.email ?? ""}
-                className="w-full h-[44px] rounded-[8px] border border-primary-500 px-[16px] 
-                py-[12px] text-[16px] font-medium leading-[150%] text-black-500 outline-none 
-                bg-gray-50 opacity-60 cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-400">
-                Email cannot be changed. Contact support if needed.
-              </p>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
-                    Country
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <select
-                        disabled={isSubmitting || isLoadingProfile}
-                        {...field}
-                        className="w-full h-[44px] appearance-none rounded-[8px] border border-primary-500 
-                        px-[16px] py-[12px] text-[16px] font-medium leading-[150%] text-black-500 
-                        outline-none focus:border-primary-500 transition-colors bg-white disabled:opacity-50"
-                      >
-                        {COUNTRY_OPTIONS.map((c) => (
-                          <option
-                            key={c.value === "" ? "_placeholder" : c.value}
-                            value={c.value}
-                          >
-                            {c.label}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                        >
-                          <path
-                            d="M4 6L8 10L12 6"
-                            stroke="#6B7280"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </form>
-
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <LogoutButton
-            variant="menu"
-            className="rounded-[8px] border border-red-100 bg-red-50 px-10 py-3 text-sm 
-            md:text-base font-medium text-red-500 hover:opacity-90 w-auto text-center"
-            onAfterLogout={onClose}
-          />
+    <SettingsTabLayout
+      footer={
+        <SettingsTabFooter className="md:flex-row md:items-center md:justify-between">
           <button
             type="submit"
             disabled={isSubmitting || updateProfile.isPending}
             form="profile-form"
-            className="rounded-[10px] bg-primary px-10 py-3 text-sm md:text-base font-medium 
-            text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="order-1 w-full rounded-[10px] bg-primary px-10 py-3 text-sm 
+            font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed
+             disabled:opacity-50 md:order-2 md:w-auto md:text-base"
           >
             {isSubmitting || updateProfile.isPending
               ? "Saving..."
               : "Save Changes"}
           </button>
+          <LogoutButton
+            variant="menu"
+            className="order-2 w-full rounded-[8px] border border-red-100 bg-red-50 px-10 py-3
+             text-center text-sm font-medium text-red-500 hover:opacity-90 md:order-1 md:w-auto md:text-base"
+          />
+        </SettingsTabFooter>
+      }
+    >
+      <div className="flex flex-col gap-6 pb-4">
+        <h3 className="text-[20px] font-medium text-black-300">My Profile</h3>
+
+        <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full">
+          <div className="h-[122px] w-[122px] overflow-hidden rounded-full bg-gray-100">
+            {avatar ? (
+              <Image
+                src={avatar}
+                alt="Profile"
+                width={122}
+                height={122}
+                unoptimized
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-gray-400 text-2xl font-medium">
+                {(profile?.fullName ?? fullName)?.charAt(0).toUpperCase() ||
+                  "?"}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleUpload}
+            />
+            <button
+              type="button"
+              disabled={isUploadingAvatar}
+              onClick={() => fileInputRef.current?.click()}
+              className="h-[40px] whitespace-nowrap rounded-[8px] border border-gray-300 px-[24px] 
+            py-[8px] text-sm md:text-base text-foreground hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              Upload new picture
+            </button>
+            <button
+              type="button"
+              disabled={isUploadingAvatar}
+              onClick={handleDeleteAvatar}
+              className="h-[40px] whitespace-nowrap rounded-[8px] border border-red-100 bg-red-50
+            px-[24px] py-[8px] text-sm md:text-base text-red-500 hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
         </div>
-      </Form>
-    </div>
+
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            id="profile-form"
+            className="flex flex-col gap-[21px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full"
+          >
+            <h4 className="text-[16px] font-medium leading-[150%] text-primary-900">
+              Personal Information
+            </h4>
+
+            <FormField
+              control={form.control}
+              name="fullName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
+                    Full name
+                  </FormLabel>
+                  <FormControl>
+                    <input
+                      type="text"
+                      disabled={isSubmitting || isLoadingProfile}
+                      {...field}
+                      className="w-full h-[44px] rounded-[8px] border border-primary-500 px-[16px] 
+                    py-[12px] text-[16px] font-medium leading-[150%] text-black-500 outline-none 
+                    focus:border-primary-500 transition-colors disabled:opacity-50"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-col gap-4 md:flex-row">
+              <div className="flex-1 flex flex-col gap-2">
+                <label className="text-[16px] font-medium leading-[150%] text-primary-900">
+                  Email address
+                </label>
+                <input
+                  type="email"
+                  disabled
+                  value={profile?.email ?? ""}
+                  className="w-full h-full rounded-[8px] border border-primary-500 px-[16px] 
+                py-[12px] text-[16px] font-medium leading-[150%] text-black-500 outline-none 
+                bg-gray-50 opacity-60 cursor-not-allowed"
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel className="text-[16px] font-medium leading-[150%] text-primary-900">
+                      Country
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <select
+                          disabled={isSubmitting || isLoadingProfile}
+                          {...field}
+                          className="w-full h-full appearance-none rounded-[8px] border border-primary-500 
+                        px-[16px] py-[12px] text-[16px] font-medium leading-[150%] text-black-500 
+                        outline-none focus:border-primary-500 transition-colors bg-white disabled:opacity-50"
+                        >
+                          {COUNTRY_OPTIONS.map((c) => (
+                            <option
+                              key={c.value === "" ? "_placeholder" : c.value}
+                              value={c.value}
+                            >
+                              {c.label}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                          >
+                            <path
+                              d="M4 6L8 10L12 6"
+                              stroke="#6B7280"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </form>
+        </Form>
+      </div>
+    </SettingsTabLayout>
   );
 }

@@ -6,7 +6,11 @@ import BaseModal from "@/components/modals/BaseModal";
 import ModalTrashIcon from "@/components/icons/modals/trash";
 import { deleteUserAccount } from "@/actions/user";
 import { toast } from "sonner";
-import { signOut } from "next-auth/react";
+import { performClientLogout } from "@/lib/client-logout";
+import {
+  SettingsTabFooter,
+  SettingsTabLayout,
+} from "@/components/settings/settings-tab-layout";
 
 interface DeleteAccountTabProps {
   onClose: () => void;
@@ -31,7 +35,7 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
 
     toast.success("Account deleted successfully.");
     onClose();
-    await signOut({ callbackUrl: "/" });
+    await performClientLogout({ callbackUrl: "/", redirect: true });
   };
 
   const consequences = [
@@ -43,47 +47,50 @@ export default function DeleteAccountTab({ onClose }: DeleteAccountTabProps) {
 
   return (
     <>
-      <div className="flex flex-col gap-6">
-        <h3 className="text-[20px] font-medium text-black-300">
-          Delete Account
-        </h3>
-
-        <div className="flex items-center gap-3 rounded-[12px] border border-red-500/30 bg-red-25 px-4 py-3">
-          <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
-          <p className="text-base font-medium text-red-500">
-            Note that this action cannot be undone. Your data, funnels, and
-            progress will be permanently deleted.
-          </p>
-        </div>
-
-        <h4 className="text-base font-medium text-primary-900">
-          What will happen:
-        </h4>
-        <div className="flex flex-col gap-4 rounded-[12px] border border-gray-200 px-4 py-6">
-          <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {consequences.map((item) => (
-              <li
-                key={item}
-                className="flex items-start gap-2 text-sm text-primary-900"
-              >
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="flex justify-center md:justify-end pt-2">
-          <button
-            type="button"
-            onClick={() => setConfirmOpen(true)}
-            className="rounded-[10px] bg-red-600 px-10 py-3 text-sm md:text-base font-medium text-white
-            hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+      <SettingsTabLayout
+        footer={
+          <SettingsTabFooter>
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(true)}
+              className="w-full rounded-[10px] bg-red-600 px-10 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+            >
+              Delete Account
+            </button>
+          </SettingsTabFooter>
+        }
+      >
+        <div className="flex flex-col gap-6 pb-4">
+          <h3 className="text-[20px] font-medium text-black-300">
             Delete Account
-          </button>
+          </h3>
+
+          <div className="flex items-center gap-3 rounded-[12px] border border-red-500/30 bg-red-25 px-4 py-3">
+            <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
+            <p className="text-base font-medium text-red-500">
+              Note that this action cannot be undone. Your data, funnels, and
+              progress will be permanently deleted.
+            </p>
+          </div>
+
+          <h4 className="text-base font-medium text-primary-900">
+            What will happen:
+          </h4>
+          <div className="flex flex-col gap-4 rounded-[12px] border border-gray-200 px-4 py-6">
+            <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {consequences.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-2 text-sm text-primary-900"
+                >
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
+      </SettingsTabLayout>
 
       <BaseModal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <div className="flex flex-col items-center gap-6 text-center">

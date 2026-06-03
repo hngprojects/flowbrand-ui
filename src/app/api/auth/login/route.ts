@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { envConfig } from "@/config/env.config";
 import { loginWithCookieForward } from "@/lib/auth-api";
+import { appendAuthSetCookieHeaders } from "@/lib/auth-cookies";
 import { loginFailureCode } from "@/lib/login-errors";
 import { LoginSchema } from "@/schema/auth.schema";
-
-function applySetCookieHeaders(response: NextResponse, headers: string[]) {
-  for (const header of headers) {
-    response.headers.append("Set-Cookie", header);
-  }
-}
 
 /** Proxies password login so the browser receives the refresh-token httpOnly cookie. */
 export async function POST(request: Request) {
@@ -49,6 +44,6 @@ export async function POST(request: Request) {
     access_token: result.access_token,
     user: result.user,
   });
-  applySetCookieHeaders(response, result.setCookieHeaders);
+  appendAuthSetCookieHeaders(response, result.setCookieHeaders);
   return response;
 }

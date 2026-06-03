@@ -1,5 +1,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { BUSINESS_DESCRIPTION_MAX_WORDS } from "@/schema/onboarding";
+import { countWords, truncateToMaxWords } from "@/lib/word-count";
 
 interface StepOneProps {
   value: string;
@@ -8,7 +10,7 @@ interface StepOneProps {
 }
 
 export default function StepOne({ value, onChange, onNext }: StepOneProps) {
-  const maxLength = 500;
+  const wordCount = countWords(value);
 
   return (
     <div className="space-y-default">
@@ -26,12 +28,18 @@ export default function StepOne({ value, onChange, onNext }: StepOneProps) {
         <Textarea
           placeholder="e.g I sell small chops and pastries for events and walk in customers..."
           value={value}
-          maxLength={maxLength}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) =>
+            onChange(
+              truncateToMaxWords(
+                e.target.value,
+                BUSINESS_DESCRIPTION_MAX_WORDS,
+              ),
+            )
+          }
           className="min-h-[120px] resize-none bg-card border-gray-600 text-label placeholder:text-gray-700 rounded-lg focus-visible:ring-1 focus-visible:ring-primary"
         />
         <div className="text-right text-xs text-gray-700">
-          {value.length}/{maxLength}
+          {wordCount}/{BUSINESS_DESCRIPTION_MAX_WORDS} words
         </div>
       </div>
 

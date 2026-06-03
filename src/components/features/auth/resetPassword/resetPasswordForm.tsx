@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { performClientLogout } from "@/lib/client-logout";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -88,7 +88,7 @@ function ResetPasswordForm({ resetToken }: Readonly<{ resetToken: string }>) {
       }
 
       clearForgotResetStorage();
-      await signOut({ redirect: false });
+      await performClientLogout({ callbackUrl: "/login", redirect: false });
       toast.success("Password reset successful", {
         description: "Sign in with your new password.",
       });

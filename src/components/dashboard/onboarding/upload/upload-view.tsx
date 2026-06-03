@@ -30,6 +30,7 @@ import {
 } from "@/hooks/queries/use-upload-queries";
 import { mergeUploadProgress } from "@/lib/funnel-upload-progress";
 import { cn } from "@/lib/utils";
+import { ThingsYouCanLearnModal } from "@/components/modals/things-you-can-learn/things-you-can-learn-modal";
 
 type UploadStatus = "uploading" | "parsing" | "ready" | "failed";
 
@@ -125,6 +126,7 @@ export function UploadView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
+  const [thingsToLearnOpen, setThingsToLearnOpen] = useState(false);
   // const [processingWarning, setProcessingWarning] = useState<string | null>(
   //   null,
   // );
@@ -200,7 +202,10 @@ export function UploadView() {
       return null;
     }
 
-    return "Document processing is taking longer than expected. The server may still be parsing your file. please refresh the page after a moment or two to see if it’s ready.";
+    return (
+      "Document processing is taking longer than expected. " +
+      "The server may still be parsing your file. Please refresh the page after a moment or two to see if it’s ready."
+    );
   }, [displayFiles]);
 
   useEffect(() => {
@@ -512,8 +517,9 @@ export function UploadView() {
 
           <button
             type="button"
-            onClick={goToQuestions}
-            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-0.5 text-sm text-neutral-500 transition-colors hover:text-neutral-700"
+            onClick={() => setThingsToLearnOpen(true)}
+            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-0.5 text-sm text-neutral-500 
+            transition-colors hover:text-neutral-700"
           >
             Don&apos;t know what to do? Click here
             <ChevronRight size={16} className="text-neutral-400" />
@@ -548,6 +554,11 @@ export function UploadView() {
           <ChevronRight size={20} className="shrink-0 text-neutral-400" />
         </button>
       </div>
+
+      <ThingsYouCanLearnModal
+        isOpen={thingsToLearnOpen}
+        onClose={() => setThingsToLearnOpen(false)}
+      />
     </main>
   );
 }

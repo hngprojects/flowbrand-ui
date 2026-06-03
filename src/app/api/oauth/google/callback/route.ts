@@ -1,6 +1,7 @@
 import { signIn } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { exchangeGoogleOAuthCode, fetchAuthMe } from "@/lib/auth-api";
+import { appendAuthSetCookieHeaders } from "@/lib/auth-cookies";
 import { withGoogleSignInSuccessQuery } from "@/lib/google-sign-in-toast";
 import { parseGoogleOAuthCallbackParams } from "@/lib/google-oauth";
 import { isSignInFailure } from "@/lib/login-errors";
@@ -70,8 +71,6 @@ export async function GET(request: Request) {
   );
 
   const response = Response.redirect(successUrl);
-  for (const header of refreshCookieHeaders) {
-    response.headers.append("Set-Cookie", header);
-  }
+  appendAuthSetCookieHeaders(response, refreshCookieHeaders);
   return response;
 }

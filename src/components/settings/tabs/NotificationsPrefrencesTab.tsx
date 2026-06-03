@@ -6,6 +6,7 @@ import {
   getNotificationPreferences,
   updateNotificationPreferences,
 } from "@/actions/user";
+import { SettingsTabLayout } from "@/components/settings/settings-tab-layout";
 
 interface NotificationSetting {
   id: string;
@@ -107,37 +108,41 @@ export default function NotificationPreferencesTab() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <h3 className="text-[20px] font-medium text-black-300">Notifications</h3>
+    <SettingsTabLayout>
+      <div className="flex flex-col gap-6 pb-4">
+        <h3 className="text-[20px] font-medium text-black-300">
+          Notifications
+        </h3>
 
-      <div className="flex flex-col rounded-[12px] border border-gray-200">
-        {notifications.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center justify-between px-5 py-4"
-          >
-            <span className="text-base text-[#1A1A1A]">{item.label}</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={item.enabled}
-              aria-label={item.label}
-              disabled={isLoading || savingId !== null}
-              onClick={() => toggle(item.id)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 
+        <div className="flex flex-col rounded-[12px] border border-gray-200">
+          {notifications.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between px-5 py-4"
+            >
+              <span className="text-base text-[#1A1A1A]">{item.label}</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={item.enabled}
+                aria-label={item.label}
+                disabled={isLoading || savingId !== null}
+                onClick={() => toggle(item.id)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
                 disabled:opacity-50 disabled:cursor-not-allowed
                 ${item.enabled ? "bg-primary" : "bg-gray-200"}`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${
-                  item.enabled ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
-        ))}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${
+                    item.enabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </SettingsTabLayout>
   );
 }
