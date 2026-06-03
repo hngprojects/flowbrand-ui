@@ -4,7 +4,7 @@ import type { PaymentDetails } from "@/components/modals/payment/payment-types";
 
 export function PaymentDetailsBox({ details }: { details: PaymentDetails }) {
   const rows: { label: string; value: string }[] = [
-    { label: "Reference method", value: details.reference },
+    { label: "Reference", value: details.reference },
     { label: "Amount", value: details.amount },
     { label: "Payment Method", value: details.paymentMethod },
     { label: "Date & Time", value: details.dateTime },

@@ -73,24 +73,6 @@ export function PaymentFlowProvider({ children }: { children: ReactNode }) {
     setFailedOpen(true);
   }, []);
 
-  const simulateSuccess = useCallback(() => {
-    setUpgradeOpen(false);
-    setFailedOpen(false);
-    setSuccessOpen(true);
-  }, []);
-
-  const simulateFailed = useCallback(() => {
-    setUpgradeOpen(false);
-    setSuccessOpen(false);
-    setFailedOpen(true);
-  }, []);
-
-  const retryPayment = useCallback(() => {
-    setSuccessOpen(false);
-    setFailedOpen(false);
-    setUpgradeOpen(true);
-  }, []);
-
   const value = useMemo(
     () => ({ openUpgrade, openSuccess, openFailed, closeAll }),
     [openUpgrade, openSuccess, openFailed, closeAll],
@@ -106,8 +88,8 @@ export function PaymentFlowProvider({ children }: { children: ReactNode }) {
         billingCycle={billingCycle}
         onBillingCycleChange={setBillingCycle}
         onGetFullAccess={() => {}}
-        onSimSuccess={simulateSuccess}
-        onSimFailed={simulateFailed}
+        onSimSuccess={openSuccess}
+        onSimFailed={openFailed}
       />
 
       <PaymentSuccessModal
@@ -120,8 +102,8 @@ export function PaymentFlowProvider({ children }: { children: ReactNode }) {
         isOpen={failedOpen}
         onClose={() => setFailedOpen(false)}
         details={paymentDetails}
-        onTryAgain={retryPayment}
-        onChooseAnotherMethod={retryPayment}
+        onTryAgain={openUpgrade}
+        onChooseAnotherMethod={openUpgrade}
       />
     </PaymentFlowContext.Provider>
   );
