@@ -34,38 +34,9 @@ export default function FunnelModal({
       }}
     >
       <DialogContent
+        variant="sidePanel"
         showCloseButton={false}
-        className="
-          fixed
-          inset-0
-          z-50
-          flex
-          flex-col
-          w-screen
-          h-screen
-          max-w-none
-          bg-white
-          border-0
-          shadow-2xl
-          p-8
-          overflow-hidden
-          translate-x-0
-          translate-y-0
-          left-0
-          top-0
-          md:left-auto
-          md:right-5
-          md:top-5
-          md:bottom-5
-          md:w-[50vw]
-          md:max-w-[50vw]
-          md:h-auto
-          md:rounded-[24px]
-          md:border
-          md:border-gray-500
-          min-w-[320px]
-          md:min-w-120 
-        "
+        className="min-w-[320px] border-0 bg-white p-8 shadow-2xl md:min-w-120 md:rounded-[24px] md:border md:border-gray-500"
         overlayClassName="bg-black-500/80"
       >
         <VisuallyHidden>
