@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Plus, ChevronDown } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PptImg } from "@/components/icons/ppt-img";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DocsImg } from "@/components/icons/docs-img";
 import { InlineSpinner } from "@/components/icons/loader/inline-spinner";
-import { FunnelHistory } from "@/components/dashboard/strategy/funnel-history";
 import type { StrategyPhaseDisplay } from "@/lib/funnel-display";
 import { STRATEGY_LOADING_MESSAGE } from "@/hooks/queries/use-strategy-funnel";
 import { StrategyIcon } from "@/components/icons/strategy";
@@ -164,7 +163,6 @@ export default function StrategySidebar({
                 Stages will appear here once generation completes.
               </p>
             )}
-            feat/rename-delete-button
             {onCreateNewStrategy && (
               <>
                 <p className="text-sm leading-6 text-neutral-500">

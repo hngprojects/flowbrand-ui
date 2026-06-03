@@ -211,6 +211,11 @@ export function FunnelSwitcher({
                       aria-label={`Actions for ${item.label}`}
                       aria-haspopup="menu"
                       aria-expanded={isMenuOpen}
+                      aria-controls={
+                        isMenuOpen
+                          ? `funnel-actions-${item.funnelId}`
+                          : undefined
+                      }
                       onClick={(e) => {
                         e.stopPropagation();
                         setMenuOpenId(isMenuOpen ? null : item.funnelId);
@@ -223,7 +228,11 @@ export function FunnelSwitcher({
 
                   {/* Action popover */}
                   {isMenuOpen ? (
-                    <div className="absolute right-2 top-8 z-40 min-w-[160px] rounded-[10px] border border-neutral-100 bg-white p-1 shadow-lg">
+                    <div
+                      id={`funnel-actions-${item.funnelId}`}
+                      role="menu"
+                      className="absolute right-2 top-8 z-40 min-w-[160px] rounded-[10px] border border-neutral-100 bg-white p-1 shadow-lg"
+                    >
                       <button
                         type="button"
                         onClick={(e) => {

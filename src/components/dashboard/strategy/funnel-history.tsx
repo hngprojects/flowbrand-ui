@@ -8,27 +8,30 @@ import { listFunnels } from "@/actions/funnels";
 import { parseFunnelList } from "@/lib/funnel-api-types";
 import { unwrapActionResult } from "@/lib/api-query";
 import { queryKeys } from "@/lib/query-keys";
+import { formatCreationPathLabel } from "@/lib/funnel-display";
 
 function statusBadge(status?: string) {
-  if (status === "active")
+  const normalized = status?.toLowerCase();
+
+  if (normalized === "active")
     return (
       <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
         Active
       </span>
     );
-  if (status === "generating")
+  if (normalized === "generating" || normalized === "pending")
     return (
       <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">
         Generating
       </span>
     );
-  if (status === "complete")
+  if (normalized === "complete" || normalized === "completed")
     return (
       <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
         Complete
       </span>
     );
-  if (status === "failed")
+  if (normalized === "failed")
     return (
       <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
         Failed
@@ -85,9 +88,14 @@ export function FunnelHistory({
             className="rounded-[12px] border border-primary-80 bg-white overflow-hidden"
           >
             <button
+              type="button"
               aria-expanded={isExpanded}
-              aria-controls={`funnel-${funnel.funnelId}`}
-              onClick={() => setExpandedId(isExpanded ? null : funnel.funnelId)}
+              aria-controls={
+                hasStages ? `funnel-stages-${funnel.funnelId}` : undefined
+              }
+              onClick={() =>
+                setExpandedId(isExpanded ? null : (funnel.funnelId ?? null))
+              }
               className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
             >
               <div className="min-w-0">
@@ -95,7 +103,7 @@ export function FunnelHistory({
                   {funnel.businessName ?? "Unnamed Strategy"}
                 </p>
                 <p className="text-xs text-neutral-400 capitalize">
-                  {funnel.creationPath?.replace(/_/g, " ") ?? ""}
+                  {formatCreationPathLabel(funnel.creationPath)}
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -111,7 +119,7 @@ export function FunnelHistory({
 
             {isExpanded && hasStages && (
               <div
-                id={`funnel-${funnel.funnelId}`}
+                id={`funnel-stages-${funnel.funnelId}`}
                 className="border-t border-primary-80 px-4 py-3 flex flex-col gap-2"
               >
                 {funnel.stages?.map((stage) => (
