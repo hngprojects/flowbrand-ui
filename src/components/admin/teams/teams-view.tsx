@@ -30,7 +30,8 @@ export function TeamsView() {
   function confirmDelete() {
     if (!target) return;
     deleteMutation.mutate(target.id, {
-      onSettled: () => {
+      // Close only on success so a failed delete keeps the modal open for retry.
+      onSuccess: () => {
         setModalOpen(false);
         setTarget(null);
       },

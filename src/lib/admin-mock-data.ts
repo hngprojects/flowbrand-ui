@@ -259,13 +259,14 @@ export function fetchInvites(): Promise<InvitesData> {
 }
 
 /** GET /admin/logs (mock) — paginated activity log. */
-export function fetchActivityLog(
-  page = 1,
-  perPage = LOG_USERS.length,
-): Promise<ActivityLogData> {
+export function fetchActivityLog(page = 1): Promise<ActivityLogData> {
   const safePage = Math.min(Math.max(page, 1), TOTAL_LOG_PAGES);
+  const entries = buildLogPage(safePage);
+  // Derive perPage from the actual page contents so the pagination contract
+  // stays internally consistent (totalCount = totalPages * perPage).
+  const perPage = entries.length;
   return delay({
-    entries: buildLogPage(safePage),
+    entries,
     page: safePage,
     perPage,
     totalPages: TOTAL_LOG_PAGES,

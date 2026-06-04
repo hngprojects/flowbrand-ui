@@ -16,6 +16,15 @@ function wait(ms = 300): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Collision-resistant id, falling back to a random suffix where crypto is unavailable. */
+function generateId(prefix: string): string {
+  const uuid =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `${prefix}-${uuid}`;
+}
+
 /** DELETE /admin/teams/:id (mock) — remove a team member. */
 export function useDeleteTeamMemberMutation() {
   const queryClient = useQueryClient();
@@ -62,7 +71,7 @@ export function useSendInviteMutation() {
                 ...previous,
                 pending: [
                   {
-                    id: `pi-${Date.now()}`,
+                    id: generateId("pi"),
                     email,
                     role,
                     sentAgo: "was sent just now",
