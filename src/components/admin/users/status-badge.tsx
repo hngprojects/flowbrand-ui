@@ -2,24 +2,22 @@ import { cn } from "@/lib/utils";
 
 export type UserStatus = "active" | "inactive" | "deleted";
 
+const STATUS_CONFIG = {
+  active: {
+    label: "Active",
+    className: "bg-primary-50 text-primary-500",
+  },
+  inactive: {
+    label: "Inactive",
+    className: "bg-accent-50 text-accent-700",
+  },
+  deleted: {
+    label: "Deleted",
+    className: "bg-red-50 text-red-500",
+  },
+} as const;
 export function StatusBadge({ status }: { status: UserStatus }) {
-  const config = {
-    active: {
-      label: "Active",
-      className: "bg-primary-50 text-primary-500",
-    },
-    inactive: {
-      label: "Inactive",
-      className: "bg-accent-50 text-accent-700",
-    },
-    deleted: {
-      label: "Deleted",
-      className: "bg-red-50 text-red-500",
-    },
-  };
-
-  const current = config[status];
-
+  const current = STATUS_CONFIG[status];
   return (
     <span
       className={cn(

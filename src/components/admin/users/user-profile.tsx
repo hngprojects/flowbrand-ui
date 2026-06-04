@@ -147,7 +147,14 @@ function initials(name: string) {
 
 export function UserProfile({ userId }: { userId: string }) {
   const user = STUB_USER; // TODO: fetch GET /api/users/:userId
-  const [expanded, setExpanded] = useState<string | null>("s1");
+  if (userId !== user.id) {
+    return (
+      <div>
+        User {userId} not found (stub data only shows user {user.id})
+      </div>
+    );
+  }
+  const [expanded, setExpanded] = useState<string[]>(["s1"]);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleDeleteConfirm = () => {
@@ -246,7 +253,7 @@ export function UserProfile({ userId }: { userId: string }) {
           </h2>
           <div className="flex flex-col gap-4">
             {user.strategies.map((strategy) => {
-              const isOpen = expanded === strategy.id;
+              const isOpen = expanded.includes(strategy.id);
               return (
                 <div
                   key={strategy.id}
@@ -255,7 +262,13 @@ export function UserProfile({ userId }: { userId: string }) {
                   {/* Strategy header */}
                   <button
                     type="button"
-                    onClick={() => setExpanded(isOpen ? null : strategy.id)}
+                    onClick={() =>
+                      setExpanded((prev) =>
+                        prev.includes(strategy.id)
+                          ? prev.filter((id) => id !== strategy.id)
+                          : [...prev, strategy.id],
+                      )
+                    }
                     className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left hover:bg-neutral-50 transition-colors"
                   >
                     <div className="flex flex-col gap-1.5">
@@ -293,21 +306,30 @@ export function UserProfile({ userId }: { userId: string }) {
                           key={stage.name}
                           className="flex items-center justify-between"
                         >
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center justify-between w-full">
+                            {/* LEFT SIDE */}
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-2 w-2 shrink-0 rounded-full bg-primary-500" />
+
+                              <div>
+                                <p className="text-sm font-medium text-neutral-900">
+                                  {stage.name}
+                                </p>
+                                <p className="text-xs text-neutral-400">
+                                  {stage.tasks}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* RIGHT SIDE STATUS DOT */}
                             <div
                               className={cn(
                                 "h-2 w-2 shrink-0 rounded-full",
-                                stageDot(stage.status),
+                                stage.status === "complete" && "bg-green-500",
+                                stage.status === "active" && "bg-yellow-500",
+                                stage.status === "locked" && "bg-neutral-300",
                               )}
                             />
-                            <div>
-                              <p className="text-sm font-medium text-neutral-900">
-                                {stage.name}
-                              </p>
-                              <p className="text-xs text-neutral-400">
-                                {stage.tasks}
-                              </p>
-                            </div>
                           </div>
                         </div>
                       ))}

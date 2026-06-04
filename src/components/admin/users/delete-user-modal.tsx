@@ -22,7 +22,7 @@ export function DeleteUserModal({
       onClose={onClose}
       icon={<ModalTrashIcon />}
       title="Delete user"
-      subtitle={`Are you sure you want to delete ${userName}? This action cannot be undone.`}
+      subtitle={`Are you sure you want to delete ${userName || "this user"}? This action cannot be undone.`}
       confirmText="Delete user"
       cancelText="Cancel"
       onConfirm={onConfirm}
