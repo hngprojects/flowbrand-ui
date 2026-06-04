@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -111,43 +111,15 @@ type FilterTab = "all" | "active" | "inactive";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function initials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
+  return (
+    name
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0] || "")
+      .join("")
+      .toUpperCase() || "?"
+  );
 }
-
-// function StatusBadge({ status }: { status: UserStatus }) {
-//   const config = {
-//     active: {
-//       label: "Active",
-//       className: "bg-primary-50 text-primary-500",
-//     },
-//     inactive: {
-//       label: "Inactive",
-//       className: "bg-accent-50 text-yellow-700",
-//     },
-//     deleted: {
-//       label: "Deleted",
-//       className: "bg-red-50 text-red-500",
-//     },
-//   };
-
-//   const current = config[status];
-
-//   return (
-//     <span
-//       className={cn(
-//         "inline-flex items-center justify-center rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap",
-//         current.className,
-//       )}
-//     >
-//       {current.label}
-//     </span>
-//   );
-// }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -169,11 +141,14 @@ export function UsersTable() {
     return matchesTab && matchesSearch;
   });
 
-  const counts = {
-    all: users.length,
-    active: users.filter((u) => u.status === "active").length,
-    inactive: users.filter((u) => u.status === "inactive").length,
-  };
+  const counts = useMemo(
+    () => ({
+      all: users.length,
+      active: users.filter((u) => u.status === "active").length,
+      inactive: users.filter((u) => u.status === "inactive").length,
+    }),
+    [users],
+  );
 
   const handleDeleteConfirm = () => {
     if (!deleteTarget) return;
@@ -260,7 +235,7 @@ export function UsersTable() {
                           {initials(user.name)}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-[#030D1F] group-hover:text-[#EBF0FA] transition-colors">
+                          <p className="text-sm font-medium text-[`#030D1F`] group-hover:text-primary-600 transition-colors">
                             {user.name}
                           </p>
                           <p className="text-xs text-[#565D69]">{user.email}</p>
@@ -292,6 +267,15 @@ export function UsersTable() {
                     <td className="px-6 py-4 text-sm text-neutral-600">
                       {user.signupDate}
                     </td>
+                    {/* <td className="px-6 py-4">
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(user)}
+                        className="text-sm text-red-600 hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                    </td> */}
                   </tr>
                 ))
               )}
