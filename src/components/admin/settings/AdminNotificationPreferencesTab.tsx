@@ -66,7 +66,7 @@ export default function AdminNotificationPreferencesTab() {
     );
 
     setSavingId(id);
-  
+
     setSavingId(null);
   };
 

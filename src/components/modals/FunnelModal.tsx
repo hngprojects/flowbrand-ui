@@ -120,9 +120,26 @@ export default function FunnelModal({
               className="flex items-center gap-[7.08px] rounded-[25.47px] border-[0.35px] border-gray-500 px-[15px] py-[7.08px] 
               text-sm text-black-500 transition-colors pointer-events-auto hover:bg-gray-50 cursor-pointer"
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M7 7L13 13M13 7L7 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="9"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M7 7L13 13M13 7L7 13"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
               <span className="text-base">Close</span>
             </button>
@@ -130,7 +147,12 @@ export default function FunnelModal({
 
           <div
             className="mb-6 shrink-0 w-full"
-            style={{ overflowX: "auto", overflowY: "hidden", scrollbarWidth: "none", msOverflowStyle: "none" }}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
           >
             <TabsList className="flex items-center h-[42px] w-full gap-[10px] rounded-[12px] border border-gray-400 px-1 bg-transparent">
               {tabs.map((tab) => (

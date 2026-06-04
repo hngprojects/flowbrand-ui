@@ -11,7 +11,10 @@ interface AdminSettingsModalProps {
   onClose: () => void;
 }
 
-export default function AdminSettingsModal({ isOpen, onClose }: AdminSettingsModalProps) {
+export default function AdminSettingsModal({
+  isOpen,
+  onClose,
+}: AdminSettingsModalProps) {
   return (
     <FunnelModal
       isOpen={isOpen}
