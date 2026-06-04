@@ -2,11 +2,7 @@ import { cn } from "@/lib/utils";
 
 export type UserStatus = "active" | "inactive" | "deleted";
 
-export function StatusBadge({
-  status,
-}: {
-  status: UserStatus;
-}) {
+export function StatusBadge({ status }: { status: UserStatus }) {
   const config = {
     active: {
       label: "Active",
