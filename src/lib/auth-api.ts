@@ -1,9 +1,31 @@
-import axios from "axios";
+import axios, {
+  type AxiosResponseHeaders,
+  type RawAxiosResponseHeaders,
+} from "axios";
 import type { User } from "@/types/auth";
 import { extractApiErrorMessages } from "@/lib/api-errors";
 import { collectApiRecords } from "@/lib/api-envelope";
 
 export const AUTH_API_PREFIX = "/api/auth";
+
+/** Backend logout / refresh-token calls should not forward unrelated app cookies. */
+const BACKEND_AUTH_COOKIE_NAMES = new Set(["refresh_token", "refreshToken"]);
+
+export function isBackendAuthCookieName(name: string): boolean {
+  if (BACKEND_AUTH_COOKIE_NAMES.has(name)) return true;
+  return /refresh[-_]?token/i.test(name);
+}
+
+export function buildBackendAuthCookieHeader(
+  entries: ReadonlyArray<{ name: string; value: string }>,
+): string {
+  return entries
+    .filter((entry) => isBackendAuthCookieName(entry.name))
+    .map((entry) => `${entry.name}=${entry.value}`)
+    .join("; ");
+}
+
+const LOGOUT_TIMEOUT_MS = 15_000;
 
 export function authApiUrl(baseUrl: string, path: string): string {
   const base = baseUrl.replace(/\/$/, "");
@@ -346,6 +368,14 @@ export function parseMeEnvelope(body: unknown): AuthMeProfile | null {
   };
 }
 
+export function readSetCookieHeaders(
+  headers: RawAxiosResponseHeaders | AxiosResponseHeaders,
+): string[] {
+  const raw = headers["set-cookie"];
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+}
+
 /** Exchange short-lived Google OAuth code for access token (refresh token via Set-Cookie). */
 export async function exchangeGoogleOAuthCode(
   baseUrl: string,
@@ -354,6 +384,7 @@ export async function exchangeGoogleOAuthCode(
   user: User;
   access_token: string;
   redirect_url?: string;
+  setCookieHeaders: string[];
 } | null> {
   try {
     const response = await axios.post(
@@ -361,9 +392,94 @@ export async function exchangeGoogleOAuthCode(
       { code },
       { withCredentials: true },
     );
-    return parseLoginEnvelope(response.data);
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed) return null;
+    return {
+      ...parsed,
+      setCookieHeaders: readSetCookieHeaders(response.headers),
+    };
   } catch {
     return null;
+  }
+}
+
+/** Browser login proxy — forwards backend Set-Cookie (refresh token) to the client. */
+export async function loginWithCookieForward(
+  baseUrl: string,
+  body: { email: string; password: string },
+): Promise<
+  | {
+      ok: true;
+      access_token: string;
+      user: User;
+      setCookieHeaders: string[];
+    }
+  | { ok: false; status: number; message: string }
+> {
+  try {
+    const response = await axios.post(authApiUrl(baseUrl, "/login"), body, {
+      withCredentials: true,
+    });
+    const parsed = parseLoginEnvelope(response.data);
+    if (!parsed) {
+      return {
+        ok: false,
+        status: 502,
+        message:
+          "Login succeeded but the server response was invalid. Contact support.",
+      };
+    }
+    return {
+      ok: true,
+      access_token: parsed.access_token,
+      user: parsed.user,
+      setCookieHeaders: readSetCookieHeaders(response.headers),
+    };
+  } catch (error) {
+    const status =
+      axios.isAxiosError(error) && error.response ? error.response.status : 500;
+    const message =
+      axios.isAxiosError(error) && error.response
+        ? messageFromApiBody(error.response.data, "Could not sign in.")
+        : "Could not reach the server.";
+    return { ok: false, status, message };
+  }
+}
+
+/** Browser logout proxy — revokes refresh token and forwards Set-Cookie clears. */
+export async function logoutWithCookieForward(
+  baseUrl: string,
+  options: { accessToken?: string | null; cookieHeader?: string },
+): Promise<{ ok: boolean; setCookieHeaders: string[]; status: number }> {
+  const headers: Record<string, string> = {};
+  const token = options.accessToken?.trim();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const cookieHeader = options.cookieHeader?.trim();
+  if (cookieHeader) {
+    headers.Cookie = cookieHeader;
+  }
+
+  try {
+    const response = await axios.post(
+      authApiUrl(baseUrl, "/logout"),
+      {},
+      {
+        withCredentials: true,
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
+        validateStatus: () => true,
+        timeout: LOGOUT_TIMEOUT_MS,
+      },
+    );
+
+    return {
+      ok: response.status >= 200 && response.status < 300,
+      setCookieHeaders: readSetCookieHeaders(response.headers),
+      status: response.status,
+    };
+  } catch {
+    return { ok: false, setCookieHeaders: [], status: 500 };
   }
 }
 
@@ -377,44 +493,6 @@ export async function fetchAuthMe(
       withCredentials: true,
     });
     return parseMeEnvelope(response.data);
-  } catch {
-    return null;
-  }
-}
-
-export async function refreshAccessToken(baseUrl: string): Promise<{
-  access_token: string;
-} | null> {
-  try {
-    const response = await axios.post(
-      authApiUrl(baseUrl, "/refresh-token"),
-      {},
-      {
-        withCredentials: true,
-      },
-    );
-
-    const body =
-      response.data &&
-      typeof response.data === "object" &&
-      "data" in response.data
-        ? (response.data.data as Record<string, unknown>)
-        : null;
-
-    const accessToken =
-      typeof body?.accessToken === "string"
-        ? body.accessToken
-        : typeof body?.access_token === "string"
-          ? body.access_token
-          : null;
-
-    if (!accessToken) {
-      return null;
-    }
-
-    return {
-      access_token: accessToken,
-    };
   } catch {
     return null;
   }

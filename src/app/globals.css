@@ -368,17 +368,28 @@
   }
 }
 
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer components {
-  /**
-   * Landing page layout shell: max width, centering, horizontal + vertical padding.
-   * Use on the inner wrapper inside a full-bleed <section>.
-   */
   .section-class {
     @apply mx-auto w-full max-w-[1440px]  py-10 px-4 sm:px-6 lg:px-18;
   }
 
   .layout-components-class {
     @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-18;
+  }
+
+  .dashboard-layout-class {
+    @apply mx-auto w-full;
   }
 }
 

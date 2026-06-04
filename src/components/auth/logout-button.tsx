@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { signOut } from "next-auth/react";
+import { performClientLogout } from "@/lib/client-logout";
 import { cn } from "@/lib/utils";
 
 type LogoutButtonProps = {
   className?: string;
   variant?: "default" | "menu";
-  onAfterLogout?: () => void;
 };
 
 const menuVariantClass =
@@ -25,7 +24,6 @@ const defaultVariantClass = cn(
 export function LogoutButton({
   className,
   variant = "default",
-  onAfterLogout,
 }: LogoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,10 +31,8 @@ export function LogoutButton({
     if (isLoading) return;
     setIsLoading(true);
     try {
-      onAfterLogout?.();
       sessionStorage.removeItem("flowbrand-strategy-preview-toast");
-      // Full redirect so middleware sees a cleared session (client router.push races the cookie).
-      await signOut({ callbackUrl: "/login", redirect: true });
+      await performClientLogout({ callbackUrl: "/login", redirect: true });
     } catch {
       window.location.assign("/login");
     }
@@ -52,7 +48,7 @@ export function LogoutButton({
         className,
       )}
     >
-      {isLoading ? "Signing out…" : "Log out"}
+      {isLoading ? "Logging out..." : "Log out"}
     </button>
   );
 }

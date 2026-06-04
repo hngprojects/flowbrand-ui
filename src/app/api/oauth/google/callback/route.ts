@@ -1,6 +1,7 @@
 import { signIn } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { exchangeGoogleOAuthCode, fetchAuthMe } from "@/lib/auth-api";
+import { appendAuthSetCookieHeaders } from "@/lib/auth-cookies";
 import { withGoogleSignInSuccessQuery } from "@/lib/google-sign-in-toast";
 import { parseGoogleOAuthCallbackParams } from "@/lib/google-oauth";
 import { isSignInFailure } from "@/lib/login-errors";
@@ -25,6 +26,8 @@ export async function GET(request: Request) {
   let token = accessToken;
   let apiRedirectUrl = redirectUrl;
 
+  let refreshCookieHeaders: string[] = [];
+
   if (!token && code) {
     const exchanged = await exchangeGoogleOAuthCode(envConfig.BASEURL, code);
     if (!exchanged) {
@@ -32,6 +35,7 @@ export async function GET(request: Request) {
     }
     token = exchanged.access_token;
     apiRedirectUrl = exchanged.redirect_url ?? apiRedirectUrl;
+    refreshCookieHeaders = exchanged.setCookieHeaders;
   }
 
   if (!token) {
@@ -66,5 +70,7 @@ export async function GET(request: Request) {
     envConfig.APP_URL,
   );
 
-  return Response.redirect(successUrl);
+  const response = Response.redirect(successUrl);
+  appendAuthSetCookieHeaders(response, refreshCookieHeaders);
+  return response;
 }

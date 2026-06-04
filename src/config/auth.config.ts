@@ -5,7 +5,8 @@ import Credentials from "next-auth/providers/credentials";
 import { credentialsAuth } from "@/lib/credentials-auth";
 import { envConfig } from "@/config/env.config";
 // import { fetchAuthMe } from "@/lib/auth-api";
-import { fetchAuthMe, refreshAccessToken } from "@/lib/auth-api";
+import { fetchAuthMe } from "@/lib/auth-api";
+import { refreshAccessToken } from "@/lib/auth-api-server";
 import { inDevEnvironment } from "@/lib/utils";
 import { loginFailureCode } from "@/lib/login-errors";
 import { LoginCredentialsSchema } from "@/schema/auth.schema";
@@ -30,7 +31,10 @@ function readAuthSecret(): string | undefined {
 const AUTH_SECRET_FALLBACK =
   readAuthSecret() ??
   (process.env.NODE_ENV !== "production" ? "seil-dev-secret" : undefined);
+/** Backend access tokens are ~15m; refresh slightly before expiry. */
 const ACCESS_TOKEN_LIFETIME_MS = 1000 * 60 * 14;
+/** Refresh early so API calls are not rejected while the JWT still looks valid. */
+const ACCESS_TOKEN_REFRESH_BUFFER_MS = 60_000;
 
 const authConfig: NextAuthConfig = {
   providers: [
@@ -134,9 +138,12 @@ const authConfig: NextAuthConfig = {
       }
 
       /**
-       * Existing token still valid
+       * Existing token still valid (refresh a minute before client-side expiry).
        */
-      if (customToken.expires_at && Date.now() < customToken.expires_at) {
+      if (
+        customToken.expires_at &&
+        Date.now() < customToken.expires_at - ACCESS_TOKEN_REFRESH_BUFFER_MS
+      ) {
         return customToken;
       }
 
