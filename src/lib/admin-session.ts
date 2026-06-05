@@ -16,16 +16,45 @@ export type AdminSession = {
   signedInAt: string;
 };
 
-export function readAdminSession(): AdminSession | null {
-  if (typeof window === "undefined") return null;
+let cachedRaw: string | null | undefined;
+let cachedSession: AdminSession | null = null;
+
+function parseAdminSession(raw: string | null): AdminSession | null {
+  if (!raw) return null;
+
   try {
-    const raw = sessionStorage.getItem(ADMIN_SESSION_KEY);
-    if (!raw) return null;
     const parsed = JSON.parse(raw) as AdminSession;
     return parsed?.email ? parsed : null;
   } catch {
     return null;
   }
+}
+
+function readAdminSessionRaw(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    return sessionStorage.getItem(ADMIN_SESSION_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** Stable snapshot for useSyncExternalStore — reuses the same object until storage changes. */
+export function getAdminSessionSnapshot(): AdminSession | null {
+  const raw = readAdminSessionRaw();
+
+  if (raw === cachedRaw) {
+    return cachedSession;
+  }
+
+  cachedRaw = raw;
+  cachedSession = parseAdminSession(raw);
+  return cachedSession;
+}
+
+export function readAdminSession(): AdminSession | null {
+  return getAdminSessionSnapshot();
 }
 
 export function writeAdminSession(email: string): void {

@@ -5,20 +5,15 @@ import { usePathname, useRouter } from "next/navigation";
 import AdminNavbar from "@/components/navigation/admin-navbar/index";
 import { AdminTabNav } from "@/components/navigation/admin-navbar/admin-tab-nav";
 import Loader from "@/components/ui/loader";
-import { readAdminSession, subscribeToAdminSession } from "@/lib/admin-session";
+import {
+  getAdminSessionSnapshot,
+  subscribeToAdminSession,
+} from "@/lib/admin-session";
 import { ADMIN_LOGIN_ROUTE } from "@/routes";
 
 type AdminShellProps = {
   children: ReactNode;
 };
-
-function getAdminSessionSnapshot() {
-  return readAdminSession();
-}
-
-function getAdminSessionServerSnapshot() {
-  return null;
-}
 
 export function AdminShell({ children }: AdminShellProps) {
   const router = useRouter();
@@ -26,7 +21,7 @@ export function AdminShell({ children }: AdminShellProps) {
   const session = useSyncExternalStore(
     subscribeToAdminSession,
     getAdminSessionSnapshot,
-    getAdminSessionServerSnapshot,
+    () => null,
   );
 
   useEffect(() => {
