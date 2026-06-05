@@ -18,11 +18,7 @@ export default function AdminLoginPage() {
 
       <main className="flex flex-1 items-center justify-center px-4 pb-16">
         {/* Required: AdminLoginForm calls useSearchParams() */}
-        <Suspense
-          fallback={<p className="text-sm text-neutral-500">Loading...</p>}
-        >
-          <AdminLoginForm />
-        </Suspense>
+        <AdminLoginForm />
       </main>
     </div>
   );
