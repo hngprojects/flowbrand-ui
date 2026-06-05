@@ -21,14 +21,18 @@ export function AdminSearch() {
   const [hiddenResultIds, setHiddenResultIds] = useState<string[]>([]);
 
   useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
+    function handlePointerDown(event: MouseEvent | TouchEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false);
       }
     }
 
     document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
   }, []);
 
   const results = useMemo(() => {
@@ -69,7 +73,7 @@ export function AdminSearch() {
   }
 
   return (
-    <div ref={rootRef} className="relative ml-6 w-[280px]">
+    <div ref={rootRef} className="relative ml-2 w-full max-w-[280px] sm:ml-6">
       <div className="flex items-center gap-2 rounded-xl border border-[#A2A2A2] bg-gray-100 px-4 py-2">
         <Search className="size-4 shrink-0 text-[#A2A2A2]" />
         <input
@@ -89,7 +93,10 @@ export function AdminSearch() {
       </div>
 
       {open ? (
-        <div className="absolute left-0 top-[calc(100%+10px)] z-[60] w-[320px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.12)]">
+        <div
+          className="absolute left-0 top-[calc(100%+10px)] z-[60] w-full min-w-[280px] 
+        max-w-[320px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
+        >
           {recent.length > 0 ? (
             <div className="border-b border-gray-100 px-4 pb-3 pt-4">
               <p className="text-[11px] font-medium tracking-wide text-neutral-400">

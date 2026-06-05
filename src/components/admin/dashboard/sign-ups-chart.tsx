@@ -55,13 +55,14 @@ export function SignUpsChart({
             {periodLabel} · {total} total sign ups
           </p>
         </div>
-        <button
-          type="button"
+        {/* TODO: Wire period selector dropdown when live overview API is ready. */}
+        <div
+          aria-hidden
           className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-black-500"
         >
           Weekly live overview
           <ChevronDown className="size-4 text-neutral-500" />
-        </button>
+        </div>
       </div>
 
       <div className="relative h-[280px]">

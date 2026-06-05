@@ -5,16 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import AdminNavbar from "@/components/navigation/admin-navbar/index";
 import { AdminTabNav } from "@/components/navigation/admin-navbar/admin-tab-nav";
 import Loader from "@/components/ui/loader";
-import { readAdminSession } from "@/lib/admin-session";
+import { readAdminSession, subscribeToAdminSession } from "@/lib/admin-session";
 import { ADMIN_LOGIN_ROUTE } from "@/routes";
 
 type AdminShellProps = {
   children: ReactNode;
 };
-
-function subscribeToAdminSession() {
-  return () => {};
-}
 
 function getAdminSessionSnapshot() {
   return readAdminSession();

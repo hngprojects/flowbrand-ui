@@ -16,7 +16,7 @@ export default function AdminNavbar() {
     <>
       <nav className="sticky top-0 z-50 border-b border-gray-500 bg-white">
         <div className="dashboard-layout-class flex h-[72px] items-center justify-between md:h-[83px]">
-          <div className="flex items-center gap-3 md:gap-5">
+          <div className="flex min-w-0 flex-1 items-center gap-3 md:gap-5">
             <Link href={ADMIN_ROUTE} className="cursor-pointer">
               <LogoIcon />
             </Link>

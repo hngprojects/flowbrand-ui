@@ -10,7 +10,11 @@ type DonutChartProps = {
   total: number;
   centerLabel?: string;
   size?: number;
-  /** Min arc degrees for small values. Use 0 for true proportional slices (e.g. plan 140/44). */
+  /**
+   * Target min arc degrees for small values (not a strict guarantee).
+   * When many segments exceed available angle, sweeps are scaled down uniformly.
+   * Use 0 for true proportional slices (e.g. plan 140/44).
+   */
   minSweepDegrees?: number;
 };
 
@@ -58,6 +62,7 @@ function computeVisualSweeps(
     return minSweepDegrees > 0 ? Math.max(rawSweep, minSweepDegrees) : rawSweep;
   });
 
+  // Scale down uniformly when min sweeps exceed available angle (may drop below minSweepDegrees).
   const sweepSum = sweeps.reduce((acc, sweep) => acc + sweep, 0);
   if (sweepSum > availableAngle) {
     const scale = availableAngle / sweepSum;
