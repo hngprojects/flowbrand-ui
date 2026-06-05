@@ -42,11 +42,12 @@ export function AdminLoginForm() {
     try {
       writeAdminSession(values.email);
       toast.success("Signed in to admin portal");
-      const callbackUrl =
-        searchParams.get("callbackUrl")?.trim() || ADMIN_ROUTE;
-      router.replace(
-        callbackUrl.startsWith("/admin") ? callbackUrl : ADMIN_ROUTE,
-      );
+      const rawCallback = searchParams.get("callbackUrl")?.trim() || ADMIN_ROUTE;
+      // Only allow paths, not full URLs, and verify admin route
+      const isValidAdminPath = 
+        rawCallback.startsWith("/admin/") || rawCallback === "/admin";
+      const callbackUrl = isValidAdminPath ? rawCallback : ADMIN_ROUTE;
+      router.replace(callbackUrl);
     } catch {
       toast.error("Could not sign in. Please try again.");
     }
