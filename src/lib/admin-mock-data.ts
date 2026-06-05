@@ -10,6 +10,7 @@
 import type {
   ActivityLogData,
   ActivityLogEntry,
+  AdminDashboardData,
   InvitesData,
   TeamMembersData,
 } from "@/types/admin";
@@ -256,6 +257,102 @@ export function fetchTeamMembers(): Promise<TeamMembersData> {
 /** GET /admin/teams/invites (mock) — invite link + pending invites. */
 export function fetchInvites(): Promise<InvitesData> {
   return delay({ ...INVITES, pending: [...INVITES.pending] });
+}
+
+const DASHBOARD_SIGN_UPS = [
+  { week: "W1", signUps: 38 },
+  { week: "W2", signUps: 78 },
+  { week: "W3", signUps: 25 },
+  { week: "W4", signUps: 98 },
+  { week: "W5", signUps: 80 },
+  { week: "W6", signUps: 45 },
+  { week: "W7", signUps: 92 },
+  { week: "W8", signUps: 88 },
+  { week: "W9", signUps: 15 },
+  { week: "W10", signUps: 60 },
+  { week: "W11", signUps: 38 },
+  { week: "W12", signUps: 45 },
+] as const;
+
+const DASHBOARD_DATA: AdminDashboardData = {
+  metrics: [
+    {
+      id: "views",
+      label: "Views",
+      value: 965,
+      changePercent: 11.01,
+      trend: "up",
+    },
+    {
+      id: "visits",
+      label: "Visits",
+      value: 571,
+      changePercent: 0.03,
+      trend: "down",
+    },
+    {
+      id: "total-users",
+      label: "Total Users",
+      value: 184,
+      changePercent: 15.03,
+      trend: "up",
+    },
+    {
+      id: "active-users",
+      label: "Active Users",
+      value: 142,
+      changePercent: 6.08,
+      trend: "up",
+    },
+  ],
+  signUps: {
+    weeks: [...DASHBOARD_SIGN_UPS],
+    total: 93,
+    periodLabel: "Last 12 weeks",
+  },
+  userStages: {
+    total: 184,
+    subtitle: "All 184 users by current activity",
+    segments: [
+      { id: "stage-3", label: "Stage 3 active", value: 14, color: "#D946EF" },
+      { id: "signed-up", label: "Signed up", value: 184, color: "#4CAF50" },
+      {
+        id: "created-strategies",
+        label: "Created strategies",
+        value: 138,
+        color: "#4285F4",
+      },
+      { id: "intake-done", label: "Intake done", value: 142, color: "#FB8C00" },
+      { id: "stage-1", label: "Stage 1 active", value: 42, color: "#26C6DA" },
+      { id: "stage-2", label: "Stage 2 active", value: 20, color: "#FF8A80" },
+    ],
+  },
+  planDistribution: {
+    total: 184,
+    subtitle: "Free vs Pro breakdown",
+    segments: [
+      { id: "free", label: "Free plan users", value: 140, color: "#FBC02D" },
+      { id: "pro", label: "Pro plan users", value: 44, color: "#4FC3F7" },
+    ],
+  },
+  userTenure: {
+    total: 184,
+    subtitle: "How long users stay active after signing up.",
+    buckets: [
+      { id: "lt-1w", label: "< 1 week", value: 184, color: "#40747F" },
+      { id: "1-4w", label: "1-4 weeks", value: 93, color: "#9BE7E8" },
+      { id: "1-3m", label: "1-3 months", value: 64, color: "#EEAACC" },
+      { id: "3m-plus", label: "3+ months", value: 42, color: "#9C83F7" },
+    ],
+  },
+  recentActivity: buildLogPage(1).slice(0, 4),
+};
+
+/** GET /admin/dashboard (mock) — overview metrics and charts. */
+export function fetchAdminDashboard(): Promise<AdminDashboardData> {
+  return delay(
+    JSON.parse(JSON.stringify(DASHBOARD_DATA)) as AdminDashboardData,
+  );
 }
 
 /** GET /admin/logs (mock) — paginated activity log. */

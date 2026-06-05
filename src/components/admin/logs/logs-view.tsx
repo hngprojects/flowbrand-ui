@@ -17,7 +17,7 @@ export function LogsView() {
   const { data, isLoading, isFetching, isError } = useActivityLogQuery(page);
 
   return (
-    <section className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6">
+    <section className="w-full">
       <div className="rounded-xl border border-gray-300 bg-card">
         <div className="flex items-center gap-3 px-4 py-4">
           <h1 className="text-base font-semibold text-black-500">

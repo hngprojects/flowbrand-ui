@@ -39,7 +39,7 @@ export function TeamsView() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6">
+    <section className="w-full">
       <div className="mb-5 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-black-500">
           {data?.teamName ?? "Admin team"}

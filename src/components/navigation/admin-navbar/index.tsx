@@ -6,47 +6,20 @@ import LogoIcon from "@/components/icons/navbar/logo";
 import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
 import AdminSettingsModal from "@/components/modals/AdminSettingsModal";
+import { AdminSearch } from "@/components/navigation/admin-navbar/admin-search";
 
 export default function AdminNavbar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-gray-500 bg-white px-4">
-        <div className=" dashboard-layout-class flex h-[72px] items-center justify-between md:h-[83px]">
+      <nav className="sticky top-0 z-50 border-b border-gray-500 bg-white">
+        <div className="dashboard-layout-class flex h-[72px] items-center justify-between md:h-[83px]">
           <div className="flex items-center gap-3 md:gap-5">
             <Link href="/admin" className="cursor-pointer">
               <LogoIcon />
             </Link>
-            <div className="flex items-center gap-2 rounded-xl border bg-gray-100 border-[#A2A2A2] px-4 py-2 w-[280px] ml-6">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="shrink-0 text-[#A2A2A2]"
-              >
-                <circle
-                  cx="7"
-                  cy="7"
-                  r="5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M11 11L14 14"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full text-sm outline-none placeholder:text-[#A2A2A2]"
-              />
-            </div>
+            <AdminSearch />
           </div>
 
           <div className="flex items-center gap-3">
