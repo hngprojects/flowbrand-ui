@@ -7,6 +7,7 @@ import BellIcon from "@/components/icons/navbar/bell";
 import ProfileIcon from "@/components/icons/navbar/profile";
 import AdminSettingsModal from "@/components/modals/AdminSettingsModal";
 import { AdminSearch } from "@/components/navigation/admin-navbar/admin-search";
+import { ADMIN_NOTIFICATIONS_ROUTE, ADMIN_ROUTE } from "@/routes";
 
 export default function AdminNavbar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -16,7 +17,7 @@ export default function AdminNavbar() {
       <nav className="sticky top-0 z-50 border-b border-gray-500 bg-white">
         <div className="dashboard-layout-class flex h-[72px] items-center justify-between md:h-[83px]">
           <div className="flex items-center gap-3 md:gap-5">
-            <Link href="/admin" className="cursor-pointer">
+            <Link href={ADMIN_ROUTE} className="cursor-pointer">
               <LogoIcon />
             </Link>
             <AdminSearch />
@@ -24,7 +25,7 @@ export default function AdminNavbar() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/admin/notifications"
+              href={ADMIN_NOTIFICATIONS_ROUTE}
               aria-label="Notifications"
               className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-500 hover:bg-gray-50 transition-colors"
             >

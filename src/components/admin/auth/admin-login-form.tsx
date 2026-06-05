@@ -27,6 +27,8 @@ export function AdminLoginForm() {
     if (readAdminSession()) {
       router.replace(ADMIN_ROUTE);
     }
+    // Run once on mount; Next.js router is not a stable dependency reference.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const form = useForm<AdminLoginValues>({

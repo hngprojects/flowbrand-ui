@@ -9,6 +9,7 @@ import { DeleteTeamModal } from "@/components/admin/teams/delete-team-modal";
 import { useTeamMembersQuery } from "@/hooks/queries/use-admin-teams-queries";
 import { useDeleteTeamMemberMutation } from "@/hooks/mutations/use-admin-team-mutations";
 import type { TeamMember } from "@/types/admin";
+import { ADMIN_TEAMS_INVITE_ROUTE } from "@/routes";
 
 /**
  * /admin/teams — Admin team list with role badges, presence, and per-member
@@ -45,7 +46,7 @@ export function TeamsView() {
           {data?.teamName ?? "Admin team"}
         </h1>
         <Button asChild className="rounded-lg">
-          <Link href="/admin/teams/invite">
+          <Link href={ADMIN_TEAMS_INVITE_ROUTE}>
             <Plus className="size-4" />
             Invite team
           </Link>
