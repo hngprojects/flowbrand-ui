@@ -22,6 +22,8 @@ export const ADMIN_LOGIN_ROUTE = "/admin/login";
 export const ADMIN_USERS_ROUTE = "/admin/users";
 export const ADMIN_TEAMS_ROUTE = "/admin/teams";
 export const ADMIN_LOGS_ROUTE = "/admin/logs";
+export const ADMIN_NOTIFICATIONS_ROUTE = "/admin/notifications";
+export const ADMIN_TEAMS_INVITE_ROUTE = "/admin/teams/invite";
 
 export const protectedRoutes = [DASHBOARD_ROUTE] as const;
 
@@ -30,8 +32,8 @@ export const adminRoutes = [
   ADMIN_USERS_ROUTE,
   ADMIN_TEAMS_ROUTE,
   ADMIN_LOGS_ROUTE,
-  "/admin/notifications",
-  "/admin/teams/invite",
+  ADMIN_NOTIFICATIONS_ROUTE,
+  ADMIN_TEAMS_INVITE_ROUTE,
 ] as const;
 
 /** Map backend redirectUrl paths to in-app routes. */

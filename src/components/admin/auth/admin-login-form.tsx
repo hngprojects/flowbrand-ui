@@ -27,7 +27,7 @@ export function AdminLoginForm() {
     if (readAdminSession()) {
       router.replace(ADMIN_ROUTE);
     }
-  }, [router]);
+  }, []);
 
   const form = useForm<AdminLoginValues>({
     resolver: zodResolver(AdminLoginSchema),
@@ -36,6 +36,7 @@ export function AdminLoginForm() {
   });
 
   const onSubmit = async (values: AdminLoginValues) => {
+    // TODO: Replace with POST /api/admin/auth/login when backend is ready.
     try {
       writeAdminSession(values.email);
       toast.success("Signed in to admin portal");

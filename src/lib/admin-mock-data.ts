@@ -350,9 +350,7 @@ const DASHBOARD_DATA: AdminDashboardData = {
 
 /** GET /admin/dashboard (mock) — overview metrics and charts. */
 export function fetchAdminDashboard(): Promise<AdminDashboardData> {
-  return delay(
-    JSON.parse(JSON.stringify(DASHBOARD_DATA)) as AdminDashboardData,
-  );
+  return delay(structuredClone(DASHBOARD_DATA));
 }
 
 /** GET /admin/logs (mock) — paginated activity log. */

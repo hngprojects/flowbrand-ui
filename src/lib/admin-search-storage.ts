@@ -30,10 +30,14 @@ export function writeAdminRecentSearches(items: string[]): void {
     return;
   }
 
-  window.localStorage.setItem(
-    RECENT_KEY,
-    JSON.stringify(items.slice(0, MAX_RECENT)),
-  );
+  try {
+    window.localStorage.setItem(
+      RECENT_KEY,
+      JSON.stringify(items.slice(0, MAX_RECENT)),
+    );
+  } catch {
+    // Quota exceeded, private mode, or storage disabled.
+  }
 }
 
 export function addAdminRecentSearch(term: string): string[] {
@@ -49,14 +53,6 @@ export function addAdminRecentSearch(term: string): string[] {
     ),
   ].slice(0, MAX_RECENT);
 
-  writeAdminRecentSearches(next);
-  return next;
-}
-
-export function removeAdminRecentSearch(term: string): string[] {
-  const next = readAdminRecentSearches().filter(
-    (item) => item.toLowerCase() !== term.toLowerCase(),
-  );
   writeAdminRecentSearches(next);
   return next;
 }
