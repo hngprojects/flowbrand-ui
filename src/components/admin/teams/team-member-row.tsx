@@ -13,8 +13,11 @@ interface TeamMemberRowProps {
 
 export function TeamMemberRow({ member, onDelete }: TeamMemberRowProps) {
   return (
-    <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-4 border-b border-gray-300 px-4 py-3.5 last:border-b-0">
-      <div className="flex min-w-0 items-center gap-3">
+    <div
+      role="row"
+      className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-4 border-b border-gray-300 px-4 py-3.5 last:border-b-0"
+    >
+      <div role="cell" className="flex min-w-0 items-center gap-3">
         <AdminAvatar initials={member.initials} seed={member.id} />
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-black-500">
@@ -24,13 +27,15 @@ export function TeamMemberRow({ member, onDelete }: TeamMemberRowProps) {
         </div>
       </div>
 
-      <div className="flex justify-center">
+      <div role="cell" className="flex justify-center">
         <RoleBadge role={member.role} />
       </div>
 
-      <p className="text-sm text-neutral-500">{member.activity}</p>
+      <p role="cell" className="text-sm text-neutral-500">
+        {member.activity}
+      </p>
 
-      <div className="flex w-9 justify-end">
+      <div role="cell" className="flex w-9 justify-end">
         {member.removable ? (
           <Button
             type="button"
