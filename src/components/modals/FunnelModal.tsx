@@ -17,6 +17,7 @@ interface FunnelModalProps {
   tabs: FunnelModalTab[];
   defaultTab?: string;
   title?: string;
+  variant?: "side" | "center";
 }
 
 export default function FunnelModal({
@@ -25,7 +26,69 @@ export default function FunnelModal({
   tabs,
   defaultTab,
   title = "Funnel",
+  variant = "side",
 }: FunnelModalProps) {
+  const centerClasses = `
+    scrollbar-none
+    max-h-[92vh]
+    w-[calc(100%-1.5rem)]
+    overflow-y-auto
+    rounded-[24px]
+    border
+    border-primary-80
+    bg-white
+    p-5
+    sm:max-w-[720px]
+    sm:p-7
+    md:max-w-[860px]
+    md:p-8
+    shadow-2xl
+  `;
+
+  const sideClasses = `
+    fixed
+    inset-0
+    z-50
+    flex
+    flex-col
+    w-screen
+    h-[100dvh]
+    max-w-none
+    bg-white
+    border-0
+    shadow-2xl
+    p-5
+    overflow-hidden
+    translate-x-0
+    translate-y-0
+    left-0
+    top-0
+    md:inset-auto
+    md:left-1/2
+    md:top-1/2
+    md:-translate-x-1/2
+    md:-translate-y-1/2
+    md:w-[80vw]
+    md:max-w-[600px]
+    md:h-[85vh]
+    md:rounded-[24px]
+    md:border
+    md:border-gray-500
+    md:p-8
+    lg:left-auto
+    lg:right-5
+    lg:top-5
+    lg:bottom-5
+    lg:translate-x-0
+    lg:translate-y-0
+    lg:w-[50vw]
+    lg:max-w-[50vw]
+    lg:max-h-none
+    lg:h-auto
+    min-w-[320px]
+    md:min-w-120
+  `;
+
   return (
     <Dialog
       open={isOpen}
@@ -34,10 +97,10 @@ export default function FunnelModal({
       }}
     >
       <DialogContent
-        variant="sidePanel"
         showCloseButton={false}
-        className="min-w-[320px] border-0 bg-white p-8 shadow-2xl md:min-w-120 md:rounded-[24px] md:border md:border-gray-500"
+        className={variant === "center" ? centerClasses : sideClasses}
         overlayClassName="bg-black-500/80"
+        style={{ height: undefined }}
       >
         <VisuallyHidden>
           <DialogTitle>{title}</DialogTitle>
@@ -46,9 +109,9 @@ export default function FunnelModal({
         <Tabs
           key={isOpen ? "open" : "closed"}
           defaultValue={defaultTab ?? tabs[0]?.id}
-          className="flex min-w-0 flex-col h-full gap-0"
+          className="flex flex-col h-full gap-0 min-h-0"
         >
-          <div className="flex items-center justify-between mb-6 shrink-0 border-b-[0.35px] border-gray-500 pb-4 mx-[-32px] px-8">
+          <div className="flex items-center justify-between mb-6 shrink-0 border-b-[0.35px] border-gray-500 pb-4 mx-[-20px] px-5 md:mx-[-32px] md:px-8">
             <h2 className="text-[18px] font-medium text-foreground">{title}</h2>
             <button
               type="button"
@@ -82,19 +145,24 @@ export default function FunnelModal({
             </button>
           </div>
 
-          <div className="mb-6 shrink-0 overflow-x-auto scrollbar-none touch-pan-x [-webkit-overflow-scrolling:touch] max-lg:-mx-8 lg:overflow-x-visible">
-            <TabsList
-              className="flex h-auto w-max min-w-full flex-nowrap items-center justify-between gap-1.5 rounded-lg border border-gray-400 bg-transparent p-1
-               px-8 max-md:rounded-none max-md:border-x-0 md:w-full md:max-w-full md:overflow-x-auto md:rounded-lg md:border md:px-1"
-            >
+          <div
+            className="mb-6 shrink-0 w-full"
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <TabsList className="flex items-center h-[42px] w-full gap-[10px] rounded-[12px] border border-gray-400 px-1 bg-transparent">
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className="after:hidden h-[44px] min-h-[44px] shrink-0 grow-0 basis-auto 
-                  rounded-lg border-0 px-3 text-center text-[16px] font-medium leading-[150%]
-                   whitespace-nowrap text-black-300 transition-all duration-200 hover:bg-transparent hover:text-black-300
-                   data-active:bg-primary-500 data-active:text-white data-active:shadow-none data-active:hover:bg-primary-500 data-active:hover:text-white sm:px-4"
+                  className="h-full shrink-0 min-w-fit rounded-[10px] py-2 px-4 font-medium transition-all duration-200 
+                  whitespace-nowrap text-center text-sm leading-[150%] text-black-300 data-active:bg-primary-500 
+                  data-active:text-white cursor-pointer border-0 data-active:shadow-none hover:bg-transparent 
+                  hover:text-black-300 data-active:hover:bg-primary-500 data-active:hover:text-white"
                 >
                   {tab.label}
                 </TabsTrigger>
@@ -102,12 +170,16 @@ export default function FunnelModal({
             </TabsList>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div
+            className={`min-h-0 pb-6 ${variant === "center" ? "" : "flex-1 overflow-y-auto"}`}
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             {tabs.map((tab) => (
               <TabsContent
                 key={tab.id}
                 value={tab.id}
-                className="mt-0 flex h-full min-h-0 flex-col outline-none data-[state=inactive]:hidden"
+                forceMount
+                className="data-[state=inactive]:hidden"
               >
                 {tab.content}
               </TabsContent>
