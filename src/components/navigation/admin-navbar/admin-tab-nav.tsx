@@ -23,7 +23,7 @@ export function AdminTabNav() {
   return (
     <nav
       aria-label="Admin sections"
-      className="border-b border-gray-200 dashboard-layout-class "
+      className="border-b border-gray-200 dashboard-layout-class"
     >
       <div className=" flex gap-14 overflow-x-auto  scrollbar-none bg-white w-fit rounded-xl p-1 mt-6">
         {TABS.map((tab) => {
