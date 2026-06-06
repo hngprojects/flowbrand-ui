@@ -17,7 +17,25 @@ export const authRoutes = [
   "/reset-password",
 ] as const;
 
+export const ADMIN_ROUTE = "/admin";
+export const ADMIN_LOGIN_ROUTE = "/admin/login";
+export const ADMIN_USERS_ROUTE = "/admin/users";
+export const ADMIN_TEAMS_ROUTE = "/admin/teams";
+export const ADMIN_LOGS_ROUTE = "/admin/logs";
+export const ADMIN_NOTIFICATIONS_ROUTE = "/admin/notifications";
+export const ADMIN_TEAMS_INVITE_ROUTE = "/admin/teams/invite";
+export const ACCEPT_INVITE_ROUTE = "/accept-invite";
+
 export const protectedRoutes = [DASHBOARD_ROUTE] as const;
+
+export const adminRoutes = [
+  ADMIN_ROUTE,
+  ADMIN_USERS_ROUTE,
+  ADMIN_TEAMS_ROUTE,
+  ADMIN_LOGS_ROUTE,
+  ADMIN_NOTIFICATIONS_ROUTE,
+  ADMIN_TEAMS_INVITE_ROUTE,
+] as const;
 
 /** Map backend redirectUrl paths to in-app routes. */
 export function mapApiRedirectToAppPath(redirectUrl?: string): string | null {

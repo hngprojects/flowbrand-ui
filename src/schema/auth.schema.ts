@@ -150,6 +150,11 @@ export function splitFullNameForRegister(fullName: string): {
 export const RegistrationFormSchema = z
   .object({
     full_name: registerFullNameField,
+    business_name: z
+      .string()
+      .trim()
+      .min(1, { message: "Business name is required" })
+      .max(150, { message: "Business name must be at most 150 characters" }),
     email: z
       .string()
       .trim()

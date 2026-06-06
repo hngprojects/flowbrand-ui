@@ -29,6 +29,9 @@ export type FunnelStageApi = {
 
 export type FunnelDetailApi = {
   funnelId: string;
+  /** Primary display name from GET /api/funnels list and detail. */
+  funnelName?: string;
+  /** Legacy / account business name when funnelName is absent. */
   businessName?: string;
   creationPath?: string;
   status?: string;
@@ -227,6 +230,12 @@ function buildFunnelDetailFromRecord(
 
   return {
     funnelId,
+    funnelName:
+      typeof node.funnelName === "string"
+        ? node.funnelName
+        : typeof node.funnel_name === "string"
+          ? node.funnel_name
+          : undefined,
     businessName:
       typeof node.businessName === "string"
         ? node.businessName
@@ -294,6 +303,16 @@ export function parseFunnelStagesList(data: unknown): FunnelStageApi[] {
   return [];
 }
 
+function parseFunnelListItem(raw: unknown): FunnelDetailApi | null {
+  const record = readRecord(raw);
+  if (!record) return null;
+
+  const funnelId = readFunnelIdFromRecord(record);
+  if (!funnelId) return null;
+
+  return buildFunnelDetailFromRecord(record, funnelId);
+}
+
 export function parseFunnelList(data: unknown): FunnelDetailApi[] {
   const node = unwrapData(data);
   if (!node) return [];
@@ -302,7 +321,7 @@ export function parseFunnelList(data: unknown): FunnelDetailApi[] {
     const list = node[key];
     if (Array.isArray(list)) {
       return list
-        .map((item) => parseFunnelDetail(item))
+        .map((item) => parseFunnelListItem(item))
         .filter((f): f is FunnelDetailApi => f !== null);
     }
   }
