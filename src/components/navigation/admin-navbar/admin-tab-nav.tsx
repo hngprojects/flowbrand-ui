@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { label: "Overview", href: ADMIN_ROUTE, exact: true },
   { label: "Users", href: ADMIN_USERS_ROUTE },
-  { label: "Teams", href: ADMIN_TEAMS_ROUTE, matchNested: true },
+  { label: "Teams", href: ADMIN_TEAMS_ROUTE },
   { label: "Logs", href: ADMIN_LOGS_ROUTE, exact: true },
 ] as const;
 

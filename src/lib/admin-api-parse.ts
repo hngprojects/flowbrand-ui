@@ -1,5 +1,8 @@
 export async function parseAdminError(res: Response): Promise<never> {
-  const body = (await res.json().catch(() => ({}))) as { message?: string };
+  const body = (await res.json().catch((err) => {
+    console.warn("Failed to parse error response as JSON:", err);
+    return {};
+  })) as { message?: string };
   throw new Error(body.message ?? `Request failed (${res.status})`);
 }
 
