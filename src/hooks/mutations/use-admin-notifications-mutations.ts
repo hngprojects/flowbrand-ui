@@ -16,7 +16,7 @@ export function useAdminNotificationsMutations() {
   const queryClient = useQueryClient();
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: adminNotificationsKeys.all() });
+    void queryClient.invalidateQueries({ queryKey: adminNotificationsKeys.all() });
 
   const markRead = useMutation({
     mutationFn: (id: string) => markAdminNotificationRead(id),
