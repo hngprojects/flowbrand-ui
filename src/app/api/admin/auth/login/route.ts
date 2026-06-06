@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { envConfig } from "@/config/env.config";
 import { adminLoginWithCookieForward } from "@/lib/admin-api";
+import { setAdminAccessTokenCookie } from "@/lib/admin-auth-cookies";
+import { readAdminRoleFromAccessToken } from "@/lib/admin-role";
 import { appendAuthSetCookieHeaders } from "@/lib/auth-cookies";
 
 const AdminLoginSchema = z.object({
@@ -41,7 +43,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const response = NextResponse.json({ access_token: result.access_token });
+  const response = NextResponse.json({
+    email: parsed.data.email,
+    role: readAdminRoleFromAccessToken(result.access_token) ?? undefined,
+  });
+  setAdminAccessTokenCookie(response, result.access_token);
   appendAuthSetCookieHeaders(response, result.setCookieHeaders);
   return response;
 }

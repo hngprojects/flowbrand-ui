@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { envConfig } from "@/config/env.config";
 import { adminRefreshWithCookieForward } from "@/lib/admin-api";
+import { setAdminAccessTokenCookie } from "@/lib/admin-auth-cookies";
+import { readAdminRoleFromAccessToken } from "@/lib/admin-role";
 import { buildBackendAuthCookieHeader } from "@/lib/auth-api";
 import { appendAuthSetCookieHeaders } from "@/lib/auth-cookies";
 
@@ -22,7 +24,10 @@ export async function POST() {
     );
   }
 
-  const response = NextResponse.json({ access_token: result.access_token });
+  const response = NextResponse.json({
+    role: readAdminRoleFromAccessToken(result.access_token) ?? undefined,
+  });
+  setAdminAccessTokenCookie(response, result.access_token);
   appendAuthSetCookieHeaders(response, result.setCookieHeaders);
   return response;
 }

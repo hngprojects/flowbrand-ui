@@ -1,4 +1,3 @@
-import { readAdminRoleFromAccessToken } from "@/lib/admin-role";
 import type { AdminRole } from "@/types/admin";
 
 const ADMIN_SESSION_KEY = "flowbrand-admin-session";
@@ -9,8 +8,8 @@ function notifyAdminSessionChanged() {
   window.dispatchEvent(new Event(ADMIN_SESSION_CHANGED_EVENT));
 }
 
+/** Non-sensitive admin UI session — bearer token lives in an httpOnly cookie. */
 export type AdminSession = {
-  accessToken: string;
   email?: string;
   role?: AdminRole;
   signedInAt: string;
@@ -23,8 +22,19 @@ function parseAdminSession(raw: string | null): AdminSession | null {
   if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(raw) as AdminSession;
-    return parsed?.accessToken ? parsed : null;
+    const parsed = JSON.parse(raw) as AdminSession & { accessToken?: string };
+    if (!parsed?.signedInAt) return null;
+
+    // Drop legacy sessions that only stored a bearer token with no signedInAt.
+    if (!parsed.email && !parsed.role && parsed.accessToken) {
+      return null;
+    }
+
+    return {
+      email: parsed.email,
+      role: parsed.role,
+      signedInAt: parsed.signedInAt,
+    };
   } catch {
     return null;
   }
@@ -74,34 +84,25 @@ export function readAdminSession(): AdminSession | null {
 }
 
 export function writeAdminSession(input: {
-  accessToken: string;
   email?: string;
   role?: AdminRole;
 }): void {
   if (typeof window === "undefined") return;
 
   persistSession({
-    accessToken: input.accessToken,
     email: input.email,
-    role:
-      input.role ??
-      readAdminRoleFromAccessToken(input.accessToken) ??
-      undefined,
+    role: input.role,
     signedInAt: new Date().toISOString(),
   });
 }
 
-export function updateAdminAccessToken(accessToken: string): void {
+export function updateAdminSessionRole(role?: AdminRole): void {
   const current = readAdminSession();
-  if (!current) {
-    writeAdminSession({ accessToken });
-    return;
-  }
+  if (!current) return;
 
   persistSession({
     ...current,
-    accessToken,
-    role: readAdminRoleFromAccessToken(accessToken) ?? undefined,
+    role,
   });
 }
 

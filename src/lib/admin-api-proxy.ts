@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { envConfig } from "@/config/env.config";
 import { adminApiUrl, readSetCookieHeaders } from "@/lib/admin-api";
+import { readAdminAccessTokenCookie } from "@/lib/admin-auth-cookies";
 import { buildBackendAuthCookieHeader } from "@/lib/auth-api";
 import { appendAuthSetCookieHeaders } from "@/lib/auth-cookies";
 
@@ -15,7 +16,7 @@ export async function proxyAdminBackend(
   const method = options?.method ?? request.method;
   const cookieStore = await cookies();
   const cookieHeader = buildBackendAuthCookieHeader(cookieStore.getAll());
-  const authHeader = request.headers.get("Authorization");
+  const accessToken = readAdminAccessTokenCookie(cookieStore);
 
   let body = options?.body;
   if (body === undefined && method !== "GET" && method !== "HEAD") {
@@ -27,7 +28,7 @@ export async function proxyAdminBackend(
   }
 
   const headers: Record<string, string> = {};
-  if (authHeader) headers.Authorization = authHeader;
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   if (cookieHeader) headers.Cookie = cookieHeader;
 
   const url = new URL(request.url);

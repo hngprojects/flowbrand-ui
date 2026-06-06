@@ -1,19 +1,10 @@
-import {
-  clearAdminSession,
-  readAdminSession,
-  updateAdminAccessToken,
-} from "@/lib/admin-session";
+import { clearAdminSession, updateAdminSessionRole } from "@/lib/admin-session";
 import { ADMIN_LOGIN_ROUTE } from "@/routes";
+import type { AdminRole } from "@/types/admin";
 
 type AdminFetchOptions = RequestInit & {
   skipRefresh?: boolean;
 };
-
-function adminAuthHeaders(): HeadersInit {
-  const session = readAdminSession();
-  if (!session?.accessToken) return {};
-  return { Authorization: `Bearer ${session.accessToken}` };
-}
 
 async function tryAdminRefresh(): Promise<boolean> {
   const res = await fetch("/api/admin/auth/refresh-token", {
@@ -24,15 +15,13 @@ async function tryAdminRefresh(): Promise<boolean> {
   if (!res.ok) return false;
 
   const body = (await res.json().catch(() => ({}))) as {
-    access_token?: string;
+    role?: AdminRole;
   };
-  if (!body.access_token?.trim()) return false;
-
-  updateAdminAccessToken(body.access_token);
+  updateAdminSessionRole(body.role);
   return true;
 }
 
-/** Authenticated fetch via the admin BFF gateway. */
+/** Authenticated fetch via the admin BFF gateway (Bearer from httpOnly cookie). */
 export async function adminGatewayFetch(
   path: string,
   options: AdminFetchOptions = {},
@@ -45,7 +34,6 @@ export async function adminGatewayFetch(
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...adminAuthHeaders(),
         ...init.headers,
       },
     });
@@ -72,7 +60,7 @@ export async function adminLoginRequest(
   email: string,
   password: string,
 ): Promise<
-  | { ok: true; access_token: string }
+  | { ok: true; email?: string; role?: AdminRole }
   | { ok: false; status: number; message: string }
 > {
   const res = await fetch("/api/admin/auth/login", {
@@ -83,7 +71,8 @@ export async function adminLoginRequest(
   });
 
   const body = (await res.json().catch(() => ({}))) as {
-    access_token?: string;
+    email?: string;
+    role?: AdminRole;
     message?: string;
   };
 
@@ -95,22 +84,13 @@ export async function adminLoginRequest(
     };
   }
 
-  if (!body.access_token?.trim()) {
-    return {
-      ok: false,
-      status: 502,
-      message: "Login succeeded but the response was invalid.",
-    };
-  }
-
-  return { ok: true, access_token: body.access_token };
+  return { ok: true, email: body.email ?? email, role: body.role };
 }
 
 export async function adminLogoutRequest(): Promise<void> {
   await fetch("/api/admin/auth/logout", {
     method: "POST",
     credentials: "include",
-    headers: adminAuthHeaders(),
   });
   clearAdminSession();
 }

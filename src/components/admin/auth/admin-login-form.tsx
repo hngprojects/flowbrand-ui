@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { adminLoginRequest } from "@/lib/admin-api-client";
+import { normalizeAdminRole } from "@/lib/admin-role";
 import { readAdminSession, writeAdminSession } from "@/lib/admin-session";
 import { ACCEPT_INVITE_ROUTE, ADMIN_ROUTE } from "@/routes";
 
@@ -33,7 +34,29 @@ export function AdminLoginForm() {
   useEffect(() => {
     if (readAdminSession()) {
       router.replace(ADMIN_ROUTE);
+      return;
     }
+
+    void (async () => {
+      const res = await fetch("/api/admin/gateway/profile", {
+        credentials: "include",
+      });
+      if (!res.ok) return;
+
+      const body = (await res.json().catch(() => null)) as {
+        data?: { email?: string; role?: string };
+        email?: string;
+        role?: string;
+      } | null;
+      const data = body?.data ?? body;
+      if (!data?.email && !data?.role) return;
+
+      writeAdminSession({
+        email: data.email,
+        role: normalizeAdminRole(data.role) ?? undefined,
+      });
+      router.replace(ADMIN_ROUTE);
+    })();
     // Run once on mount; Next.js router is not a stable dependency reference.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -58,8 +81,8 @@ export function AdminLoginForm() {
       }
 
       writeAdminSession({
-        accessToken: result.access_token,
-        email: values.email,
+        email: result.email ?? values.email,
+        role: result.role,
       });
       toast.success("Signed in to admin portal");
 

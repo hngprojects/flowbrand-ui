@@ -3,11 +3,7 @@
 import { useMemo } from "react";
 import { useSyncExternalStore } from "react";
 import { useAdminProfileQuery } from "@/hooks/queries/use-admin-profile-queries";
-import {
-  isSuperAdminRole,
-  normalizeAdminRole,
-  readAdminRoleFromAccessToken,
-} from "@/lib/admin-role";
+import { isSuperAdminRole, normalizeAdminRole } from "@/lib/admin-role";
 import {
   getAdminSessionSnapshot,
   subscribeToAdminSession,
@@ -26,16 +22,12 @@ export function useIsSuperAdmin(): boolean {
   const { data: profile } = useAdminProfileQuery(Boolean(session));
 
   return useMemo(() => {
-    const sessionRole =
-      normalizeAdminRole(session?.role) ??
-      (session?.accessToken
-        ? readAdminRoleFromAccessToken(session.accessToken)
-        : null);
+    const sessionRole = normalizeAdminRole(session?.role);
     if (sessionRole) return isSuperAdminRole(sessionRole);
 
     const profileRole = normalizeAdminRole(profile?.role);
     if (profileRole) return isSuperAdminRole(profileRole);
 
     return false;
-  }, [session, profile?.role]);
+  }, [session?.role, profile?.role]);
 }
