@@ -6,16 +6,39 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { InviteRoleSelect } from "@/components/admin/teams/invite-role-select";
+import { useRegenerateInviteLinkMutation } from "@/hooks/mutations/use-admin-team-mutations";
 import type { InviteLink, InviteRole } from "@/types/admin";
 
-/** "By link" invite panel: role picker + shareable link + copy. */
-export function InviteByLink({ link }: { link: InviteLink }) {
-  const [role, setRole] = useState<InviteRole>(link.role);
+function roleLabel(role: InviteRole): string {
+  if (role === "super_admin") return "a super admin";
+  if (role === "owner") return "an owner";
+  if (role === "dev") return "a dev";
+  if (role === "designer") return "a designer";
+  return "an admin";
+}
+
+/** Shareable invite link with role picker. */
+export function InviteByLink({
+  teamId,
+  link,
+}: {
+  teamId: string;
+  link: InviteLink;
+}) {
+  const [generatedLink, setGeneratedLink] = useState<InviteLink | null>(null);
   const [copied, setCopied] = useState(false);
+  const regenerate = useRegenerateInviteLinkMutation(teamId);
+  const activeLink = generatedLink ?? link;
+
+  function handleRoleChange(nextRole: InviteRole) {
+    regenerate.mutate(nextRole, {
+      onSuccess: setGeneratedLink,
+    });
+  }
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(link.url);
+      await navigator.clipboard.writeText(activeLink.url);
       setCopied(true);
       toast.success("Invite link copied");
       setTimeout(() => setCopied(false), 2000);
@@ -25,31 +48,33 @@ export function InviteByLink({ link }: { link: InviteLink }) {
   }
 
   return (
-    <div className="rounded-xl border border-gray-300 p-4 sm:p-5">
-      <div className="mb-1 flex items-center justify-between">
+    <div className="rounded-2xl border border-[#EAECF0] bg-white p-5 sm:p-6">
+      <div className="mb-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-sm font-medium text-black-500">By link</h3>
         <InviteRoleSelect
-          value={role}
-          onChange={setRole}
+          value={activeLink.role}
+          onChange={handleRoleChange}
           id="invite-link-role"
         />
       </div>
-      <p className="mb-3 text-xs text-neutral-500">
-        Anyone with this link can join as an admin. {link.expiresLabel}.
+      <p className="mb-4 text-xs text-neutral-500">
+        Anyone with this link can join as {roleLabel(activeLink.role)}.{" "}
+        {activeLink.expiresLabel}.
       </p>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Input
           readOnly
-          value={link.url}
+          value={activeLink.url}
           aria-label="Invite link"
-          className="h-11 rounded-lg text-neutral-500"
+          className="h-12 min-w-0 rounded-xl border-[#EAECF0] text-neutral-500"
         />
         <Button
           type="button"
           variant="outline"
           onClick={handleCopy}
-          className="h-11 shrink-0 rounded-lg"
+          disabled={regenerate.isPending}
+          className="h-12 w-full shrink-0 rounded-xl px-5 sm:w-auto"
         >
           {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           {copied ? "Copied" : "Copy"}

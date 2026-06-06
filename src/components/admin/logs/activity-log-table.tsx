@@ -30,7 +30,7 @@ export function ActivityLogTable({
   isLoading?: boolean;
 }) {
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="mb-6 w-full overflow-x-auto sm:mb-18">
       <table className="w-full min-w-[820px] border-collapse text-left">
         <thead>
           <tr>
@@ -46,52 +46,60 @@ export function ActivityLogTable({
           </tr>
         </thead>
         <tbody>
-          {isLoading
-            ? Array.from({ length: 9 }).map((_, index) => (
-                <tr key={index} className="border-b border-gray-300">
-                  <td className="px-4 py-3" colSpan={COLUMNS.length}>
-                    <span className="block h-6 w-full animate-pulse rounded bg-gray-200" />
-                  </td>
-                </tr>
-              ))
-            : entries.map((entry) => (
-                <tr
-                  key={entry.id}
-                  className="border-b border-gray-300 last:border-b-0"
-                >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <AdminAvatar
-                        initials={entry.user.initials}
-                        seed={entry.user.email}
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-black-500">
-                          {entry.user.fullName}
-                        </p>
-                        <p className="truncate text-xs text-neutral-500">
-                          {entry.user.email}
-                        </p>
-                      </div>
+          {isLoading ? (
+            Array.from({ length: 9 }).map((_, index) => (
+              <tr key={index} className="border-b border-gray-300">
+                <td className="px-4 py-3" colSpan={COLUMNS.length}>
+                  <span className="block h-6 w-full animate-pulse rounded bg-gray-200" />
+                </td>
+              </tr>
+            ))
+          ) : entries.length === 0 ? (
+            <tr>
+              <td
+                colSpan={COLUMNS.length}
+                className="px-4 py-12 text-center text-sm text-neutral-500"
+              >
+                No activity yet
+              </td>
+            </tr>
+          ) : (
+            entries.map((entry) => (
+              <tr
+                key={entry.id}
+                className="border-b border-gray-300 last:border-b-0"
+              >
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <AdminAvatar initials={entry.user.initials} />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-black-500">
+                        {entry.user.fullName}
+                      </p>
+                      <p className="truncate text-xs text-neutral-500">
+                        {entry.user.email}
+                      </p>
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm whitespace-nowrap text-neutral-500">
-                    {formatTimestamp(entry.timestamp)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-black-500">
-                    {entry.action}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-neutral-500">
-                    {entry.ipAddress}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-neutral-500">
-                    {entry.location}
-                  </td>
-                  <td className="px-4 py-3 text-sm whitespace-nowrap text-neutral-500">
-                    {entry.device}
-                  </td>
-                </tr>
-              ))}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-sm whitespace-nowrap text-neutral-500">
+                  {formatTimestamp(entry.timestamp)}
+                </td>
+                <td className="px-4 py-3 text-sm text-black-500">
+                  {entry.action}
+                </td>
+                <td className="px-4 py-3 text-sm text-neutral-500">
+                  {entry.ipAddress}
+                </td>
+                <td className="px-4 py-3 text-sm text-neutral-500">
+                  {entry.location}
+                </td>
+                <td className="px-4 py-3 text-sm whitespace-nowrap text-neutral-500">
+                  {entry.device}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

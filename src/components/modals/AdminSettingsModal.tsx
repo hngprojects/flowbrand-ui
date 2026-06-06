@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import FunnelModal from "@/components/modals/FunnelModal";
 import AdminProfileTab from "@/components/admin/settings/AdminProfileTab";
 import AdminPasswordSecurityTab from "@/components/admin/settings/AdminPasswordSecurityTab";

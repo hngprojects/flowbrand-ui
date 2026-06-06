@@ -24,6 +24,7 @@ export const ADMIN_TEAMS_ROUTE = "/admin/teams";
 export const ADMIN_LOGS_ROUTE = "/admin/logs";
 export const ADMIN_NOTIFICATIONS_ROUTE = "/admin/notifications";
 export const ADMIN_TEAMS_INVITE_ROUTE = "/admin/teams/invite";
+export const ACCEPT_INVITE_ROUTE = "/accept-invite";
 
 export const protectedRoutes = [DASHBOARD_ROUTE] as const;
 

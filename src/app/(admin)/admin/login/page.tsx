@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import LogoIcon from "@/components/icons/navbar/logo";
 import { AdminLoginForm } from "@/components/admin/auth/admin-login-form";

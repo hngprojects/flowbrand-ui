@@ -2,117 +2,127 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  deleteAdminTeamMember,
+  inviteAdminTeamMembers,
+  regenerateAdminTeamInviteLink,
+  revokeAdminTeamInvitation,
+  revokeAdminTeamMemberAccess,
+} from "@/lib/admin-teams-api";
 import { adminTeamsKeys } from "@/hooks/queries/use-admin-teams-queries";
-import type { InviteRole, InvitesData, TeamMembersData } from "@/types/admin";
+import type { InviteRole } from "@/types/admin";
 
-/**
- * Mutations for the admin teams module. These currently resolve against the
- * in-memory mock and optimistically update the React Query cache, so the UI is
- * fully interactive. When the real endpoints land, replace each `mutationFn`
- * body with the network call — the cache wiring stays the same.
- */
-
-function wait(ms = 300): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/** Collision-resistant id, falling back to a random suffix where crypto is unavailable. */
-function generateId(prefix: string): string {
-  const uuid =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  return `${prefix}-${uuid}`;
-}
-
-/** DELETE /admin/teams/:id (mock) — remove a team member. */
-export function useDeleteTeamMemberMutation() {
+export function useSendInviteMutation(teamId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (memberId: string) => {
-      await wait();
-      return memberId;
+    mutationFn: (payload: {
+      email: string;
+      role: InviteRole;
+      message?: string;
+    }) =>
+      inviteAdminTeamMembers(teamId, {
+        emails: [payload.email],
+        role: payload.role,
+        message: payload.message,
+      }),
+    onSuccess: (result, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: adminTeamsKeys.invitations(teamId),
+      });
+      if (result.failed > 0) {
+        toast.warning(
+          `Invite sent to ${variables.email}, but ${result.failed} invite(s) failed.`,
+        );
+      } else {
+        toast.success(`Invite sent to ${variables.email}`);
+      }
     },
-    onSuccess: (memberId) => {
-      queryClient.setQueryData<TeamMembersData>(
-        adminTeamsKeys.members(),
-        (previous) =>
-          previous
-            ? {
-                ...previous,
-                members: previous.members.filter((m) => m.id !== memberId),
-              }
-            : previous,
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Could not send the invite.",
       );
-      toast.success("Team member removed");
-    },
-    onError: () => {
-      toast.error("Could not remove team member. Please try again.");
     },
   });
 }
 
-/** POST /admin/teams/invites (mock) — send an email invite. */
-export function useSendInviteMutation() {
+export function useRevokeInviteMutation(teamId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: { email: string; role: InviteRole }) => {
-      await wait();
-      return payload;
+    mutationFn: (inviteId: string) =>
+      revokeAdminTeamInvitation(teamId, inviteId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: adminTeamsKeys.invitations(teamId),
+      });
+      toast.success("Access revoked");
     },
-    onSuccess: ({ email, role }) => {
-      queryClient.setQueryData<InvitesData>(
-        adminTeamsKeys.invites(),
-        (previous) =>
-          previous
-            ? {
-                ...previous,
-                pending: [
-                  {
-                    id: generateId("pi"),
-                    email,
-                    role,
-                    sentAgo: "was sent just now",
-                  },
-                  ...previous.pending,
-                ],
-              }
-            : previous,
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Could not revoke access.",
       );
-      toast.success(`Invite sent to ${email}`);
-    },
-    onError: () => {
-      toast.error("Could not send the invite. Please try again.");
     },
   });
 }
 
-/** DELETE /admin/teams/invites/:id (mock) — revoke a pending invite. */
-export function useRevokeInviteMutation() {
+export function useDeleteTeamMemberMutation(teamId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (inviteId: string) => {
-      await wait();
-      return inviteId;
+    mutationFn: (memberId: string) => deleteAdminTeamMember(teamId, memberId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: adminTeamsKeys.members(teamId),
+      });
+      void queryClient.invalidateQueries({ queryKey: adminTeamsKeys.portal() });
+      toast.success("Team member deleted");
     },
-    onSuccess: (inviteId) => {
-      queryClient.setQueryData<InvitesData>(
-        adminTeamsKeys.invites(),
-        (previous) =>
-          previous
-            ? {
-                ...previous,
-                pending: previous.pending.filter((p) => p.id !== inviteId),
-              }
-            : previous,
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Could not delete member.",
       );
-      toast.success("Invite revoked");
     },
-    onError: () => {
-      toast.error("Could not revoke the invite. Please try again.");
+  });
+}
+
+export function useRevokeMemberAccessMutation(teamId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (memberId: string) =>
+      revokeAdminTeamMemberAccess(teamId, memberId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: adminTeamsKeys.members(teamId),
+      });
+      toast.success("Portal access revoked");
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Could not revoke access.",
+      );
+    },
+  });
+}
+
+export function useRegenerateInviteLinkMutation(teamId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (role: InviteRole) =>
+      regenerateAdminTeamInviteLink(teamId, role),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: adminTeamsKeys.inviteLink(teamId),
+      });
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not update invite link.",
+      );
     },
   });
 }

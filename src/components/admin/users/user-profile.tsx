@@ -6,14 +6,10 @@ import { ChevronLeft, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DeleteUserModal } from "@/components/admin/users/delete-user-modal";
-import { getAdminUserProfile } from "@/lib/admin-users-stub";
 import { StatusBadge } from "./status-badge";
-
-function stageDot(status: "complete" | "active" | "locked") {
-  if (status === "complete") return "bg-[#22C55E]";
-  if (status === "active") return "bg-[#F59E0B] ring-2 ring-[#F59E0B]/30";
-  return "bg-[#D0D5DD]";
-}
+import { useAdminUserProfileQuery } from "@/hooks/queries/use-admin-user-profile-queries";
+import { useDeleteAdminUserMutation } from "@/hooks/mutations/use-admin-users-mutations";
+import { useRouter } from "next/navigation";
 
 function initials(name: string) {
   return name
@@ -25,20 +21,34 @@ function initials(name: string) {
 }
 
 export function UserProfile({ userId }: { userId: string }) {
-  const user = getAdminUserProfile(userId); // TODO: fetch GET /api/users/:userId
-  const [expanded, setExpanded] = useState<string[]>(["s1"]);
+  const router = useRouter();
+  const { data: user, isLoading, isError } = useAdminUserProfileQuery(userId);
+  const deleteMutation = useDeleteAdminUserMutation();
+  const [expanded, setExpanded] = useState<string[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleDeleteConfirm = () => {
-    // TODO: DELETE /api/users/:userId
-    setDeleteOpen(false);
+    deleteMutation.mutate(userId, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        router.push("/admin/users");
+      },
+    });
   };
 
-  if (!user) {
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-gray-200 bg-white px-6 py-10 text-center">
+        <p className="text-sm text-neutral-500">Loading user profile...</p>
+      </div>
+    );
+  }
+
+  if (isError || !user) {
     return (
       <div className="rounded-2xl border border-gray-200 bg-white px-6 py-10 text-center">
         <p className="text-sm text-neutral-500">
-          User not found. This id is not in the admin mock directory yet.
+          User not found or could not be loaded.
         </p>
         <Link
           href="/admin/users"

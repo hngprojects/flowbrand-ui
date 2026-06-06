@@ -16,7 +16,7 @@ export type OnboardingSessionAnswers = {
     };
     additional_notes?: string;
   };
-  step_3?: { discovery_channel?: string };
+  step_3?: { discovery_channel?: string | string[] };
 };
 
 export type ParsedOnboardingSession = {
@@ -101,6 +101,19 @@ const COMPLETED_SESSION_STATUSES = new Set([
 ]);
 
 /** Backend may leave /me flags false while the onboarding session is already done. */
+export function discoveryChannelsFromStep3(
+  step3?: OnboardingSessionAnswers["step_3"],
+): string[] {
+  const raw = step3?.discovery_channel;
+  if (Array.isArray(raw)) {
+    return raw.map((channel) => channel.trim()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return [raw.trim()];
+  }
+  return [];
+}
+
 export function isOnboardingSessionComplete(
   session: ParsedOnboardingSession,
 ): boolean {
@@ -113,7 +126,7 @@ export function isOnboardingSessionComplete(
     return true;
   }
 
-  return Boolean(session.answers.step_3?.discovery_channel);
+  return discoveryChannelsFromStep3(session.answers.step_3).length > 0;
 }
 
 export function isOnboardingConflictStatus(status?: number): boolean {
@@ -190,8 +203,12 @@ export function buildStep2Answer(input: {
   return answer;
 }
 
-export function buildStep3Answer(trafficChannel: string) {
-  return { discovery_channel: trafficChannel.trim() };
+export function buildStep3Answer(trafficChannels: string[]) {
+  return {
+    discovery_channel: trafficChannels
+      .map((channel) => channel.trim())
+      .filter(Boolean),
+  };
 }
 
 export function customerTagsFromAnswers(

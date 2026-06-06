@@ -2,16 +2,22 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { Search, Users, X } from "lucide-react";
-import { searchAdminUsers } from "@/lib/admin-users-stub";
+import { searchAdminApi } from "@/lib/admin-search-api";
 import {
   addAdminRecentSearch,
   readAdminRecentSearches,
 } from "@/lib/admin-search-storage";
 import { ADMIN_USERS_ROUTE } from "@/routes";
+import { cn } from "@/lib/utils";
 import type { AdminSearchUser } from "@/types/admin";
 
-export function AdminSearch() {
+type AdminSearchProps = {
+  className?: string;
+};
+
+export function AdminSearch({ className }: AdminSearchProps) {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -19,6 +25,19 @@ export function AdminSearch() {
   const [open, setOpen] = useState(false);
   const [recent, setRecent] = useState(() => readAdminRecentSearches());
   const [hiddenResultIds, setHiddenResultIds] = useState<string[]>([]);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query), 300);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  const { data: apiResults = [], isFetching } = useQuery({
+    queryKey: ["admin", "search", debouncedQuery],
+    queryFn: () => searchAdminApi(debouncedQuery),
+    enabled: debouncedQuery.trim().length >= 2,
+    staleTime: 30_000,
+  });
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent | TouchEvent) {
@@ -36,10 +55,8 @@ export function AdminSearch() {
   }, []);
 
   const results = useMemo(() => {
-    return searchAdminUsers(query).filter(
-      (user) => !hiddenResultIds.includes(user.id),
-    );
-  }, [query, hiddenResultIds]);
+    return apiResults.filter((user) => !hiddenResultIds.includes(user.id));
+  }, [apiResults, hiddenResultIds]);
 
   function goToUsersFilter(term: string) {
     const trimmed = term.trim();
@@ -73,7 +90,10 @@ export function AdminSearch() {
   }
 
   return (
-    <div ref={rootRef} className="relative ml-2 w-full max-w-[280px] sm:ml-6">
+    <div
+      ref={rootRef}
+      className={cn("relative w-full max-w-[280px]", className)}
+    >
       <div className="flex items-center gap-2 rounded-xl border border-[#A2A2A2] bg-gray-100 px-4 py-2">
         <Search className="size-4 shrink-0 text-[#A2A2A2]" />
         <input
@@ -94,8 +114,8 @@ export function AdminSearch() {
 
       {open ? (
         <div
-          className="absolute left-0 top-[calc(100%+10px)] z-[60] w-full min-w-[280px] 
-        max-w-[320px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
+          className="absolute left-0 top-[calc(100%+10px)] z-[60] w-full min-w-[280px] max-w-[320px] 
+        overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
         >
           {recent.length > 0 ? (
             <div className="border-b border-gray-100 px-4 pb-3 pt-4">
@@ -136,13 +156,22 @@ export function AdminSearch() {
                       type="button"
                       aria-label={`Remove ${user.fullName} from results`}
                       onClick={() => handleDismissResult(user.id)}
-                      className="flex size-7 shrink-0 items-center justify-center rounded-md text-neutral-400 transition-colors hover:bg-gray-100 hover:text-neutral-600"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-md text-neutral-400
+                       transition-colors hover:bg-gray-100 hover:text-neutral-600"
                     >
                       <X className="size-3.5" />
                     </button>
                   </div>
                 </li>
               ))
+            ) : query.trim().length < 2 ? (
+              <li className="px-4 py-6 text-center text-sm text-neutral-500">
+                Type at least 2 characters to search
+              </li>
+            ) : isFetching ? (
+              <li className="px-4 py-6 text-center text-sm text-neutral-500">
+                Searching...
+              </li>
             ) : (
               <li className="px-4 py-6 text-center text-sm text-neutral-500">
                 No users found for &ldquo;{query}&rdquo;

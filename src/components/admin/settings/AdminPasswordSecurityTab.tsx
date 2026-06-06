@@ -5,7 +5,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { adminLogoutRequest } from "@/lib/admin-api-client";
+import { changeAdminPassword } from "@/lib/admin-profile-api";
+import { ADMIN_LOGIN_ROUTE } from "@/routes";
 import {
   Form,
   FormControl,
@@ -43,6 +47,7 @@ const PasswordSecuritySchema = z
 type PasswordSecurityFormValues = z.infer<typeof PasswordSecuritySchema>;
 
 export default function AdminPasswordSecurityTab() {
+  const router = useRouter();
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -63,9 +68,15 @@ export default function AdminPasswordSecurityTab() {
 
   const onSubmit = async (values: PasswordSecurityFormValues) => {
     try {
-      console.log(values);
-      setSuccessOpen(true);
+      await changeAdminPassword({
+        old_password: values.oldPassword,
+        new_password: values.newPassword,
+        confirm_password: values.confirmPassword,
+      });
+      toast.success("Password updated. Please sign in again.");
       form.reset();
+      await adminLogoutRequest();
+      router.replace(ADMIN_LOGIN_ROUTE);
     } catch (error) {
       toast.error(
         error instanceof Error

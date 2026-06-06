@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { AdminMetricCard } from "@/types/admin";
 
@@ -8,35 +9,45 @@ type MetricCardsRowProps = {
   isLoading?: boolean;
 };
 
+const METRIC_CARD_CLASS =
+  "flex h-[168px] min-h-[120px] w-[min(82vw,280px)] shrink-0 snap-start snap-always flex-col justify-between rounded-2xl bg-primary px-5 py-4 text-white shadow-sm sm:w-auto sm:shrink";
+
+function MetricCardsTrack({ children }: { children: ReactNode }) {
+  return (
+    <div className="-mx-4 min-w-0 overflow-x-auto overscroll-x-contain px-4 [-webkit-overflow-scrolling:touch] scrollbar-none sm:mx-0 sm:overflow-visible sm:px-0">
+      <div className="flex w-max min-w-full snap-x snap-mandatory gap-4 sm:grid sm:w-full sm:grid-cols-2 sm:snap-none xl:grid-cols-4">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function MetricCardSkeleton() {
   return (
-    <div className="h-[120px] rounded-2xl bg-primary/40 md:min-w-[200px] md:flex-1" />
+    <div className="h-[168px] min-h-[120px] w-[min(82vw,280px)] shrink-0 snap-start snap-always rounded-2xl bg-primary/40 sm:w-auto sm:shrink" />
   );
 }
 
 export function MetricCardsRow({ metrics, isLoading }: MetricCardsRowProps) {
   if (isLoading) {
     return (
-      <div className="flex gap-4 overflow-x-auto pb-1">
+      <MetricCardsTrack>
         {Array.from({ length: 4 }).map((_, index) => (
           <MetricCardSkeleton key={index} />
         ))}
-      </div>
+      </MetricCardsTrack>
     );
   }
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-none">
+    <MetricCardsTrack>
       {metrics.map((metric) => {
         const isUp = metric.trend === "up";
         const TrendIcon = isUp ? TrendingUp : TrendingDown;
         const changePrefix = isUp ? "+" : "-";
 
         return (
-          <article
-            key={metric.id}
-            className="flex min-h-[120px] h-[168px] min-w-[200px] flex-1 flex-col justify-between rounded-2xl bg-primary px-5 py-4 text-white shadow-sm "
-          >
+          <article key={metric.id} className={METRIC_CARD_CLASS}>
             <div className="flex items-start justify-between gap-3">
               <p className="text-sm font-medium text-white">{metric.label}</p>
               <span
@@ -55,7 +66,7 @@ export function MetricCardsRow({ metrics, isLoading }: MetricCardsRowProps) {
               </span>
             </div>
 
-            <div className="flex items-end justify-between gap-3 mb-10">
+            <div className="flex items-end justify-between gap-3">
               <p className="text-[32px] font-semibold leading-none tracking-tight">
                 {metric.value.toLocaleString()}
               </p>
@@ -67,6 +78,6 @@ export function MetricCardsRow({ metrics, isLoading }: MetricCardsRowProps) {
           </article>
         );
       })}
-    </div>
+    </MetricCardsTrack>
   );
 }

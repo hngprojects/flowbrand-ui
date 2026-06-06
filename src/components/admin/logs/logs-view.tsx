@@ -7,10 +7,7 @@ import { LogPagination } from "@/components/admin/logs/log-pagination";
 import { useActivityLogQuery } from "@/hooks/queries/use-admin-logs-queries";
 import type { LogDateRange } from "@/types/admin";
 
-/**
- * /admin/logs — Activity log with a date-range filter and pagination.
- * Page content only; the admin shell (sidebar/header/tabs) is owned by @fez.
- */
+/** /admin/logs — Activity log with a date-range filter and pagination. */
 export function LogsView() {
   const [page, setPage] = useState(1);
   const [range, setRange] = useState<LogDateRange>("all");
@@ -19,7 +16,7 @@ export function LogsView() {
   return (
     <section className="w-full">
       <div className="rounded-xl border border-gray-300 bg-card">
-        <div className="flex items-center gap-3 px-4 py-4">
+        <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center">
           <h1 className="text-base font-semibold text-black-500">
             Activity log
           </h1>

@@ -38,6 +38,19 @@ function userApiUrl(path: string): string {
   return `${base}/api/users${path}`;
 }
 
+function parseAvatarUrlFromResponse(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+
+  const root = body as Record<string, unknown>;
+  const payload =
+    root.data && typeof root.data === "object"
+      ? (root.data as Record<string, unknown>)
+      : root;
+
+  const url = payload.avatarUrl ?? payload.avatar_url;
+  return typeof url === "string" && url.trim() ? url.trim() : null;
+}
+
 async function getAccessToken(): Promise<string | null> {
   try {
     const session = await auth();
@@ -216,14 +229,13 @@ export async function uploadUserAvatar(
     const res = await axios.post(userApiUrl("/me/avatar"), formData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
       },
       timeout: 30_000,
     });
     flowLog("auth", "POST /api/users/me/avatar → raw response", {
       data: res.data,
     });
-    const avatarUrl = res.data?.avatarUrl as string;
+    const avatarUrl = parseAvatarUrlFromResponse(res.data);
     if (!avatarUrl) {
       return { ok: false, error: "Could not read avatar URL.", status: 502 };
     }

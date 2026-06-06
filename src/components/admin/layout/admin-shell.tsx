@@ -41,10 +41,10 @@ export function AdminShell({ children }: AdminShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7F7F7]">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-[#F7F7F7]">
       <AdminNavbar />
       <AdminTabNav />
-      <main className="dashboard-layout-class w-full flex-1 py-6">
+      <main className="mx-auto w-full max-w-[1800px] flex-1 px-4 py-6 sm:px-6 lg:px-18">
         {children}
       </main>
     </div>

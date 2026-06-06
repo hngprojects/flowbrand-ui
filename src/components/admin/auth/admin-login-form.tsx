@@ -8,8 +8,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { adminLoginRequest } from "@/lib/admin-api-client";
 import { readAdminSession, writeAdminSession } from "@/lib/admin-session";
-import { ADMIN_ROUTE } from "@/routes";
+import { ACCEPT_INVITE_ROUTE, ADMIN_ROUTE } from "@/routes";
 
 const AdminLoginSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
@@ -38,16 +39,32 @@ export function AdminLoginForm() {
   });
 
   const onSubmit = async (values: AdminLoginValues) => {
-    // TODO: Replace with POST /api/admin/auth/login when backend is ready.
     try {
-      writeAdminSession(values.email);
+      const result = await adminLoginRequest(values.email, values.password);
+
+      if (!result.ok) {
+        if (result.status === 423) {
+          toast.error("Account temporarily locked. Try again in one hour.");
+          return;
+        }
+        toast.error(result.message);
+        return;
+      }
+
+      writeAdminSession({
+        accessToken: result.access_token,
+        email: values.email,
+      });
       toast.success("Signed in to admin portal");
+
       const rawCallback =
         searchParams.get("callbackUrl")?.trim() || ADMIN_ROUTE;
-      // Only allow paths, not full URLs, and verify admin route
-      const isValidAdminPath =
-        rawCallback.startsWith("/admin/") || rawCallback === "/admin";
-      const callbackUrl = isValidAdminPath ? rawCallback : ADMIN_ROUTE;
+      const isValidCallback =
+        rawCallback.startsWith("/admin/") ||
+        rawCallback === "/admin" ||
+        rawCallback.startsWith(`${ACCEPT_INVITE_ROUTE}?`) ||
+        rawCallback === ACCEPT_INVITE_ROUTE;
+      const callbackUrl = isValidCallback ? rawCallback : ADMIN_ROUTE;
       router.replace(callbackUrl);
     } catch {
       toast.error("Could not sign in. Please try again.");
