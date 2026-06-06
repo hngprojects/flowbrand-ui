@@ -34,7 +34,7 @@ export function AdminDashboardView() {
       <SignUpsChart
         weeks={data?.signUps.weeks ?? []}
         total={data?.signUps.total ?? 0}
-        periodLabel={data?.signUps.periodLabel ?? "Last 12 weeks"}
+        periodLabel={data?.signUps.periodLabel ?? "Last 7 weeks"}
         isLoading={isLoading}
       />
 
@@ -54,6 +54,7 @@ export function AdminDashboardView() {
             <DonutChart
               segments={data?.userStages.segments ?? []}
               total={data?.userStages.total ?? 0}
+              minSweepDegrees={26}
             />
           )}
         </section>

@@ -1,8 +1,5 @@
-/**
- * Temporary client-side admin session for UI development.
- * Replace with server-validated auth (HttpOnly cookie / JWT + middleware)
- * before production — see admin-login-form.tsx.
- */
+import type { AdminRole } from "@/types/admin";
+
 const ADMIN_SESSION_KEY = "flowbrand-admin-session";
 const ADMIN_SESSION_CHANGED_EVENT = "admin-session-changed";
 
@@ -11,8 +8,10 @@ function notifyAdminSessionChanged() {
   window.dispatchEvent(new Event(ADMIN_SESSION_CHANGED_EVENT));
 }
 
+/** Non-sensitive admin UI session — bearer token lives in an httpOnly cookie. */
 export type AdminSession = {
-  email: string;
+  email?: string;
+  role?: AdminRole;
   signedInAt: string;
 };
 
@@ -23,8 +22,19 @@ function parseAdminSession(raw: string | null): AdminSession | null {
   if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(raw) as AdminSession;
-    return parsed?.email ? parsed : null;
+    const parsed = JSON.parse(raw) as AdminSession & { accessToken?: string };
+    if (!parsed?.signedInAt) return null;
+
+    // Drop legacy sessions that only stored a bearer token with no signedInAt.
+    if (!parsed.email && !parsed.role && parsed.accessToken) {
+      return null;
+    }
+
+    return {
+      email: parsed.email,
+      role: parsed.role,
+      signedInAt: parsed.signedInAt,
+    };
   } catch {
     return null;
   }
@@ -37,6 +47,22 @@ function readAdminSessionRaw(): string | null {
     return sessionStorage.getItem(ADMIN_SESSION_KEY);
   } catch {
     return null;
+  }
+}
+
+function persistSession(session: AdminSession | null): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    if (!session) {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    } else {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+    }
+    cachedRaw = undefined;
+    notifyAdminSessionChanged();
+  } catch {
+    // Quota exceeded or storage disabled.
   }
 }
 
@@ -57,31 +83,31 @@ export function readAdminSession(): AdminSession | null {
   return getAdminSessionSnapshot();
 }
 
-export function writeAdminSession(email: string): void {
+export function writeAdminSession(input: {
+  email?: string;
+  role?: AdminRole;
+}): void {
   if (typeof window === "undefined") return;
 
-  const session: AdminSession = {
-    email,
+  persistSession({
+    email: input.email,
+    role: input.role,
     signedInAt: new Date().toISOString(),
-  };
+  });
+}
 
-  try {
-    sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
-    notifyAdminSessionChanged();
-  } catch {
-    // Quota exceeded or storage disabled — fail silently for mock auth.
-  }
+export function updateAdminSessionRole(role?: AdminRole): void {
+  const current = readAdminSession();
+  if (!current) return;
+
+  persistSession({
+    ...current,
+    role,
+  });
 }
 
 export function clearAdminSession(): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    sessionStorage.removeItem(ADMIN_SESSION_KEY);
-    notifyAdminSessionChanged();
-  } catch {
-    // Ignore storage errors on logout.
-  }
+  persistSession(null);
 }
 
 export function subscribeToAdminSession(onStoreChange: () => void) {

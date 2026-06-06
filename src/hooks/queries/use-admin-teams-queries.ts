@@ -1,36 +1,60 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchInvites, fetchTeamMembers } from "@/lib/admin-mock-data";
-import type { InvitesData, TeamMembersData } from "@/types/admin";
+import {
+  fetchAdminPortalTeam,
+  fetchAdminTeamInviteLink,
+  fetchAdminTeamInvitations,
+  fetchAdminTeamMembers,
+} from "@/lib/admin-teams-api";
 
-/**
- * Query keys for the admin teams/invites data. Kept local to the admin module
- * so the shared `@/lib/query-keys` file isn't a merge-conflict hotspot across
- * the four parallel admin workstreams.
- */
 export const adminTeamsKeys = {
   all: () => ["admin", "teams"] as const,
-  members: () => ["admin", "teams", "members"] as const,
-  invites: () => ["admin", "teams", "invites"] as const,
+  portal: () => ["admin", "teams", "portal"] as const,
+  members: (teamId: string) => ["admin", "teams", "members", teamId] as const,
+  invitations: (teamId: string) =>
+    ["admin", "teams", "invitations", teamId] as const,
+  inviteLink: (teamId: string) =>
+    ["admin", "teams", "invite-link", teamId] as const,
 };
 
-/** GET /admin/teams (mock) — Admin team member list. */
-export function useTeamMembersQuery(enabled = true) {
+/** Singleton admin portal team. */
+export function useAdminPortalTeamQuery(enabled = true) {
   return useQuery({
-    queryKey: adminTeamsKeys.members(),
-    queryFn: (): Promise<TeamMembersData> => fetchTeamMembers(),
+    queryKey: adminTeamsKeys.portal(),
+    queryFn: fetchAdminPortalTeam,
     enabled,
+    staleTime: 60_000,
+  });
+}
+
+/** GET /api/admin/teams/:teamId/members */
+export function useAdminTeamMembersQuery(teamId: string, enabled = true) {
+  return useQuery({
+    queryKey: adminTeamsKeys.members(teamId),
+    queryFn: () => fetchAdminTeamMembers(teamId),
+    enabled: enabled && Boolean(teamId),
     staleTime: 30_000,
   });
 }
 
-/** GET /admin/teams/invites (mock) — invite link + pending invites. */
-export function useInvitesQuery(enabled = true) {
+/** GET /api/admin/teams/:teamId/invitations */
+export function useTeamInvitationsQuery(teamId: string, enabled = true) {
   return useQuery({
-    queryKey: adminTeamsKeys.invites(),
-    queryFn: (): Promise<InvitesData> => fetchInvites(),
-    enabled,
+    queryKey: adminTeamsKeys.invitations(teamId),
+    queryFn: () => fetchAdminTeamInvitations(teamId),
+    enabled: enabled && Boolean(teamId),
     staleTime: 30_000,
+  });
+}
+
+/** GET /api/admin/teams/:teamId/invite-link */
+export function useTeamInviteLinkQuery(teamId: string, enabled = true) {
+  return useQuery({
+    queryKey: adminTeamsKeys.inviteLink(teamId),
+    queryFn: () => fetchAdminTeamInviteLink(teamId),
+    enabled: enabled && Boolean(teamId),
+    staleTime: 30_000,
+    retry: false,
   });
 }

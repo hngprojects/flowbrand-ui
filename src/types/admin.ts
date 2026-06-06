@@ -33,10 +33,27 @@ export interface TeamMembersData {
   members: TeamMember[];
 }
 
-export type InviteRole = Extract<
-  TeamRole,
-  "admin" | "regular" | "designer" | "dev"
->;
+/** Portal access roles assignable via invite (matches team member roles). */
+export type InviteRole = Exclude<TeamRole, "regular">;
+
+export interface AdminTeam {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  createdAt: string;
+  memberCount: number;
+}
+
+export interface AdminTeamsListResult {
+  teams: AdminTeam[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
+  };
+}
 
 export interface PendingInvite {
   id: string;
@@ -44,6 +61,7 @@ export interface PendingInvite {
   role: InviteRole;
   /** Human-readable string, e.g. "was sent 2 days ago". */
   sentAgo: string;
+  expiresAt?: string;
 }
 
 export interface InviteLink {
@@ -124,6 +142,18 @@ export interface AdminSearchUser {
   id: string;
   fullName: string;
   email: string;
+}
+
+export type AdminRole = "admin" | "super_admin";
+
+export interface AdminProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  country: string;
+  avatarUrl: string | null;
+  role: AdminRole;
+  createdAt: string;
 }
 
 export interface AdminDashboardData {

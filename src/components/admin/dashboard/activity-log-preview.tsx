@@ -16,7 +16,7 @@ export function ActivityLogPreview({
 }: ActivityLogPreviewProps) {
   return (
     <section className="rounded-2xl border border-gray-200 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-4 py-4 sm:px-5">
         <h2 className="text-base font-semibold text-black-500">Activity log</h2>
         <Link
           href={ADMIN_LOGS_ROUTE}

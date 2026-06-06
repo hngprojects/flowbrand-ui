@@ -1,19 +1,13 @@
 import { cn } from "@/lib/utils";
 
-/**
- * Circular initials avatar used across admin tables (Teams, Logs).
- * Background tint is chosen deterministically from the initials so the same
- * person keeps a stable colour. All colours come from globals.css tokens.
- */
+/** Circular initials avatar used across admin tables (Teams, Logs). */
 
 interface AdminAvatarProps {
   initials: string;
-  /** Used only to seed the colour; not displayed. */
-  seed?: string;
   className?: string;
 }
 
-export function AdminAvatar({ initials, seed, className }: AdminAvatarProps) {
+export function AdminAvatar({ initials, className }: AdminAvatarProps) {
   return (
     <span
       aria-hidden="true"

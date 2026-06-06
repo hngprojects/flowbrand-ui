@@ -3,12 +3,13 @@ import type { InviteRole } from "@/types/admin";
 
 const ROLE_OPTIONS: { value: InviteRole; label: string }[] = [
   { value: "admin", label: "Admin" },
-  { value: "regular", label: "Regular" },
-  { value: "designer", label: "Designer" },
+  { value: "super_admin", label: "Super Admin" },
+  { value: "owner", label: "Owner" },
   { value: "dev", label: "Dev" },
+  { value: "designer", label: "Designer" },
 ];
 
-/** Compact role picker reused by both the "By email" and "By link" panels. */
+/** Compact role picker for team invite panels. */
 export function InviteRoleSelect({
   value,
   onChange,
@@ -25,7 +26,9 @@ export function InviteRoleSelect({
       id={id}
       value={value}
       onChange={(event) => onChange(event.target.value as InviteRole)}
-      className={className ?? "h-9 w-28 rounded-lg"}
+      className={
+        className ?? "h-9 min-w-[120px] rounded-lg border-gray-300 text-sm"
+      }
       aria-label="Invite role"
     >
       {ROLE_OPTIONS.map((option) => (

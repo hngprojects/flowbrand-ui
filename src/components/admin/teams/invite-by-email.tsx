@@ -9,12 +9,11 @@ import type { InviteRole } from "@/types/admin";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** "By email" invite panel: role picker + email field + send. */
-export function InviteByEmail() {
+export function InviteByEmail({ teamId }: { teamId: string }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<InviteRole>("admin");
   const [touched, setTouched] = useState(false);
-  const sendInvite = useSendInviteMutation();
+  const sendInvite = useSendInviteMutation(teamId);
 
   const isValid = EMAIL_PATTERN.test(email.trim());
 
@@ -28,8 +27,8 @@ export function InviteByEmail() {
   }
 
   return (
-    <div className="rounded-xl border border-gray-300 p-4 sm:p-5">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="rounded-2xl border border-[#EAECF0] bg-white p-5 sm:p-6">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-sm font-medium text-black-500">By email</h3>
         <InviteRoleSelect
           value={role}
@@ -47,7 +46,7 @@ export function InviteByEmail() {
         onChange={(event) => setEmail(event.target.value)}
         onBlur={() => setTouched(true)}
         aria-invalid={touched && !isValid}
-        className="h-11 rounded-lg"
+        className="h-12 rounded-xl border-[#EAECF0]"
       />
       {touched && !isValid ? (
         <p className="mt-1.5 text-xs text-red-500">
@@ -55,12 +54,12 @@ export function InviteByEmail() {
         </p>
       ) : null}
 
-      <div className="mt-3 flex justify-end">
+      <div className="mt-4 flex justify-end">
         <Button
           type="button"
           onClick={handleSend}
           disabled={sendInvite.isPending}
-          className="rounded-lg"
+          className="h-11 rounded-xl px-6"
         >
           {sendInvite.isPending ? "Sending…" : "Send invite"}
         </Button>

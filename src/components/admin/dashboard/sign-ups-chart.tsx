@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown } from "lucide-react";
 import type { SignUpWeek } from "@/types/admin";
 import { ChartTooltip } from "@/components/admin/dashboard/chart-tooltip";
 
@@ -11,6 +10,8 @@ type SignUpsChartProps = {
   periodLabel: string;
   isLoading?: boolean;
 };
+
+const BAR_WIDTH_CLASS = "w-[32px] md:w-[67.75px]";
 
 function buildYAxisTicks(max: number): number[] {
   const step = max <= 50 ? 10 : 20;
@@ -48,21 +49,11 @@ export function SignUpsChart({
 
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-black-500">Sign ups</h2>
-          <p className="mt-1 text-sm text-neutral-500">
-            {periodLabel} · {total} total sign ups
-          </p>
-        </div>
-        {/* TODO: Wire period selector dropdown when live overview API is ready. */}
-        <div
-          aria-hidden
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-black-500"
-        >
-          Weekly live overview
-          <ChevronDown className="size-4 text-neutral-500" />
-        </div>
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-black-500">Sign ups</h2>
+        <p className="mt-1 text-sm text-neutral-500">
+          {periodLabel} · {total} total sign ups
+        </p>
       </div>
 
       <div className="relative h-[280px]">
@@ -83,7 +74,7 @@ export function SignUpsChart({
             ))}
         </div>
 
-        <div className="relative z-10 flex h-full gap-2 pl-8 pr-2">
+        <div className="relative z-10 flex h-full gap-1 pl-8 pr-2 md:gap-2">
           {weeks.map((week) => {
             const barHeightPct = (week.signUps / yMax) * 100;
             const isActive = activeWeek === week.week;
@@ -91,22 +82,23 @@ export function SignUpsChart({
             return (
               <div
                 key={week.week}
-                className="relative flex h-full min-w-0 flex-1 flex-col"
+                className="relative flex h-full min-w-0 flex-1 items-end justify-center"
                 onMouseEnter={() => setActiveWeek(week.week)}
                 onMouseLeave={() => setActiveWeek(null)}
               >
-                <div className="relative flex min-h-0 flex-1 items-end justify-center">
-                  {isActive ? (
-                    <div className="absolute bottom-full z-20 mb-2">
-                      <ChartTooltip
-                        label={week.week}
-                        value={`${week.signUps} sign ups`}
-                      />
-                    </div>
-                  ) : null}
+                {isActive ? (
+                  <div className="absolute bottom-full z-20 mb-2">
+                    <ChartTooltip
+                      label={week.week}
+                      value={`${week.signUps} sign ups`}
+                    />
+                  </div>
+                ) : null}
 
+                <div className={`relative h-full shrink-0 ${BAR_WIDTH_CLASS}`}>
+                  <div aria-hidden className="absolute inset-0 bg-primary-50" />
                   <div
-                    className={`w-full max-w-[67px] rounded-full transition-all duration-200 ${
+                    className={`absolute bottom-0 left-0 rounded-full transition-all duration-200 ${BAR_WIDTH_CLASS} ${
                       isActive ? "bg-primary" : "bg-primary/90"
                     }`}
                     style={{
@@ -114,20 +106,22 @@ export function SignUpsChart({
                       minHeight: week.signUps > 0 ? "6px" : "0",
                     }}
                   />
-
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute max-w-[67px] inset-x-0 translate-x-5 bottom-0 top-0 -z-10 bg-primary-50"
-                  />
                 </div>
-
-                <span className="mt-3 shrink-0 text-center text-xs text-neutral-500">
-                  {week.week}
-                </span>
               </div>
             );
           })}
         </div>
+      </div>
+
+      <div className="mt-3 flex gap-1 pl-8 pr-2 md:gap-2">
+        {weeks.map((week) => (
+          <span
+            key={`${week.week}-label`}
+            className="min-w-0 flex-1 text-center text-xs text-neutral-500"
+          >
+            {week.week}
+          </span>
+        ))}
       </div>
     </section>
   );

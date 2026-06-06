@@ -1,12 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { COUNTRY_OPTIONS } from "@/lib/countries";
-import { LogoutButton } from "@/components/auth/logout-button";
+import { updateAdminProfile } from "@/lib/admin-profile-api";
+import { AdminLogoutButton } from "@/components/admin/auth/admin-logout-button";
+import {
+  adminProfileKeys,
+  useAdminProfileQuery,
+} from "@/hooks/queries/use-admin-profile-queries";
 import {
   Form,
   FormControl,
@@ -38,8 +45,17 @@ interface AdminProfileTabProps {
 }
 
 export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
+  const queryClient = useQueryClient();
+  const { data: profile } = useAdminProfileQuery();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
+  const [avatarOverride, setAvatarOverride] = useState<
+    string | null | undefined
+  >(undefined);
+  const displayAvatar =
+    avatarOverride !== undefined
+      ? avatarOverride
+      : (profile?.avatarUrl ?? null);
 
   const form = useForm<AdminProfileFormValues>({
     resolver: zodResolver(AdminProfileSchema),
@@ -54,20 +70,65 @@ export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
   const { isSubmitting } = form.formState;
   const fullName = useWatch({ control: form.control, name: "fullName" });
 
+  useEffect(() => {
+    if (!profile) return;
+
+    const countryCode =
+      COUNTRY_OPTIONS.find((option) => option.label === profile.country)
+        ?.value ?? "";
+
+    form.reset({
+      fullName: profile.fullName,
+      country: countryCode,
+    });
+  }, [profile, form]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
     const previewUrl = URL.createObjectURL(file);
-    setAvatar(previewUrl);
+    previewUrlRef.current = previewUrl;
+    setAvatarOverride(previewUrl);
   };
 
   const handleDeleteAvatar = () => {
-    setAvatar(null);
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setAvatarOverride(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const onSubmit = (values: AdminProfileFormValues) => {
-    console.log(values);
+  const onSubmit = async (values: AdminProfileFormValues) => {
+    try {
+      await updateAdminProfile({
+        full_name: values.fullName.trim(),
+        country: values.country,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: adminProfileKeys.me(),
+      });
+      toast.success("Profile updated successfully.");
+      onClose();
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not update profile. Please try again.",
+      );
+    }
   };
 
   return (
@@ -76,9 +137,9 @@ export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
 
       <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full">
         <div className=" h-[100px] w-[100px]md:h-[122px] md:w-[122px] overflow-hidden rounded-full bg-gray-100">
-          {avatar ? (
+          {displayAvatar ? (
             <Image
-              src={avatar}
+              src={displayAvatar}
               alt="Profile"
               width={122}
               height={122}
@@ -160,6 +221,8 @@ export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
               <input
                 type="email"
                 disabled
+                value={profile?.email ?? ""}
+                readOnly
                 className="w-full h-[44px] rounded-[8px] border border-primary-500 px-[16px] 
                 py-[12px] text-[16px] font-medium leading-[150%] text-black-500 outline-none 
                 bg-gray-50 opacity-60 cursor-not-allowed"
@@ -221,11 +284,7 @@ export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
         </form>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <LogoutButton
-            variant="menu"
-            className="rounded-[8px] border border-red-100 bg-red-50 px-10 py-3 text-sm 
-  md:text-base font-medium text-red-500 hover:opacity-90 w-auto text-center"
-          />
+          <AdminLogoutButton className="rounded-[8px] border border-red-100 bg-red-50 px-10 py-3 text-sm md:text-base font-medium text-red-500 hover:opacity-90 w-auto text-center" />
           <button
             type="submit"
             disabled={isSubmitting}

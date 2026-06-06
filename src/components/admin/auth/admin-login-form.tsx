@@ -8,8 +8,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { adminLoginRequest } from "@/lib/admin-api-client";
+import { normalizeAdminRole } from "@/lib/admin-role";
 import { readAdminSession, writeAdminSession } from "@/lib/admin-session";
-import { ADMIN_ROUTE } from "@/routes";
+import { ACCEPT_INVITE_ROUTE, ADMIN_ROUTE } from "@/routes";
 
 const AdminLoginSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
@@ -17,6 +19,12 @@ const AdminLoginSchema = z.object({
 });
 
 type AdminLoginValues = z.infer<typeof AdminLoginSchema>;
+
+function isValidAdminCallback(callback: string): boolean {
+  const [pathname] = callback.split("?");
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  return pathname === ACCEPT_INVITE_ROUTE;
+}
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -26,7 +34,29 @@ export function AdminLoginForm() {
   useEffect(() => {
     if (readAdminSession()) {
       router.replace(ADMIN_ROUTE);
+      return;
     }
+
+    void (async () => {
+      const res = await fetch("/api/admin/gateway/profile", {
+        credentials: "include",
+      });
+      if (!res.ok) return;
+
+      const body = (await res.json().catch(() => null)) as {
+        data?: { email?: string; role?: string };
+        email?: string;
+        role?: string;
+      } | null;
+      const data = body?.data ?? body;
+      if (!data?.email && !data?.role) return;
+
+      writeAdminSession({
+        email: data.email,
+        role: normalizeAdminRole(data.role) ?? undefined,
+      });
+      router.replace(ADMIN_ROUTE);
+    })();
     // Run once on mount; Next.js router is not a stable dependency reference.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -38,16 +68,29 @@ export function AdminLoginForm() {
   });
 
   const onSubmit = async (values: AdminLoginValues) => {
-    // TODO: Replace with POST /api/admin/auth/login when backend is ready.
     try {
-      writeAdminSession(values.email);
+      const result = await adminLoginRequest(values.email, values.password);
+
+      if (!result.ok) {
+        if (result.status === 423) {
+          toast.error("Account temporarily locked. Try again in one hour.");
+          return;
+        }
+        toast.error(result.message);
+        return;
+      }
+
+      writeAdminSession({
+        email: result.email ?? values.email,
+        role: result.role,
+      });
       toast.success("Signed in to admin portal");
+
       const rawCallback =
         searchParams.get("callbackUrl")?.trim() || ADMIN_ROUTE;
-      // Only allow paths, not full URLs, and verify admin route
-      const isValidAdminPath =
-        rawCallback.startsWith("/admin/") || rawCallback === "/admin";
-      const callbackUrl = isValidAdminPath ? rawCallback : ADMIN_ROUTE;
+      const callbackUrl = isValidAdminCallback(rawCallback)
+        ? rawCallback
+        : ADMIN_ROUTE;
       router.replace(callbackUrl);
     } catch {
       toast.error("Could not sign in. Please try again.");

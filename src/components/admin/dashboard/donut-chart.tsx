@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PieChart, Pie, Cell } from "recharts";
 import type { ChartSegment } from "@/types/admin";
 import { cn } from "@/lib/utils";
@@ -125,10 +125,31 @@ export function DonutChart({
   segments,
   total,
   centerLabel = "Total Users",
-  size = 300,
+  size: preferredSize = 300,
   minSweepDegrees = DEFAULT_MIN_SWEEP_DEGREES,
 }: DonutChartProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(preferredSize);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const updateSize = () => {
+      setContainerWidth(element.offsetWidth);
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const size = Math.min(
+    preferredSize,
+    Math.max(220, containerWidth || preferredSize),
+  );
 
   const chartSegments = useMemo(
     () => toChartSegments(segments, minSweepDegrees),
@@ -153,8 +174,12 @@ export function DonutChart({
   );
 
   return (
-    <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-center lg:gap-12">
-      <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <div className="flex flex-col items-center gap-6 sm:gap-8 lg:flex-row lg:items-center lg:justify-center lg:gap-12">
+      <div
+        ref={containerRef}
+        className="relative mx-auto w-full max-w-[300px] shrink-0"
+        style={{ width: size, height: size }}
+      >
         <PieChart width={size} height={size}>
           <Pie
             data={chartSegments}
@@ -188,7 +213,7 @@ export function DonutChart({
         </PieChart>
 
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="text-[28px] font-semibold leading-none text-black-500">
+          <p className="text-2xl font-semibold leading-none text-black-500 sm:text-[28px]">
             {total}
           </p>
           <p className="mt-1.5 text-sm text-neutral-500">{centerLabel}</p>

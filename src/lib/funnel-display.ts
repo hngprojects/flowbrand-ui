@@ -119,9 +119,15 @@ export type UploadedDocDisplay = {
   type: "DOC" | "DOCX" | "PDF" | "PPT" | "PPTX";
 };
 
+export function funnelDisplayName(funnel: FunnelDetailApi): string | undefined {
+  const name = funnel.funnelName?.trim() || funnel.businessName?.trim();
+  return name || undefined;
+}
+
 export function funnelSidebarSummary(funnel: FunnelDetailApi | null): string {
-  if (funnel?.businessName?.trim()) {
-    return `Strategy for ${funnel.businessName.trim()}.`;
+  const name = funnel ? funnelDisplayName(funnel) : undefined;
+  if (name) {
+    return `Strategy for ${name}.`;
   }
   return "Your generated marketing strategy.";
 }
@@ -160,7 +166,7 @@ function funnelCreationPathLabel(creationPath: string | undefined): string {
 export function mapFunnelToListItem(
   funnel: FunnelDetailApi,
 ): FunnelListItemDisplay {
-  const label = funnel.businessName?.trim() || "Untitled strategy";
+  const label = funnelDisplayName(funnel) || "Untitled strategy";
   const subtitleParts = [
     funnelCreationPathLabel(funnel.creationPath),
     formatFunnelCreatedAt(funnel.createdAt),

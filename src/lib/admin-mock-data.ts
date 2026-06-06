@@ -267,11 +267,6 @@ const DASHBOARD_SIGN_UPS = [
   { week: "W5", signUps: 80 },
   { week: "W6", signUps: 45 },
   { week: "W7", signUps: 92 },
-  { week: "W8", signUps: 88 },
-  { week: "W9", signUps: 15 },
-  { week: "W10", signUps: 60 },
-  { week: "W11", signUps: 38 },
-  { week: "W12", signUps: 45 },
 ] as const;
 
 const DASHBOARD_DATA: AdminDashboardData = {
@@ -307,8 +302,8 @@ const DASHBOARD_DATA: AdminDashboardData = {
   ],
   signUps: {
     weeks: [...DASHBOARD_SIGN_UPS],
-    total: 93,
-    periodLabel: "Last 12 weeks",
+    total: DASHBOARD_SIGN_UPS.reduce((sum, row) => sum + row.signUps, 0),
+    periodLabel: "Last 7 weeks",
   },
   userStages: {
     total: 184,

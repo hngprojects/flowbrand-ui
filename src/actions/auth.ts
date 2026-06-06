@@ -77,6 +77,7 @@ export async function getPostAuthRedirect(): Promise<string> {
 export type RegisterUserInput = {
   email: string;
   full_name: string;
+  business_name: string;
   country: string;
   password: string;
   terms_accepted?: boolean;
@@ -90,6 +91,11 @@ const registerUser = async (
   const registrationBodySchema = z.object({
     email: z.string().email(),
     fullName: registerFullNameField,
+    businessName: z
+      .string()
+      .trim()
+      .min(1, { message: "Business name is required" })
+      .max(150, { message: "Business name must be at most 150 characters" }),
     password: registrationPasswordField,
     termsAccepted: z.literal(true),
   });
@@ -97,6 +103,7 @@ const registerUser = async (
   const validated = registrationBodySchema.safeParse({
     email: values.email.trim(),
     fullName: values.full_name.trim(),
+    businessName: values.business_name.trim(),
     password: values.password,
     termsAccepted: values.terms_accepted ?? true,
   });

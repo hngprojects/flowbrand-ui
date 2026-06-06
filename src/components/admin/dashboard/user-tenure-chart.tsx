@@ -60,9 +60,9 @@ export function UserTenureChart({
                 onMouseEnter={() => setActiveId(bucket.id)}
                 onMouseLeave={() => setActiveId(null)}
               >
-                <div className="rounded-xl flex items-center gap-2 border border-gray-200 px-1">
+                <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-1">
                   <div
-                    className="flex h-[80px] items-center rounded-lg px-3 text-sm font-semibold text-white transition-all duration-200"
+                    className="flex h-14 items-center rounded-lg px-3 text-sm font-semibold text-white transition-all duration-200 sm:h-[80px]"
                     style={{
                       width: `${widthPct}%`,
                       minWidth: "72px",
