@@ -1,4 +1,5 @@
 import { UserProfile } from "@/components/admin/users/user-profile";
+import { AdminShell } from "@/components/admin/layout/admin-shell";
 
 export default async function AdminUserProfilePage({
   params,
@@ -7,8 +8,8 @@ export default async function AdminUserProfilePage({
 }) {
   const { id } = await params;
   return (
-    <main className="min-h-screen bg-[`#F9FAFB`] px-4 py-8 md:px-8">
+    <AdminShell>
       <UserProfile userId={id} />
-    </main>
+    </AdminShell>
   );
 }

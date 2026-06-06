@@ -6,129 +6,8 @@ import { ChevronLeft, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PdfImg } from "@/components/icons/pdf-img";
 import { DeleteUserModal } from "@/components/admin/users/delete-user-modal";
-import type { AdminUser } from "@/components/admin/users/users-table";
+import { getAdminUserProfile } from "@/lib/admin-users-stub";
 import { StatusBadge } from "./status-badge";
-
-// ─── Stub data — replace with GET /api/users/:id ─────────────────────────────
-const STUB_USER: AdminUser & {
-  lastActive: string;
-  signupFull: string;
-  documents: { name: string; size: string }[];
-  strategies: {
-    id: string;
-    title: string;
-    source: "documents" | "questions";
-    createdAt: string;
-    info?: string;
-    stages: {
-      name: string;
-      tasks: string;
-      status: "complete" | "active" | "locked";
-    }[];
-  }[];
-} = {
-  id: "1",
-  name: "Folake Adeyemi",
-  email: "folake@folakeandco.com",
-  plan: "Free",
-  country: "Nigeria",
-  status: "active",
-  signupDate: "Mar 4",
-  lastActive: "12 mins ago",
-  signupFull: "Mar 4, 2026",
-  documents: [
-    { name: "Business requirement.pdf", size: "3.5 MB" },
-    { name: "Business requirement.pdf", size: "1.5 MB" },
-    { name: "Business requirement.pdf", size: "2.5 MB" },
-  ],
-  strategies: [
-    {
-      id: "s1",
-      title: "I want to build a strategy for my small batch bakery",
-      source: "documents",
-      createdAt: "Mar 4, 2026",
-      stages: [
-        {
-          name: "Get Noticed",
-          tasks: "5/5 task this week",
-          status: "complete",
-        },
-        {
-          name: "Spark Interest",
-          tasks: "7/10 task this week",
-          status: "active",
-        },
-        {
-          name: "Make first sale",
-          tasks: "0/7 task this week",
-          status: "locked",
-        },
-        {
-          name: "Bring them back",
-          tasks: "0/3 task this week",
-          status: "locked",
-        },
-      ],
-    },
-    {
-      id: "s2",
-      title: "Social media platform isn't working for me",
-      source: "questions",
-      createdAt: "Mar 18, 2026",
-      info: "I sell small chops and pastries for events and walk in customers who are typically Young women in Lagos who want affordable snacks. I get most of my customers from TikTok.",
-      stages: [
-        {
-          name: "Get Noticed",
-          tasks: "5/5 task this week",
-          status: "complete",
-        },
-        {
-          name: "Spark Interest",
-          tasks: "7/10 task this week",
-          status: "active",
-        },
-        {
-          name: "Make first sale",
-          tasks: "0/7 task this week",
-          status: "locked",
-        },
-        {
-          name: "Bring them back",
-          tasks: "0/3 task this week",
-          status: "locked",
-        },
-      ],
-    },
-    {
-      id: "s3",
-      title: "Grow my social media presence with reels",
-      source: "documents",
-      createdAt: "Mar 4, 2026",
-      stages: [
-        {
-          name: "Get Noticed",
-          tasks: "5/5 task this week",
-          status: "complete",
-        },
-        {
-          name: "Spark Interest",
-          tasks: "7/10 task this week",
-          status: "locked",
-        },
-        {
-          name: "Make first sale",
-          tasks: "0/7 task this week",
-          status: "locked",
-        },
-        {
-          name: "Bring them back",
-          tasks: "0/3 task this week",
-          status: "locked",
-        },
-      ],
-    },
-  ],
-};
 
 function stageDot(status: "complete" | "active" | "locked") {
   if (status === "complete") return "bg-[#22C55E]";
@@ -146,14 +25,7 @@ function initials(name: string) {
 }
 
 export function UserProfile({ userId }: { userId: string }) {
-  const user = STUB_USER; // TODO: fetch GET /api/users/:userId
-  if (userId !== user.id) {
-    return (
-      <div>
-        User {userId} not found (stub data only shows user {user.id})
-      </div>
-    );
-  }
+  const user = getAdminUserProfile(userId); // TODO: fetch GET /api/users/:userId
   const [expanded, setExpanded] = useState<string[]>(["s1"]);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -162,8 +34,24 @@ export function UserProfile({ userId }: { userId: string }) {
     setDeleteOpen(false);
   };
 
+  if (!user) {
+    return (
+      <div className="rounded-2xl border border-gray-200 bg-white px-6 py-10 text-center">
+        <p className="text-sm text-neutral-500">
+          User not found. This id is not in the admin mock directory yet.
+        </p>
+        <Link
+          href="/admin/users"
+          className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
+        >
+          Back to users
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-[1260px] flex flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       {/* Back */}
       <Link
         href="/admin/users"

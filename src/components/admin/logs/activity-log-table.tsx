@@ -33,12 +33,12 @@ export function ActivityLogTable({
     <div className="w-full overflow-x-auto">
       <table className="w-full min-w-[820px] border-collapse text-left">
         <thead>
-          <tr className="border-b border-gray-300">
+          <tr>
             {COLUMNS.map((column) => (
               <th
                 key={column}
                 scope="col"
-                className="px-4 py-3 text-xs font-medium tracking-wide text-neutral-400 uppercase"
+                className="px-4 py-3 text-[14px] font-[500] tracking-wide text-[#606060] uppercase"
               >
                 {column}
               </th>

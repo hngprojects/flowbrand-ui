@@ -90,3 +90,63 @@ export interface ActivityLogData {
   totalPages: number;
   totalCount: number;
 }
+
+export type MetricTrend = "up" | "down";
+
+export interface AdminMetricCard {
+  id: string;
+  label: string;
+  value: number;
+  changePercent: number;
+  trend: MetricTrend;
+}
+
+export interface SignUpWeek {
+  week: string;
+  signUps: number;
+}
+
+export interface ChartSegment {
+  id: string;
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface UserTenureBucket {
+  id: string;
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface AdminSearchUser {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
+export interface AdminDashboardData {
+  metrics: AdminMetricCard[];
+  signUps: {
+    weeks: SignUpWeek[];
+    total: number;
+    periodLabel: string;
+  };
+  userStages: {
+    total: number;
+    subtitle: string;
+    segments: ChartSegment[];
+  };
+  planDistribution: {
+    total: number;
+    subtitle: string;
+    segments: ChartSegment[];
+  };
+  userTenure: {
+    total: number;
+    subtitle: string;
+    buckets: UserTenureBucket[];
+  };
+  recentActivity: ActivityLogEntry[];
+}

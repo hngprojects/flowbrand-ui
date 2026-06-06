@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DeleteUserModal } from "@/components/admin/users/delete-user-modal";
+import { ADMIN_STUB_USERS } from "@/lib/admin-users-stub";
 import { StatusBadge } from "./status-badge";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -20,91 +21,6 @@ export interface AdminUser {
   status: UserStatus;
   signupDate: string;
 }
-
-// ─── Stub data — replace with real API call when backend is ready ─────────────
-const STUB_USERS: AdminUser[] = [
-  {
-    id: "1",
-    name: "Folakemi Adeyemi",
-    email: "Folake@folakeandco.com",
-    plan: "Free",
-    country: "Nigeria",
-    status: "active",
-    signupDate: "Mar 4",
-  },
-  {
-    id: "2",
-    name: "Adaeze Okoro",
-    email: "a.okoro@sweetbites.ng",
-    plan: "Pro",
-    country: "Nigeria",
-    status: "inactive",
-    signupDate: "Mar 7",
-  },
-  {
-    id: "3",
-    name: "Priya Iyer",
-    email: "priya@yogawithpriya.com",
-    plan: "Pro",
-    country: "Ghana",
-    status: "active",
-    signupDate: "Feb 22",
-  },
-  {
-    id: "4",
-    name: "Marcus Aboagye",
-    email: "marcus@methodstudio.com",
-    plan: "Free",
-    country: "Benin Republic",
-    status: "active",
-    signupDate: "Feb 18",
-  },
-  {
-    id: "5",
-    name: "Daniel Otieno",
-    email: "daniel@repairhub.ke",
-    plan: "Free",
-    country: "Cameroon",
-    status: "active",
-    signupDate: "Feb 14",
-  },
-  {
-    id: "6",
-    name: "Bright Smile Dental",
-    email: "admin@brightsmile.com",
-    plan: "Free",
-    country: "Ghana",
-    status: "active",
-    signupDate: "Jan 30",
-  },
-  {
-    id: "7",
-    name: "Mama Dele Foods",
-    email: "orders@mamadele.com",
-    plan: "Pro",
-    country: "Cameroon",
-    status: "deleted",
-    signupDate: "Feb 12",
-  },
-  {
-    id: "8",
-    name: "James Park",
-    email: "james@parkplumbing.com",
-    plan: "Pro",
-    country: "Nigeria",
-    status: "inactive",
-    signupDate: "Mar 17",
-  },
-  {
-    id: "9",
-    name: "Imani Banda",
-    email: "imani@brushflorals.co",
-    plan: "Pro",
-    country: "Nigeria",
-    status: "active",
-    signupDate: "Mar 10",
-  },
-];
 
 type FilterTab = "all" | "active" | "inactive";
 
@@ -124,10 +40,11 @@ function initials(name: string) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function UsersTable() {
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<FilterTab>("all");
-  const [search, setSearch] = useState("");
+  const search = searchParams.get("search")?.trim() ?? "";
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
-  const [users, setUsers] = useState<AdminUser[]>(STUB_USERS);
+  const [users, setUsers] = useState<AdminUser[]>(ADMIN_STUB_USERS);
 
   const filtered = users.filter((u) => {
     const matchesTab =

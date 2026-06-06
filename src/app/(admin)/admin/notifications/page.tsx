@@ -200,161 +200,163 @@ export default function AdminNotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-6 md:px-8">
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-5 flex items-center gap-2 text-sm text-black-300 hover:text-black-500 transition-colors"
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path
-            d="M10 12L6 8L10 4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+    <div className="min-h-screen bg-gray-100">
+      <div className="dashboard-layout-class py-6">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="mb-5 flex items-center gap-2 text-sm text-black-300 hover:text-black-500 transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M10 12L6 8L10 4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Back
+        </button>
+
+        <div className="mb-4 flex flex-wrap gap-2">
+          {TAB_FILTERS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? "bg-primary text-white"
+                  : "bg-transparent text-black-300 hover:bg-gray-200"
+              }`}
+            >
+              {tab.label} ({tabCount(tab.id)})
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-3 flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={selected.size === filtered.length && filtered.length > 0}
+            onChange={toggleSelectAll}
+            className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-primary"
           />
-        </svg>
-        Back
-      </button>
-
-      <div className="mb-4 flex flex-wrap gap-2">
-        {TAB_FILTERS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? "bg-primary text-white"
-                : "bg-transparent text-black-300 hover:bg-gray-200"
-            }`}
-          >
-            {tab.label} ({tabCount(tab.id)})
-          </button>
-        ))}
-      </div>
-
-      <div className="mb-3 flex items-center gap-3">
-        <input
-          type="checkbox"
-          checked={selected.size === filtered.length && filtered.length > 0}
-          onChange={toggleSelectAll}
-          className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-primary"
-        />
-        <span className="text-sm text-black-300">
-          {filtered.length} notifications
-        </span>
-        {selected.size > 0 && (
-          <button
-            type="button"
-            onClick={() => setBulkDeleteOpen(true)}
-            className="flex items-center gap-1.5 rounded-[8px] border border-red-100 bg-red-50 
+          <span className="text-sm text-black-300">
+            {filtered.length} notifications
+          </span>
+          {selected.size > 0 && (
+            <button
+              type="button"
+              onClick={() => setBulkDeleteOpen(true)}
+              className="flex items-center gap-1.5 rounded-[8px] border border-red-100 bg-red-50 
             px-3 py-1.5 text-sm font-medium text-red-500 hover:opacity-90 transition-opacity"
-          >
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <path
-                d="M2 4h11M5 4V2.5a.5.5 0 01.5-.5h4a.5.5 0 01.5.5V4M6 7v4M9 7v4M3 4l.8 8.1a1 1 0 001 .9h5.4a1 1 0 001-.9L12 4"
-                stroke="currentColor"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Delete ({selected.size})
-          </button>
-        )}
-      </div>
+            >
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <path
+                  d="M2 4h11M5 4V2.5a.5.5 0 01.5-.5h4a.5.5 0 01.5.5V4M6 7v4M9 7v4M3 4l.8 8.1a1 1 0 001 .9h5.4a1 1 0 001-.9L12 4"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Delete ({selected.size})
+            </button>
+          )}
+        </div>
 
-      <div className="overflow-hidden rounded-[12px] border border-gray-500 bg-white">
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-black-300">
-            <AlertCircle size={32} className="text-gray-300" />
-            <p className="text-sm">No notifications</p>
-          </div>
-        ) : (
-          filtered.map((notif) => (
-            <div
-              key={notif.id}
-              className={`flex items-start gap-3 px-4 py-4 transition-colors
+        <div className="overflow-hidden rounded-[12px] border border-gray-500 bg-white">
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-16 text-black-300">
+              <AlertCircle size={32} className="text-gray-300" />
+              <p className="text-sm">No notifications</p>
+            </div>
+          ) : (
+            filtered.map((notif) => (
+              <div
+                key={notif.id}
+                className={`flex items-start gap-3 px-4 py-4 transition-colors
                 border-t border-b border-gray-500 first:border-t-0 last:border-b-0
                 ${selected.has(notif.id) ? "bg-blue-50" : "hover:bg-gray-50"}`}
-            >
-              <input
-                type="checkbox"
-                checked={selected.has(notif.id)}
-                onChange={() => toggleSelect(notif.id)}
-                className="mt-1 h-5 w- cursor-pointer rounded border-gray-300 accent-primary shrink-0"
-              />
-
-              <div
-                className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${
-                  notif.read ? "bg-transparent" : "bg-primary"
-                }`}
-              />
-
-              <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-medium"
-                style={{ backgroundColor: notif.avatarColor }}
               >
-                {TAG_ICONS[notif.tag]}
-              </div>
+                <input
+                  type="checkbox"
+                  checked={selected.has(notif.id)}
+                  onChange={() => toggleSelect(notif.id)}
+                  className="mt-1 h-5 w- cursor-pointer rounded border-gray-300 accent-primary shrink-0"
+                />
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-medium text-foreground">
-                    {notif.name}
-                  </span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${TAG_STYLES[notif.tag]}`}
-                  >
-                    {notif.tag}
-                  </span>
-                </div>
-                <p className="text-sm text-black-300 leading-snug">
-                  {notif.text}
-                </p>
-                <p className="text-xs text-[#A2A2A2] mt-0.5">{notif.sub}</p>
-              </div>
+                <div
+                  className={`mt-1.5 h-3 w-3 shrink-0 rounded-full ${
+                    notif.read ? "bg-transparent" : "bg-primary"
+                  }`}
+                />
 
-              <div className="flex shrink-0 flex-col items-end gap-2">
-                <span className="text-xs text-[#A2A2A2]">{notif.time}</span>
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(notif.id)}
-                  aria-label="Delete notification"
-                  className="text-gray-400 hover:text-red-500 transition-colors"
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-medium"
+                  style={{ backgroundColor: notif.avatarColor }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                    <path
-                      d="M2 4h11M5 4V2.5a.5.5 0 01.5-.5h4a.5.5 0 01.5.5V4M6 7v4M9 7v4M3 4l.8 8.1a1 1 0 001 .9h5.4a1 1 0 001-.9L12 4"
-                      stroke="currentColor"
-                      strokeWidth="1.3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+                  {TAG_ICONS[notif.tag]}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-medium text-foreground">
+                      {notif.name}
+                    </span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${TAG_STYLES[notif.tag]}`}
+                    >
+                      {notif.tag}
+                    </span>
+                  </div>
+                  <p className="text-sm text-black-300 leading-snug">
+                    {notif.text}
+                  </p>
+                  <p className="text-xs text-[#A2A2A2] mt-0.5">{notif.sub}</p>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <span className="text-xs text-[#A2A2A2]">{notif.time}</span>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(notif.id)}
+                    aria-label="Delete notification"
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                      <path
+                        d="M2 4h11M5 4V2.5a.5.5 0 01.5-.5h4a.5.5 0 01.5.5V4M6 7v4M9 7v4M3 4l.8 8.1a1 1 0 001 .9h5.4a1 1 0 001-.9L12 4"
+                        stroke="currentColor"
+                        strokeWidth="1.3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
+
+        <DeleteNotificationModal
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleDeleteSingle}
+          isBulk={false}
+        />
+
+        <DeleteNotificationModal
+          isOpen={bulkDeleteOpen}
+          onClose={() => setBulkDeleteOpen(false)}
+          onConfirm={handleBulkDelete}
+          isBulk={true}
+          count={selected.size}
+        />
       </div>
-
-      <DeleteNotificationModal
-        isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDeleteSingle}
-        isBulk={false}
-      />
-
-      <DeleteNotificationModal
-        isOpen={bulkDeleteOpen}
-        onClose={() => setBulkDeleteOpen(false)}
-        onConfirm={handleBulkDelete}
-        isBulk={true}
-        count={selected.size}
-      />
     </div>
   );
 }
