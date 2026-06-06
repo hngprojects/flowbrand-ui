@@ -257,6 +257,7 @@ export function AdminNotificationsView() {
                   onClick={() => handleOpenNotification(notif)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
                       handleOpenNotification(notif);
                     }
                   }}

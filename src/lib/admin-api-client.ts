@@ -23,7 +23,9 @@ async function tryAdminRefresh(): Promise<boolean> {
 
   if (!res.ok) return false;
 
-  const body = (await res.json()) as { access_token?: string };
+  const body = (await res.json().catch(() => ({}))) as {
+    access_token?: string;
+  };
   if (!body.access_token?.trim()) return false;
 
   updateAdminAccessToken(body.access_token);

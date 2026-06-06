@@ -48,6 +48,7 @@ export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
   const queryClient = useQueryClient();
   const { data: profile } = useAdminProfileQuery();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [avatarOverride, setAvatarOverride] = useState<
     string | null | undefined
   >(undefined);
@@ -82,14 +83,30 @@ export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
     });
   }, [profile, form]);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
     const previewUrl = URL.createObjectURL(file);
+    previewUrlRef.current = previewUrl;
     setAvatarOverride(previewUrl);
   };
 
   const handleDeleteAvatar = () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setAvatarOverride(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };

@@ -101,7 +101,7 @@ export function updateAdminAccessToken(accessToken: string): void {
   persistSession({
     ...current,
     accessToken,
-    role: readAdminRoleFromAccessToken(accessToken) ?? current.role,
+    role: readAdminRoleFromAccessToken(accessToken) ?? undefined,
   });
 }
 

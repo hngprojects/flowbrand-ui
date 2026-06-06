@@ -54,9 +54,12 @@ export function AdminSearch({ className }: AdminSearchProps) {
     };
   }, []);
 
+  const hasMinQuery = debouncedQuery.trim().length >= 2;
+
   const results = useMemo(() => {
+    if (!hasMinQuery) return [];
     return apiResults.filter((user) => !hiddenResultIds.includes(user.id));
-  }, [apiResults, hiddenResultIds]);
+  }, [apiResults, hiddenResultIds, hasMinQuery]);
 
   function goToUsersFilter(term: string) {
     const trimmed = term.trim();
@@ -114,8 +117,8 @@ export function AdminSearch({ className }: AdminSearchProps) {
 
       {open ? (
         <div
-          className="absolute left-0 top-[calc(100%+10px)] z-[60] w-full min-w-[280px] max-w-[320px] 
-        overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
+          className="absolute left-0 top-[calc(100%+10px)] z-[60] w-full min-w-[280px]
+         max-w-[320px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.12)]"
         >
           {recent.length > 0 ? (
             <div className="border-b border-gray-100 px-4 pb-3 pt-4">

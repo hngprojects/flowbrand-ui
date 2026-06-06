@@ -10,20 +10,7 @@ import {
   useTeamInvitationsQuery,
   useTeamInviteLinkQuery,
 } from "@/hooks/queries/use-admin-teams-queries";
-import { ACCEPT_INVITE_ROUTE, ADMIN_TEAMS_ROUTE } from "@/routes";
-import type { InviteLink } from "@/types/admin";
-
-function buildFallbackInviteLink(): InviteLink {
-  const origin =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "https://app.seil.brand";
-  return {
-    url: `${origin}${ACCEPT_INVITE_ROUTE}?token=pending`,
-    role: "admin",
-    expiresLabel: "Expires in 7 days",
-  };
-}
+import { ADMIN_TEAMS_ROUTE } from "@/routes";
 
 export function InviteTeamView() {
   const { data: team, isLoading: teamLoading } = useAdminPortalTeamQuery();
@@ -41,7 +28,6 @@ export function InviteTeamView() {
     isError: linkError,
   } = useTeamInviteLinkQuery(teamId, Boolean(teamId));
 
-  const link = inviteLink ?? (linkError ? buildFallbackInviteLink() : null);
   const isLoading = teamLoading || invitesLoading || linkLoading;
 
   if (!teamLoading && !teamId) {
@@ -72,11 +58,15 @@ export function InviteTeamView() {
 
         {isLoading ? (
           <div className="h-36 animate-pulse rounded-2xl border border-[#EAECF0] bg-gray-100" />
-        ) : link && teamId ? (
+        ) : linkError ? (
+          <p className="rounded-2xl border border-[#EAECF0] bg-white p-6 text-sm text-neutral-500">
+            Could not load the invite link. Please refresh and try again.
+          </p>
+        ) : inviteLink && teamId ? (
           <InviteByLink
-            key={`${link.url}-${link.role}`}
+            key={`${inviteLink.url}-${inviteLink.role}`}
             teamId={teamId}
-            link={link}
+            link={inviteLink}
           />
         ) : null}
 

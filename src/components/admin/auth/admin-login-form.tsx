@@ -19,6 +19,12 @@ const AdminLoginSchema = z.object({
 
 type AdminLoginValues = z.infer<typeof AdminLoginSchema>;
 
+function isValidAdminCallback(callback: string): boolean {
+  const [pathname] = callback.split("?");
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  return pathname === ACCEPT_INVITE_ROUTE;
+}
+
 export function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,12 +65,9 @@ export function AdminLoginForm() {
 
       const rawCallback =
         searchParams.get("callbackUrl")?.trim() || ADMIN_ROUTE;
-      const isValidCallback =
-        rawCallback.startsWith("/admin/") ||
-        rawCallback === "/admin" ||
-        rawCallback.startsWith(`${ACCEPT_INVITE_ROUTE}?`) ||
-        rawCallback === ACCEPT_INVITE_ROUTE;
-      const callbackUrl = isValidCallback ? rawCallback : ADMIN_ROUTE;
+      const callbackUrl = isValidAdminCallback(rawCallback)
+        ? rawCallback
+        : ADMIN_ROUTE;
       router.replace(callbackUrl);
     } catch {
       toast.error("Could not sign in. Please try again.");

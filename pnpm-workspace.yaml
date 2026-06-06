@@ -1,3 +1,5 @@
-allowBuilds:
+packages:
+  - "."
+builds:
   msw: true
   sharp: false

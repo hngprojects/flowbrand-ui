@@ -45,6 +45,7 @@ export async function proxyAdminBackend(
       params,
       validateStatus: () => true,
       withCredentials: true,
+      timeout: 15_000,
     });
 
     const nextRes = NextResponse.json(response.data, {

@@ -63,7 +63,7 @@ export async function adminLoginWithCookieForward(
     const response = await axios.post(
       adminApiUrl(baseUrl, "/auth/login"),
       body,
-      { withCredentials: true },
+      { withCredentials: true, timeout: 15_000 },
     );
     const access_token = parseAdminLoginEnvelope(response.data);
     if (!access_token) {
@@ -148,6 +148,7 @@ export async function adminRefreshWithCookieForward(
         withCredentials: true,
         headers: Object.keys(headers).length > 0 ? headers : undefined,
         validateStatus: () => true,
+        timeout: 15_000,
       },
     );
 
