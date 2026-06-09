@@ -198,6 +198,7 @@ export function VoiceView() {
   const micStreamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number>(0);
   const questionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
 
   const startQuestionRotation = useCallback(() => {
     if (questionTimerRef.current) clearInterval(questionTimerRef.current);
@@ -246,9 +247,23 @@ export function VoiceView() {
     setAmplitude(0);
   }, []);
 
+  // UI prototype only.
+  // Microphone access is currently used for audio-level visualization.
+  // Speech-to-text and AI processing will be added during backend integration.
   const startListening = useCallback(async () => {
+    setViewState("listening");
+    startQuestionRotation();
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      if (!mountedRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+
       micStreamRef.current = stream;
 
       const ctx = new AudioContext();
@@ -261,12 +276,12 @@ export function VoiceView() {
       const source = ctx.createMediaStreamSource(stream);
       source.connect(analyser);
 
-      setViewState("listening");
-      startQuestionRotation();
       startAmplitudePolling();
-    } catch {
-      setViewState("listening");
-      startQuestionRotation();
+    } catch (error) {
+      console.warn(
+        "Microphone unavailable. Continuing in prototype mode.",
+        error,
+      );
     }
   }, [startQuestionRotation, startAmplitudePolling]);
 
@@ -303,9 +318,10 @@ export function VoiceView() {
 
   useEffect(() => {
     return () => {
+      mountedRef.current = false;
       stopListening();
     };
-  }, []);
+  }, [stopListening]);
 
   const currentQuestion = QUESTIONS[questionIndex];
   const isListening = viewState === "listening";
@@ -337,7 +353,7 @@ export function VoiceView() {
             <button
               type="button"
               onClick={handleCenterTap}
-              className="focus:outline-none"
+              className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
               aria-label={isListening ? "Stop listening" : "Tap to speak"}
             >
               {isListening ? (
