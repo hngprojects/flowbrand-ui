@@ -2,17 +2,26 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import MicButtonIcon from "@/components/icons/voice/mic";
 import GalleryIcon from "@/components/icons/voice/gallery";
 import LittlefileIcon from "@/components/icons/voice/file";
 import LittleMicIcon from "@/components/icons/voice/littlemic";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { ONBOARDING_QUESTIONS_ROUTE, STRATEGY_ROUTE } from "@/routes";
+import { ONBOARDING_QUESTIONS_ROUTE, ONBOARDING_UPLOAD_ROUTE } from "@/routes";
 import { NEW_STRATEGY_QUERY } from "@/lib/new-strategy";
 import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
+import {
+  micErrorMessage,
+  queryMicPermissionState,
+  readVoiceLevels,
+  SILENT_VOICE_LEVELS,
+  smoothVoiceLevels,
+  type VoiceLevels,
+} from "@/lib/audio/voice-levels";
+import { GlobeOrb } from "@/components/dashboard/onboarding/voice/globe-orb";
 
-type ViewState = "idle" | "listening";
+type ViewState = "idle" | "requesting" | "listening";
 
 const QUESTIONS = [
   "What does your business sell?",
@@ -24,49 +33,14 @@ const QUESTIONS = [
 
 const QUESTION_ROTATION_MS = 4000;
 
-function GlobeOrb({ amplitude }: { amplitude: number }) {
-  const scale = 1 + amplitude * 0.12;
-  const blur = 18 + amplitude * 10;
-  const opacity = 0.85 + amplitude * 0.15;
-
-  return (
-    <div
-      className="relative flex items-center justify-center"
-      style={{
-        width: 220,
-        height: 220,
-        transition: "transform 120ms ease-out",
-        transform: `scale(${scale})`,
-      }}
-    >
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(100,120,255,0.18) 0%, rgba(100,120,255,0) 70%)",
-          filter: `blur(${blur}px)`,
-          opacity,
-          transition: "opacity 120ms ease-out, filter 120ms ease-out",
-        }}
-      />
-
-      <Image
-        src="/images/globe-orb.png"
-        alt="AI Orb"
-        width={200}
-        height={200}
-        className="relative z-1 animate-[float_4s_ease-in-out_infinite]"
-        priority
-      />
-    </div>
-  );
-}
-
 function MicButton({ onClick }: { onClick: () => void }) {
   return (
     <div className="flex flex-col items-center gap-0 group focus:outline-none">
       <div className="relative">
-        <span className="absolute inset-[-12px] rounded-full bg-primary-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <span
+          className="absolute inset-[-12px] rounded-full bg-primary-100 
+        opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        />
 
         <MicButtonIcon />
       </div>
@@ -191,13 +165,17 @@ export function VoiceView() {
   const [viewState, setViewState] = useState<ViewState>("idle");
   const [showTextInput, setShowTextInput] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [amplitude, setAmplitude] = useState(0);
+  const [voiceLevels, setVoiceLevels] =
+    useState<VoiceLevels>(SILENT_VOICE_LEVELS);
+  const [micError, setMicError] = useState<string | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number>(0);
+  const levelsRef = useRef<VoiceLevels>(SILENT_VOICE_LEVELS);
   const questionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const listenSessionRef = useRef(0);
   const mountedRef = useRef(true);
 
   const startQuestionRotation = useCallback(() => {
@@ -218,24 +196,11 @@ export function VoiceView() {
     const analyser = analyserRef.current;
     if (!analyser) return;
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
     const poll = () => {
-      analyser.getByteTimeDomainData(dataArray);
-
-      // RMS of the signal
-      let sum = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        const val = (dataArray[i] - 128) / 128;
-        sum += val * val;
-      }
-      const rms = Math.sqrt(sum / dataArray.length);
-      // Normalise & smooth: rms typically 0–0.5 when speaking
-      setAmplitude((prev) => {
-        const target = Math.min(rms * 3, 1);
-        return prev * 0.75 + target * 0.25;
-      });
-
+      const target = readVoiceLevels(analyser);
+      const next = smoothVoiceLevels(levelsRef.current, target);
+      levelsRef.current = next;
+      setVoiceLevels(next);
       animFrameRef.current = requestAnimationFrame(poll);
     };
 
@@ -244,48 +209,80 @@ export function VoiceView() {
 
   const stopAmplitudePolling = useCallback(() => {
     cancelAnimationFrame(animFrameRef.current);
-    setAmplitude(0);
+    levelsRef.current = SILENT_VOICE_LEVELS;
+    setVoiceLevels(SILENT_VOICE_LEVELS);
   }, []);
 
   // UI prototype only.
   // Microphone access is currently used for audio-level visualization.
   // Speech-to-text and AI processing will be added during backend integration.
+  const setupAudioAnalyser = useCallback(
+    async (stream: MediaStream) => {
+      const ctx = new AudioContext();
+      audioContextRef.current = ctx;
+
+      if (ctx.state === "suspended") {
+        try {
+          await ctx.resume();
+        } catch {
+          // Continue — analyser may still work once the context starts.
+        }
+      }
+
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      analyser.smoothingTimeConstant = 0.65;
+      analyserRef.current = analyser;
+
+      const source = ctx.createMediaStreamSource(stream);
+      source.connect(analyser);
+      startAmplitudePolling();
+    },
+    [startAmplitudePolling],
+  );
+
   const startListening = useCallback(async () => {
-    setViewState("listening");
-    startQuestionRotation();
+    const session = ++listenSessionRef.current;
+    setMicError(null);
+    setViewState("requesting");
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new DOMException("Unsupported", "NotSupportedError");
+      }
 
-      if (!mountedRef.current) {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      if (!mountedRef.current || listenSessionRef.current !== session) {
         stream.getTracks().forEach((track) => track.stop());
         return;
       }
 
       micStreamRef.current = stream;
+      setViewState("listening");
+      startQuestionRotation();
 
-      const ctx = new AudioContext();
-      audioContextRef.current = ctx;
-
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
-      analyserRef.current = analyser;
-
-      const source = ctx.createMediaStreamSource(stream);
-      source.connect(analyser);
-
-      startAmplitudePolling();
+      try {
+        await setupAudioAnalyser(stream);
+      } catch (audioError) {
+        console.warn("Audio analyser setup failed.", audioError);
+      }
     } catch (error) {
-      console.warn(
-        "Microphone unavailable. Continuing in prototype mode.",
-        error,
+      if (!mountedRef.current || listenSessionRef.current !== session) return;
+
+      console.warn("Microphone unavailable.", error);
+      setViewState("idle");
+      const permissionState = await queryMicPermissionState();
+      setMicError(
+        micErrorMessage(error, {
+          wasAlreadyDenied: permissionState === "denied",
+        }),
       );
     }
-  }, [startQuestionRotation, startAmplitudePolling]);
+  }, [startQuestionRotation, setupAudioAnalyser]);
 
   const stopListening = useCallback(() => {
+    listenSessionRef.current += 1;
     micStreamRef.current?.getTracks().forEach((t) => t.stop());
     micStreamRef.current = null;
 
@@ -296,15 +293,31 @@ export function VoiceView() {
     stopAmplitudePolling();
     stopQuestionRotation();
     setViewState("idle");
+    setMicError(null);
   }, [stopAmplitudePolling, stopQuestionRotation]);
 
   const handleCenterTap = useCallback(() => {
-    if (viewState === "idle") {
-      startListening();
-    } else {
+    if (viewState === "listening") {
       stopListening();
+      return;
+    }
+
+    if (viewState === "idle") {
+      setShowTextInput(false);
+      void startListening();
     }
   }, [viewState, startListening, stopListening]);
+
+  const uploadHref = isNewStrategy
+    ? `${ONBOARDING_UPLOAD_ROUTE}?${NEW_STRATEGY_QUERY}=1`
+    : ONBOARDING_UPLOAD_ROUTE;
+
+  const goToUpload = useCallback(() => {
+    if (viewState === "listening" || viewState === "requesting") {
+      stopListening();
+    }
+    router.push(uploadHref);
+  }, [viewState, stopListening, router, uploadHref]);
 
   const handleTextSubmit = useCallback(
     (_text: string) => {
@@ -317,60 +330,103 @@ export function VoiceView() {
   );
 
   useEffect(() => {
+    mountedRef.current = true;
+
     return () => {
       mountedRef.current = false;
-      stopListening();
+      cancelAnimationFrame(animFrameRef.current);
+      micStreamRef.current?.getTracks().forEach((track) => track.stop());
+      micStreamRef.current = null;
+      void audioContextRef.current?.close();
+      audioContextRef.current = null;
+      analyserRef.current = null;
+      if (questionTimerRef.current) {
+        clearInterval(questionTimerRef.current);
+        questionTimerRef.current = null;
+      }
     };
-  }, [stopListening]);
+  }, []);
 
   const currentQuestion = QUESTIONS[questionIndex];
   const isListening = viewState === "listening";
+  const isRequesting = viewState === "requesting";
 
   return (
     <>
       <style>{`
-       @keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
+        @keyframes orbSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes orbFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes orbShimmer {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.92; }
+        }
       `}</style>
 
       <main className="flex flex-1 flex-col">
         <div
-          className="flex-1 flex flex-col items-center justify-center relative"
+          className="flex-1 flex flex-col items-center justify-center relative px-4"
           style={{
             backgroundImage:
               "linear-gradient(rgba(203,213,225,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(203,213,225,0.3) 1px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         >
-          <div className="flex flex-col items-center gap-6 px-4">
+          <button
+            type="button"
+            onClick={goToUpload}
+            className="absolute left-4 top-4 flex items-center gap-1.5 rounded-lg 
+            border border-neutral-200 bg-white/80 px-3 py-2 text-sm font-medium text-neutral-700 backdrop-blur-sm
+             transition-colors hover:bg-white hover:text-neutral-900 sm:left-6 sm:top-6"
+          >
+            <ChevronLeft size={16} aria-hidden />
+            Back to upload
+          </button>
+
+          <div className="flex flex-col items-center gap-6">
             <button
               type="button"
               onClick={handleCenterTap}
-              className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-              aria-label={isListening ? "Stop listening" : "Tap to speak"}
+              className={cn(
+                "rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+                isRequesting && "cursor-wait",
+              )}
+              aria-label={
+                isListening
+                  ? "Stop listening"
+                  : isRequesting
+                    ? "Waiting for microphone permission"
+                    : "Tap to speak"
+              }
             >
-              {isListening ? (
-                <GlobeOrb amplitude={amplitude} />
+              {isListening || isRequesting ? (
+                <GlobeOrb levels={voiceLevels} />
               ) : (
                 <MicButton onClick={() => {}} />
               )}
             </button>
 
-            <p
-              className={cn(
-                "text-[22px] font-semibold text-neutral-900 tracking-tight transition-opacity duration-300",
-                isListening ? "opacity-100" : "opacity-100",
-              )}
-            >
-              {isListening ? "Listening" : "Tap to speak"}
+            <p className="text-[22px] font-semibold text-neutral-900 tracking-tight">
+              {isListening
+                ? "Listening"
+                : isRequesting
+                  ? "Allow microphone access"
+                  : "Tap to speak"}
             </p>
+
+            {micError && (
+              <div
+                role="alert"
+                className="max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600"
+              >
+                {micError}
+              </div>
+            )}
 
             <div
               key={currentQuestion}
@@ -393,7 +449,17 @@ export function VoiceView() {
 
             <button
               type="button"
-              onClick={() => setShowTextInput((v) => !v)}
+              onClick={() => {
+                setShowTextInput((showing) => {
+                  if (
+                    !showing &&
+                    (viewState === "listening" || viewState === "requesting")
+                  ) {
+                    stopListening();
+                  }
+                  return !showing;
+                });
+              }}
               className="mt-2 text-[14px] text-neutral-500 underline underline-offset-2 hover:text-neutral-700 transition-colors"
             >
               {showTextInput ? "Use voice instead" : "Use text instead"}

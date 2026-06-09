@@ -38,6 +38,10 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { getGoogleOAuthUrl } from "~/actions/auth";
+import {
+  clearGoogleAccountSelectionPrompt,
+  readGoogleAccountSelectionPrompt,
+} from "@/lib/google-oauth";
 import GoogleLogo from "@/components/icons/googleIcon";
 
 type LoginValues = z.infer<typeof LoginSchema>;
@@ -375,7 +379,11 @@ export function LoginForm() {
             return;
           }
 
-          const url = await getGoogleOAuthUrl();
+          const promptSelectAccount = readGoogleAccountSelectionPrompt();
+          const url = await getGoogleOAuthUrl(promptSelectAccount);
+          if (promptSelectAccount) {
+            clearGoogleAccountSelectionPrompt();
+          }
           window.location.href = url;
         }}
         className="h-auto w-full gap-2 rounded-lg py-2.5 text-sm font-semibold sm:py-3"
