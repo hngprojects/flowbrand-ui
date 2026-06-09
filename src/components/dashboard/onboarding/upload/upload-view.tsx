@@ -32,6 +32,8 @@ import { mergeUploadProgress } from "@/lib/funnel-upload-progress";
 import { cn } from "@/lib/utils";
 import { ThingsYouCanLearnModal } from "@/components/modals/things-you-can-learn/things-you-can-learn-modal";
 
+const ONBOARDING_VOICE_ROUTE = "/dashboard/onboarding/voice";
+
 type UploadStatus = "uploading" | "parsing" | "ready" | "failed";
 
 interface UploadedFile {
@@ -219,9 +221,17 @@ export function UploadView() {
     ? `${ONBOARDING_QUESTIONS_ROUTE}?${NEW_STRATEGY_QUERY}=1`
     : ONBOARDING_QUESTIONS_ROUTE;
 
+  const voiceHref = isNewStrategy
+    ? `${ONBOARDING_VOICE_ROUTE}?${NEW_STRATEGY_QUERY}=1`
+    : ONBOARDING_VOICE_ROUTE;
+
   const goToQuestions = useCallback(() => {
     router.push(questionsHref);
   }, [router, questionsHref]);
+
+  const goToVoice = useCallback(() => {
+    router.push(voiceHref);
+  }, [router, voiceHref]);
 
   const isGenerating = startGeneration.isPending;
 
@@ -513,6 +523,19 @@ export function UploadView() {
             )}
           >
             {isGenerating ? "Starting strategy…" : "Create my strategy"}
+          </button>
+
+          <button
+            type="button"
+            onClick={goToVoice}
+            className="mt-6 mx-auto block  cursor-pointer focus:outline-none"
+            aria-label="Talk to our AI model to generate a business document"
+          >
+            <div className="w-full rounded-xl bg-[linear-gradient(90deg,#4289FF_0%,#E58F17_30.77%,#155EEF_59.86%,#E58F17_79.81%)] p-px">
+              <div className="rounded-xl bg-white px-4 py-2 text-center text-[15px] font-medium text-neutral-900">
+                Talk to our AI model to generate a business document
+              </div>
+            </div>
           </button>
 
           <button
