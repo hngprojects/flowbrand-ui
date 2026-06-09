@@ -10,6 +10,10 @@ import { refreshAccessToken } from "@/lib/auth-api-server";
 import { inDevEnvironment } from "@/lib/utils";
 import { loginFailureCode } from "@/lib/login-errors";
 import { LoginCredentialsSchema } from "@/schema/auth.schema";
+import {
+  ACCESS_TOKEN_LIFETIME_MS,
+  ACCESS_TOKEN_REFRESH_BUFFER_MS,
+} from "@/lib/auth-session-timing";
 import { CustomJWT } from "@/types/auth";
 
 /** Surfaces API failure as Auth.js `code` for client signIn(redirect: false). */
@@ -31,11 +35,6 @@ function readAuthSecret(): string | undefined {
 const AUTH_SECRET_FALLBACK =
   readAuthSecret() ??
   (process.env.NODE_ENV !== "production" ? "seil-dev-secret" : undefined);
-/** Backend access tokens are ~15m; refresh slightly before expiry. */
-const ACCESS_TOKEN_LIFETIME_MS = 1000 * 60 * 14;
-/** Refresh early so API calls are not rejected while the JWT still looks valid. */
-const ACCESS_TOKEN_REFRESH_BUFFER_MS = 60_000;
-
 const authConfig: NextAuthConfig = {
   providers: [
     Credentials({
