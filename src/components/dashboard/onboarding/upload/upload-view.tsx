@@ -13,11 +13,7 @@ import { fileNameToDocType, formatFileSize } from "@/lib/dashboard-mock-data";
 import { saveFunnelDocuments } from "@/lib/funnel-documents-storage";
 import type { UploadedDocDisplay } from "@/lib/funnel-display";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
-import {
-  ONBOARDING_QUESTIONS_ROUTE,
-  ONBOARDING_VOICE_ROUTE,
-  STRATEGY_ROUTE,
-} from "@/routes";
+import { ONBOARDING_QUESTIONS_ROUTE, STRATEGY_ROUTE } from "@/routes";
 import { clearNewStrategyFlow, NEW_STRATEGY_QUERY } from "@/lib/new-strategy";
 import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
 import { redirectToExistingFunnelIfAny } from "@/lib/onboarding-client-recovery";
@@ -36,6 +32,8 @@ import {
 import { mergeUploadProgress } from "@/lib/funnel-upload-progress";
 import { cn } from "@/lib/utils";
 import { ThingsYouCanLearnModal } from "@/components/modals/things-you-can-learn/things-you-can-learn-modal";
+
+const ONBOARDING_VOICE_ROUTE = "/dashboard/onboarding/voice";
 
 type UploadStatus = "uploading" | "parsing" | "ready" | "failed";
 
