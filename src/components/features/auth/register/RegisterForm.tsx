@@ -99,6 +99,7 @@ const RegistrationForm = () => {
     reValidateMode: "onChange",
     defaultValues: {
       full_name: "",
+      business_name: "",
       email: "",
       country: "",
       password: "",
@@ -117,6 +118,7 @@ const RegistrationForm = () => {
       const data = await registerUser({
         email: values.email,
         full_name: values.full_name,
+        business_name: values.business_name,
         country: values.country,
         password: values.password,
         terms_accepted: true,
@@ -137,6 +139,8 @@ const RegistrationForm = () => {
           form.setError("email", { type: "server", message });
         } else if (/name|full name/i.test(message)) {
           form.setError("full_name", { type: "server", message });
+        } else if (/business/i.test(message)) {
+          form.setError("business_name", { type: "server", message });
         }
         toast.error("Could not create account", { description: message });
         return;
@@ -199,6 +203,30 @@ const RegistrationForm = () => {
                     {...field}
                     className={inputClassWithError(
                       !!form.formState.errors.full_name,
+                    )}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="business_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground/80 text-xs font-semibold sm:text-sm">
+                  Business name
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Ben Clothing"
+                    disabled={isSubmitting}
+                    {...field}
+                    className={inputClassWithError(
+                      !!form.formState.errors.business_name,
                     )}
                   />
                 </FormControl>
@@ -415,7 +443,7 @@ const RegistrationForm = () => {
         variant="outline"
         disabled={isSubmitting || isAuthenticated}
         onClick={async () => {
-          const url = await getGoogleOAuthUrl();
+          const url = await getGoogleOAuthUrl(true);
           window.location.href = url;
         }}
         className="h-auto w-full gap-2 rounded-lg py-2.5 text-sm font-semibold sm:py-3"

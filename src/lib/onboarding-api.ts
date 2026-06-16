@@ -101,6 +101,19 @@ const COMPLETED_SESSION_STATUSES = new Set([
 ]);
 
 /** Backend may leave /me flags false while the onboarding session is already done. */
+export function discoveryChannelsFromStep3(
+  step3?: OnboardingSessionAnswers["step_3"],
+): string[] {
+  const raw = step3?.discovery_channel;
+  if (Array.isArray(raw)) {
+    return raw.map((channel) => channel.trim()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return [raw.trim()];
+  }
+  return [];
+}
+
 export function isOnboardingSessionComplete(
   session: ParsedOnboardingSession,
 ): boolean {
@@ -113,33 +126,19 @@ export function isOnboardingSessionComplete(
     return true;
   }
 
-  return hasDiscoveryChannel(session.answers.step_3);
+  return discoveryChannelsFromStep3(session.answers.step_3).length > 0;
 }
 
 export function hasDiscoveryChannel(
   step3?: OnboardingSessionAnswers["step_3"],
 ): boolean {
-  const channel = step3?.discovery_channel;
-  if (Array.isArray(channel)) {
-    return channel.some((value) => typeof value === "string" && value.trim());
-  }
-  return typeof channel === "string" && channel.trim().length > 0;
+  return discoveryChannelsFromStep3(step3).length > 0;
 }
 
 export function discoveryChannelsFromAnswers(
   answers: OnboardingSessionAnswers,
 ): string[] {
-  const channel = answers.step_3?.discovery_channel;
-  if (Array.isArray(channel)) {
-    return channel
-      .filter((value): value is string => typeof value === "string")
-      .map((value) => value.trim())
-      .filter(Boolean);
-  }
-  if (typeof channel === "string" && channel.trim()) {
-    return [channel.trim()];
-  }
-  return [];
+  return discoveryChannelsFromStep3(answers.step_3);
 }
 
 /** @deprecated Use {@link discoveryChannelsFromAnswers}. */
@@ -224,10 +223,11 @@ export function buildStep2Answer(input: {
 }
 
 export function buildStep3Answer(trafficChannels: string[]) {
-  const channels = trafficChannels
-    .map((channel) => channel.trim())
-    .filter(Boolean);
-  return { discovery_channel: channels };
+  return {
+    discovery_channel: trafficChannels
+      .map((channel) => channel.trim())
+      .filter(Boolean),
+  };
 }
 
 export function customerTagsFromAnswers(

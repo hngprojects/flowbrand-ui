@@ -101,6 +101,7 @@
   --color-green-700: var(--green-700);
   --color-green-800: var(--green-800);
   --color-green-900: var(--green-900);
+  --color-green-950: var(--green-950);
 
   /* Yellow Scale */
   --color-yellow-50: var(--yellow-50);
@@ -110,6 +111,7 @@
   --color-yellow-400: var(--yellow-400);
   --color-yellow-500: var(--yellow-500);
   --color-yellow-600: var(--yellow-600);
+  --color-yellow-650: var(--yellow-650);
   --color-yellow-700: var(--yellow-700);
   --color-yellow-800: var(--yellow-800);
   --color-yellow-900: var(--yellow-900);
@@ -190,6 +192,7 @@
   --primary-50: #ebf0fa;
   --primary-60: #fbfcff;
   --primary-100: #bfd1f1;
+  --primary-150: #4cc3ff;
   --primary-200: #a1baea;
   --primary-300: #769be0;
   --primary-400: #5b88da;
@@ -237,6 +240,7 @@
   --green-700: #3e9424;
   --green-800: #30731c;
   --green-900: #255815;
+  --green-950: #40747f;
   --yellow-50: #faf9eb;
   --yellow-100: #f1ebbf;
   --yellow-200: #eae1a1;
@@ -244,6 +248,7 @@
   --yellow-400: #dacb5b;
   --yellow-500: #d1be32;
   --yellow-600: #bead2e;
+  --yellow-650: #f3e074;
   --yellow-700: #948724;
   --yellow-800: #73691c;
   --yellow-900: #585015;
@@ -286,6 +291,13 @@
   --primary-925: #1c2b4a;
   --primary-950: #1e3a8a;
   --primary-625: #2859b8;
+
+  /*chart scale*/
+  --chart-1: #4cc3ff;
+  --chart-2: #40747f;
+  --chart-3: #9be7e8;
+  --chart-4: #eeaacc;
+  --chart-5: #9c83f7;
 
   /* Accent Extended Scale */
   --accent-75: #fdebd6;
@@ -390,6 +402,11 @@
 
   .dashboard-layout-class {
     @apply mx-auto w-full;
+  }
+
+  .admin-layout-class {
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-18;
+    max-width: 1800px;
   }
 }
 

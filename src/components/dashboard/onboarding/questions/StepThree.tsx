@@ -28,7 +28,7 @@ export default function StepThree({
     <div className="space-y-default">
       <div className="space-y-small">
         <h1 className="text-xl lg:text-3xl font-semibold tracking-wide lg:tracking-tight leading-tight">
-          How do most of your customer find you right now?
+          How do most of your customers find you right now?
         </h1>
         <p className="text-sm lg:tracking-normal tracking-wide leading-tight text-muted-foreground">
           Select every channel that brings you customers right now.
