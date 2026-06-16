@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { COUNTRY_OPTIONS } from "@/lib/countries";
+import { apiCountryLabelToCode, COUNTRY_OPTIONS } from "@/lib/countries";
 import { updateAdminProfile } from "@/lib/admin-profile-api";
 import { AdminLogoutButton } from "@/components/admin/auth/admin-logout-button";
 import {
@@ -29,13 +29,7 @@ const AdminProfileSchema = z.object({
     .min(2, "Name must be at least 2 characters.")
     .max(80, "Name must be under 80 characters.")
     .refine((val) => val.trim().length > 0, "Name cannot be empty."),
-  country: z
-    .string()
-    .min(1, "Please select a country.")
-    .transform((code) => {
-      const match = COUNTRY_OPTIONS.find((c) => c.value === code);
-      return match?.label ?? code;
-    }),
+  country: z.string().min(1, "Please select a country."),
 });
 
 type AdminProfileFormValues = z.infer<typeof AdminProfileSchema>;
@@ -73,13 +67,9 @@ export default function AdminProfileTab({ onClose }: AdminProfileTabProps) {
   useEffect(() => {
     if (!profile) return;
 
-    const countryCode =
-      COUNTRY_OPTIONS.find((option) => option.label === profile.country)
-        ?.value ?? "";
-
     form.reset({
       fullName: profile.fullName,
-      country: countryCode,
+      country: apiCountryLabelToCode(profile.country),
     });
   }, [profile, form]);
 

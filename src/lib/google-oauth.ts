@@ -1,9 +1,90 @@
 /** Where the API should redirect after Google OAuth (set FRONTEND_URL on the API). */
 export const GOOGLE_OAUTH_CALLBACK_PATH = "/api/oauth/google/callback";
 
-/** Starts OAuth: `GET {BASE_URL}/auth/google` → Google → API callback → app callback URL. */
-export function googleOAuthStartUrl(apiBaseUrl: string): string {
-  return `${apiBaseUrl.replace(/\/$/, "")}/auth/google`;
+export const GOOGLE_OAUTH_START_PATH = "/api/oauth/google/start";
+
+const GOOGLE_SELECT_ACCOUNT_KEY = "flowbrand-google-select-account";
+
+export const GOOGLE_SELECT_ACCOUNT_QUERY = "google_select_account";
+
+/** Append a logout marker so /login knows to show the Google account picker. */
+export function appendGoogleSelectAccountToPath(path: string): string {
+  const isAbsolute = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(path);
+  const url = new URL(path, "https://flowbrand.invalid");
+  url.searchParams.set(GOOGLE_SELECT_ACCOUNT_QUERY, "1");
+  return isAbsolute
+    ? url.toString()
+    : `${url.pathname}${url.search}${url.hash}`;
+}
+
+/** Set after logout so the next Google sign-in shows the account picker. */
+export function markGoogleAccountSelectionOnNextSignIn(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(GOOGLE_SELECT_ACCOUNT_KEY, "1");
+  } catch {
+    // Storage disabled.
+  }
+}
+
+/** Whether the next Google sign-in should show the account picker. */
+export function readGoogleAccountSelectionPrompt(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get(GOOGLE_SELECT_ACCOUNT_QUERY) === "1") {
+      return true;
+    }
+    return localStorage.getItem(GOOGLE_SELECT_ACCOUNT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** Clear logout markers after starting Google OAuth. */
+export function clearGoogleAccountSelectionPrompt(): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    localStorage.removeItem(GOOGLE_SELECT_ACCOUNT_KEY);
+  } catch {
+    // Storage disabled.
+  }
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has(GOOGLE_SELECT_ACCOUNT_QUERY)) return;
+
+    params.delete(GOOGLE_SELECT_ACCOUNT_QUERY);
+    const nextQuery = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`,
+    );
+  } catch {
+    // History API unavailable.
+  }
+}
+
+type GoogleOAuthStartOptions = {
+  /** Ask Google to show the account chooser (survives app logout). */
+  promptSelectAccount?: boolean;
+};
+
+/**
+ * Starts OAuth via the app proxy so we can append Google params the API omits.
+ * `GET /api/oauth/google/start` → Google → API callback → app callback URL.
+ */
+export function googleOAuthStartUrl(
+  appUrl: string,
+  options: GoogleOAuthStartOptions = {},
+): string {
+  const url = new URL(GOOGLE_OAUTH_START_PATH, appUrl.replace(/\/$/, ""));
+  if (options.promptSelectAccount) {
+    url.searchParams.set("prompt", "select_account");
+  }
+  return url.toString();
 }
 
 export function googleOAuthCallbackUrl(appUrl: string): string {

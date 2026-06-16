@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { formatAuthApiError } from "@/lib/auth-api";
 import { flowLog, flowLogApiResult } from "@/lib/flow-debug-log";
+import { countryCodeToApiLabel } from "@/lib/countries";
+import { normalizeAvatarStorageUrl } from "@/lib/user-avatar";
 import type {
   NotificationPreferences,
   UpdateNotificationPreferencesInput,
@@ -38,17 +40,52 @@ function userApiUrl(path: string): string {
   return `${base}/api/users${path}`;
 }
 
-function parseAvatarUrlFromResponse(body: unknown): string | null {
+function readProfileRecord(body: unknown): Record<string, unknown> | null {
   if (!body || typeof body !== "object") return null;
-
   const root = body as Record<string, unknown>;
-  const payload =
-    root.data && typeof root.data === "object"
-      ? (root.data as Record<string, unknown>)
-      : root;
+  const data = root.data;
+  if (data && typeof data === "object") {
+    const dataRecord = data as Record<string, unknown>;
+    const nestedUser = dataRecord.user;
+    if (nestedUser && typeof nestedUser === "object") {
+      return nestedUser as Record<string, unknown>;
+    }
+    return dataRecord;
+  }
+  return root;
+}
 
-  const url = payload.avatarUrl ?? payload.avatar_url;
-  return typeof url === "string" && url.trim() ? url.trim() : null;
+function parseUserProfileFromApi(body: unknown): UserProfile | null {
+  const data = readProfileRecord(body);
+  if (!data?.id) return null;
+
+  const rawAvatar = data.avatarUrl ?? data.avatar_url;
+
+  return {
+    id: String(data.id),
+    fullName: String(data.fullName ?? data.full_name ?? ""),
+    email: String(data.email ?? ""),
+    country: String(data.country ?? ""),
+    avatarUrl: normalizeAvatarStorageUrl(
+      typeof rawAvatar === "string" ? rawAvatar : null,
+      envConfig.BASEURL,
+    ),
+    authProvider: String(data.authProvider ?? data.auth_provider ?? ""),
+    isVerified: Boolean(data.isVerified ?? data.is_verified),
+    createdAt: String(data.createdAt ?? data.created_at ?? ""),
+    updatedAt: String(data.updatedAt ?? data.updated_at ?? ""),
+  };
+}
+
+function parseAvatarUrlFromResponse(body: unknown): string | null {
+  const data = readProfileRecord(body);
+  if (!data) return null;
+
+  const url = data.avatarUrl ?? data.avatar_url;
+  return normalizeAvatarStorageUrl(
+    typeof url === "string" ? url : null,
+    envConfig.BASEURL,
+  );
 }
 
 async function getAccessToken(): Promise<string | null> {
@@ -83,8 +120,8 @@ export async function getUserProfile(): Promise<UserActionResult<UserProfile>> {
       timeout: 30_000,
     });
 
-    const profile = res.data?.data as UserProfile;
-    if (!profile?.id) {
+    const profile = parseUserProfileFromApi(res.data);
+    if (!profile) {
       return { ok: false, error: "Could not read profile data.", status: 502 };
     }
 
@@ -126,13 +163,20 @@ export async function updateUserProfile(
   }
 
   try {
-    const res = await axios.patch(userApiUrl("/me"), input, {
+    const payload: UpdateProfileInput = { ...input };
+    if (payload.country) {
+      const apiCountry =
+        countryCodeToApiLabel(payload.country) ?? payload.country;
+      payload.country = apiCountry;
+    }
+
+    const res = await axios.patch(userApiUrl("/me"), payload, {
       headers: { Authorization: `Bearer ${token}` },
       timeout: 30_000,
     });
 
-    const profile = res.data?.data as UserProfile;
-    if (!profile?.id) {
+    const profile = parseUserProfileFromApi(res.data);
+    if (!profile) {
       return {
         ok: false,
         error: "Could not read updated profile.",
