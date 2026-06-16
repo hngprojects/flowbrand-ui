@@ -13,7 +13,11 @@ import { fileNameToDocType, formatFileSize } from "@/lib/dashboard-mock-data";
 import { saveFunnelDocuments } from "@/lib/funnel-documents-storage";
 import type { UploadedDocDisplay } from "@/lib/funnel-display";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
-import { STRATEGY_ROUTE, ONBOARDING_QUESTIONS_ROUTE } from "@/routes";
+import {
+  ONBOARDING_QUESTIONS_ROUTE,
+  ONBOARDING_VOICE_ROUTE,
+  STRATEGY_ROUTE,
+} from "@/routes";
 import { clearNewStrategyFlow, NEW_STRATEGY_QUERY } from "@/lib/new-strategy";
 import { useNewStrategyFlow } from "@/hooks/use-new-strategy-flow";
 import { redirectToExistingFunnelIfAny } from "@/lib/onboarding-client-recovery";
@@ -25,6 +29,7 @@ import { OnboardingAlreadyCompleteError } from "@/lib/onboarding-query-fns";
 import { useStartFunnelGenerationMutation } from "@/hooks/mutations/use-funnel-mutations";
 import { reserveIdempotencyKey } from "@/lib/funnel-generation-storage";
 import {
+  clearUploadProgressTracking,
   useUploadDocumentsMutation,
   useUploadProgressQueries,
 } from "@/hooks/queries/use-upload-queries";
@@ -47,6 +52,8 @@ const MAX_MB = 5;
 const MAX_FILES = 3;
 const ALLOWED_EXTENSIONS = ["DOC", "DOCX", "PDF", "PPT", "PPTX"];
 const PROGRESS_ORANGE = "#E88320";
+/** Show the slow-processing notice only after this long in parsing. */
+const PARSING_WARNING_DELAY_MS = 60_000;
 
 function formatMB(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1) + "MB";
@@ -127,9 +134,10 @@ export function UploadView() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragging, setDragging] = useState(false);
   const [thingsToLearnOpen, setThingsToLearnOpen] = useState(false);
-  // const [processingWarning, setProcessingWarning] = useState<string | null>(
-  //   null,
-  // );
+  const [stalledUploadRows, setStalledUploadRows] = useState<UploadedFile[]>(
+    [],
+  );
+  const parsingStartedAtRef = useRef<Map<string, number>>(new Map());
   const uploadMutation = useUploadDocumentsMutation();
   const startGeneration = useStartFunnelGenerationMutation();
   const isNewStrategy = useNewStrategyFlow();
@@ -192,21 +200,53 @@ export function UploadView() {
     });
   }, [files, progressByUploadId]);
 
-  const processingWarning = useMemo(() => {
-    const stalled = displayFiles.find(
-      (file) =>
-        file.status === "parsing" && file.progress >= 20 && file.progress < 101,
-    );
+  useEffect(() => {
+    const map = parsingStartedAtRef.current;
+    for (const row of displayFiles) {
+      if (!row.uploadId) continue;
+      if (row.status === "ready" || row.status === "failed") {
+        map.delete(row.uploadId);
+        continue;
+      }
+      if (row.status === "parsing" || row.status === "uploading") {
+        if (!map.has(row.uploadId)) {
+          map.set(row.uploadId, Date.now());
+        }
+      }
+    }
+  }, [displayFiles]);
 
-    if (!stalled) {
-      return null;
+  const hasParsingUploads = displayFiles.some(
+    (file) => file.uploadId && file.status === "parsing",
+  );
+
+  useEffect(() => {
+    if (!hasParsingUploads) {
+      const timeoutId = setTimeout(() => setStalledUploadRows([]), 0);
+      return () => clearTimeout(timeoutId);
     }
 
-    return (
-      "Document processing is taking longer than expected. " +
-      "The server may still be parsing your file. Please refresh the page after a moment or two to see if it’s ready."
-    );
-  }, [displayFiles]);
+    const updateStalledRows = () => {
+      const now = Date.now();
+      const startedAtMap = parsingStartedAtRef.current;
+
+      setStalledUploadRows(
+        displayFiles.filter((file) => {
+          if (!file.uploadId || file.status !== "parsing") return false;
+          const startedAt = startedAtMap.get(file.uploadId);
+          return (
+            startedAt != null && now - startedAt >= PARSING_WARNING_DELAY_MS
+          );
+        }),
+      );
+    };
+
+    const intervalId = setInterval(updateStalledRows, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [hasParsingUploads, displayFiles]);
+
+  const showProcessingWarning = stalledUploadRows.length > 0;
 
   useEffect(() => {
     if (isNewStrategy) return;
@@ -219,9 +259,17 @@ export function UploadView() {
     ? `${ONBOARDING_QUESTIONS_ROUTE}?${NEW_STRATEGY_QUERY}=1`
     : ONBOARDING_QUESTIONS_ROUTE;
 
+  const voiceHref = isNewStrategy
+    ? `${ONBOARDING_VOICE_ROUTE}?${NEW_STRATEGY_QUERY}=1`
+    : ONBOARDING_VOICE_ROUTE;
+
   const goToQuestions = useCallback(() => {
     router.push(questionsHref);
   }, [router, questionsHref]);
+
+  const goToVoice = useCallback(() => {
+    router.push(voiceHref);
+  }, [router, voiceHref]);
 
   const isGenerating = startGeneration.isPending;
 
@@ -307,11 +355,30 @@ export function UploadView() {
     }
   }, [displayFiles, addUploadedDocument]);
 
-  const removeFile = (id: string) => {
-    const row = files.find((f) => f.id === id);
-    if (row?.uploadId) removeUploadedDocument(row.uploadId);
-    setFiles((prev) => prev.filter((f) => f.id !== id));
-  };
+  const removeFile = useCallback(
+    (id: string) => {
+      setFiles((prev) => {
+        const row = prev.find((f) => f.id === id);
+        if (row?.uploadId) {
+          clearUploadProgressTracking(row.uploadId);
+          parsingStartedAtRef.current.delete(row.uploadId);
+          removeUploadedDocument(row.uploadId);
+        }
+        return prev.filter((f) => f.id !== id);
+      });
+    },
+    [removeUploadedDocument],
+  );
+
+  const cancelStalledUploads = useCallback(() => {
+    const rows = [...stalledUploadRows];
+    if (rows.length === 0) return;
+
+    rows.forEach((row) => removeFile(row.id));
+    toast.message("Upload cancelled.", {
+      description: "You can add the file again.",
+    });
+  }, [removeFile, stalledUploadRows]);
 
   const addFiles = useCallback(
     async (incoming: FileList | null) => {
@@ -485,16 +552,19 @@ export function UploadView() {
               {displayFiles.map((item) => (
                 <FileRow key={item.id} item={item} onRemove={removeFile} />
               ))}
-              {processingWarning && (
+              {showProcessingWarning && (
                 <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                  <p className="text-sm text-amber-700">{processingWarning}</p>
+                  <p className="text-sm text-amber-700">
+                    Document processing is taking longer than expected. Remove
+                    the file and try uploading again.
+                  </p>
 
                   <button
                     type="button"
-                    onClick={() => window.location.reload()}
+                    onClick={cancelStalledUploads}
                     className="mt-3 text-sm font-medium text-amber-800 underline underline-offset-2"
                   >
-                    Retry checking status
+                    Cancel and try again
                   </button>
                 </div>
               )}
@@ -513,6 +583,19 @@ export function UploadView() {
             )}
           >
             {isGenerating ? "Starting strategy…" : "Create my strategy"}
+          </button>
+
+          <button
+            type="button"
+            onClick={goToVoice}
+            className="mt-6 mx-auto block cursor-pointer focus:outline-none"
+            aria-label="Talk to our AI model to generate a business document"
+          >
+            <div className="w-full rounded-xl bg-[linear-gradient(90deg,#4289FF_0%,#E58F17_30.77%,#155EEF_59.86%,#E58F17_79.81%)] p-px">
+              <div className="rounded-xl bg-white px-4 py-2 text-center text-[15px] font-medium text-neutral-900">
+                Talk to our AI model to generate a business document
+              </div>
+            </div>
           </button>
 
           <button

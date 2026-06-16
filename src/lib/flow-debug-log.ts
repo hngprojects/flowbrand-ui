@@ -7,6 +7,7 @@ export type FlowDebugArea =
   | "funnel"
   | "strategy"
   | "upload"
+  | "voice"
   | "notifications";
 
 /** Enable with FLOWBRAND_DEBUG=1 or sessionStorage flowbrand_debug=1 in the browser. */

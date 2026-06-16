@@ -16,7 +16,7 @@ export type OnboardingSessionAnswers = {
     };
     additional_notes?: string;
   };
-  step_3?: { discovery_channel?: string };
+  step_3?: { discovery_channel?: string | string[] };
 };
 
 export type ParsedOnboardingSession = {
@@ -113,7 +113,40 @@ export function isOnboardingSessionComplete(
     return true;
   }
 
-  return Boolean(session.answers.step_3?.discovery_channel);
+  return hasDiscoveryChannel(session.answers.step_3);
+}
+
+export function hasDiscoveryChannel(
+  step3?: OnboardingSessionAnswers["step_3"],
+): boolean {
+  const channel = step3?.discovery_channel;
+  if (Array.isArray(channel)) {
+    return channel.some((value) => typeof value === "string" && value.trim());
+  }
+  return typeof channel === "string" && channel.trim().length > 0;
+}
+
+export function discoveryChannelsFromAnswers(
+  answers: OnboardingSessionAnswers,
+): string[] {
+  const channel = answers.step_3?.discovery_channel;
+  if (Array.isArray(channel)) {
+    return channel
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
+  if (typeof channel === "string" && channel.trim()) {
+    return [channel.trim()];
+  }
+  return [];
+}
+
+/** @deprecated Use {@link discoveryChannelsFromAnswers}. */
+export function discoveryChannelFromAnswers(
+  answers: OnboardingSessionAnswers,
+): string {
+  return discoveryChannelsFromAnswers(answers)[0] ?? "";
 }
 
 export function isOnboardingConflictStatus(status?: number): boolean {
@@ -190,8 +223,11 @@ export function buildStep2Answer(input: {
   return answer;
 }
 
-export function buildStep3Answer(trafficChannel: string) {
-  return { discovery_channel: trafficChannel.trim() };
+export function buildStep3Answer(trafficChannels: string[]) {
+  const channels = trafficChannels
+    .map((channel) => channel.trim())
+    .filter(Boolean);
+  return { discovery_channel: channels };
 }
 
 export function customerTagsFromAnswers(

@@ -27,10 +27,9 @@ export async function renameFunnel(
   if (!token) return { ok: false, error: "Session expired." };
 
   try {
-    // TODO: confirm endpoint path with backend
     await axios.patch(
-      funnelsUrl(`/${encodeURIComponent(funnelId)}`),
-      { name },
+      funnelsUrl(`/${encodeURIComponent(funnelId)}/rename`),
+      { funnelName: name.trim() },
       { headers: { Authorization: `Bearer ${token}` }, timeout: 30000 },
     );
     return { ok: true };

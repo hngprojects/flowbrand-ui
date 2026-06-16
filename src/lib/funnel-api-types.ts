@@ -55,13 +55,31 @@ function unwrapData(data: unknown): Record<string, unknown> | null {
 function readFunnelIdFromRecord(
   record: Record<string, unknown>,
 ): string | null {
-  for (const key of ["funnel_id", "funnelId", "funnelID"] as const) {
+  for (const key of ["funnel_id", "funnelId", "funnelID", "id"] as const) {
     const value = record[key];
     if (typeof value === "string" && value.trim()) {
       return value.trim();
     }
   }
   return null;
+}
+
+function readFunnelDisplayName(
+  record: Record<string, unknown>,
+): string | undefined {
+  for (const key of [
+    "funnelName",
+    "funnel_name",
+    "businessName",
+    "business_name",
+    "name",
+  ] as const) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return undefined;
 }
 
 function parseFunnelTask(raw: unknown): FunnelTaskApi | null {
@@ -227,12 +245,7 @@ function buildFunnelDetailFromRecord(
 
   return {
     funnelId,
-    businessName:
-      typeof node.businessName === "string"
-        ? node.businessName
-        : typeof node.business_name === "string"
-          ? node.business_name
-          : undefined,
+    businessName: readFunnelDisplayName(node),
     creationPath:
       typeof node.creationPath === "string"
         ? node.creationPath

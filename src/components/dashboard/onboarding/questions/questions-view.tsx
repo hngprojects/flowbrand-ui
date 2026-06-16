@@ -14,6 +14,7 @@ import {
   buildStep2Answer,
   buildStep3Answer,
   customerProfileFromAnswers,
+  discoveryChannelsFromAnswers,
   isOnboardingSessionComplete,
   stepNumberFromSession,
 } from "@/lib/onboarding-api";
@@ -90,7 +91,7 @@ export function QuestionsView() {
       whoWantTo: customerProfile.whoWantTo ?? [],
       locatedIn: customerProfile.locatedIn ?? [],
       customCustomerInput: customerProfile.customCustomerInput ?? "",
-      trafficChannel: session.answers.step_3?.discovery_channel ?? "",
+      trafficChannels: discoveryChannelsFromAnswers(session.answers),
       step: stepNumberFromSession(session),
     });
   }, [
@@ -246,7 +247,7 @@ export function QuestionsView() {
         locatedIn: store.locatedIn,
         customInput: store.customCustomerInput,
       },
-      trafficChannel: store.trafficChannel,
+      trafficChannels: store.trafficChannels,
     };
 
     const validation = onboardingSchema.safeParse(payload);
@@ -263,7 +264,7 @@ export function QuestionsView() {
         await saveStep.mutateAsync({
           session_id: sessionId,
           step: 3,
-          answer: buildStep3Answer(store.trafficChannel),
+          answer: buildStep3Answer(store.trafficChannels),
         });
 
         await completeOnboarding.mutateAsync(sessionId);
@@ -370,13 +371,9 @@ export function QuestionsView() {
 
           {store.step === 3 && (
             <StepThree
-              selected={store.trafficChannel}
-              onSelect={(val) => {
-                if (store.trafficChannel === val) {
-                  store.setTrafficChannel("");
-                } else {
-                  store.setTrafficChannel(val);
-                }
+              selected={store.trafficChannels}
+              onToggle={(val) => {
+                store.toggleTrafficChannel(val);
               }}
               onSubmit={handleCreateStrategy}
               isLoading={isLoading || isBootstrapping}

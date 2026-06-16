@@ -8,7 +8,7 @@ interface OnboardingState {
   whoWantTo: string[];
   locatedIn: string[];
   customCustomerInput: string;
-  trafficChannel: string;
+  trafficChannels: string[];
   uploadedDocuments: MockUploadedDoc[];
   sessionId: string | null;
   setStep: (step: number) => void;
@@ -20,7 +20,7 @@ interface OnboardingState {
   toggleWhoWantTo: (val: string) => void;
   toggleLocatedIn: (val: string) => void;
   setCustomCustomerInput: (val: string) => void;
-  setTrafficChannel: (val: string) => void;
+  toggleTrafficChannel: (val: string) => void;
   addUploadedDocument: (doc: MockUploadedDoc) => void;
   removeUploadedDocument: (id: string) => void;
   hydrateFromApiSession: (input: {
@@ -30,7 +30,7 @@ interface OnboardingState {
     whoWantTo?: string[];
     locatedIn?: string[];
     customCustomerInput?: string;
-    trafficChannel?: string;
+    trafficChannels?: string[];
     step?: number;
   }) => void;
   reset: () => void;
@@ -43,7 +43,7 @@ const initialOnboardingState = {
   whoWantTo: [] as string[],
   locatedIn: [] as string[],
   customCustomerInput: "",
-  trafficChannel: "",
+  trafficChannels: [] as string[],
   uploadedDocuments: [] as MockUploadedDoc[],
   sessionId: null as string | null,
 };
@@ -75,7 +75,12 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
         : [...state.locatedIn, val],
     })),
   setCustomCustomerInput: (val) => set({ customCustomerInput: val }),
-  setTrafficChannel: (val) => set({ trafficChannel: val }),
+  toggleTrafficChannel: (val) =>
+    set((state) => ({
+      trafficChannels: state.trafficChannels.includes(val)
+        ? state.trafficChannels.filter((channel) => channel !== val)
+        : [...state.trafficChannels, val],
+    })),
   addUploadedDocument: (doc) =>
     set((state) => ({
       uploadedDocuments: state.uploadedDocuments.some((d) => d.id === doc.id)
@@ -96,12 +101,18 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
       const locatedIn = input.locatedIn ?? state.locatedIn;
       const customCustomerInput =
         input.customCustomerInput ?? state.customCustomerInput;
-      const trafficChannel = input.trafficChannel ?? state.trafficChannel;
+      const trafficChannels = input.trafficChannels ?? state.trafficChannels;
+
+      const channelsEqual =
+        trafficChannels.length === state.trafficChannels.length &&
+        trafficChannels.every(
+          (channel, index) => channel === state.trafficChannels[index],
+        );
 
       if (
         step === state.step &&
         businessDescription === state.businessDescription &&
-        trafficChannel === state.trafficChannel &&
+        channelsEqual &&
         theyAre.length === state.theyAre.length &&
         theyAre.every((tag, index) => tag === state.theyAre[index]) &&
         whoWantTo.length === state.whoWantTo.length &&
@@ -121,7 +132,7 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
         whoWantTo,
         locatedIn,
         customCustomerInput,
-        trafficChannel,
+        trafficChannels,
       };
     }),
   reset: () => set({ ...initialOnboardingState }),

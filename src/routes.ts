@@ -2,6 +2,7 @@ export const DASHBOARD_ROUTE = "/dashboard";
 export const ONBOARDING_ROUTE = "/dashboard/onboarding";
 export const ONBOARDING_UPLOAD_ROUTE = "/dashboard/onboarding/upload";
 export const ONBOARDING_QUESTIONS_ROUTE = "/dashboard/onboarding/questions";
+export const ONBOARDING_VOICE_ROUTE = "/dashboard/onboarding/voice";
 export const STRATEGY_ROUTE = "/dashboard/strategy";
 
 /** Default when API does not specify a redirect (new users → upload). */

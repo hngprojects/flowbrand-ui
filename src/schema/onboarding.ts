@@ -38,7 +38,9 @@ export const onboardingSchema = z.object({
       },
     ),
 
-  trafficChannel: z.string().trim().min(1, "Please pick a channel"),
+  trafficChannels: z
+    .array(z.string())
+    .min(1, "Please pick at least one channel"),
 });
 
 export type OnboardingData = z.infer<typeof onboardingSchema>;
