@@ -58,6 +58,7 @@ export function useVoiceSessionStatusQuery(
     enabled: enabled && Boolean(id),
     staleTime: 0,
     refetchInterval: (query: Query<VoiceSessionStatus, Error>) => {
+      if (query.state.status === "error") return false;
       if (query.state.data?.isReady) return false;
       if (query.state.dataUpdateCount >= MAX_VOICE_POLLS) return false;
       return VOICE_POLL_MS;

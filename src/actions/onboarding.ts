@@ -197,11 +197,13 @@ export async function uploadVoiceRound(
   flowLog("voice", "POST /api/onboarding/voice → request");
   const token = await getAccessToken();
   if (!token) {
-    return {
-      ok: false,
+    const result = {
+      ok: false as const,
       error: "Session expired. Please sign in again.",
       status: 401,
     };
+    flowLogApiResult("voice", "POST /api/onboarding/voice", result);
+    return result;
   }
 
   try {
@@ -234,7 +236,12 @@ export async function uploadVoiceRound(
       flowLogApiResult("voice", "POST /api/onboarding/voice", result);
       return result;
     }
-    return { ok: false, error: "Could not reach the server." };
+    const result = {
+      ok: false as const,
+      error: "Could not reach the server.",
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice", result);
+    return result;
   }
 }
 
@@ -247,11 +254,15 @@ export async function getVoiceSessionStatus(
   });
   const token = await getAccessToken();
   if (!token) {
-    return {
-      ok: false,
+    const result = {
+      ok: false as const,
       error: "Session expired. Please sign in again.",
       status: 401,
     };
+    flowLogApiResult("voice", "GET /api/onboarding/voice/{id}/status", result, {
+      voiceSessionId: trimmed,
+    });
+    return result;
   }
 
   try {
@@ -265,11 +276,18 @@ export async function getVoiceSessionStatus(
     );
 
     if (res.status === 404) {
-      return {
-        ok: false,
+      const result = {
+        ok: false as const,
         error: "Your voice session has expired. Please start again.",
         status: 404,
       };
+      flowLogApiResult(
+        "voice",
+        "GET /api/onboarding/voice/{id}/status",
+        result,
+        { voiceSessionId: trimmed },
+      );
+      return result;
     }
 
     const result = {
@@ -282,8 +300,8 @@ export async function getVoiceSessionStatus(
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      return {
-        ok: false,
+      const result = {
+        ok: false as const,
         error: formatHttpApiError(
           status,
           data,
@@ -291,8 +309,22 @@ export async function getVoiceSessionStatus(
         ),
         status,
       };
+      flowLogApiResult(
+        "voice",
+        "GET /api/onboarding/voice/{id}/status",
+        result,
+        { voiceSessionId: trimmed },
+      );
+      return result;
     }
-    return { ok: false, error: "Could not reach the server." };
+    const result = {
+      ok: false as const,
+      error: "Could not reach the server.",
+    };
+    flowLogApiResult("voice", "GET /api/onboarding/voice/{id}/status", result, {
+      voiceSessionId: trimmed,
+    });
+    return result;
   }
 }
 
@@ -305,11 +337,15 @@ export async function completeVoiceSession(
   });
   const token = await getAccessToken();
   if (!token) {
-    return {
-      ok: false,
+    const result = {
+      ok: false as const,
       error: "Session expired. Please sign in again.",
       status: 401,
     };
+    flowLogApiResult("voice", "POST /api/onboarding/voice/complete", result, {
+      voiceSessionId: trimmed,
+    });
+    return result;
   }
 
   try {
@@ -335,8 +371,8 @@ export async function completeVoiceSession(
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       const { status, data } = error.response;
-      return {
-        ok: false,
+      const result = {
+        ok: false as const,
         error: formatHttpApiError(
           status,
           data,
@@ -344,7 +380,18 @@ export async function completeVoiceSession(
         ),
         status,
       };
+      flowLogApiResult("voice", "POST /api/onboarding/voice/complete", result, {
+        voiceSessionId: trimmed,
+      });
+      return result;
     }
-    return { ok: false, error: "Could not reach the server." };
+    const result = {
+      ok: false as const,
+      error: "Could not reach the server.",
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice/complete", result, {
+      voiceSessionId: trimmed,
+    });
+    return result;
   }
 }

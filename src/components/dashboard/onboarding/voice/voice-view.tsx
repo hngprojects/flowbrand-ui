@@ -208,6 +208,7 @@ export function VoiceView() {
   const listenSessionRef = useRef(0);
   const mountedRef = useRef(true);
   const generatingRef = useRef(false);
+  const completingRef = useRef(false);
 
   const startQuestionRotation = useCallback(() => {
     if (questionTimerRef.current) clearInterval(questionTimerRef.current);
@@ -283,6 +284,7 @@ export function VoiceView() {
   );
 
   const beginVoiceProcessing = useCallback((voiceSessionId: string) => {
+    completingRef.current = false;
     setActiveVoiceSessionId(voiceSessionId);
     setShouldPollVoiceSession(true);
     setViewState("processing");
@@ -540,20 +542,25 @@ export function VoiceView() {
   useEffect(() => {
     if (!shouldPollVoiceSession || !activeVoiceSessionId) return;
     if (!voiceSessionQuery.data?.isReady) return;
+    // The mutation object is re-created on every render, so this effect can
+    // re-run while the request is still in flight. Guard with a ref so the
+    // session is completed exactly once per ready signal.
+    if (completingRef.current) return;
 
-    let cancelled = false;
+    completingRef.current = true;
 
     void (async () => {
       try {
         const { uploadId } =
           await completeVoiceSession.mutateAsync(activeVoiceSessionId);
-        if (cancelled) return;
+        if (!mountedRef.current) return;
 
         setShouldPollVoiceSession(false);
         setPendingUploadId(uploadId);
         setShouldPollUpload(true);
       } catch (error) {
-        if (cancelled) return;
+        completingRef.current = false;
+        if (!mountedRef.current) return;
 
         const message =
           error instanceof Error
@@ -564,10 +571,6 @@ export function VoiceView() {
         setShouldPollVoiceSession(false);
       }
     })();
-
-    return () => {
-      cancelled = true;
-    };
   }, [
     activeVoiceSessionId,
     completeVoiceSession,
