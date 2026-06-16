@@ -33,7 +33,7 @@ const QUESTIONS = [
 
 const QUESTION_ROTATION_MS = 4000;
 
-function MicButton({ onClick }: { onClick: () => void }) {
+function MicButton() {
   return (
     <div className="flex flex-col items-center gap-0 group focus:outline-none">
       <div className="relative">
@@ -224,7 +224,8 @@ export function VoiceView() {
       if (ctx.state === "suspended") {
         try {
           await ctx.resume();
-        } catch {
+        } catch (err) {
+          console.warn("AudioContext resume failed:", err);
           // Continue — analyser may still work once the context starts.
         }
       }
@@ -353,21 +354,6 @@ export function VoiceView() {
 
   return (
     <>
-      <style>{`
-        @keyframes orbSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes orbFloat {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-        }
-        @keyframes orbShimmer {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.92; }
-        }
-      `}</style>
-
       <main className="flex flex-1 flex-col">
         <div
           className="flex-1 flex flex-col items-center justify-center relative px-4"
@@ -407,7 +393,7 @@ export function VoiceView() {
               {isListening || isRequesting ? (
                 <GlobeOrb levels={voiceLevels} />
               ) : (
-                <MicButton onClick={() => {}} />
+                <MicButton />
               )}
             </button>
 
@@ -450,15 +436,13 @@ export function VoiceView() {
             <button
               type="button"
               onClick={() => {
-                setShowTextInput((showing) => {
-                  if (
-                    !showing &&
-                    (viewState === "listening" || viewState === "requesting")
-                  ) {
-                    stopListening();
-                  }
-                  return !showing;
-                });
+                if (
+                  !showTextInput &&
+                  (viewState === "listening" || viewState === "requesting")
+                ) {
+                  stopListening();
+                }
+                setShowTextInput((prev) => !prev);
               }}
               className="mt-2 text-[14px] text-neutral-500 underline underline-offset-2 hover:text-neutral-700 transition-colors"
             >

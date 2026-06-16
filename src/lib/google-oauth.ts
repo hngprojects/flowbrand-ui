@@ -9,10 +9,12 @@ export const GOOGLE_SELECT_ACCOUNT_QUERY = "google_select_account";
 
 /** Append a logout marker so /login knows to show the Google account picker. */
 export function appendGoogleSelectAccountToPath(path: string): string {
-  const [pathname, query = ""] = path.split("?");
-  const params = new URLSearchParams(query);
-  params.set(GOOGLE_SELECT_ACCOUNT_QUERY, "1");
-  return `${pathname}?${params.toString()}`;
+  const isAbsolute = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(path);
+  const url = new URL(path, "https://flowbrand.invalid");
+  url.searchParams.set(GOOGLE_SELECT_ACCOUNT_QUERY, "1");
+  return isAbsolute
+    ? url.toString()
+    : `${url.pathname}${url.search}${url.hash}`;
 }
 
 /** Set after logout so the next Google sign-in shows the account picker. */
@@ -42,9 +44,14 @@ export function readGoogleAccountSelectionPrompt(): boolean {
 /** Clear logout markers after starting Google OAuth. */
 export function clearGoogleAccountSelectionPrompt(): void {
   if (typeof window === "undefined") return;
+
   try {
     localStorage.removeItem(GOOGLE_SELECT_ACCOUNT_KEY);
+  } catch {
+    // Storage disabled.
+  }
 
+  try {
     const params = new URLSearchParams(window.location.search);
     if (!params.has(GOOGLE_SELECT_ACCOUNT_QUERY)) return;
 
@@ -56,7 +63,7 @@ export function clearGoogleAccountSelectionPrompt(): void {
       `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`,
     );
   } catch {
-    // Storage or history API unavailable.
+    // History API unavailable.
   }
 }
 

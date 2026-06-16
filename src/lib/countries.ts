@@ -113,8 +113,10 @@ export const API_COUNTRY_LABEL_BY_CODE: Record<string, string> = {
   SN: "Senegal",
   SC: "Seychelles",
   SL: "Sierra Leone",
+  SO: "Somalia",
   ZA: "South Africa",
   SS: "South Sudan",
+  SD: "Sudan",
   TZ: "Tanzania",
   TG: "Togo",
   UG: "Uganda",
@@ -148,6 +150,7 @@ export function apiCountryLabelToCode(raw: string | null | undefined): string {
   );
   if (fromUiLabel?.value) return fromUiLabel.value;
 
+  // Some API responses may return a raw ISO code instead of the enum label.
   const upper = value.toUpperCase();
   if (upper.length === 2 && API_COUNTRY_LABEL_BY_CODE[upper]) {
     return upper;

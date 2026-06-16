@@ -7,17 +7,26 @@ export async function GET(request: Request) {
   const promptSelectAccount =
     requestUrl.searchParams.get("prompt") === "select_account";
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+
   let backendResponse: Response;
   try {
     backendResponse = await fetch(
       `${envConfig.BASEURL.replace(/\/$/, "")}/auth/google`,
-      { redirect: "manual", cache: "no-store" },
+      {
+        redirect: "manual",
+        cache: "no-store",
+        signal: controller.signal,
+      },
     );
   } catch {
     return NextResponse.json(
       { message: "Could not reach authentication service." },
       { status: 502 },
     );
+  } finally {
+    clearTimeout(timeout);
   }
 
   const location = backendResponse.headers.get("location");

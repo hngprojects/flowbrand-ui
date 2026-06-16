@@ -16,7 +16,10 @@ export function normalizeAvatarStorageUrl(
       return `${apiOrigin}/${path}`;
     }
     return `${apiOrigin}/flowbrand-staging-uploads/${path}`;
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Could not resolve avatar URL from apiBaseUrl:", err);
+    }
     return value;
   }
 }
