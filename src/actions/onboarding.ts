@@ -4,6 +4,7 @@ import axios from "axios";
 import { auth } from "@/auth";
 import { envConfig } from "@/config/env.config";
 import { formatHttpApiError } from "@/lib/api-errors";
+import { MAX_VOICE_UPLOAD_BYTES } from "@/lib/audio/voice-limits";
 import { flowLog, flowLogApiResult } from "@/lib/flow-debug-log";
 
 function onboardingUrl(path: string): string {
@@ -184,6 +185,214 @@ export async function completeOnboarding(
     }
     const result = { ok: false as const, error: "Could not reach the server." };
     flowLogApiResult("onboarding", "POST /api/onboarding/complete", result);
+    return result;
+  }
+}
+
+const MAX_VOICE_BYTES = MAX_VOICE_UPLOAD_BYTES;
+const MULTIPART_OVERHEAD_BYTES = 16 * 1024;
+
+export async function uploadVoiceRound(
+  formData: FormData,
+): Promise<OnboardingActionResult> {
+  flowLog("voice", "POST /api/onboarding/voice → request");
+  const token = await getAccessToken();
+  if (!token) {
+    const result = {
+      ok: false as const,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice", result);
+    return result;
+  }
+
+  try {
+    const res = await axios.post(onboardingUrl("/voice"), formData, {
+      headers: { Authorization: `Bearer ${token}` },
+      timeout: 120_000,
+      maxBodyLength: MAX_VOICE_BYTES + MULTIPART_OVERHEAD_BYTES,
+      maxContentLength: MAX_VOICE_BYTES,
+      validateStatus: (status) => status === 200 || status === 201,
+    });
+    const result = {
+      ok: true as const,
+      status: res.status,
+      data: res.data?.data ?? res.data,
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice", result);
+    return result;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      const result = {
+        ok: false as const,
+        error: formatHttpApiError(
+          status,
+          data,
+          "Could not upload your voice recording.",
+        ),
+        status,
+      };
+      flowLogApiResult("voice", "POST /api/onboarding/voice", result);
+      return result;
+    }
+    const result = {
+      ok: false as const,
+      error: "Could not reach the server.",
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice", result);
+    return result;
+  }
+}
+
+export async function getVoiceSessionStatus(
+  voiceSessionId: string,
+): Promise<OnboardingActionResult> {
+  const trimmed = voiceSessionId.trim();
+  flowLog("voice", "GET /api/onboarding/voice/{id}/status → request", {
+    voiceSessionId: trimmed,
+  });
+  const token = await getAccessToken();
+  if (!token) {
+    const result = {
+      ok: false as const,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
+    flowLogApiResult("voice", "GET /api/onboarding/voice/{id}/status", result, {
+      voiceSessionId: trimmed,
+    });
+    return result;
+  }
+
+  try {
+    const res = await axios.get(
+      onboardingUrl(`/voice/${encodeURIComponent(trimmed)}/status`),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 30_000,
+        validateStatus: (status) => status === 200 || status === 404,
+      },
+    );
+
+    if (res.status === 404) {
+      const result = {
+        ok: false as const,
+        error: "Your voice session has expired. Please start again.",
+        status: 404,
+      };
+      flowLogApiResult(
+        "voice",
+        "GET /api/onboarding/voice/{id}/status",
+        result,
+        { voiceSessionId: trimmed },
+      );
+      return result;
+    }
+
+    const result = {
+      ok: true as const,
+      status: res.status,
+      data: res.data?.data ?? res.data,
+    };
+    flowLogApiResult("voice", "GET /api/onboarding/voice/{id}/status", result);
+    return result;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      const result = {
+        ok: false as const,
+        error: formatHttpApiError(
+          status,
+          data,
+          "Could not check voice transcription status.",
+        ),
+        status,
+      };
+      flowLogApiResult(
+        "voice",
+        "GET /api/onboarding/voice/{id}/status",
+        result,
+        { voiceSessionId: trimmed },
+      );
+      return result;
+    }
+    const result = {
+      ok: false as const,
+      error: "Could not reach the server.",
+    };
+    flowLogApiResult("voice", "GET /api/onboarding/voice/{id}/status", result, {
+      voiceSessionId: trimmed,
+    });
+    return result;
+  }
+}
+
+export async function completeVoiceSession(
+  voiceSessionId: string,
+): Promise<OnboardingActionResult> {
+  const trimmed = voiceSessionId.trim();
+  flowLog("voice", "POST /api/onboarding/voice/complete → request", {
+    voiceSessionId: trimmed,
+  });
+  const token = await getAccessToken();
+  if (!token) {
+    const result = {
+      ok: false as const,
+      error: "Session expired. Please sign in again.",
+      status: 401,
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice/complete", result, {
+      voiceSessionId: trimmed,
+    });
+    return result;
+  }
+
+  try {
+    const res = await axios.post(
+      onboardingUrl("/voice/complete"),
+      { voiceSessionId: trimmed },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 60_000,
+        validateStatus: (status) => status === 200 || status === 201,
+      },
+    );
+    const result = {
+      ok: true as const,
+      status: res.status,
+      data: res.data?.data ?? res.data,
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice/complete", result);
+    return result;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const { status, data } = error.response;
+      const result = {
+        ok: false as const,
+        error: formatHttpApiError(
+          status,
+          data,
+          "Could not complete your voice session.",
+        ),
+        status,
+      };
+      flowLogApiResult("voice", "POST /api/onboarding/voice/complete", result, {
+        voiceSessionId: trimmed,
+      });
+      return result;
+    }
+    const result = {
+      ok: false as const,
+      error: "Could not reach the server.",
+    };
+    flowLogApiResult("voice", "POST /api/onboarding/voice/complete", result, {
+      voiceSessionId: trimmed,
+    });
     return result;
   }
 }

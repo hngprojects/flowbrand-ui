@@ -103,13 +103,16 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
         input.customCustomerInput ?? state.customCustomerInput;
       const trafficChannels = input.trafficChannels ?? state.trafficChannels;
 
-      if (
-        step === state.step &&
-        businessDescription === state.businessDescription &&
+      const channelsEqual =
         trafficChannels.length === state.trafficChannels.length &&
         trafficChannels.every(
           (channel, index) => channel === state.trafficChannels[index],
-        ) &&
+        );
+
+      if (
+        step === state.step &&
+        businessDescription === state.businessDescription &&
+        channelsEqual &&
         theyAre.length === state.theyAre.length &&
         theyAre.every((tag, index) => tag === state.theyAre[index]) &&
         whoWantTo.length === state.whoWantTo.length &&

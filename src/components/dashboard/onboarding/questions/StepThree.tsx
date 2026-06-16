@@ -31,7 +31,7 @@ export default function StepThree({
           How do most of your customers find you right now?
         </h1>
         <p className="text-sm lg:tracking-normal tracking-wide leading-tight text-muted-foreground">
-          Select all channels where customers discover your business.
+          Select every channel that brings you customers right now.
         </p>
       </div>
 

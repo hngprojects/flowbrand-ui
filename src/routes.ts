@@ -2,6 +2,7 @@ export const DASHBOARD_ROUTE = "/dashboard";
 export const ONBOARDING_ROUTE = "/dashboard/onboarding";
 export const ONBOARDING_UPLOAD_ROUTE = "/dashboard/onboarding/upload";
 export const ONBOARDING_QUESTIONS_ROUTE = "/dashboard/onboarding/questions";
+export const ONBOARDING_VOICE_ROUTE = "/dashboard/onboarding/voice";
 export const STRATEGY_ROUTE = "/dashboard/strategy";
 
 /** Default when API does not specify a redirect (new users → upload). */
@@ -54,6 +55,9 @@ export function mapApiRedirectToAppPath(redirectUrl?: string): string | null {
     path === "strategy_dashboard"
   ) {
     return STRATEGY_ROUTE;
+  }
+  if (path === "/onboarding/voice" || path.startsWith("/onboarding/voice/")) {
+    return ONBOARDING_VOICE_ROUTE;
   }
   if (path === "/onboarding" || path.startsWith("/onboarding/")) {
     return ONBOARDING_UPLOAD_ROUTE;

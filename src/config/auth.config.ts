@@ -147,22 +147,44 @@ const authConfig: NextAuthConfig = {
       }
 
       /**
-       * Refresh expired access token
+       * Refresh expired access token. 429 back-off is handled inside
+       * refreshAccessToken so concurrent requests don't hammer the endpoint.
        */
       const refreshed = await refreshAccessToken(envConfig.BASEURL);
 
-      if (!refreshed?.access_token) {
+      if (refreshed.ok) {
         return {
           ...customToken,
-          error: "RefreshAccessTokenError",
+          access_token: refreshed.access_token,
+          expires_at: Date.now() + ACCESS_TOKEN_LIFETIME_MS,
+          error: undefined,
         } satisfies CustomJWT;
+      }
+
+      /**
+       * A rate limit (429) is transient: keep the session valid and let a
+       * later request retry once the back-off window clears. Forcing re-auth
+       * here would log users out during a temporary rate limit even though the
+       * refresh token is still valid.
+       */
+      if (refreshed.reason === "rate_limited") {
+        if (inDevEnvironment) {
+          console.warn(
+            "[auth] Refresh rate-limited — keeping session, will retry after back-off",
+          );
+        }
+        return { ...customToken, error: undefined } satisfies CustomJWT;
+      }
+
+      if (inDevEnvironment) {
+        console.warn(
+          `[auth] Refresh failed (${refreshed.reason}) — marking session for re-authentication`,
+        );
       }
 
       return {
         ...customToken,
-        access_token: refreshed.access_token,
-        expires_at: Date.now() + ACCESS_TOKEN_LIFETIME_MS,
-        error: undefined,
+        error: "RefreshAccessTokenError",
       } satisfies CustomJWT;
     },
 

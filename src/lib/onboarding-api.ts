@@ -129,6 +129,25 @@ export function isOnboardingSessionComplete(
   return discoveryChannelsFromStep3(session.answers.step_3).length > 0;
 }
 
+export function hasDiscoveryChannel(
+  step3?: OnboardingSessionAnswers["step_3"],
+): boolean {
+  return discoveryChannelsFromStep3(step3).length > 0;
+}
+
+export function discoveryChannelsFromAnswers(
+  answers: OnboardingSessionAnswers,
+): string[] {
+  return discoveryChannelsFromStep3(answers.step_3);
+}
+
+/** @deprecated Use {@link discoveryChannelsFromAnswers}. */
+export function discoveryChannelFromAnswers(
+  answers: OnboardingSessionAnswers,
+): string {
+  return discoveryChannelsFromAnswers(answers)[0] ?? "";
+}
+
 export function isOnboardingConflictStatus(status?: number): boolean {
   return status === 409;
 }

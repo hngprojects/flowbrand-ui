@@ -154,6 +154,7 @@ function formatFunnelCreatedAt(createdAt: string | undefined): string {
 export function formatCreationPathLabel(creationPath?: string): string {
   if (!creationPath) return "";
   if (creationPath === "document_upload") return "From documents";
+  if (creationPath === "voice") return "From voice";
   if (creationPath === "wizard") return "From questions";
   return creationPath.replace(/_/g, " ");
 }

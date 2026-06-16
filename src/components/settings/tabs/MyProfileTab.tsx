@@ -41,10 +41,11 @@ const MyProfileSchema = z.object({
 type MyProfileFormValues = z.infer<typeof MyProfileSchema>;
 
 interface MyProfileTabProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-export default function MyProfileTab({ onClose }: MyProfileTabProps) {
+export default function MyProfileTab({ onClose }: MyProfileTabProps = {}) {
+  void onClose;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [manualAvatar, setManualAvatar] = useState<string | null | "deleted">(
     null,
