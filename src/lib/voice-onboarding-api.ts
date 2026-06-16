@@ -32,10 +32,12 @@ function readNumber(
 ): number | undefined {
   for (const key of keys) {
     const value = record[key];
-    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
+      return value;
+    }
     if (typeof value === "string" && value.trim()) {
       const parsed = Number(value);
-      if (Number.isFinite(parsed)) return parsed;
+      if (Number.isInteger(parsed) && parsed >= 0) return parsed;
     }
   }
   return undefined;

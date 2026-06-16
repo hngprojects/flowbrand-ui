@@ -206,10 +206,12 @@ export function UploadView() {
         map.delete(row.uploadId);
         continue;
       }
-      if (row.status === "parsing" || row.status === "uploading") {
-        if (!map.has(row.uploadId)) {
-          map.set(row.uploadId, Date.now());
-        }
+      if (row.status === "uploading") {
+        map.delete(row.uploadId);
+        continue;
+      }
+      if (row.status === "parsing" && !map.has(row.uploadId)) {
+        map.set(row.uploadId, Date.now());
       }
     }
   }, [displayFiles]);

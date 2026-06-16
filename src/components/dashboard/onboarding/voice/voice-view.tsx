@@ -209,6 +209,7 @@ export function VoiceView() {
   const mountedRef = useRef(true);
   const generatingRef = useRef(false);
   const completingRef = useRef(false);
+  const finishingRecordingRef = useRef(false);
 
   const startQuestionRotation = useCallback(() => {
     if (questionTimerRef.current) clearInterval(questionTimerRef.current);
@@ -349,20 +350,26 @@ export function VoiceView() {
 
   const finishListeningAndSubmit = useCallback(
     async (hitRecordingLimit = false) => {
-      const blob = await stopListening();
-      if (!blob) {
-        toast.error("No audio was captured. Please try again.");
-        setViewState("idle");
-        return;
-      }
+      if (finishingRecordingRef.current) return;
+      finishingRecordingRef.current = true;
+      try {
+        const blob = await stopListening();
+        if (!blob) {
+          toast.error("No audio was captured. Please try again.");
+          setViewState("idle");
+          return;
+        }
 
-      if (hitRecordingLimit || blob.size >= MAX_VOICE_UPLOAD_BYTES - 1024) {
-        toast.message("Maximum recording length reached.", {
-          description: "Sending what we captured.",
-        });
-      }
+        if (hitRecordingLimit || blob.size >= MAX_VOICE_UPLOAD_BYTES - 1024) {
+          toast.message("Maximum recording length reached.", {
+            description: "Sending what we captured.",
+          });
+        }
 
-      await submitRecording(blob);
+        await submitRecording(blob);
+      } finally {
+        finishingRecordingRef.current = false;
+      }
     },
     [stopListening, submitRecording],
   );
@@ -438,6 +445,9 @@ export function VoiceView() {
         await setupAudioCapture(stream);
       } catch (audioError) {
         console.warn("Audio capture setup failed.", audioError);
+        await stopListening();
+        setViewState("idle");
+        setMicError("Could not start audio capture. Please try again.");
       }
     } catch (error) {
       if (!mountedRef.current || listenSessionRef.current !== session) return;

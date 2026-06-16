@@ -251,16 +251,16 @@ function buildFunnelDetailFromRecord(
   return {
     funnelId,
     funnelName:
-      typeof node.funnelName === "string"
-        ? node.funnelName
-        : typeof node.funnel_name === "string"
-          ? node.funnel_name
+      typeof node.funnelName === "string" && node.funnelName.trim()
+        ? node.funnelName.trim()
+        : typeof node.funnel_name === "string" && node.funnel_name.trim()
+          ? node.funnel_name.trim()
           : displayName,
     businessName:
-      typeof node.businessName === "string"
-        ? node.businessName
-        : typeof node.business_name === "string"
-          ? node.business_name
+      typeof node.businessName === "string" && node.businessName.trim()
+        ? node.businessName.trim()
+        : typeof node.business_name === "string" && node.business_name.trim()
+          ? node.business_name.trim()
           : displayName,
     creationPath:
       typeof node.creationPath === "string"

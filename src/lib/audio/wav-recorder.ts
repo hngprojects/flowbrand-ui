@@ -89,6 +89,7 @@ export function startPcmCapture(
   return {
     stop: () => {
       processor.onaudioprocess = null;
+      source.disconnect(processor);
       processor.disconnect();
       silentOutput.disconnect();
       return frames;

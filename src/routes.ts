@@ -56,6 +56,9 @@ export function mapApiRedirectToAppPath(redirectUrl?: string): string | null {
   ) {
     return STRATEGY_ROUTE;
   }
+  if (path === "/onboarding/voice" || path.startsWith("/onboarding/voice/")) {
+    return ONBOARDING_VOICE_ROUTE;
+  }
   if (path === "/onboarding" || path.startsWith("/onboarding/")) {
     return ONBOARDING_UPLOAD_ROUTE;
   }

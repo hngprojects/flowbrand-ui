@@ -190,6 +190,7 @@ export async function completeOnboarding(
 }
 
 const MAX_VOICE_BYTES = MAX_VOICE_UPLOAD_BYTES;
+const MULTIPART_OVERHEAD_BYTES = 16 * 1024;
 
 export async function uploadVoiceRound(
   formData: FormData,
@@ -210,7 +211,7 @@ export async function uploadVoiceRound(
     const res = await axios.post(onboardingUrl("/voice"), formData, {
       headers: { Authorization: `Bearer ${token}` },
       timeout: 120_000,
-      maxBodyLength: MAX_VOICE_BYTES,
+      maxBodyLength: MAX_VOICE_BYTES + MULTIPART_OVERHEAD_BYTES,
       maxContentLength: MAX_VOICE_BYTES,
       validateStatus: (status) => status === 200 || status === 201,
     });
