@@ -92,10 +92,10 @@ export function ActivityLogTable({
                   {entry.ipAddress}
                 </td>
                 <td className="px-4 py-3 text-sm text-neutral-500">
-                  {entry.location}
+                  {entry.location ?? "—"}
                 </td>
                 <td className="px-4 py-3 text-sm whitespace-nowrap text-neutral-500">
-                  {entry.device}
+                  {entry.device ?? "—"}
                 </td>
               </tr>
             ))

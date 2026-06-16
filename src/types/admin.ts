@@ -77,13 +77,6 @@ export interface InvitesData {
   pending: PendingInvite[];
 }
 
-export type LogAction =
-  | "Signed in"
-  | "Signed up"
-  | "Invited a team"
-  | "Copied invite link"
-  | "Edited profile";
-
 export interface ActivityLogEntry {
   id: string;
   user: {
@@ -93,10 +86,16 @@ export interface ActivityLogEntry {
   };
   /** ISO timestamp; formatted for display in the table cell. */
   timestamp: string;
-  action: LogAction;
+  /** Human-readable action label derived from the backend action_type. */
+  action: string;
   ipAddress: string;
-  location: string;
-  device: string;
+  /**
+   * NOTE: the backend audit-log endpoint does not currently return location or
+   * device. These stay optional so the table can render a placeholder and so
+   * the mapper can pick them up automatically if the API adds them later.
+   */
+  location?: string;
+  device?: string;
 }
 
 export type LogDateRange = "all" | "last_7_days" | "last_30_days" | "custom";
