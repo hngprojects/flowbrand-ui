@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { COUNTRY_OPTIONS } from "@/lib/countries";
+import { apiCountryLabelToCode, COUNTRY_OPTIONS } from "@/lib/countries";
 import {
   Form,
   FormControl,
@@ -23,6 +23,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useUpdateProfileMutation } from "@/hooks/mutations/use-profile-mutations";
 import { uploadUserAvatar } from "@/actions/user";
+import { resolveProfileAvatarDisplayUrl } from "@/lib/user-avatar";
 import {
   SettingsTabFooter,
   SettingsTabLayout,
@@ -34,22 +35,17 @@ const MyProfileSchema = z.object({
     .min(2, "Name must be at least 2 characters.")
     .max(80, "Name must be under 80 characters.")
     .refine((val) => val.trim().length > 0, "Name cannot be empty."),
-  country: z
-    .string()
-    .min(1, "Please select a country.")
-    .transform((code) => {
-      const match = COUNTRY_OPTIONS.find((c) => c.value === code);
-      return match?.label ?? code;
-    }),
+  country: z.string().min(1, "Please select a country."),
 });
 
 type MyProfileFormValues = z.infer<typeof MyProfileSchema>;
 
 interface MyProfileTabProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-export default function MyProfileTab({ onClose }: MyProfileTabProps) {
+export default function MyProfileTab({ onClose }: MyProfileTabProps = {}) {
+  void onClose;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [manualAvatar, setManualAvatar] = useState<string | null | "deleted">(
     null,
@@ -59,11 +55,17 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
   const updateProfile = useUpdateProfileMutation();
   const queryClient = useQueryClient();
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarCacheKey, setAvatarCacheKey] = useState<string | null>(null);
 
   const avatar =
     manualAvatar === "deleted"
       ? null
       : (manualAvatar ?? profile?.avatarUrl ?? null);
+
+  const avatarSrc = resolveProfileAvatarDisplayUrl(
+    avatar,
+    avatarCacheKey ?? profile?.updatedAt,
+  );
 
   const form = useForm<MyProfileFormValues>({
     resolver: zodResolver(MyProfileSchema),
@@ -80,12 +82,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
 
   useEffect(() => {
     if (profile) {
-      const countryCode =
-        COUNTRY_OPTIONS.find((c) => c.label === profile.country)?.value ?? "";
-
       form.reset({
         fullName: profile.fullName ?? "",
-        country: countryCode,
+        country: apiCountryLabelToCode(profile.country),
       });
     }
   }, [profile, form]);
@@ -112,6 +111,7 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
 
       setManualAvatar(result.data.avatarUrl);
       URL.revokeObjectURL(previewUrl);
+      setAvatarCacheKey(String(Date.now()));
       queryClient.invalidateQueries({ queryKey: profileQueryKey });
       toast.success("Avatar updated successfully.");
     } finally {
@@ -170,9 +170,9 @@ export default function MyProfileTab({ onClose }: MyProfileTabProps) {
 
         <div className="flex flex-col items-center gap-[30px] rounded-[12px] border-[0.5px] border-gray-500 p-[24px] w-full">
           <div className="h-[122px] w-[122px] overflow-hidden rounded-full bg-gray-100">
-            {avatar ? (
+            {avatarSrc ? (
               <Image
-                src={avatar}
+                src={avatarSrc}
                 alt="Profile"
                 width={122}
                 height={122}

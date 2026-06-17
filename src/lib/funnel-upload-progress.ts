@@ -76,7 +76,7 @@ function readPercent(record: Record<string, unknown>): number {
   return 0;
 }
 
-function normalizeUploadStatus(
+export function normalizeUploadStatus(
   raw: unknown,
   percentComplete: number,
 ): FunnelUploadProgressStatus {

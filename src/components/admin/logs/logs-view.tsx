@@ -11,7 +11,10 @@ import type { LogDateRange } from "@/types/admin";
 export function LogsView() {
   const [page, setPage] = useState(1);
   const [range, setRange] = useState<LogDateRange>("all");
-  const { data, isLoading, isFetching, isError } = useActivityLogQuery(page);
+  const { data, isLoading, isFetching, isError } = useActivityLogQuery(
+    page,
+    range,
+  );
 
   return (
     <section className="w-full">

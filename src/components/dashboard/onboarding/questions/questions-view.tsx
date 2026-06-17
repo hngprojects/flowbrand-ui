@@ -14,7 +14,7 @@ import {
   buildStep2Answer,
   buildStep3Answer,
   customerProfileFromAnswers,
-  discoveryChannelsFromStep3,
+  discoveryChannelsFromAnswers,
   isOnboardingSessionComplete,
   stepNumberFromSession,
 } from "@/lib/onboarding-api";
@@ -91,7 +91,7 @@ export function QuestionsView() {
       whoWantTo: customerProfile.whoWantTo ?? [],
       locatedIn: customerProfile.locatedIn ?? [],
       customCustomerInput: customerProfile.customCustomerInput ?? "",
-      trafficChannels: discoveryChannelsFromStep3(session.answers.step_3),
+      trafficChannels: discoveryChannelsFromAnswers(session.answers),
       step: stepNumberFromSession(session),
     });
   }, [

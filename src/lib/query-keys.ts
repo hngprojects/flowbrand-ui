@@ -18,6 +18,10 @@ export const queryKeys = {
   uploads: {
     progress: (uploadId: string) => ["uploads", "progress", uploadId] as const,
   },
+  voice: {
+    sessionStatus: (voiceSessionId: string) =>
+      ["voice", "session-status", voiceSessionId] as const,
+  },
   notifications: {
     all: () => ["notifications"] as const,
     list: (filter: "all" | "unread" | "read" = "all", page = 1) =>

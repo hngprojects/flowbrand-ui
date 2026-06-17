@@ -27,6 +27,7 @@ import {
   registrationPasswordField,
   VerifyOtpCodeSchema,
 } from "@/schema/auth.schema";
+import { countryCodeToApiLabel } from "@/lib/countries";
 import { googleOAuthStartUrl } from "@/lib/google-oauth";
 import { mapApiRedirectToAppPath } from "@/routes";
 
@@ -54,8 +55,10 @@ function validateOtpCode(code: string): { code: string } | { error: string } {
   return { code: result.data };
 }
 
-export async function getGoogleOAuthUrl(): Promise<string> {
-  return googleOAuthStartUrl(envConfig.BASEURL);
+export async function getGoogleOAuthUrl(
+  promptSelectAccount = false,
+): Promise<string> {
+  return googleOAuthStartUrl(envConfig.APP_URL, { promptSelectAccount });
 }
 
 /** Where to send the user after login/register (uses GET /api/auth/me when possible). */
@@ -96,6 +99,7 @@ const registerUser = async (
       .trim()
       .min(1, { message: "Business name is required" })
       .max(150, { message: "Business name must be at most 150 characters" }),
+    country: z.string().trim().min(1, { message: "Please select a country" }),
     password: registrationPasswordField,
     termsAccepted: z.literal(true),
   });
@@ -104,6 +108,7 @@ const registerUser = async (
     email: values.email.trim(),
     fullName: values.full_name.trim(),
     businessName: values.business_name.trim(),
+    country: values.country.trim(),
     password: values.password,
     termsAccepted: values.terms_accepted ?? true,
   });
@@ -122,13 +127,19 @@ const registerUser = async (
   }
 
   const registerUrl = authApiUrl(baseURL, "/register");
+  const apiCountry =
+    countryCodeToApiLabel(validated.data.country) ?? validated.data.country;
 
   try {
-    const response = await axios.post(registerUrl, validated.data, {
-      withCredentials: true,
-      headers: { "Content-Type": "application/json" },
-      timeout: 30_000,
-    });
+    const response = await axios.post(
+      registerUrl,
+      { ...validated.data, country: apiCountry },
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+        timeout: 30_000,
+      },
+    );
 
     return {
       ok: true,

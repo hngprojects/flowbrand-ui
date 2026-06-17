@@ -8,7 +8,6 @@
  */
 
 import type {
-  ActivityLogData,
   ActivityLogEntry,
   AdminDashboardData,
   InvitesData,
@@ -235,8 +234,6 @@ const LOG_DEVICES = [
   "Safari 19 · macOS 15.3",
 ];
 
-const TOTAL_LOG_PAGES = 10;
-
 function buildLogPage(page: number): ActivityLogEntry[] {
   return LOG_USERS.map((user, index) => ({
     id: `log-${page}-${index}`,
@@ -346,20 +343,4 @@ const DASHBOARD_DATA: AdminDashboardData = {
 /** GET /admin/dashboard (mock) — overview metrics and charts. */
 export function fetchAdminDashboard(): Promise<AdminDashboardData> {
   return delay(structuredClone(DASHBOARD_DATA));
-}
-
-/** GET /admin/logs (mock) — paginated activity log. */
-export function fetchActivityLog(page = 1): Promise<ActivityLogData> {
-  const safePage = Math.min(Math.max(page, 1), TOTAL_LOG_PAGES);
-  const entries = buildLogPage(safePage);
-  // Derive perPage from the actual page contents so the pagination contract
-  // stays internally consistent (totalCount = totalPages * perPage).
-  const perPage = entries.length;
-  return delay({
-    entries,
-    page: safePage,
-    perPage,
-    totalPages: TOTAL_LOG_PAGES,
-    totalCount: TOTAL_LOG_PAGES * perPage,
-  });
 }

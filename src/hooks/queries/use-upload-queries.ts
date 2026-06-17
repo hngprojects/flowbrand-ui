@@ -83,6 +83,14 @@ async function fetchUploadProgressOnce(
   });
 }
 
+export function clearUploadProgressTracking(uploadId?: string): void {
+  if (uploadId) {
+    uploadProgressTracking.delete(uploadId);
+    return;
+  }
+  uploadProgressTracking.clear();
+}
+
 export function useUploadDocumentsMutation() {
   return useMutation({
     mutationFn: async (formData: FormData) => {

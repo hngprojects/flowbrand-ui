@@ -58,13 +58,31 @@ function unwrapData(data: unknown): Record<string, unknown> | null {
 function readFunnelIdFromRecord(
   record: Record<string, unknown>,
 ): string | null {
-  for (const key of ["funnel_id", "funnelId", "funnelID"] as const) {
+  for (const key of ["funnel_id", "funnelId", "funnelID", "id"] as const) {
     const value = record[key];
     if (typeof value === "string" && value.trim()) {
       return value.trim();
     }
   }
   return null;
+}
+
+function readFunnelDisplayName(
+  record: Record<string, unknown>,
+): string | undefined {
+  for (const key of [
+    "funnelName",
+    "funnel_name",
+    "businessName",
+    "business_name",
+    "name",
+  ] as const) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return undefined;
 }
 
 function parseFunnelTask(raw: unknown): FunnelTaskApi | null {
@@ -228,20 +246,22 @@ function buildFunnelDetailFromRecord(
         .filter((s): s is FunnelStageApi => s !== null)
     : undefined;
 
+  const displayName = readFunnelDisplayName(node);
+
   return {
     funnelId,
     funnelName:
-      typeof node.funnelName === "string"
-        ? node.funnelName
-        : typeof node.funnel_name === "string"
-          ? node.funnel_name
-          : undefined,
+      typeof node.funnelName === "string" && node.funnelName.trim()
+        ? node.funnelName.trim()
+        : typeof node.funnel_name === "string" && node.funnel_name.trim()
+          ? node.funnel_name.trim()
+          : displayName,
     businessName:
-      typeof node.businessName === "string"
-        ? node.businessName
-        : typeof node.business_name === "string"
-          ? node.business_name
-          : undefined,
+      typeof node.businessName === "string" && node.businessName.trim()
+        ? node.businessName.trim()
+        : typeof node.business_name === "string" && node.business_name.trim()
+          ? node.business_name.trim()
+          : displayName,
     creationPath:
       typeof node.creationPath === "string"
         ? node.creationPath

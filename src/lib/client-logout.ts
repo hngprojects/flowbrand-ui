@@ -1,4 +1,8 @@
 import { signOut } from "next-auth/react";
+import {
+  appendGoogleSelectAccountToPath,
+  markGoogleAccountSelectionOnNextSignIn,
+} from "@/lib/google-oauth";
 
 const CLIENT_LOGOUT_TIMEOUT_MS = 15_000;
 
@@ -13,6 +17,9 @@ export async function performClientLogout(
 ): Promise<void> {
   const { callbackUrl = "/login", redirect = true } = options;
 
+  markGoogleAccountSelectionOnNextSignIn();
+  const logoutCallback = appendGoogleSelectAccountToPath(callbackUrl);
+
   try {
     await fetch("/api/auth/logout", {
       method: "POST",
@@ -25,13 +32,13 @@ export async function performClientLogout(
 
   try {
     if (redirect) {
-      await signOut({ callbackUrl, redirect: true });
+      await signOut({ callbackUrl: logoutCallback, redirect: true });
     } else {
-      await signOut({ callbackUrl, redirect: false });
+      await signOut({ callbackUrl: logoutCallback, redirect: false });
     }
   } catch {
     if (typeof window !== "undefined") {
-      window.location.assign(callbackUrl);
+      window.location.assign(logoutCallback);
     }
   }
 }

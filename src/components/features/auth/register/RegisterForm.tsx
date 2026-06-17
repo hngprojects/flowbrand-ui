@@ -443,7 +443,7 @@ const RegistrationForm = () => {
         variant="outline"
         disabled={isSubmitting || isAuthenticated}
         onClick={async () => {
-          const url = await getGoogleOAuthUrl();
+          const url = await getGoogleOAuthUrl(true);
           window.location.href = url;
         }}
         className="h-auto w-full gap-2 rounded-lg py-2.5 text-sm font-semibold sm:py-3"
